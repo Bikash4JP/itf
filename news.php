@@ -1,0 +1,158 @@
+<?php
+session_start();
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+?>
+<!DOCTYPE html>
+<html lang="ja" itemscope="" itemtype="https://schema.org/WebPage">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700,900|Noto+Sans+JP:400,500,700&subset=japanese&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" media="all" href="css/common.css">
+    <title>株式会社アイティーエフ</title>
+    <meta name="description" content="株式会社アイティーエフは、大阪と東京に拠点を持ち、外国人人材紹介サービスと外貨両替サービスを提供しています。外国人と企業の架け橋となり、信頼されるサポートを提供することを使命としています。">
+    <meta name="robots" content="max-image-preview:large">
+    <meta name="generator" content="All in One SEO (AIOSEO) 4.2.4 ">
+    <meta property="og:locale" content="ja_JP">
+    <meta property="og:site_name" content="外国人材の採用活動をトータルサポートするITF 株式会社のホームページBIKASH">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="外国人材の採用活動をトータルサポートするITF 株式会社のホームページBIKASHフ">
+    <meta property="og:description" content="株式会社アイティーエフは、大阪府大阪市に本社を構え、外国人人材紹介サービスと外貨両替サービスを提供しています。外国人と企業の架け橋となり、双方にとって最適なソリューションを提供することを使命としています。">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="株式会社アイティーエフ | 外国人人材紹介と外貨両替サービスのリーディングカンパニー">
+    <meta name="twitter:description" content="株式会社アイティーエフは、大阪府大阪市に本社を構え、外国人人材紹介サービスと外貨両替サービスを提供しています。外国人と企業の架け橋となり、双方にとって最適なソリューションを提供することを使命としています。">
+    <script type="application/ld+json" class="aioseo-schema"></script>
+    <link rel="stylesheet" id="wp-block-library-css" href="css/style.min.css" type="text/css" media="all">
+    <link rel="stylesheet" id="toc-screen-css" href="css/screen.min.css" type="text/css" media="all">
+    <link rel="stylesheet" id="wp-pagenavi-css" href="css/pagenavi-css.css" type="text/css" media="all">
+    <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/main_intro.css">
+    <link rel="stylesheet" href="css/news.css">
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript" src="js/jquery-migrate.min.js"></script>
+    <link rel="icon" href="images/titlle logo.PNG" sizes="32x32">
+    <link rel="icon" href="images/titlle logo.PNG" sizes="192x192">
+    <link rel="apple-touch-icon-precomposed" href="images/titlle logo.PNG">
+    <meta name="msapplication-TileImage" content="https://spc-jpn.co.jp/saiyou/wp-content/uploads/2023/12/favicon.png">
+    <meta name="theme-color" content="#000000">
+</head>
+<body class="home blog">
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NS8WP73" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <div id="overlay" class="md-overlay"></div>
+    <header id="header" class="l-header header" itemscope="" itemtype="https://schema.org/WPHeader">
+        <div class="header-frame">
+            <div class="header-top">
+                <div class="wrap pc-flex bet">
+                    <div class="header-top-in flex bet vcenter">
+                        <h1 class="sp-2 logo"><a href="index.html" class="logo-link flex vcenter"><img src="images/logo.png" alt="">株式会社アイティーエフ</a></h1>
+                        <div id="sp-menu-open" class="sp l-animebtn sp-3">
+                            <a onclick="document.getElementById('sp-menu-acc').classList.toggle('active')">
+                                <div class="bar"><span></span><span></span><span></span></div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="header-menu sp-md-acc">
+                        <div id="sp-menu-acc" class="pc-flex hend acc-body">
+                            <ul class="contents pc-flex str hend max">
+                                <li class="contents-item"><a href="about.html">事業紹介</a></li>
+                                <li class="contents-item"><a href="company_info.html">企業情報</a></li>
+                                <li class="contents-item"><a href="/ITF/service/">サービス</a></li>
+                                <li class="contents-item"><a href="news.php">新着情報</a></li>
+                            </ul>
+                            <ul class="cta pc-flex max str">
+                                <li class="cta-item tel sp"><a href="tel:06-6644-1800" class="sp-flex hcenter vcenter"><i class="icon icon-phone"></i><span class="text">電話でのお問い合わせ<br><span class="note">09:00～19:00(土日祝除く)</span></span></a></li>
+                                <li class="cta-item document flex vcenter"><a href="/ITF/Recruitment" class="cta-item-link flex hcenter vcenter">資料請求</a></li>
+                                <li class="cta-item estimation flex vcenter"><a href="#" class="cta-item-link flex hcenter vcenter staff-login-link" onclick="showLoginPopup()">社員ログイン</a></li>
+                                <li class="cta-item inquiry flex vcenter"><a href="inquiry.html" class="cta-item-link flex hcenter vcenter">お問い合わせ</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header><br>
+    <section class="bg">
+        <div class="overlay">
+            新着情報<br>NEWS & ANNOUNCEMENT
+        </div>
+    </section>
+    <section class="news-container">
+        <h2 class="news-title">お知らせ</h2>
+        <p class="text">"ITFからの最新ニュースやお知らせをこちらに掲載します。”</p>
+        <div class="filter-bar" id="filterBar">
+            <select id="categoryFilter">
+                <option value="all">全カテゴリ</option>
+                <option value="入社情報">入社情報</option>
+                <option value="連携">連携</option>
+                <option value="募集">募集</option>
+                <option value="イベント">イベント</option>
+            </select>
+            <select id="dateFilter">
+                <option value="all">全日付</option>
+                <option value="desc">最新順</option>
+                <option value="asc">古い順</option>
+            </select>
+            <select id="postedByFilter">
+                <option value="all">投稿者</option>
+                <option value="ITF Admin">ITF Admin</option>
+                <option value="HR Team">HR Team</option>
+            </select>
+        </div>
+        <div id="newsList">
+            </div>
+    </section>
+    <section class="about_c">
+        <div class="container">
+            <div class="title-section text-center">
+                <h2>外国人材の採用をご検討中の方は、お気軽にご相談ください<br><span>CONTACT</span></h2>
+            </div>
+            <div class="contact-boxes">
+                <div class="rb"><p>ご不明な点はお気軽に<br>お問い合わせください</p><button id="mailBtn" class="btn btn-primary"><span>📧</span> お問い合わせ</button></div>
+                <div class="lb"><p>お電話でのお問い合わせはこちら</p><h1><a href="tel: 06-6644-1800" class="phone-link">06-6644-1800</a></h1><p>平日 9:30~18:00</p></div>
+            </div>
+        </div>
+    </section>
+    <aside class="l-side"></aside>
+    <div class="login-popup" id="loginPopup" role="dialog" aria-labelledby="login-message" aria-modal="true">
+        <div class="login-content">
+            <span class="close-btn" onclick="hideLoginPopup()">×</span>
+            <form id="loginForm" method="POST" action="php/login.php">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+                <p class="login-message">管理者から提供されたユーザーIDとパスワードを入力してください。3回以上間違えるとブロックされますのでご注意ください。</p>
+                <input type="text" name="username" placeholder="ユーザー名" required>
+                <input type="password" name="password" id="passwordField" placeholder="パスワード" required>
+                <label class="view-password-label">
+                    <input type="checkbox" id="viewPasswordCheckbox" onclick="togglePasswordVisibility()">
+                    <span>パスワードを表示</span>
+                </label>
+                <button type="submit">サインイン</button>
+            </form>
+        </div>
+    </div>
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-row">
+                <div class="footer-col"><h3 class="footer-heading">所在地</h3><p class="footer-text">株式会社アイティーエフ<br>〒556-0017 大阪府大阪市浪速区湊町1-4-38 近鉄新難波ビル10F 06-6644-1800 <br>〒144-0052 東京都大田区蒲田5丁目21-13<br>03-6424-7747<br>ueda@it-future.jp</p></div>
+                <div class="footer-col"><h3 class="footer-heading">サービス案内</h3><a href="#" class="footer-link">就職・転職を希望の方</a><a href="#" class="footer-link">人材をお探しの企業様</a><a href="#" class="footer-link">企業様</a><a href="#" class="footer-link">ギャラリー</a></div>
+                <div class="footer-col"><h3 class="footer-heading">会社案内</h3><a href="#" class="footer-link">代表者挨拶</a><a href="company_info.html" class="footer-link">会社概要</a><a href="#" class="footer-link">企業理念</a></div>
+                <div class="footer-col"><h3 class="footer-heading">消費者情報</h3><p class="footer-text">よくあるご質問</p><a href="inquiry.html" class="footer-link">お問い合わせ</a><a href="#" class="footer-btn">プライバシーポリシー</a></div>
+            </div>
+            <div class="footer-copyright">© ITF co. Ltd. ALL Rights Reserved</div>
+        </div>
+    </footer>
+    <script src="/saiyou/wp-content/themes/spc_saiyou/js/lib.min.js?v="></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/ajaxzip3.js" charset="UTF-8"></script>
+    <script src="js/form.min.js"defer></script>
+    <script src="js/main.min.js"defer></script>
+    <script src="js/scripts.js" defer></script>
+    <script src="js/news.js" defer></script>
+    <script type="text/javascript" src="js/front.min.js"></script>
+    <script type="text/javascript" src="js/wp-embed.min.js"></script>
+</body>
+</html>

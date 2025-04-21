@@ -1,0 +1,28 @@
+body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background-color: #f8f9fa;
+}
+.text-itf-red {
+    color: #d32f2f; /* ITF red from April 2025 site */
+}
+.bg-itf-red {
+    background-color: #d32f2f;
+}
+.card {
+    max-width: 600px;
+    margin: auto;
+    border: none;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Rakuten clean shadow */
+}
+.btn-itf-red {
+    background-color: #d32f2f;
+    border-color: #d32f2f;
+    color: white;
+}
+.btn-itf-red:hover {
+    background-color: #b71c1c;
+    border-color: #b71c1c;
+}
+.progress-bar {
+    font-weight: bold;
+}

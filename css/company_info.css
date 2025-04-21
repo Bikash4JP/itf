@@ -1,0 +1,289 @@
+/* Reset default margins and padding */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Helvetica Neue', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* Header (Reused from previous page) */
+.header-frame {
+    width: 100%;
+    padding: 10px 20px;
+}
+
+.header-top-in {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.logo img {
+    max-width: 150px;
+    height: auto;
+}
+
+#sp-menu-open {
+    display: none; /* Hidden on larger screens */
+}
+
+.header-menu {
+    width: 100%;
+}
+
+.acc-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.contents, .cta {
+    list-style: none;
+    display: flex;
+    gap: 15px;
+}
+
+.contents-item a, .cta-item a {
+    text-decoration: none;
+    color: #333;
+    font-size: 16px;
+    padding: 10px;
+}
+
+.cta-item.tel {
+    display: none; /* Hide phone CTA on desktop */
+}
+
+/* Background Section */
+.bg {
+    background-image: url('../images/company_bg.jpg');
+    background-size: cover;
+    background-position: center;
+    height: 300px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 58px;
+}
+
+.bg .overlay {
+    color: rgb(85, 39, 39);
+    padding: 20px 40px;
+    font-size: clamp(20px, 5vw, 32px); /* Responsive font size */
+    font-weight: bold;
+    border-radius: 10px;
+    text-align: center;
+}
+
+/* Company Info Section */
+.company-info {
+    max-width: 900px;
+    margin: 80px auto;
+    padding: 0 20px;
+}
+
+.company-info h2 {
+    font-size: clamp(20px, 5vw, 28px);
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.company-info h2::before {
+    content: "COMPANY";
+    display: block;
+    font-size: clamp(10px, 2vw, 12px);
+    color: #d42f2f;
+    font-weight: bold;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+}
+
+.info-row {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 25px;
+}
+
+.info-title {
+    width: 140px;
+    font-weight: bold;
+    color: #000;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid orange;
+}
+
+.info-content {
+    flex: 1;
+    line-height: 1.8;
+    border-bottom: 2px solid rgba(0, 123, 255, 0.3);
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: bold;
+}
+
+.info-content li {
+    list-style-type: square;
+}
+
+/* Location Section */
+.location-section {
+    display: flex;
+    justify-content: space-between;
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.location {
+    width: 48%;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.location h3 {
+    font-size: clamp(18px, 4vw, 24px);
+    margin-bottom: 10px;
+    color: black;
+}
+
+.location p {
+    font-size: clamp(14px, 3vw, 16px);
+    color: hwb(0 1% 95%);
+    margin-bottom: 15px;
+}
+
+.location iframe {
+    width: 100%;
+    height: 300px;
+    border: 0;
+    border-radius: 5px;
+}
+
+/* Contact Section (Reused from previous page) */
+.about_c .container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.contact-boxes {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.rb, .lb {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    flex: 1;
+    min-width: 250px;
+    text-align: center;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+    /* Header */
+    #sp-menu-open {
+        display: block;
+    }
+
+    .acc-body {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        width: 100%;
+        background: white;
+        padding: 20px;
+    }
+
+    .acc-body.active {
+        display: flex;
+    }
+
+    .contents, .cta {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .cta-item.tel {
+        display: flex;
+    }
+
+    /* Background Section */
+    .bg {
+        height: 200px;
+    }
+
+    /* Company Info */
+    .info-row {
+        flex-direction: column;
+    }
+
+    .info-title {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    /* Location Section */
+    .location {
+        width: 100%;
+    }
+
+    .location iframe {
+        height: 250px;
+    }
+
+    /* Contact Section */
+    .contact-boxes {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .bg .overlay {
+        padding: 15px 20px;
+    }
+
+    .company-info {
+        margin: 40px auto;
+    }
+
+    .location {
+        padding: 15px;
+    }
+
+    .location iframe {
+        height: 200px;
+    }
+
+    .footer-col {
+        min-width: 150px;
+    }
+}

@@ -1,0 +1,275 @@
+/* General Reset */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    margin: 0;
+    padding: 0;
+}
+
+/* Reason Section */
+.itf-reason {
+    text-align: center;
+    padding: 20px;
+}
+
+.itf-reason h1 {
+    font-size: 2em;
+    margin-bottom: 10px;
+}
+
+.itf-reason h2 {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+}
+
+.itf-columns {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.itf-column {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 20px;
+    margin: 10px;
+    width: 22%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.itf-column h3 {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+}
+
+.itf-column p {
+    font-size: 0.9em;
+    margin-bottom: 20px;
+}
+
+.itf-column button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.itf-column button:hover {
+    background-color: #0056b3;
+}
+
+/* Container Section */
+.itf-container {
+    width: 811px;
+    margin: auto;
+}
+
+.itf-merit, .itf-new-container, .itf-talent-container, .itf-cost-container, .itf-process-container, .itf-support-container {
+    margin-top: 20px;
+    padding: 20px 80px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    height: auto;
+}
+
+.itf-container h1 {
+    margin-left: 100px;
+    position: relative;
+    margin-right: 0;
+}
+
+.itf-container h1 img {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.itf-merit h2, .itf-new-container h2, .itf-talent-container h2, .itf-cost-container h2, .itf-process-container h2 {
+    border-bottom: 2px solid #ccc;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    font-size: 1.2em;
+}
+
+.itf-merit h2 .itf-number, .itf-new-container h2 .itf-number, .itf-talent-container h2 .itf-number, .itf-cost-container h2 .itf-number, .itf-process-container h2 .itf-number {
+    font-size: 1.5em;
+}
+
+.itf-merit div p, .itf-new-container div p, .itf-talent-container div p, .itf-cost-container div p, .itf-process-container div p {
+    font-size: 1em;
+    line-height: 1.5;
+}
+
+.itf-cost-container {
+    background-color: #f9f9f9;
+}
+
+.itf-process-container {
+    background-color: white;
+}
+
+.itf-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.itf-step {
+    display: flex;
+    align-items: center;
+    background: #f0f0f0;
+    border-radius: 5px;
+    padding: 10px;
+    border-left: 5px solid #003366;
+}
+
+.itf-step-title {
+    font-weight: bold;
+    font-size: 18px;
+    margin-right: 15px;
+    color: white;
+    min-width: 80px;
+    text-align: center;
+    background: #003366;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+.itf-step-content {
+    flex: 1;
+}
+
+.itf-step-subtitle {
+    font-weight: bold;
+    color: #003366;
+    margin-bottom: 5px;
+}
+
+/* Support Container */
+.itf-support-container {
+    background-color: white;
+}
+
+.itf-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.itf-button {
+    background: #d92525;
+    color: white;
+    padding: 10px 15px;
+  border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+}
+
+.itf-flow {
+    background: #f0f0f0;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.itf-flow-steps {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #003366;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.itf-flow-steps div {
+    text-align: center;
+    flex: 1;
+}
+
+.itf-highlight {
+    background: #f79c00;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.itf-support-section {
+    background: #f0f0f0;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+
+.itf-support-title {
+    font-weight: bold;
+    background: #f79c00;
+    padding: 5px 10px;
+    border-radius: 5px;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.itf-support-content {
+    display: flex;
+    justify-content: space-between;
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.itf-support-column {
+    flex: 1;
+    padding: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .itf-container {
+        width: 100%;
+        padding: 0 20px;
+    }
+
+    .itf-column {
+        width: 45%;
+    }
+
+    .itf-container h1 {
+        margin-left: 0;
+        text-align: center;
+    }
+
+    .itf-container h1 img {
+        position: static;
+        transform: none;
+        margin-top: 10px;
+    }
+
+    .itf-steps, .itf-flow-steps {
+        flex-direction: column;
+    }
+
+    .itf-step, .itf-flow-steps div {
+        width: 100%;
+    }
+
+    .itf-support-content {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .itf-column {
+        width: 100%;
+    }
+
+    .itf-merit, .itf-new-container, .itf-talent-container, .itf-cost-container, .itf-process-container, .itf-support-container {
+        padding: 20px;
+    }
+}

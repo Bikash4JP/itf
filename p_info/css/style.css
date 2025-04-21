@@ -1,0 +1,31 @@
+body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background-color: #87CEEB; /* Sky Blue background */
+    color: #000000; /* Black text */
+}
+.text-theme-blue {
+    color: #0000FF; /* Blue for titles and headers */
+}
+.bg-theme-orange {
+    background-color: #FF6200; /* Orange for backgrounds */
+}
+.card {
+    max-width: 600px;
+    margin: auto;
+    border: none;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.btn-theme-orange {
+    background-color: #FF6200; /* Orange button */
+    border-color: #FF6200;
+    color: white;
+    display: block;
+    margin: 0 auto; /* Center the button */
+}
+.btn-theme-orange:hover {
+    background-color: #E55B00; /* Darker orange on hover */
+    border-color: #E55B00;
+}
+.progress-bar {
+    font-weight: bold;
+}

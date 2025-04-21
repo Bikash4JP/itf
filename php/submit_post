@@ -1,0 +1,102 @@
+<?php
+session_start();
+header("Content-Type: application/json");
+
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(["success" => false, "message" => "ログインしてください。"]);
+    exit;
+}
+
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+    echo json_encode(["success" => false, "message" => "無効なリクエストです。"]);
+    exit;
+}
+
+try {
+    $pdo = new PDO("mysql:host=localhost;dbname=itf", "username", "password", [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+    
+    $form_type = $_POST['form_type'] ?? '';
+    $post_type = $_POST['post_type'] ?? '';
+    $title = $_POST['title'] ?? '';
+    $summary = $_POST['summary'] ?? null;
+    $category = $_POST['category'] ?? null;
+    $date = $_POST['date'] ?? date('Y-m-d');
+    $posted_by = $_POST['posted_by'] ?? '';
+    $staff_id = $_SESSION['user_id'];
+    $image_path = null;
+
+    // Job-specific fields
+    $company_name = $_POST['company_name'] ?? null;
+    $job_location = $_POST['job_location'] ?? null;
+    $job_category = $_POST['job_category'] ?? null;
+    $job_type = $_POST['job_type'] ?? null;
+    $salary = $_POST['salary'] ?? null;
+    $bonuses = isset($_POST['bonuses']) ? (int)$_POST['bonuses'] : null;
+    $bonus_amount = $_POST['bonus_amount'] ?? null;
+    $living_support = isset($_POST['living_support']) ? (int)$_POST['living_support'] : null;
+    $rent_support = $_POST['rent_support'] ?? null;
+    $insurance = isset($_POST['insurance']) ? (int)$_POST['insurance'] : null;
+    $transportation_charges = isset($_POST['transportation_charges']) ? (int)$_POST['transportation_charges'] : null;
+    $transport_amount_limit = $_POST['transport_amount_limit'] ?? null;
+    $salary_increment = isset($_POST['salary_increment']) ? (int)$_POST['salary_increment'] : null;
+    $increment_condition = $_POST['increment_condition'] ?? null;
+    $japanese_level = $_POST['japanese_level'] ?? null;
+    $experience = $_POST['experience'] ?? null;
+    $minimum_leave_per_year = $_POST['minimum_leave_per_year'] ?? null;
+    $employee_size = $_POST['employee_size'] ?? null;
+    $required_vacancy = $_POST['required_vacancy'] ?? null;
+
+    // Image upload
+    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+        $file = $_FILES['image'];
+        if ($file['size'] > 2 * 1024 * 1024) {
+            echo json_encode(["success" => false, "message" => "画像は2MB以下にしてください。"]);
+            exit;
+        }
+        if (!in_array($file['type'], ['image/jpeg', 'image/png'])) {
+            echo json_encode(["success" => false, "message" => "画像はJPEGまたはPNG形式でアップロードしてください。"]);
+            exit;
+        }
+        $upload_dir = 'uploads/';
+        if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
+        $image_path = $upload_dir . uniqid() . '_' . basename($file['name']);
+        move_uploaded_file($file['tmp_name'], $image_path);
+    }
+
+    // Validate required fields
+    if ($form_type === 'posts') {
+        if (empty($title) || empty($summary) || empty($category) || empty($post_type)) {
+            echo json_encode(["success" => false, "message" => "必須フィールドを入力してください。"]);
+            exit;
+        }
+    } elseif ($form_type === 'jobs') {
+        if (empty($title) || empty($company_name) || empty($job_location) || empty($job_category) || empty($job_type) || empty($required_vacancy)) {
+            echo json_encode(["success" => false, "message" => "必須フィールドを入力してください。"]);
+            exit;
+        }
+    }
+
+    // Insert into posts table
+    $stmt = $pdo->prepare("
+        INSERT INTO posts (
+            staff_id, post_type, category, title, summary, image, company_name, job_location, job_category, job_type,
+            salary, bonuses, bonus_amount, living_support, rent_support, insurance, transportation_charges,
+            transport_amount_limit, salary_increment, increment_condition, japanese_level, experience,
+            minimum_leave_per_year, employee_size, required_vacancy, date, posted_by
+        ) VALUES (
+            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+        )
+    ");
+    $stmt->execute([
+        $staff_id, $post_type, $category, $title, $summary, $image_path, $company_name, $job_location,
+        $job_category, $job_type, $salary, $bonuses, $bonus_amount, $living_support, $rent_support,
+        $insurance, $transportation_charges, $transport_amount_limit, $salary_increment,
+        $increment_condition, $japanese_level, $experience, $minimum_leave_per_year, $employee_size,
+        $required_vacancy, $date, $posted_by
+    ]);
+
+    echo json_encode(["success" => true, "message" => "投稿が完了しました！"]);
+} catch (PDOException $e) {
+    echo json_encode(["success" => false, "message" => "エラーが発生しました：" . $e->getMessage()]);
+}
+?>

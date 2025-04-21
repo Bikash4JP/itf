@@ -1,0 +1,495 @@
+/*
+Default style for WP-PageNavi plugin
+
+http://wordpress.org/extend/plugins/wp-pagenavi/
+*/
+
+.wp-pagenavi {
+	clear: both;
+}
+
+.wp-pagenavi a, .wp-pagenavi span {
+	text-decoration: none;
+	border: 1px solid #BFBFBF;
+	padding: 3px 5px;
+	margin: 2px;
+}
+
+.wp-pagenavi a:hover, .wp-pagenavi span.current {
+	border-color: #000;
+}
+
+.wp-pagenavi span.current {
+	font-weight: bold;
+}
+/* .header {
+    /* background-color: #ffffff; White background */
+
+.header-frame {
+    background-color: #f6f7f7b0; /* Ensures consistency */
+}
+
+.header-menu {
+    background-color: #a4c6dd; /* White background for the menu */
+}
+/* ------------------------------------------------Abou start from here -------------------------- */
+.about-container {
+    display: flex;
+    align-items: center;
+    max-width: 900px;
+    padding: 20px;
+    margin: 0 auto;
+    gap: 40px;
+}
+
+/* Left Side - Logo (40%) */
+.about-logo-container {
+    flex: 40%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.about-logo {
+    width: 100%;
+    max-width: 250px;
+}
+
+/* Right Side - Content (60%) */
+.about-content {
+    flex: 60%;
+}
+
+.about-title {
+    color: red;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.about-heading {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.about-heading span {
+    font-size: 18px;
+    color: gray;
+}
+
+.about-description {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #333;
+	/* color: #3684b8; */
+}
+
+.about-button {
+    background-color: white;
+    border: 2px solid #ddd;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.3s;
+}
+
+.about-button:hover {
+    background-color: #f8f8f8;
+}
+.l-section.senryaku {
+    padding: 5px 0; /* 10px padding top and bottom, 0 for left and right */
+}
+/* make it responsive from here ======================================== */
+@media (max-width: 768px) {
+  .about-container {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .about-logo-container,
+  .about-content {
+    flex: 100%;
+  }
+
+  .about-logo {
+    max-width: 200px;
+    margin: 0 auto;
+  }
+
+  .about-content {
+    padding-top: 10px;
+  }
+}
+
+/* =====================================Sec Added ========================================== */
+.section-addd {
+    font-family: 'MS Gothic', 'MS Mincho', 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
+    margin: 0 auto;
+    padding: 30px;
+    background: linear-gradient(135deg, #d58e6d 0%, #3684b8 100%);
+    line-height: 1.6;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.l-section-header-center {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.header {
+    color: #3684b8; /* Kept original blue color */
+    font-size: 28px;
+}
+
+.flow-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.flow-item {
+    display: flex;
+    margin-bottom: 25px;
+    align-items: flex-start;
+}
+
+.flow-number {
+    background-color: #3684b8;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 20px;
+    flex-shrink: 0;
+    font-weight: bold;
+    font-size: 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.flow-content {
+    flex: 1;
+    padding: 8px 15px;
+    background-color: rgba(255,255,255,0.9);
+    border-radius: 8px;
+    color: #333;
+    text-align: left;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    position: relative;
+    line-height: 1.7;
+}
+
+.flow-content:before {
+    content: "";
+    position: absolute;
+    left: -10px;
+    top: 15px;
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-right: 10px solid rgba(255,255,255,0.9);
+}
+
+/* =========================================================JLPT Graph Style ========================================== */
+#Languages {
+	font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
+	max-width: 1000px;
+	margin: 30px auto;
+  }
+  
+  .jlpt-container {
+	display: flex;
+	gap: 30px;
+	min-height: 400px;
+  }
+  
+  /* Left Text Panel - 50% width */
+  .jlpt-text-panel {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 30px;
+	background: #f8f9fa;
+	border-radius: 10px;
+	box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+  .jlpt-title{
+	text-align: center;
+	font-size: larger;
+	font-weight: bolder;
+  }
+  
+  .jlpt-text-content {
+	max-width: 90%;
+  }
+  
+  .jlpt-heading {
+	color: #2c3e50;
+	margin-bottom: 15px;
+	text-align: center;
+  }
+  
+  .jlpt-paragraph {
+	color: #34495e;
+	line-height: 1.6;
+	text-align: center;
+  }
+  
+  /* Right Graph Panel - 50% width (EXACTLY same as before) */
+  .jlpt-graph-panel {
+	flex: 1;
+	padding: 25px;
+	background: white;
+	border-radius: 10px;
+	box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  }
+  
+  /* L-Shaped Chart (EXACTLY same styling as before) */
+  .jlpt-histogram {
+	display: flex;
+	flex-direction: column;
+	height: 350px;
+  }
+  
+  .jlpt-chart-area {
+	display: flex;
+	flex: 1;
+  }
+  
+  .jlpt-y-axis {
+	display: flex;
+	flex-direction: column-reverse;
+	justify-content: space-between;
+	width: 40px;
+	padding-right: 10px;
+	font-size: 12px;
+	color: #7f8c8d;
+	text-align: right;
+  }
+  
+  .jlpt-bars-labels {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	border-left: 1px solid #ddd;
+	border-bottom: 1px solid #ddd;
+  }
+  
+  .jlpt-bars-container {
+	flex: 1;
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-around;
+	padding: 0 10px;
+  }
+  
+  .jlpt-bar {
+	width: 50px;
+	border-radius: 4px 4px 0 0;
+	transition: all 0.3s ease;
+	position: relative;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  
+  .jlpt-x-axis {
+	display: flex;
+	justify-content: space-around;
+	padding: 10px 0;
+  }
+  
+  .jlpt-x-label {
+	width: 50px;
+	text-align: center;
+	font-weight: 500;
+	color: #34495e;
+  }
+  
+  .jlpt-value-labels {
+	display: flex;
+	justify-content: space-around;
+	margin-top: 5px;
+  }
+  
+  .jlpt-value-labels div {
+	width: 50px;
+	text-align: center;
+	font-size: 12px;
+	color: #7f8c8d;
+  }
+  
+  /* Colors (same as before) */
+  .jlpt-n1 { background: #3498db; }
+  .jlpt-n2 { background: #2ecc71; }
+  .jlpt-n3 { background: #f1c40f; }
+  .jlpt-n4 { background: #e74c3c; }
+  .jlpt-jft { background: #9b59b6; }
+  
+  /* Animation (same as before) */
+  @keyframes jlpt-barRise {
+	from { height: 0; opacity: 0; }
+	to { height: var(--jlpt-final-height); opacity: 1; }
+  }
+  
+  .jlpt-bar {
+	animation: jlpt-barRise 1s ease-out forwards;
+	animation-delay: calc(var(--jlpt-order) * 0.1s);
+  }
+
+  /* last access image style start fromhrrre ============================================= */
+  .acc_img img {
+    height: 100px;
+    width: 450px;
+    object-fit: cover; /* Ensures the image fits within the specified dimensions */
+    transition: all 0.3s ease; /* Smooth transition for the hover effect */
+}
+.acc_img:hover img {
+    filter: brightness(0.3) sepia(0.3) hue-rotate(30deg); /* Light orange hover effect */
+}
+ /* image finished===============================================================================================
+  */
+  .about_c {
+    /* border: 2px rgb(99, 95, 95) solid; */
+    border-radius: 50px;
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 20px 20px;
+    background: rgb(242, 229, 229)
+}
+
+.title-section h2 {
+    font-size: 24px;
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: bolder;
+    align-items: center;
+    text-align: center;
+}
+
+.title-section h2 span {
+    font-size: 28px;
+    color: hwb(0 91% 6%);
+}
+
+.contact-boxes {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 40px;
+}
+
+.rb, .lb {
+    /* background-color: #ffffff; */
+    /* border: 1px solid #ddd; */
+    padding: 20px;
+    border-radius: 10px;
+    width: 300px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.rb button {
+    margin-top: 20px;
+    background-color: #ff6600;
+    border: none;
+    padding: 10px 20px;
+    color: #fff;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.rb button:hover {
+  color: #333;
+    background-color: #4da3ff;
+}
+.phone-link {
+  text-decoration: underline;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  font-size: x-large;
+  font-weight: bold;
+  color: #000;
+  transition: color 0.3s ease, transform 0.3s ease;
+  display: inline-block;
+}
+
+.phone-link:hover {
+  color: #063260;
+  transform: scale(1.05);
+}
+/* video style--------------------------------------------------------- */
+.video-border {
+  border: 3px solid rgb(140, 140, 189); /* 3px solid blue border */
+  display: block; /* Ensures the video takes up full width */
+  transition: border-color 0.3s ease; /* Smooth transition on hover */
+}
+
+.video-border:hover {
+  border-color: darkblue; /* Change border color on hover */
+}
+
+  /* Responsive Breakpoint */
+  @media (max-width: 768px) {
+    .jlpt-container {
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .jlpt-text-panel {
+      order: 1;
+      padding: 20px;
+    }
+    
+    .jlpt-graph-panel {
+      order: 2;
+      padding: 20px;
+    }
+    .jlpt-histogram {
+      height: 300px;
+      }
+      
+      .jlpt-bar {
+      width: 40px;
+      }
+      
+      .jlpt-x-label,
+      .jlpt-value-labels div {
+      width: 40px;
+      font-size: 11px;
+      }
+    }
+    @media (max-width: 768px) {
+      .title-section h2 {
+        font-size: 20px;  /* Adjusted size for 768px screen width */
+      }
+    
+      .title-section h2 span {
+        font-size: 24px;  /* Adjusted span size */
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .title-section h2 {
+        font-size: 18px !important;  /* Adjusted size for 480px screen width */
+      }
+    
+      .title-section h2 span {
+        font-size: 22px !important; /* Adjusted span size */
+      }
+    }
+    @media (max-width: 768px) {
+      .contact-boxes {
+        flex-direction: column !important;
+        align-items: center !important;
+      }
+    
+      .rb, .lb {
+        width: 100% !important;
+        max-width: 320px !important;
+        margin-bottom: 20px !important;
+      }
+    }      

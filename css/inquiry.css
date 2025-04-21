@@ -1,0 +1,320 @@
+/* Base Styles */
+body {
+  font-family: 'Noto Sans JP', sans-serif;
+  background: linear-gradient(rgb(239, 242, 243), rgb(226, 216, 201));
+  margin: 0;
+  padding: 0;
+  color: #111111;
+  line-height: 1.6;
+}
+
+/* Header Background */
+.bg {
+  background-image: url('../images/inquiry_main.jpg');
+  background-size: cover;
+  background-position: center;
+  height: 300px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-top: 58px;
+  justify-content: center;
+  opacity: 0.7;
+}
+
+.bg .overlay {
+  color: rgb(245, 238, 238);
+  padding: 20px 40px;
+  font-size: 2rem;
+  font-weight: bold;
+  border-radius: 10px;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Main Container */
+.info_container {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Typography */
+h1 {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.description {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #555;
+}
+
+/* Form Box Styles */
+.box {
+  border: 1px solid #eee;
+  padding: 20px;
+  margin-bottom: 30px;
+  background-color: #fafafa;
+  text-align: center;
+  border-radius: 8px;
+}
+
+.box ul {
+  padding-left: 20px;
+  margin: 0 0 10px 0;
+  list-style-position: inside;
+}
+
+.tel {
+  text-align: center;
+  font-weight: bold;
+  margin-top: 10px;
+  font-size: 16px;
+  color: #333;
+}
+
+/* Form Notice */
+.note {
+  background: rgb(228, 222, 222);
+  padding: 10px;
+  font-size: 14px;
+  margin-bottom: 20px;
+  color: rgb(20, 18, 18);
+  text-align: center;
+  border-radius: 4px;
+}
+
+/* Form Elements */
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.required {
+  background-color: red;
+  color: white;
+  padding: 2px 6px;
+  font-size: 12px;
+  margin-left: 5px;
+  border-radius: 4px;
+}
+
+/* Input Fields - Fixed missing comma */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #5c5959;
+  border-radius: 4px;
+  font-family: 'Noto Sans JP', sans-serif;
+  color: #211414;
+  box-sizing: border-box;
+  transition: border-color 0.3s;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="tel"]:focus,
+textarea:focus {
+  border-color: #e42116;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(228, 33, 22, 0.2);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+small {
+  font-size: 12px;
+  color: #666;
+  display: block;
+  margin-top: 5px;
+}
+
+/* Radio Buttons */
+.radio-group {
+  margin: 10px 0;
+}
+
+.radio-group label {
+  display: block;
+  font-weight: normal;
+  margin: 8px 0;
+  cursor: pointer;
+}
+
+.radio-group input[type="radio"] {
+  margin-right: 8px;
+}
+
+/* Privacy Policy */
+.privacy-policy {
+  font-size: 12px;
+  margin-bottom: 10px;
+  color: #555;
+}
+
+.privacy-policy a {
+  color: #e42116;
+  text-decoration: underline;
+}
+
+/* Submit Button */
+.submit-btn {
+  text-align: center;
+  margin-top: 30px;
+}
+
+button[type="submit"] {
+  background-color: #e46c16;
+  color: #fff;
+  padding: 12px 40px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button[type="submit"]:hover:not(:disabled) {
+  background-color: #116498;
+}
+
+button[type="submit"]:disabled {
+  background-color: #3172b8;
+  cursor: not-allowed;
+}
+
+/* Messages */
+.success-message {
+  display: none;
+  text-align: center;
+  padding: 30px;
+  background: rgba(217, 155, 152, 0.1);
+  border: 1px solid #d99b98;
+  border-radius: 6px;
+  color: #111111;
+  margin: 20px 0;
+}
+
+.success-message h3 {
+  color: #2e7d32;
+  margin-bottom: 15px;
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 0.9em;
+  margin-top: 5px;
+  display: none;
+}
+
+/* Loading Animation */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255,255,255,.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .info_container {
+    padding: 15px;
+  }
+
+  .bg .overlay {
+    font-size: 1.8rem;
+    padding: 15px 30px;
+  }
+}
+
+@media (max-width: 768px) {
+  .bg {
+    height: 250px;
+    margin-top: 50px;
+  }
+
+  .bg .overlay {
+    font-size: 1.5rem;
+    padding: 10px 20px;
+  }
+
+  .info_container {
+    margin: 20px auto;
+    padding: 15px;
+  }
+
+  .box {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .bg {
+    height: 200px;
+  }
+
+  .bg .overlay {
+    font-size: 1.2rem;
+    padding: 8px 15px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  .info_container {
+    margin: 15px;
+    padding: 10px;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  textarea {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  button[type="submit"] {
+    padding: 10px 30px;
+    font-size: 15px;
+  }
+}
+
+/* About Section */
+.about_c {
+  padding: 40px 0;
+}
+
+.about_c .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
