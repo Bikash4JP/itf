@@ -1,139 +1,187 @@
-let activeForm = null;
+document.addEventListener('DOMContentLoaded', function() {
+    const postsForm = document.getElementById('postsFormSubmit');
+    const jobsForm = document.getElementById('jobsFormSubmit');
+    const previewPopup = document.getElementById('previewPopup');
+    const previewContent = document.getElementById('previewContent');
+    const closePreviewButton = previewPopup.querySelector('.close-btn');
+    const editButton = previewPopup.querySelector('.preview-actions button:first-child');
+    const submitButton = previewPopup.querySelector('.preview-actions button:last-child');
 
-function showForm(formType) {
-    const form = document.getElementById(`${formType}Form`);
-    form.style.display = 'flex';
-    document.body.classList.add('blur');
-    activeForm = formType;
-
-    // Word counter for posts form
-    if (formType === 'posts') {
-        const summary = document.getElementById('post-summary');
-        const wordCount = document.getElementById('post-word-count');
-        summary.addEventListener('input', () => {
-            const words = summary.value.trim().split(/\s+/).filter(w => w.length > 0).length;
-            wordCount.textContent = words;
-            if (words > 100) {
-                wordCount.style.color = 'red';
-                summary.setCustomValidity('概要は100語以内にしてください。');
-            } else {
-                wordCount.style.color = '#555';
-                summary.setCustomValidity('');
+    function showPreview(formData, formType) {
+        const previewUrl = 'php/preview_post.php';
+        console.log('Sending fetch request to:', previewUrl);
+        console.log('Full URL:', new URL(previewUrl, window.location.origin).href);
+        fetch(previewUrl, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            console.log('Preview response status:', response.status);
+            console.log('Preview response ok:', response.ok);
+            if (!response.ok) {
+                throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
             }
+            return response.text();
+        })
+        .then(data => {
+            console.log('Preview data received:', data);
+            previewContent.innerHTML = data;
+            previewPopup.style.display = 'block';
+            previewPopup.dataset.formType = formType;
+        })
+        .catch(error => {
+            console.error('Error fetching preview:', error);
+            alert('プレビューの取得に失敗しました。詳細: ' + error.message);
         });
     }
 
-    // Conditional fields for jobs form
-    if (formType === 'jobs') {
-        const bonuses = document.getElementsByName('bonuses');
-        const bonusGroup = document.getElementById('bonus-amount-group');
-        const livingSupport = document.getElementsByName('living_support');
-        const rentGroup = document.getElementById('rent-support-group');
-        const transport = document.getElementsByName('transportation_charges');
-        const transportGroup = document.getElementById('transport-amount-group');
-        const increment = document.getElementsByName('salary_increment');
-        const incrementGroup = document.getElementById('increment-condition-group');
-
-        bonuses.forEach(radio => radio.addEventListener('change', () => {
-            bonusGroup.style.display = radio.value === '1' ? 'block' : 'none';
-        }));
-        livingSupport.forEach(radio => radio.addEventListener('change', () => {
-            rentGroup.style.display = radio.value === '1' ? 'block' : 'none';
-        }));
-        transport.forEach(radio => radio.addEventListener('change', () => {
-            transportGroup.style.display = radio.value === '1' ? 'block' : 'none';
-        }));
-        increment.forEach(radio => radio.addEventListener('change', () => {
-            incrementGroup.style.display = radio.value === '1' ? 'block' : 'none';
-        }));
-    }
-}
-
-function hideForm(formType) {
-    const form = document.getElementById(`${formType}Form`);
-    form.style.display = 'none';
-    document.body.classList.remove('blur');
-    activeForm = null;
-    form.querySelector('form').reset();
-}
-
-function previewForm(formType) {
-    const form = document.getElementById(`${formType}FormSubmit`);
-    const formData = new FormData(form);
-    const imageInput = document.getElementById(`${formType}-image`);
-    if (imageInput.files.length > 0) {
-        const file = imageInput.files[0];
-        if (file.size > 2 * 1024 * 1024) {
-            alert('画像は2MB以下にしてください。');
-            return;
+    window.previewForm = function(formName) {
+        let formData;
+        let formType;
+        if (formName === 'posts') {
+            formData = new FormData(postsForm);
+            formType = 'posts';
+        } else if (formName === 'jobs') {
+            formData = new FormData(jobsForm);
+            formType = 'jobs';
         }
-        if (!['image/jpeg', 'image/png'].includes(file.type)) {
-            alert('画像はJPEGまたはPNG形式でアップロードしてください。');
-            return;
+        showPreview(formData, formType);
+    };
+
+    window.hidePreview = function() {
+        previewPopup.style.display = 'none';
+    };
+
+    window.editForm = function() {
+        previewPopup.style.display = 'none';
+    };
+
+    window.submitForm = function() {
+        const formType = previewPopup.dataset.formType;
+        let formToSubmit;
+        if (formType === 'posts') {
+            formToSubmit = postsForm;
+        } else if (formType === 'jobs') {
+            formToSubmit = jobsForm;
         }
-        const reader = new FileReader();
-        reader.onload = () => {
-            formData.set('image_preview', reader.result);
-            sendPreviewRequest(formData);
-        };
-        reader.readAsDataURL(file);
-    } else {
-        formData.set('image_preview', '');
-        sendPreviewRequest(formData);
-    }
-}
 
-function sendPreviewRequest(formData) {
-    fetch('php/preview_post.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.text())
-    .then(html => {
-        const previewContent = document.getElementById('previewContent');
-        previewContent.innerHTML = html;
-        document.getElementById('previewPopup').style.display = 'flex';
-        document.body.classList.add('blur');
-    })
-    .catch(error => {
-        console.error('Preview error:', error);
-        alert('プレビュー生成中にエラーが発生しました。');
-    });
-}
+        const formData = new FormData(formToSubmit);
+        const submitUrl = 'php/submit_post.php';
+        console.log('Sending fetch request to:', submitUrl);
+        console.log('Full URL:', new URL(submitUrl, window.location.origin).href);
+        fetch(submitUrl, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            console.log('Submit response status:', response.status);
+            console.log('Submit response ok:', response.ok);
+            if (!response.ok) {
+                throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Submit response data:', data);
+            if (data.success) {
+                alert(data.message);
+                previewPopup.style.display = 'none';
+                if (formToSubmit) {
+                    formToSubmit.reset();
+                }
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error submitting form:', error);
+            alert('投稿に失敗しました。詳細: ' + error.message);
+        });
+    };
 
-function hidePreview() {
-    document.getElementById('previewPopup').style.display = 'none';
-    document.body.classList.remove('blur');
-}
-
-function editForm() {
-    hidePreview();
-    document.getElementById(`${activeForm}Form`).style.display = 'flex';
-}
-
-function submitForm() {
-    const form = document.getElementById(`${activeForm}FormSubmit`);
-    const formData = new FormData(form);
-    fetch('php/submit_post.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            hidePreview();
-            const successPopup = document.getElementById('successPopup');
-            successPopup.style.display = 'flex';
-            setTimeout(() => {
-                successPopup.style.display = 'none';
-                hideForm(activeForm);
-            }, 3000);
+    // Functions for conditional form fields
+    function toggleSalaryInput() {
+        const salaryAmountGroup = document.getElementById('salary-amount-group');
+        const salaryInput = document.getElementById('salary');
+        if (document.querySelector('input[name="salary_type"]:checked').value === 'amount') {
+            salaryAmountGroup.style.display = 'block';
+            salaryInput.required = true;
         } else {
-            alert(data.message);
+            salaryAmountGroup.style.display = 'none';
+            salaryInput.required = false;
         }
-    })
-    .catch(error => {
-        console.error('Submit error:', error);
-        alert('投稿中にエラーが発生しました。');
-    });
-}
+    }
+
+    function toggleBonusAmount() {
+        const bonusAmountGroup = document.getElementById('bonus-amount-group');
+        bonusAmountGroup.style.display = document.querySelector('input[name="bonuses"]:checked').value === '1' ? 'block' : 'none';
+    }
+
+    function toggleRentSupport() {
+        const rentSupportGroup = document.getElementById('rent-support-group');
+        rentSupportGroup.style.display = document.querySelector('input[name="living_support"]:checked').value === '1' ? 'block' : 'none';
+        toggleRentSupportInput();
+    }
+
+    function toggleRentSupportInput() {
+        const rentSupportAmountGroup = document.getElementById('rent-support-amount-group');
+        const rentSupportInput = document.getElementById('rent_support_amount');
+        if (document.querySelector('input[name="living_support"]:checked')?.value === '1') {
+            rentSupportAmountGroup.style.display = 'block';
+            rentSupportInput.required = document.querySelector('input[name="rent_support_type"]:checked').value === 'amount';
+        } else {
+            rentSupportAmountGroup.style.display = 'none';
+            rentSupportInput.required = false;
+        }
+    }
+
+    function toggleTransportAmount() {
+        const transportAmountGroup = document.getElementById('transport-amount-group');
+        transportAmountGroup.style.display = document.querySelector('input[name="transportation_charges"]:checked').value === '1' ? 'block' : 'none';
+    }
+
+    function toggleIncrementCondition() {
+        const incrementConditionGroup = document.getElementById('increment-condition-group');
+        incrementConditionGroup.style.display = document.querySelector('input[name="salary_increment"]:checked').value === '1' ? 'block' : 'none';
+    }
+
+    // Add event listeners for conditional fields
+    const salaryTypeRadios = document.querySelectorAll('input[name="salary_type"]');
+    const bonusesRadios = document.querySelectorAll('input[name="bonuses"]');
+    const livingSupportRadios = document.querySelectorAll('input[name="living_support"]');
+    const rentSupportTypeRadios = document.querySelectorAll('input[name="rent_support_type"]');
+    const transportationRadios = document.querySelectorAll('input[name="transportation_charges"]');
+    const salaryIncrementRadios = document.querySelectorAll('input[name="salary_increment"]');
+
+    salaryTypeRadios.forEach(radio => radio.addEventListener('change', toggleSalaryInput));
+    bonusesRadios.forEach(radio => radio.addEventListener('change', toggleBonusAmount));
+    livingSupportRadios.forEach(radio => radio.addEventListener('change', toggleRentSupport));
+    rentSupportTypeRadios.forEach(radio => radio.addEventListener('change', toggleRentSupportInput));
+    transportationRadios.forEach(radio => radio.addEventListener('change', toggleTransportAmount));
+    salaryIncrementRadios.forEach(radio => radio.addEventListener('change', toggleIncrementCondition));
+
+    // Initial state
+    toggleSalaryInput();
+    toggleBonusAmount();
+    toggleRentSupport();
+    toggleTransportAmount();
+    toggleIncrementCondition();
+
+    if (closePreviewButton) {
+        closePreviewButton.addEventListener('click', hidePreview);
+    }
+    if (editButton) {
+        editButton.addEventListener('click', editForm);
+    }
+    if (submitButton) {
+        submitButton.addEventListener('click', submitForm);
+    }
+});
+
+window.showForm = function(formId) {
+    document.getElementById(formId + 'Form').style.display = 'block';
+};
+
+window.hideForm = function(formId) {
+    document.getElementById(formId + 'Form').style.display = 'none';
+};
