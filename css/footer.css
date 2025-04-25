@@ -6,6 +6,9 @@
     font-family: 'Noto Sans JP', sans-serif;
     line-height: 1.6;
 }
+acc_img{
+    height: 300px;
+} 
 
 .footer .footer-container {
     max-width: 1200px;

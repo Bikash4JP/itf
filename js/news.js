@@ -30,8 +30,9 @@ function renderIndexNews() {
     const newsList = document.querySelector(".list ul");
     if (!newsList) return;
     newsList.innerHTML = "";
-    const sortedNews = [...newsData].sort((a, b) => new Date(b.date) - new Date(a.date));
-    const latestNews = sortedNews.slice(0, 3);
+    // Sort to ensure latest-to-oldest order
+    const sortedNews = [...newsData].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    const latestNews = sortedNews.slice(0, 3); // Take the first 3 items
     latestNews.forEach((item) => {
         const index = newsData.indexOf(newsData.find(news => news.title === item.title && news.date === item.date));
         const shortSummary = getShortSummary(item.summary);
@@ -60,7 +61,8 @@ function renderNews(filteredData) {
     if (!newsList) return;
     newsList.innerHTML = "";
     console.log('Rendering news with filtered data:', filteredData);
-    const sortedData = [...filteredData].sort((a, b) => new Date(b.date) - new Date(a.date));
+    // Sort to ensure latest-to-oldest order
+    const sortedData = [...filteredData].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     sortedData.forEach((item) => {
         const index = newsData.indexOf(item);
         const shortSummary = getShortSummary(item.summary);
@@ -115,9 +117,19 @@ function filterNews() {
     }
 
     if (dateOrder === "desc") {
-        filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+        filtered.sort((a, b) => {
+            const dateA = new Date(a.created_at);
+            const dateB = new Date(b.created_at);
+            console.log(`Sorting: ${a.title} (${a.created_at}) vs ${b.title} (${b.created_at}) -> ${dateB - dateA}`);
+            return dateB - dateA;
+        });
     } else if (dateOrder === "asc") {
-        filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+        filtered.sort((a, b) => {
+            const dateA = new Date(a.created_at);
+            const dateB = new Date(b.created_at);
+            console.log(`Sorting: ${a.title} (${a.created_at}) vs ${b.title} (${b.created_at}) -> ${dateA - dateB}`);
+            return dateA - dateB;
+        });
     }
 
     renderNews(filtered);
@@ -188,23 +200,27 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         } else {
             console.log("newsId is not present, rendering all news items...");
-            renderNews(newsData);
+            // Ensure default view is sorted latest-to-oldest
+            const sortedNewsData = [...newsData].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            renderNews(sortedNewsData);
 
             const categoryFilter = document.getElementById("categoryFilter");
             const dateFilter = document.getElementById("dateFilter");
+
+            if (dateFilter) {
+                // Set default value to "desc" (latest to oldest)
+                dateFilter.value = "desc";
+                console.log("dateFilter found, setting default to desc and adding event listener...");
+                dateFilter.addEventListener("change", filterNews);
+            } else {
+                console.warn("dateFilter element not found");
+            }
 
             if (categoryFilter) {
                 console.log("categoryFilter found, adding event listener...");
                 categoryFilter.addEventListener("change", filterNews);
             } else {
                 console.warn("categoryFilter element not found");
-            }
-
-            if (dateFilter) {
-                console.log("dateFilter found, adding event listener...");
-                dateFilter.addEventListener("change", filterNews);
-            } else {
-                console.warn("dateFilter element not found");
             }
         }
     } else {

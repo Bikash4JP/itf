@@ -1,4 +1,3 @@
-/* Reset default margins and padding */
 * {
     margin: 0;
     padding: 0;
@@ -7,60 +6,10 @@
 
 body {
     font-family: Arial, sans-serif;
-    background: linear-gradient(white, rgb(211, 182, 129), rgb(108, 108, 138));
+    background: linear-gradient(90deg,rgb(242, 243, 244), rgb(81, 178, 230), rgb(233, 188, 104));
     margin: 0;
     padding: 0;
 }
-
-/* Header Responsiveness */
-.header-frame {
-    width: 100%;
-    padding: 10px 20px;
-}
-
-.header-top-in {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.logo img {
-    max-width: 150px;
-    height: auto;
-}
-
-#sp-menu-open {
-    display: none; /* Hidden by default on larger screens */
-}
-
-.header-menu {
-    width: 100%;
-}
-
-.acc-body {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.contents, .cta {
-    list-style: none;
-    display: flex;
-    gap: 15px;
-}
-
-.contents-item a, .cta-item a {
-    text-decoration: none;
-    color: #333;
-    font-size: 16px;
-    padding: 10px;
-}
-
-.cta-item.tel {
-    display: none; /* Hide phone CTA on desktop */
-}
-
 /* Towa Container */
 .towa-container {
     display: flex;
@@ -68,10 +17,11 @@ body {
     justify-content: center;
     width: 90%;
     max-width: 1000px;
-    background-color: #fff;
     padding: 20px;
+    /* background:linear-gradient(rgb(63, 50, 26),rgb(30, 62, 93)); */
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     margin: 20px auto;
+    border-radius: 13px;
 }
 
 .towa-text-box {
@@ -79,21 +29,28 @@ body {
     width: 60%;
 }
 
-.towa-text-box h1 {
+ h1 {
     font-size: clamp(24px, 5vw, 40px);
-    font-weight: bold;
-    color: #333;
+    font-weight: bolder;
+    color: #26292a;
+    font-family: 'Times New Roman', Times, serif;
+    text-align: center;
+    align-items: center;
+    text-decoration: underline;
 }
 
 .towa-text-box p {
     font-size: clamp(14px, 3vw, 18px);
     line-height: 1.6;
     color: #333;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-weight: bold;
+
 }
 
 .towa-divider {
     width: 5px;
-    background-color: #e60012;
+    background-color: #0c07fa;
     height: 100px;
     margin: 0 20px;
 }
@@ -108,12 +65,6 @@ body {
     text-align: center;
     padding: 20px;
 }
-
-.itf-reason h1 {
-    font-size: clamp(24px, 5vw, 32px);
-    margin-bottom: 10px;
-}
-
 .itf-reason h2 {
     font-size: clamp(18px, 4vw, 24px);
     margin-bottom: 20px;
@@ -127,8 +78,8 @@ body {
 }
 
 .itf-column {
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
+    /* background:linear-gradient(260deg,rgb(223, 150, 61),#6dc0dc); */
+    border: 1px solid #111010;
     border-radius: 5px;
     padding: 20px;
     margin: 10px;
@@ -136,14 +87,19 @@ body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.itf-column h3 {
-    font-size: clamp(16px, 3vw, 20px);
+h3 {
+    font-size:larger;
+    color: #003366;
+    font-weight: bolder;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     margin-bottom: 10px;
 }
 
 .itf-column p {
-    font-size: clamp(12px, 2.5vw, 16px);
+    font-size: medium;
     margin-bottom: 20px;
+    font-weight:400;
+    font-family:Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
 }
 
 /* ITF Container Section */
@@ -156,9 +112,9 @@ body {
 .itf-merit, .itf-new-container, .itf-talent-container, .itf-cost-container, .itf-process-container, .itf-support-container {
     margin-top: 20px;
     padding: 20px;
-    border: 1px solid #ccc;
+    /* border: 1px solid #ccc; */
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(220, 192, 192, 0.1);
 }
 
 .itf-container h1 {
@@ -190,13 +146,8 @@ body {
     font-size: clamp(14px, 2.5vw, 16px);
     line-height: 1.5;
 }
-
-.itf-cost-container {
-    background-color: #f9f9f9;
-}
-
 .itf-process-container {
-    background-color: white;
+    background-color: rgb(4, 88, 118);
 }
 
 .itf-steps {
@@ -208,7 +159,7 @@ body {
 .itf-step {
     display: flex;
     align-items: center;
-    background: #f0f0f0;
+    background:linear-gradient(180deg,rgb(239, 237, 234),rgb(118, 194, 227));
     border-radius: 5px;
     padding: 10px;
     border-left: 5px solid #003366;
@@ -239,7 +190,7 @@ body {
 
 /* ITF Support Container */
 .itf-support-container {
-    background-color: white;
+    background:linear-gradient(120deg,white,rgb(229, 201, 150))
 }
 
 .itf-buttons {
@@ -251,7 +202,7 @@ body {
 }
 
 .itf-button {
-    background: #d92525;
+    background: #3798e2;
     color: white;
     padding: 10px 15px;
     border-radius: 5px;
@@ -382,36 +333,6 @@ body {
 }
 
 /* Media Queries */
-@media (max-width: 768px) {
-    /* Header */
-    #sp-menu-open {
-        display: block;
-    }
-
-    .acc-body {
-        display: none;
-        flex-direction: column;
-        position: absolute;
-        top: 60px;
-        left: 0;
-        width: 100%;
-        background: white;
-        padding: 20px;
-    }
-
-    .acc-body.active {
-        display: flex;
-    }
-
-    .contents, .cta {
-        flex-direction: column;
-        width: 100%;
-    }
-
-    .cta-item.tel {
-        display: flex;
-    }
-
     /* Towa Container */
     .towa-container {
         flex-direction: column;
@@ -451,8 +372,6 @@ body {
     .contact-boxes {
         flex-direction: column;
     }
-}
-
 @media (max-width: 480px) {
     .towa-text-box h1 {
         font-size: 20px;

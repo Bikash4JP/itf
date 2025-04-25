@@ -26,78 +26,102 @@ http://wordpress.org/extend/plugins/wp-pagenavi/
     /* background-color: #ffffff; White background */
 
 .header-frame {
-    background-color: #f6f7f7b0; /* Ensures consistency */
+    background-color: #339cf2; /* Ensures consistency */
 }
 
-.header-menu {
-    background-color: #a4c6dd; /* White background for the menu */
+#header {
+    background-color: #339cf2; /* White background for the menu */
 }
 /* ------------------------------------------------Abou start from here -------------------------- */
 .about-container {
-    display: flex;
-    align-items: center;
-    max-width: 900px;
-    padding: 20px;
-    margin: 0 auto;
-    gap: 40px;
+  display: flex;
+  align-items: center;
+  max-width: 900px;
+  padding: 20px;
+  margin: 0 auto;
+  gap: 40px;
 }
 
 /* Left Side - Logo (40%) */
 .about-logo-container {
-    flex: 40%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  flex: 40%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .about-logo {
-    width: 100%;
-    max-width: 250px;
+  width: 100%;
+  max-width: 250px;
 }
 
 /* Right Side - Content (60%) */
 .about-content {
-    flex: 60%;
+  flex: 60%;
 }
 
 .about-title {
-    color: red;
-    font-size: 16px;
-    font-weight: bold;
+  color: red;
+  font-size: 16px;
+  font-weight: bold;
 }
 
 .about-heading {
-    font-size: 24px;
-    font-weight: bold;
+  font-size: 24px;
+  font-weight: bold;
 }
 
 .about-heading span {
-    font-size: 18px;
-    color: gray;
+  font-size: 18px;
+  color: gray;
 }
 
 .about-description {
-    font-size: 16px;
-    line-height: 1.6;
-    color: #333;
-	/* color: #3684b8; */
+  font-size:large;
+  font-weight: bold;
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  color: #333;
+/* color: #3684b8; */
+
 }
 
 .about-button {
-    background-color: white;
-    border: 2px solid #ddd;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    margin-top: 10px;
-    transition: background 0.3s;
+  background-color: white;
+  border: 2px solid #ddd;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.3s;
 }
 
 .about-button:hover {
-    background-color: #f8f8f8;
+  background-color: #f8f8f8;
 }
 .l-section.senryaku {
-    padding: 5px 0; /* 10px padding top and bottom, 0 for left and right */
+  padding: 5px 0; /* 10px padding top and bottom, 0 for left and right */
+}
+/* make it responsive from here ======================================== */
+@media (max-width: 768px) {
+.about-container {
+  flex-direction: column;
+  text-align: center;
+}
+
+.about-logo-container,
+.about-content {
+  flex: 100%;
+}
+
+.about-logo {
+  max-width: 200px;
+  margin: 0 auto;
+}
+
+.about-content {
+  padding-top: 10px;
+}
 }
 /* make it responsive from here ======================================== */
 @media (max-width: 768px) {
@@ -120,7 +144,20 @@ http://wordpress.org/extend/plugins/wp-pagenavi/
     padding-top: 10px;
   }
 }
-
+/* Solution --------------------------------------------------------------------------------- */
+h1.solution{
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight:bolder;
+  font-size:x-large;
+  color: #262323;
+  text-decoration: underline;
+}
+p.sl li{
+  font-family: 'Times New Roman', Times, serif;
+  font-size: large;
+  font-weight: bold;
+  color: #000;
+}
 /* =====================================Sec Added ========================================== */
 .section-addd {
     font-family: 'MS Gothic', 'MS Mincho', 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
@@ -172,13 +209,16 @@ http://wordpress.org/extend/plugins/wp-pagenavi/
 .flow-content {
     flex: 1;
     padding: 8px 15px;
-    background-color: rgba(255,255,255,0.9);
+    background:linear-gradient(35deg,skyblue,rgb(188, 222, 239));
     border-radius: 8px;
     color: #333;
     text-align: left;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     position: relative;
     line-height: 1.7;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: large;
+    font-weight: bold;
 }
 
 .flow-content:before {
@@ -195,7 +235,9 @@ http://wordpress.org/extend/plugins/wp-pagenavi/
 
 /* =========================================================JLPT Graph Style ========================================== */
 #Languages {
-	font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
+	font-family: 'Times New Roman', Times, serif;
+  font-size: large;
+  font-weight: bold;
 	max-width: 1000px;
 	margin: 30px auto;
   }
@@ -221,6 +263,7 @@ http://wordpress.org/extend/plugins/wp-pagenavi/
 	text-align: center;
 	font-size: larger;
 	font-weight: bolder;
+  color: #063260;
   }
   
   .jlpt-text-content {
@@ -231,12 +274,14 @@ http://wordpress.org/extend/plugins/wp-pagenavi/
 	color: #2c3e50;
 	margin-bottom: 15px;
 	text-align: center;
+  color: royalblue;
+  font-weight: bolder;
   }
   
   .jlpt-paragraph {
 	color: #34495e;
 	line-height: 1.6;
-	text-align: center;
+	text-align: left;
   }
   
   /* Right Graph Panel - 50% width (EXACTLY same as before) */

@@ -6,60 +6,10 @@
 }
 
 body {
-    font-family: 'Helvetica Neue', sans-serif;
-    margin: 0;
-    padding: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(90deg,white, rgb(78, 172, 235), rgb(233, 188, 104));
 }
-
 /* Header (Reused from previous page) */
-.header-frame {
-    width: 100%;
-    padding: 10px 20px;
-}
-
-.header-top-in {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.logo img {
-    max-width: 150px;
-    height: auto;
-}
-
-#sp-menu-open {
-    display: none; /* Hidden on larger screens */
-}
-
-.header-menu {
-    width: 100%;
-}
-
-.acc-body {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.contents, .cta {
-    list-style: none;
-    display: flex;
-    gap: 15px;
-}
-
-.contents-item a, .cta-item a {
-    text-decoration: none;
-    color: #333;
-    font-size: 16px;
-    padding: 10px;
-}
-
-.cta-item.tel {
-    display: none; /* Hide phone CTA on desktop */
-}
-
 /* Background Section */
 .bg {
     background-image: url('../images/company_bg.jpg');
@@ -207,35 +157,6 @@ body {
 
 /* Media Queries */
 @media (max-width: 768px) {
-    /* Header */
-    #sp-menu-open {
-        display: block;
-    }
-
-    .acc-body {
-        display: none;
-        flex-direction: column;
-        position: absolute;
-        top: 60px;
-        left: 0;
-        width: 100%;
-        background: white;
-        padding: 20px;
-    }
-
-    .acc-body.active {
-        display: flex;
-    }
-
-    .contents, .cta {
-        flex-direction: column;
-        width: 100%;
-    }
-
-    .cta-item.tel {
-        display: flex;
-    }
-
     /* Background Section */
     .bg {
         height: 200px;

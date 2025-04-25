@@ -1,7 +1,7 @@
 /* Base Styles */
 body {
   font-family: 'Noto Sans JP', sans-serif;
-  background: linear-gradient(rgb(239, 242, 243), rgb(226, 216, 201));
+  background: linear-gradient(90deg, rgb(233, 184, 111),rgb(134, 211, 236));
   margin: 0;
   padding: 0;
   color: #111111;
@@ -118,7 +118,7 @@ input[type="tel"],
 textarea {
   width: 100%;
   padding: 12px;
-  border: 1px solid #5c5959;
+  border: 1px solid #171616;
   border-radius: 4px;
   font-family: 'Noto Sans JP', sans-serif;
   color: #211414;

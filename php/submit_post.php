@@ -25,7 +25,7 @@ try {
     $summary = $_POST['summary'] ?? null;
     $content = $_POST['content'] ?? null;
     $category = $_POST['category'] ?? null;
-    $date = $_POST['date'] ?? date('Y-m-d H:i:s');
+    $date = date('Y-m-d'); // Only date (YYYY-MM-DD)
     $posted_by = $_SESSION['username'];
     $staff_id = $_SESSION['id'];
     $image_path = isset($_SESSION['preview_image']) ? $_SESSION['preview_image'] : null;
@@ -64,7 +64,7 @@ try {
         }
     }
 
-    // Insert into posts table
+    // Insert into posts table (removed created_at as it will be set automatically by the database)
     $stmt = $pdo->prepare("
         INSERT INTO posts (
             staff_id, post_type, category, title, summary, content, image, company_name, 
@@ -72,14 +72,14 @@ try {
             living_support, rent_support, insurance, transportation_charges, 
             transport_amount_limit, salary_increment, increment_condition, 
             japanese_level, experience, minimum_leave_per_year, employee_size, 
-            required_vacancy, date, posted_by, created_at
+            required_vacancy, date, posted_by
         ) VALUES (
             ?, ?, ?, ?, ?, ?, ?, ?, 
             ?, ?, ?, ?, ?, ?, 
             ?, ?, ?, ?, 
             ?, ?, ?, 
             ?, ?, ?, ?, 
-            ?, ?, ?, ?
+            ?, ?, ?
         )
     ");
     $stmt->execute([
@@ -88,7 +88,7 @@ try {
         $living_support, $rent_support, $insurance, $transportation_charges,
         $transport_amount_limit, $salary_increment, $increment_condition,
         $japanese_level, $experience, $minimum_leave_per_year, $employee_size,
-        $required_vacancy, $date, $posted_by, $date
+        $required_vacancy, $date, $posted_by
     ]);
 
     // Clear session preview data
