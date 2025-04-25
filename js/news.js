@@ -177,7 +177,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                                     <span class="posted-by">Posted By: ${selectedNews.posted_by}</span>
                                 </div>
                                 <div class="title">${selectedNews.title}</div>
-                                <div class="summary">${selectedNews.summary}</div>
+                                <div class="summary">${selectedNews.content}</div>
                             </div>
                         </div>
                     </div>
