@@ -12,6 +12,14 @@
   </style>
 </head>
 <body>
+  <?php
+  // Validate job_id from URL
+  if (!isset($_GET['job_id']) || !filter_var($_GET['job_id'], FILTER_VALIDATE_INT) || $_GET['job_id'] <= 0) {
+      die("Error: Please access this form with a valid job_id (e.g., ?job_id=13).");
+  }
+  $job_id = htmlspecialchars($_GET['job_id']);
+  ?>
+
   <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
     <div class="container">
       <a class="navbar-brand" href="/">ITF</a>
@@ -327,7 +335,7 @@
       </div>
 
       <!-- Hidden Job ID -->
-      <input type="hidden" name="job_id" value="<?php echo isset($_GET['job_id']) ? htmlspecialchars($_GET['job_id']) : ''; ?>" />
+      <input type="hidden" name="job_id" value="<?php echo $job_id; ?>" />
 
       <!-- Submit Button -->
       <div class="text-center mt-4">

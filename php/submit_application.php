@@ -12,6 +12,7 @@ require $autoloadPath;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
 // Database connection
 try {
@@ -53,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Validate job_id
     if ($job_id === false || $job_id <= 0) {
-        die("Error: job_id is missing or invalid. Please ensure the form is accessed with a valid job_id (e.g., ?job_id=1).");
+        die("Error: job_id is missing or invalid. Please ensure the form is accessed with a valid job_id (e.g., ?job_id=13).");
     }
 
     // Validate required fields
@@ -119,6 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'certificates' => 'Certificate'
     ];
 
+    $photo_path = null; // To store the path of the uploaded photo
     foreach ($upload_types as $field => $type) {
         if (isset($_FILES[$field]) && !empty($_FILES[$field]['name'])) {
             if ($field === 'certificates') {
@@ -139,6 +141,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $file_path = '../uploads/' . uniqid() . '_' . basename($_FILES[$field]['name']);
                     if (move_uploaded_file($_FILES[$field]['tmp_name'], $file_path)) {
                         $uploads[] = ['type' => $type, 'path' => $file_path];
+                        // Store the photo path if this is the photo upload
+                        if ($field === 'photo') {
+                            $photo_path = $file_path;
+                        }
                     }
                 }
             }
@@ -211,107 +217,147 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die("Failed to save applicant data: " . $e->getMessage());
     }
 
-    // Generate resume
+    // Load the template file and fill user data
     try {
-        $spreadsheet = new Spreadsheet();
+        // Path to the template file
+        $templateFile = dirname(__DIR__) . '/templates/template.xlsx';
+
+        // Check if the template file exists
+        if (!file_exists($templateFile)) {
+            die("Error: Template file not found at: $templateFile. Please ensure the template.xlsx file exists in the templates/ directory.");
+        }
+
+        // Load the template
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($templateFile);
         $sheet = $spreadsheet->getActiveSheet();
 
-        // Map data to Excel cells based on the resume format
-        $sheet->setCellValue('A1', '履歴書');
-        $sheet->setCellValue('A3', '氏名');
-        $sheet->setCellValue('B3', $fullname);
-        $sheet->setCellValue('A4', 'ふりがな');
-        $sheet->setCellValue('B4', $furigana);
-        $sheet->setCellValue('A5', 'ローマ字');
-        $sheet->setCellValue('B5', $roman_name);
-        $sheet->setCellValue('A6', '国籍');
-        $sheet->setCellValue('B6', $nationality);
-        $sheet->setCellValue('A7', '性別');
-        $sheet->setCellValue('B7', $gender === 'Male' ? '男性' : ($gender === 'Female' ? '女性' : 'その他'));
-        $sheet->setCellValue('A8', '宗教');
-        $sheet->setCellValue('B8', $religion);
-        $sheet->setCellValue('A9', '生年月日');
-        $sheet->setCellValue('B9', $dob);
-        $sheet->setCellValue('A10', '出生地');
-        $sheet->setCellValue('B10', $birth_place);
-        $sheet->setCellValue('A11', '配偶者の有無');
-        $sheet->setCellValue('B11', $marital_status === 'Single' ? '無し' : '有り');
-        $sheet->setCellValue('A12', '現住所');
-        $sheet->setCellValue('B12', $address);
-        $sheet->setCellValue('A13', '連絡先');
-        $sheet->setCellValue('B13', $phone);
-        $sheet->setCellValue('A14', 'Email');
-        $sheet->setCellValue('B14', $email);
-        $sheet->setCellValue('A15', '身長');
-        $sheet->setCellValue('B15', $height_cm ? $height_cm . ' cm' : '');
-        $sheet->setCellValue('A16', '体重');
-        $sheet->setCellValue('B16', $weight_kg ? $weight_kg . ' kg' : '');
-        $sheet->setCellValue('A17', 'パスポート有無');
-        $sheet->setCellValue('B17', $passport_have === 'Yes' ? '有り' : '無し');
-        $sheet->setCellValue('A18', 'パスポートNO');
-        $sheet->setCellValue('B18', $passport_number);
-        $sheet->setCellValue('A19', '有効期限');
-        $sheet->setCellValue('B19', $passport_expiry);
-        $sheet->setCellValue('A20', '過去の出入国歴 (回数)');
-        $sheet->setCellValue('B20', $migration_history);
-        $sheet->setCellValue('A21', '直近の入国日');
-        $sheet->setCellValue('B21', $recent_migration_entry);
-        $sheet->setCellValue('A22', '直近の出国日');
-        $sheet->setCellValue('B22', $recent_migration_exit);
-        $sheet->setCellValue('A23', '現在の在留資格');
-        $sheet->setCellValue('B23', $residency_status);
-        $sheet->setCellValue('A24', '在留期限');
-        $sheet->setCellValue('B24', $residency_expiry);
+        // Fill Header (Filled Date)
+        $sheet->setCellValue('AC2', date('Y'));  // Year (merged AC2:AD2)
+        $sheet->setCellValue('AF2', date('m'));  // Month
+        $sheet->setCellValue('AH2', date('d'));  // Day
 
-        // Education
-        $sheet->setCellValue('A26', '学歴');
-        $row = 27;
-        foreach ($education as $edu) {
-            $sheet->setCellValue('A' . $row, $edu['institution_name']);
-            $sheet->setCellValue('B' . $row, $edu['join_date'] . ' - ' . $edu['leave_date']);
-            $sheet->setCellValue('C' . $row, $edu['major']);
-            $sheet->setCellValue('D' . $row, $edu['status']);
-            $row++;
+        // Fill Personal Details
+        $sheet->setCellValue('H3', $fullname);  // Full Name (merged H3:T3)
+        $sheet->setCellValue('H4', $furigana);  // Katakana Name (merged H4:T4)
+        $sheet->setCellValue('H5', $dob ? date('Y', strtotime($dob)) : '-');  // Date of Birth Year (merged H5:I5)
+        $sheet->setCellValue('K5', $dob ? date('m', strtotime($dob)) : '-');  // Date of Birth Month (merged K5:L5)
+        $sheet->setCellValue('N5', $dob ? date('d', strtotime($dob)) : '-');  // Date of Birth Day (merged N5:O5)
+        $sheet->setCellValue('Q5', $dob ? (date('Y') - date('Y', strtotime($dob))) : '-');  // Age (merged Q5:R5)
+        $sheet->setCellValue('H6', $birth_place ? $birth_place : '-');  // Birthplace (merged H6:Q6)
+        $sheet->setCellValue('B8', $address ? $address : '-');  // Address (merged B8:T8)
+        $sheet->setCellValue('X3', $nationality ? $nationality : '-');  // Nationality (merged X3:AC3)
+        $sheet->setCellValue('X4', $gender === 'Male' ? '男性' : ($gender === 'Female' ? '女性' : 'その他'));  // Gender (merged X4:AC4)
+        $sheet->setCellValue('X5', $religion ? $religion : '-');  // Religion (merged X5:AC5)
+        $sheet->setCellValue('X6', $marital_status === 'Single' ? '無し' : ($marital_status === 'Married' ? '有り' : '-'));  // Marital Status (merged X6:AC6)
+        $sheet->setCellValue('X7', $phone ? $phone : '-');  // Phone (merged X7:AC7)
+        $sheet->setCellValue('X8', $email ? $email : '-');  // Email (merged X8:AC8)
+        $sheet->setCellValue('H9', $height_cm ? $height_cm . ' cm' : '-');  // Height (merged H9:K9)
+        $sheet->setCellValue('R9', $weight_kg ? $weight_kg . ' kg' : '-');  // Weight (merged R9:U9)
+
+        // Fill Photo (merged AD3:AI8)
+        if ($photo_path) {
+            $drawing = new Drawing();
+            $drawing->setPath($photo_path);
+            $drawing->setCoordinates('AD3');  // Top-left cell of the merged range AD3:AI8
+            // Set width and height to cover AD3:AI8 (approx dimensions)
+            $drawing->setWidth(150);  // Adjust width to cover columns AD to AI (6 columns, assuming 25 pixels per column)
+            $drawing->setHeight(150);  // Adjust height to cover rows 3 to 8 (6 rows, assuming 25 pixels per row)
+            $drawing->setOffsetX(5);  // Optional: adjust position within cell
+            $drawing->setOffsetY(5);
+            $drawing->setWorksheet($sheet);
         }
 
-        // Work Experience
-        $sheet->setCellValue('A' . ($row + 1), '職歴');
-        $row += 2;
-        foreach ($work_experience as $exp) {
-            $sheet->setCellValue('A' . $row, $exp['company_name']);
-            $sheet->setCellValue('B' . $row, $exp['join_date'] . ' - ' . $exp['leave_date']);
-            $sheet->setCellValue('C' . $row, $exp['job_role']);
-            $sheet->setCellValue('D' . $row, $exp['current_status']);
-            $row++;
+        // Fill Passport and Residency
+        $sheet->setCellValue('H10', $passport_have === 'Yes' ? '有り' : '無し');  // Passport Possession (merged H10:K10)
+        $sheet->setCellValue('P10', $passport_expiry ? date('Y', strtotime($passport_expiry)) : '-');  // Passport Expiry Year (merged P10:Q10)
+        $sheet->setCellValue('S10', $passport_expiry ? date('m', strtotime($passport_expiry)) : '-');  // Passport Expiry Month
+        $sheet->setCellValue('U10', $passport_expiry ? date('d', strtotime($passport_expiry)) : '-');  // Passport Expiry Day
+        $sheet->setCellValue('AB10', $passport_number ? $passport_number : '-');  // Passport Number (merged AB10:AI10)
+        $sheet->setCellValue('H11', $migration_history ? $migration_history : '0');  // Migration History (H11)
+        $sheet->setCellValue('T11', $recent_migration_entry ? date('Y', strtotime($recent_migration_entry)) : '-');  // Recent Migration Entry Year (merged T11:U11)
+        $sheet->setCellValue('W11', $recent_migration_entry ? date('m', strtotime($recent_migration_entry)) : '-');  // Recent Migration Entry Month
+        $sheet->setCellValue('Y11', $recent_migration_entry ? date('d', strtotime($recent_migration_entry)) : '-');  // Recent Migration Entry Day
+        $sheet->setCellValue('AC11', $recent_migration_exit ? date('Y', strtotime($recent_migration_exit)) : '-');  // Recent Migration Exit Year (merged AC11:AD11)
+        $sheet->setCellValue('AF11', $recent_migration_exit ? date('m', strtotime($recent_migration_exit)) : '-');  // Recent Migration Exit Month
+        $sheet->setCellValue('AH11', $recent_migration_exit ? date('d', strtotime($recent_migration_exit)) : '-');  // Recent Migration Exit Day
+        $sheet->setCellValue('H12', $residency_status ? $residency_status : '-');  // Residency Status (merged H12:K12)
+        $sheet->setCellValue('T12', $residency_expiry ? date('Y', strtotime($residency_expiry)) : '-');  // Residency Expiry Year (merged T12:U12)
+        $sheet->setCellValue('W12', $residency_expiry ? date('m', strtotime($residency_expiry)) : '-');  // Residency Expiry Month
+        $sheet->setCellValue('Y12', $residency_expiry ? date('d', strtotime($residency_expiry)) : '-');  // Residency Expiry Day
+        $sheet->setCellValue('AC12', $recent_migration_exit ? date('Y', strtotime($recent_migration_exit)) : '-');  // Exit Year (merged AC12:AD12)
+        $sheet->setCellValue('AF12', $recent_migration_exit ? date('m', strtotime($recent_migration_exit)) : '-');  // Exit Month
+        $sheet->setCellValue('AH12', $recent_migration_exit ? date('d', strtotime($recent_migration_exit)) : '-');  // Exit Day
+
+        // Fill Education (Start at row 15, multiple entries at rows 15 to 19)
+        $educationRows = [15, 16, 17, 18, 19];  // Rows 15 to 19 as specified
+        foreach ($educationRows as $index => $row) {
+            if (isset($education[$index])) {
+                $edu = $education[$index];
+                $sheet->setCellValue("B{$row}", $edu['join_date'] ? date('Y', strtotime($edu['join_date'])) : '');  // From Year (merged B15:C15)
+                $sheet->setCellValue("E{$row}", $edu['join_date'] ? date('m', strtotime($edu['join_date'])) : '');  // From Month
+                $sheet->setCellValue("H{$row}", $edu['leave_date'] ? date('Y', strtotime($edu['leave_date'])) : '');  // To Year (merged H15:I15)
+                $sheet->setCellValue("K{$row}", $edu['leave_date'] ? date('m', strtotime($edu['leave_date'])) : '');  // To Month
+                $sheet->setCellValue("M{$row}", $edu['institution_name'] ? $edu['institution_name'] : '');  // Institution Name (merged M15:AD15)
+                $sheet->setCellValue("AE{$row}", $edu['major'] ? $edu['major'] : '');  // Major (merged AE15:AI15)
+            } else {
+                $sheet->setCellValue("B{$row}", '');
+                $sheet->setCellValue("E{$row}", '');
+                $sheet->setCellValue("H{$row}", '');
+                $sheet->setCellValue("K{$row}", '');
+                $sheet->setCellValue("M{$row}", '');
+                $sheet->setCellValue("AE{$row}", '');
+            }
         }
 
-        // Certifications
-        $sheet->setCellValue('A' . ($row + 1), '免許・資格');
-        $row += 2;
-        foreach ($certifications as $cert) {
-            $sheet->setCellValue('A' . $row, $cert['name']);
-            $sheet->setCellValue('B' . $row, $cert['type']);
-            $sheet->setCellValue('C' . $row, $cert['score']);
-            $sheet->setCellValue('D' . $row, $cert['date_obtained']);
-            $row++;
+        // Fill Work Experience (Start at row 21, multiple entries at rows 21 to 24)
+        $workRows = [21, 22, 23, 24];  // Rows 21 to 24 as specified
+        foreach ($workRows as $index => $row) {
+            if (isset($work_experience[$index])) {
+                $work = $work_experience[$index];
+                $sheet->setCellValue("B{$row}", $work['join_date'] ? date('Y', strtotime($work['join_date'])) : '');  // From Year (merged B21:C21)
+                $sheet->setCellValue("E{$row}", $work['join_date'] ? date('m', strtotime($work['join_date'])) : '');  // From Month
+                $sheet->setCellValue("H{$row}", $work['leave_date'] ? date('Y', strtotime($work['leave_date'])) : '');  // To Year (merged H21:I21)
+                $sheet->setCellValue("K{$row}", $work['leave_date'] ? date('m', strtotime($work['leave_date'])) : '');  // To Month
+                $sheet->setCellValue("M{$row}", $work['company_name'] ? $work['company_name'] : '');  // Org Name (merged M21:AD21)
+                $sheet->setCellValue("AE{$row}", $work['job_role'] ? $work['job_role'] : '');  // Designation (merged AE21:AI21)
+            } else {
+                $sheet->setCellValue("B{$row}", '');
+                $sheet->setCellValue("E{$row}", '');
+                $sheet->setCellValue("H{$row}", '');
+                $sheet->setCellValue("K{$row}", '');
+                $sheet->setCellValue("M{$row}", '');
+                $sheet->setCellValue("AE{$row}", '');
+            }
         }
 
-        // Self-PR and Motivation
-        $sheet->setCellValue('A' . ($row + 1), '自己PR');
-        $sheet->setCellValue('B' . ($row + 1), $self_intro);
-        $row += 2;
-        $sheet->setCellValue('A' . $row, '志望動機');
-        $sheet->setCellValue('B' . $row, $motivation);
-        $row += 2;
-        $sheet->setCellValue('A' . $row, '本人希望欄');
-        $sheet->setCellValue('B' . $row, $job_preference);
+        // Fill Certifications (Start at row 27, multiple entries at rows 27 to 31)
+        $certRows = [27, 28, 29, 30, 31];  // Rows 27 to 31 as specified
+        foreach ($certRows as $index => $row) {
+            if (isset($certifications[$index])) {
+                $cert = $certifications[$index];
+                $sheet->setCellValue("B{$row}", $cert['date_obtained'] ? date('Y', strtotime($cert['date_obtained'])) : '');  // Year (merged B27:D27)
+                $sheet->setCellValue("E{$row}", $cert['date_obtained'] ? date('m', strtotime($cert['date_obtained'])) : '');  // Month (merged E27:F27)
+                $sheet->setCellValue("G{$row}", $cert['name'] ? $cert['name'] : '');  // Exam Name (merged G27:AI27)
+            } else {
+                $sheet->setCellValue("B{$row}", '');
+                $sheet->setCellValue("E{$row}", '');
+                $sheet->setCellValue("G{$row}", '');
+            }
+        }
 
-        // Save resume
+        // Fill Self-PR, Motivation, and Preferences
+        $sheet->setCellValue('B33', $self_intro ? $self_intro : '-');  // Self-Introduction (merged B33:AI37)
+        $sheet->setCellValue('B39', $motivation ? $motivation : '-');  // Motivation (merged B39:AI39)
+        $sheet->setCellValue('B45', $job_preference ? $job_preference : '-');  // Applicant's Preferences (merged B45:AI46)
+
+        // Save the filled template
         $resume_path = '../resumes/' . $applicant_id . '_resume.xlsx';
         $writer = new Xlsx($spreadsheet);
         $writer->save($resume_path);
+
+        // If successful, proceed to the confirmation page
     } catch (Exception $e) {
-        die("Failed to generate resume: " . $e->getMessage());
+        die("Failed to load or save the template: " . $e->getMessage());
     }
 
     // Update applicant with resume path
@@ -326,7 +372,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Redirect to confirmation page
-    header("Location: ../confirmation.php?applicant_id=$applicant_id");
+    header("Location: confirmation.php?applicant_id=$applicant_id");
     exit;
 } else {
     die("Invalid request method.");
