@@ -180,3 +180,57 @@ nav ul li a {
 .preview-actions button:hover {
     background-color: #0056b3;
 }
+/* ---------------------------------------------------------------------------------------------------- */
+/* css/staff.css */
+.post-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    background-color: #E6F0FA;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.post-image {
+    flex: 0 0 400px; /* Fixed width for the image container */
+    height: 250px; /* Fixed height for the image container */
+    margin-right: 20px;
+    overflow: hidden; /* Prevent overflow */
+}
+
+.post-image img {
+    width: 400px; /* Exact width to stretch the image */
+    height: 250px; /* Exact height to stretch the image */
+    object-fit: fill; /* Stretch the image to fit the exact dimensions */
+    border-radius: 5px;
+}
+
+.post-content {
+    flex: 1;
+    text-align: left; /* Left-align text */
+}
+
+.post-meta {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 8px;
+}
+
+.post-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.post-summary {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.job-details {
+    font-size: 14px;
+    color: #777;
+    line-height: 1.5;
+}

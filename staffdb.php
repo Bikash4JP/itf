@@ -27,7 +27,7 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                 <li><a href="staffdb.php">Home</a></li>
                 <li><a href="#" onclick="showForm('posts')">Add Posts</a></li>
                 <li><a href="#" onclick="showForm('jobs')">Add Jobs</a></li>
-                <li><a href="#">DashBoard</a></li>
+                <li><a href="dashboard.html">DashBoard</a></li>
             </ul>
         </nav>
     </header>
@@ -38,8 +38,9 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     
     <section class="recent-posts">
         <h2>新規投稿</h2>
+        <div id="postsList"></div>
     </section>
-    <!-- the recent posts  -->
+
     <div class="form-popup" id="postsForm">
         <div class="form-content">
             <span class="close-btn" onclick="hideForm('posts')">×</span>
@@ -238,7 +239,9 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                 <input type="file" id="jobs-image" name="image">
 
                 <div class="buttons">
-                    <button type="button" onclick="previewForm('jobs')">プレビュー</button>                </div>
+                    <button type="button" onclick="previewForm('jobs')">プレビュー</button>
+                    <button type="submit">投稿</button>
+                </div>
             </form>
         </div>
     </div>

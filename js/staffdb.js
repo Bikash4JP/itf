@@ -185,3 +185,105 @@ window.showForm = function(formId) {
 window.hideForm = function(formId) {
     document.getElementById(formId + 'Form').style.display = 'none';
 };
+// js/staff.js
+// Fetch posts when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    fetch('php/fetch_staff_posts.php', {
+        method: 'GET',
+        credentials: 'include' // Ensure session cookies are sent
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            renderStaffPosts(data.posts);
+        } else {
+            console.error(data.message);
+            document.getElementById('postsList').innerHTML = `<p>${data.message}</p>`;
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching posts:', error);
+        document.getElementById('postsList').innerHTML = '<p>投稿の取得中にエラーが発生しました。</p>';
+    });
+});
+
+// Render posts to the page
+function renderStaffPosts(posts) {
+    const postsList = document.getElementById('postsList');
+    if (!postsList) return;
+
+    postsList.innerHTML = '';
+
+    if (posts.length === 0) {
+        postsList.innerHTML = '<p>投稿がありません。</p>';
+        return;
+    }
+
+    posts.forEach(post => {
+        const postItem = document.createElement('div');
+        postItem.className = `post-item ${post.post_type === 'job' ? 'post-item--job' : 'post-item--news'}`;
+
+        // Post Meta
+        const meta = document.createElement('div');
+        meta.className = 'post-meta';
+        meta.innerHTML = `
+            <span class="date">Posted Date: ${post.date}</span>
+            <span class="category">${post.category || post.job_category || 'その他'}</span>
+            <span class="posted-by">Posted By: ${post.posted_by}</span>
+        `;
+
+        // Post Title
+        const title = document.createElement('div');
+        title.className = 'post-title';
+        title.innerHTML = `<a href="post_view.php?id=${post.id}">${post.title}</a>`;
+
+        // Post Image or Placeholder
+        let image = '';
+        if (post.image) {
+            image = `
+                <div class="post-image">
+                    <img src="${post.image}" alt="${post.title}">
+                </div>
+            `;
+        } else {
+            image = `
+                <div class="post-image">
+                    <div class="image-placeholder">IMAGE (If Attached)</div>
+                </div>
+            `;
+        }
+
+        // Post Summary
+        const summary = document.createElement('div');
+        summary.className = 'post-summary';
+        summary.textContent = post.short_summary;
+
+        // Job Details (if applicable)
+        let jobDetails = '';
+        if (post.post_type === 'job') {
+            jobDetails = `
+                <div class="job-details">
+                    ${post.company_name ? `Company: ${post.company_name}<br>` : ''}
+                    ${post.job_location ? `Location: ${post.job_location}<br>` : ''}
+                    ${post.job_type ? `Job Type: ${post.job_type}<br>` : ''}
+                    ${post.salary ? `Salary: ${post.salary}<br>` : ''}
+                    ${post.japanese_level ? `Japanese Level: ${post.japanese_level}<br>` : ''}
+                </div>
+            `;
+        }
+
+        // Construct the post item
+        postItem.innerHTML = `
+            ${image}
+            <div class="post-content">
+                ${meta.outerHTML}
+                ${title.outerHTML}
+                ${summary.outerHTML}
+                ${jobDetails}
+            </div>
+        `;
+
+        postsList.appendChild(postItem);
+    });
+}
+// for staff control ---------------------------------------------------------------------------

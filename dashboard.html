@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Staff Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .dashboard {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #333;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .comment, .post {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+        .form-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        }
+        .form-popup input {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 8px;
+        }
+        button {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="index.html">Home</a> | 
+        <a href="dashboard.html">Dashboard</a> | 
+        <a href="logout.php">Logout</a>
+    </nav>
+
+    <section class="dashboard">
+        <div class="section">
+            <h2>Account Management</h2>
+            <div id="accountDetails">
+                <!-- Staff details loaded here -->
+            </div>
+            <button onclick="showEditForm()">Edit Details</button>
+        </div>
+
+        <div class="section">
+            <h2>Comments on Your Posts</h2>
+            <div id="commentsList">
+                <!-- Comments loaded here -->
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Your Posts</h2>
+            <div id="postsList">
+                <!-- Posts loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Edit Form Popup -->
+    <div class="form-popup" id="editForm">
+        <form id="editStaffForm">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name">
+            <label for="phone">Phone Number</label>
+            <input type="text" id="phone" name="phone">
+            <label for="password">New Password</label>
+            <input type="password" id="password" name="password">
+            <button type="submit">Update</button>
+            <button type="button" onclick="document.getElementById('editForm').style.display='none'">Cancel</button>
+        </form>
+    </div>
+
+    <script>
+        // Fetch staff details
+        function fetchStaffDetails() {
+            fetch('php/fetch_staff_details.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('accountDetails').innerHTML = `
+                            <p>Name: ${data.name}</p>
+                            <p>Phone: ${data.phone}</p>
+                        `;
+                    } else {
+                        alert('Error loading account details.');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Fetch comments on staff's posts
+        function fetchComments() {
+            fetch('php/fetch_comments.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const commentsList = document.getElementById('commentsList');
+                        commentsList.innerHTML = data.comments.map(comment => `
+                            <div class="comment">
+                                <p><strong>${comment.commenter_name}</strong> on "${comment.title}": ${comment.comment}</p>
+                                <small>${comment.created_at}</small>
+                            </div>
+                        `).join('');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Fetch staff's posts for editing
+        function fetchPosts() {
+            fetch('php/fetch_staff_posts.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const postsList = document.getElementById('postsList');
+                        postsList.innerHTML = data.posts.map(post => `
+                            <div class="post">
+                                <h3>${post.title}</h3>
+                                <button onclick="editPost(${post.id})">Edit</button>
+                            </div>
+                        `).join('');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Show edit form with current details
+        function showEditForm() {
+            fetch('php/fetch_staff_details.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('name').value = data.name;
+                        document.getElementById('phone').value = data.phone;
+                        document.getElementById('editForm').style.display = 'block';
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Handle form submission for updating staff details
+        document.getElementById('editStaffForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            fetch('php/update_staff_details.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Details updated successfully.');
+                    fetchStaffDetails(); // Refresh details
+                    document.getElementById('editForm').style.display = 'none';
+                } else {
+                    alert(data.message || 'Error updating details.');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        // Function to edit a post
+        function editPost(postId) {
+            window.location.href = `edit_post.php?id=${postId}`;
+        }
+
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchStaffDetails();
+            fetchComments();
+            fetchPosts();
+        });
+    </script>
+    <script src="js/staf_controll.js"></script>
+
+</body>
+</html>
