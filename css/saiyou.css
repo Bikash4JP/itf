@@ -51,28 +51,24 @@ section.bg .search-form button i {
   color: #333;
 }
 
-/*--- Main Two-Column Layout ---*/
+/*--- Main Layout with Title and Content/Filter Side by Side ---*/
 .saiyou-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   max-width: 1200px;
   margin: 40px auto;
   padding: 0 20px;
+  text-align: center; /* Title ko center mein rakhta hai */
 }
 
 .section-title {
-  text-align: center;
   font-size: 1.8rem;
   color: #0577c5;
   margin-bottom: 20px;
-  width: 100%;
 }
 
 .content-wrapper {
   display: flex;
-  width: 100%;
   justify-content: space-between;
+  align-items: flex-start;
 }
 
 .results {
@@ -122,12 +118,20 @@ section.bg .search-form button i {
   margin-top: 12px;
 }
 
-.job-image img {
-  width: 120px;
-  height: 120px;
-  object-fit: cover;
-  border-radius: 16px;
+.job-image {
+  width: 30%; /* Image takes 30% of the content width */
   margin-right: 20px;
+}
+
+.job-image img {
+  width: 100%; /* Stretch to fit the container */
+  height: 120px; /* Fixed height to maintain 2:1 ratio */
+  object-fit: cover; /* Ensures the image fits without distortion */
+  border-radius: 16px;
+}
+
+.job-summary {
+  width: 70%; /* Summary takes the remaining 70% */
 }
 
 .job-summary p {
@@ -191,9 +195,6 @@ section.bg .search-form button i {
 
 /*--- Responsive ---*/
 @media (max-width: 768px) {
-  .saiyou-section {
-      flex-direction: column;
-  }
   .content-wrapper {
       flex-direction: column;
   }
@@ -207,5 +208,21 @@ section.bg .search-form button i {
   }
   .section-title {
       font-size: 1.5rem;
+  }
+  .job-content {
+      flex-direction: column;
+  }
+  .job-image {
+      width: 100%;
+      margin-right: 0;
+      margin-bottom: 15px;
+  }
+  .job-image img {
+      width: 100%;
+      height: auto; /* Let height adjust automatically in mobile view */
+      aspect-ratio: 2 / 1; /* Maintain 2:1 ratio */
+  }
+  .job-summary {
+      width: 100%;
   }
 }

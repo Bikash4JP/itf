@@ -29,12 +29,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $furigana = filter_input(INPUT_POST, 'furigana', FILTER_SANITIZE_STRING);
     $roman_name = filter_input(INPUT_POST, 'roman_name', FILTER_SANITIZE_STRING);
     $nationality = filter_input(INPUT_POST, 'nationality', FILTER_SANITIZE_STRING);
+    $custom_nationality = filter_input(INPUT_POST, 'custom_nationality', FILTER_SANITIZE_STRING) ?: '';
+    $nationality = ($nationality === 'その他' && !empty($custom_nationality)) ? $custom_nationality : $nationality;
     $gender = filter_input(INPUT_POST, 'gender', FILTER_SANITIZE_STRING);
     $religion = filter_input(INPUT_POST, 'religion', FILTER_SANITIZE_STRING);
     $dob = filter_input(INPUT_POST, 'dob', FILTER_SANITIZE_STRING);
     $birth_place = filter_input(INPUT_POST, 'birth_place', FILTER_SANITIZE_STRING);
     $marital_status = filter_input(INPUT_POST, 'marital_status', FILTER_SANITIZE_STRING);
+
+    // Address fields are already concatenated in recruit.js
     $address = filter_input(INPUT_POST, 'address', FILTER_SANITIZE_STRING);
+    $postal_code = filter_input(INPUT_POST, 'postal_code', FILTER_SANITIZE_STRING);
+
     $phone = filter_input(INPUT_POST, 'phone', FILTER_SANITIZE_STRING);
     $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
     $height_cm = filter_input(INPUT_POST, 'height_cm', FILTER_SANITIZE_NUMBER_INT) ?: null;
@@ -58,8 +64,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Validate required fields
-    if (!$fullname || !$furigana || !$roman_name || !$nationality || !$gender || !$dob || !$marital_status || !$address || !$phone || !$email || !$passport_have || !$self_intro || !$motivation) {
-        die("Required fields are missing.");
+    if (!$fullname || !$furigana || !$roman_name || !$nationality || !$gender || !$dob || !$marital_status || !$address || !$phone || !$email || !$passport_have || !$self_intro || !$motivation || !$postal_code) {
+        $missingFields = [];
+        if (!$fullname) $missingFields[] = "fullname";
+        if (!$furigana) $missingFields[] = "furigana";
+        if (!$roman_name) $missingFields[] = "roman_name";
+        if (!$nationality) $missingFields[] = "nationality";
+        if (!$gender) $missingFields[] = "gender";
+        if (!$dob) $missingFields[] = "dob";
+        if (!$marital_status) $missingFields[] = "marital_status";
+        if (!$address) $missingFields[] = "address";
+        if (!$phone) $missingFields[] = "phone";
+        if (!$email) $missingFields[] = "email";
+        if (!$passport_have) $missingFields[] = "passport_have";
+        if (!$self_intro) $missingFields[] = "self_intro";
+        if (!$motivation) $missingFields[] = "motivation";
+        if (!$postal_code) $missingFields[] = "postal_code";
+        die("Required fields are missing: " . implode(", ", $missingFields));
     }
 
     // Prepare education JSON
@@ -78,6 +99,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     $education_json = json_encode($education);
+
+    // Validate education (at least one entry required)
+    if (empty($education)) {
+        die("At least one education entry is required.");
+    }
 
     // Prepare work experience JSON
     $work_experience = [];
@@ -170,12 +196,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $db->prepare("
             INSERT INTO applicant (
                 job_id, fullname, furigana, roman_name, nationality, gender, religion, dob, birth_place, marital_status,
-                address, phone, email, height_cm, weight_kg, passport_have, passport_number, passport_expiry,
+                address, postal_code, phone, email, height_cm, weight_kg, passport_have, passport_number, passport_expiry,
                 migration_history, recent_migration_entry, recent_migration_exit, residency_status, residency_expiry,
                 education, work_experience, certifications, self_intro, motivation, job_preference, uploads
             ) VALUES (
                 :job_id, :fullname, :furigana, :roman_name, :nationality, :gender, :religion, :dob, :birth_place, :marital_status,
-                :address, :phone, :email, :height_cm, :weight_kg, :passport_have, :passport_number, :passport_expiry,
+                :address, :postal_code, :phone, :email, :height_cm, :weight_kg, :passport_have, :passport_number, :passport_expiry,
                 :migration_history, :recent_migration_entry, :recent_migration_exit, :residency_status, :residency_expiry,
                 :education, :work_experience, :certifications, :self_intro, :motivation, :job_preference, :uploads
             )
@@ -192,6 +218,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'birth_place' => $birth_place,
             'marital_status' => $marital_status,
             'address' => $address,
+            'postal_code' => $postal_code,
             'phone' => $phone,
             'email' => $email,
             'height_cm' => $height_cm,
@@ -244,6 +271,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $sheet->setCellValue('N5', $dob ? date('d', strtotime($dob)) : '-');  // Date of Birth Day (merged N5:O5)
         $sheet->setCellValue('Q5', $dob ? (date('Y') - date('Y', strtotime($dob))) : '-');  // Age (merged Q5:R5)
         $sheet->setCellValue('H6', $birth_place ? $birth_place : '-');  // Birthplace (merged H6:Q6)
+        $sheet->mergeCells('E7:H7');  // Merge cells for Postal Code
+        $sheet->setCellValue('E7', $postal_code ? $postal_code : '-');  // Postal Code (merged E7:H7)
+        $sheet->mergeCells('B8:T8');  // Merge cells for Address
         $sheet->setCellValue('B8', $address ? $address : '-');  // Address (merged B8:T8)
         $sheet->setCellValue('X3', $nationality ? $nationality : '-');  // Nationality (merged X3:AC3)
         $sheet->setCellValue('X4', $gender === 'Male' ? '男性' : ($gender === 'Female' ? '女性' : 'その他'));  // Gender (merged X4:AC4)
@@ -259,10 +289,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $drawing = new Drawing();
             $drawing->setPath($photo_path);
             $drawing->setCoordinates('AD3');  // Top-left cell of the merged range AD3:AI8
-            // Set width and height to cover AD3:AI8 (approx dimensions)
-            $drawing->setWidth(150);  // Adjust width to cover columns AD to AI (6 columns, assuming 25 pixels per column)
-            $drawing->setHeight(150);  // Adjust height to cover rows 3 to 8 (6 rows, assuming 25 pixels per row)
-            $drawing->setOffsetX(5);  // Optional: adjust position within cell
+            $drawing->setWidth(150);  // Adjust width to cover columns AD to AI
+            $drawing->setHeight(150);  // Adjust height to cover rows 3 to 8
+            $drawing->setOffsetX(5);
             $drawing->setOffsetY(5);
             $drawing->setWorksheet($sheet);
         }

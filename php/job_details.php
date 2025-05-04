@@ -34,18 +34,30 @@
             list-style-type: disc;
             padding-left: 20px;
         }
-        .apply-button {
-            display: inline-block;
+        .button-container {
+            text-align: right;
             margin-top: 20px;
+        }
+        .apply-button, .back-button {
+            display: inline-block;
             padding: 10px 20px;
-            background: #2a7de1;
             color: #fff;
             text-decoration: none;
             border-radius: 4px;
-            text-align: center;
+            font-size: 0.95rem;
+            margin-left: 10px;
+        }
+        .apply-button {
+            background: #2a7de1;
         }
         .apply-button:hover {
             background: #1a5cb8;
+        }
+        .back-button {
+            background: #555;
+        }
+        .back-button:hover {
+            background: #333;
         }
     </style>
 </head>
@@ -137,7 +149,10 @@
             echo '<p><strong>現在の従業員数:</strong> ' . htmlspecialchars($job['employee_size']) . '</p>';
             echo '<p><strong>募集人数:</strong> ' . htmlspecialchars($job['required_vacancy']) . '</p>';
             echo '<p><strong>投稿者:</strong> ' . htmlspecialchars($job['posted_by']) . '</p>';
+            echo '<div class="button-container">';
             echo '<a href="../recruitment.php?job_id=' . htmlspecialchars($job['id']) . '" class="apply-button">この求人に応募する</a>';
+            echo '<a href="../saiyou.php" class="back-button">求人一覧に戻る</a>';
+            echo '</div>';
         } else {
             echo '<p>求人が見つかりませんでした。</p>';
         }

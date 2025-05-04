@@ -28,7 +28,41 @@ try {
     $date = date('Y-m-d'); // Only date (YYYY-MM-DD)
     $posted_by = $_SESSION['username'];
     $staff_id = $_SESSION['id'];
-    $image_path = isset($_SESSION['preview_image']) ? $_SESSION['preview_image'] : null;
+
+    // Handle image upload
+    $image_path = null;
+    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+        $upload_dir = '../uploads/';
+        // Ensure the uploads directory exists
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0755, true);
+        }
+        $image_name = uniqid() . '_' . basename($_FILES['image']['name']);
+        $image_path = $upload_dir . $image_name;
+
+        // Validate image file (JPEG or PNG, max 2MB)
+        $allowed_types = ['image/jpeg', 'image/png'];
+        $max_size = 2 * 1024 * 1024; // 2MB
+        $file_type = mime_content_type($_FILES['image']['tmp_name']);
+        $file_size = $_FILES['image']['size'];
+
+        if (!in_array($file_type, $allowed_types)) {
+            echo json_encode(["success" => false, "message" => "画像はJPEGまたはPNG形式である必要があります。"]);
+            exit;
+        }
+        if ($file_size > $max_size) {
+            echo json_encode(["success" => false, "message" => "画像サイズは2MB以下である必要があります。"]);
+            exit;
+        }
+
+        // Move uploaded file to uploads directory
+        if (!move_uploaded_file($_FILES['image']['tmp_name'], $image_path)) {
+            echo json_encode(["success" => false, "message" => "画像のアップロードに失敗しました。"]);
+            exit;
+        }
+    } elseif (isset($_SESSION['preview_image']) && !empty($_SESSION['preview_image'])) {
+        $image_path = $_SESSION['preview_image'];
+    }
 
     // Job-specific fields (made optional since not all are in the form)
     $company_name = $_POST['company_name'] ?? null;

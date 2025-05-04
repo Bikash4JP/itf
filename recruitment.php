@@ -5,12 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ITF 新着採用応募フォーム</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <style>
-    .section-header { border-bottom: 2px solid #007BFF; margin-bottom: 20px; padding-bottom: 10px; }
-    .dynamic-block { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 5px; }
-    .remove-btn { margin-top: 10px; }
-    .hidden { display: none; }
-  </style>
+  <link rel="stylesheet" href="css/recruit.css" />
 </head>
 <body>
   <?php
@@ -41,7 +36,7 @@
 
   <div class="container my-5">
     <h2 class="mb-4">ITF 新着採用応募フォーム</h2>
-    <form action="php/submit_application.php" method="POST" enctype="multipart/form-data">
+    <form action="php/submit_application.php" method="POST" enctype="multipart/form-data" id="recruitment-form">
       <!-- Personal Details -->
       <h4 class="section-header">個人情報</h4>
       <div class="row mb-3">
@@ -71,16 +66,44 @@
         </div>
         <div class="col-md-3">
           <label for="height_cm" class="form-label">身長 (cm)</label>
-          <input type="number" id="height_cm" name="height_cm" class="form-control" placeholder="例: 170" />
+          <input type="text" id="height_cm" name="height_cm" class="form-control number-input" placeholder="例: 170" />
         </div>
         <div class="col-md-3">
           <label for="weight_kg" class="form-label">体重 (kg)</label>
-          <input type="number" id="weight_kg" name="weight_kg" class="form-control" placeholder="例: 70" />
+          <input type="text" id="weight_kg" name="weight_kg" class="form-control number-input" placeholder="例: 70" />
         </div>
       </div>
       <div class="mb-3">
-        <label for="address" class="form-label">現住所 *</label>
-        <textarea id="address" name="address" class="form-control" rows="2" placeholder="例: 東京都渋谷区1-2-3" required></textarea>
+        <label class="form-label">現住所 *</label>
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label for="postal_code" class="form-label">郵便番号 *</label>
+            <input type="text" id="postal_code" name="postal_code" class="form-control" placeholder="例: 123-4567" required />
+          </div>
+          <div class="col-md-2">
+            <button type="button" id="search-postal-code-btn" class="btn btn-secondary mt-4">郵便番号から検索</button>
+          </div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label for="prefecture" class="form-label">都道府県 *</label>
+            <input type="text" id="prefecture" name="prefecture" class="form-control" placeholder="例: 東京都" required />
+          </div>
+          <div class="col-md-4">
+            <label for="city_ward" class="form-label">市区町村 *</label>
+            <input type="text" id="city_ward" name="city_ward" class="form-control" placeholder="例: 千代田区" required />
+          </div>
+          <div class="col-md-4">
+            <label for="street_address" class="form-label">ストリート番号 *</label>
+            <input type="text" id="street_address" name="street_address" class="form-control" placeholder="例: 3-7-19" required />
+          </div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="home_details" class="form-label">ホーム詳細</label>
+            <input type="text" id="home_details" name="home_details" class="form-control" placeholder="例: 山田ビル 301" />
+          </div>
+        </div>
       </div>
       <div class="row mb-3">
         <div class="col-md-6">
@@ -104,11 +127,30 @@
         </div>
         <div class="col-md-4">
           <label for="nationality" class="form-label">国籍 *</label>
-          <input type="text" id="nationality" name="nationality" class="form-control" placeholder="例: 日本" required />
+          <select id="nationality" name="nationality" class="form-select" required onchange="toggleNationalityInput()">
+            <option value="">選択してください</option>
+            <option value="インドネシア国籍">インドネシア国籍</option>
+            <option value="ベトナム国籍">ベトナム国籍</option>
+            <option value="中国国籍">中国国籍</option>
+            <option value="ネパール国籍">ネパール国籍</option>
+            <option value="バングラデシュ国籍">バングラデシュ国籍</option>
+            <option value="ミャンマー国籍">ミャンマー国籍</option>
+            <option value="ペルー国籍">ペルー国籍</option>
+            <option value="韓国国籍">韓国国籍</option>
+            <option value="その他">その他</option>
+          </select>
+          <input type="text" id="custom_nationality" name="custom_nationality" class="form-control mt-2" style="display:none;" placeholder="国籍を入力してください (例: フィリピン)" />
         </div>
         <div class="col-md-4">
           <label for="religion" class="form-label">宗教</label>
-          <input type="text" id="religion" name="religion" class="form-control" placeholder="例: 仏教" />
+          <select id="religion" name="religion" class="form-select">
+            <option value="">選択してください</option>
+            <option value="イスラム教">イスラム教</option>
+            <option value="キリスト教">キリスト教</option>
+            <option value="ヒンドゥー教">ヒンドゥー教</option>
+            <option value="仏教">仏教</option>
+            <option value="無宗教">無宗教</option>
+          </select>
         </div>
       </div>
       <div class="row mb-3">
@@ -116,8 +158,9 @@
           <label for="marital_status" class="form-label">配偶者の有無 *</label>
           <select id="marital_status" name="marital_status" class="form-select" required>
             <option value="">選択してください</option>
-            <option value="Single">無し</option>
-            <option value="Married">有り</option>
+            <option value="有り（子供あり)">有り（子供あり)</option>
+            <option value="有り（子供なし)">有り（子供なし)</option>
+            <option value="無し">無し</option>
           </select>
         </div>
       </div>
@@ -175,38 +218,38 @@
       <!-- Education -->
       <h4 class="section-header">学歴</h4>
       <div id="education-section">
-        <div class="dynamic-block education-block">
+        <div class="dynamic-block education-block" data-block-id="edu-0">
           <div class="row mb-3">
             <div class="col-md-6">
-              <label for="institution_name" class="form-label">学校名 *</label>
-              <input type="text" name="institution_name[]" class="form-control" placeholder="学校名、学習レベル (例: 東京大学、大学)" required />
+              <label for="institution_name_0" class="form-label">学校名 *</label>
+              <input type="text" id="institution_name_0" name="institution_name[]" class="form-control" placeholder="学校名、学習レベル (例: 東京大学、大学)" required />
             </div>
             <div class="col-md-6">
-              <label for="institution_address" class="form-label">学校住所</label>
-              <input type="text" name="institution_address[]" class="form-control" placeholder="例: 東京都文京区本郷7-3-1" />
+              <label for="institution_address_0" class="form-label">学校住所</label>
+              <input type="text" id="institution_address_0" name="institution_address[]" class="form-control" placeholder="例: 東京都文京区本郷7-3-1" />
             </div>
           </div>
           <div class="row mb-3">
             <div class="col-md-3">
-              <label for="edu_join_date" class="form-label">入学日 *</label>
-              <input type="text" name="edu_join_date[]" class="form-control date-input" placeholder="例: 2018/04/01" required />
+              <label for="edu_join_date_0" class="form-label">入学日 *</label>
+              <input type="text" id="edu_join_date_0" name="edu_join_date[]" class="form-control date-input" placeholder="例: 2018/04/01" required />
             </div>
             <div class="col-md-3">
-              <label for="edu_leave_date" class="form-label">卒業/終了日</label>
-              <input type="text" name="edu_leave_date[]" class="form-control date-input edu-leave-date" placeholder="例: 2022/03/31" />
+              <label for="edu_leave_date_0" class="form-label">卒業/終了日</label>
+              <input type="text" id="edu_leave_date_0" name="edu_leave_date[]" class="form-control date-input edu-leave-date" placeholder="例: 2022/03/31" />
             </div>
             <div class="col-md-3">
-              <label for="faculty" class="form-label">学部</label>
-              <input type="text" name="faculty[]" class="form-control" placeholder="例: 文学部" />
+              <label for="faculty_0" class="form-label">学部</label>
+              <input type="text" id="faculty_0" name="faculty[]" class="form-control" placeholder="例: 文学部" />
             </div>
             <div class="col-md-3">
-              <label for="major" class="form-label">専攻</label>
-              <input type="text" name="major[]" class="form-control" placeholder="例: 日本文学" />
+              <label for="major_0" class="form-label">専攻</label>
+              <input type="text" id="major_0" name="major[]" class="form-control" placeholder="例: 日本文学" />
             </div>
           </div>
           <div class="mb-3">
-            <label for="edu_status" class="form-label">状態 *</label>
-            <select name="edu_status[]" class="form-select edu-status" required>
+            <label for="edu_status_0" class="form-label">状態 *</label>
+            <select id="edu_status_0" name="edu_status[]" class="form-select edu-status" required>
               <option value="">選択してください</option>
               <option value="Graduated">卒業</option>
               <option value="Ongoing">在学中</option>
@@ -221,29 +264,29 @@
       <!-- Work Experience -->
       <h4 class="section-header">職歴</h4>
       <div id="experience-section">
-        <div class="dynamic-block experience-block">
+        <div class="dynamic-block experience-block" data-block-id="exp-0">
           <div class="row mb-3">
             <div class="col-md-6">
-              <label for="company_name" class="form-label">会社名 *</label>
-              <input type="text" name="company_name[]" class="form-control company-name" placeholder="例: 株式会社ITF" required />
+              <label for="company_name_0" class="form-label">会社名 *</label>
+              <input type="text" id="company_name_0" name="company_name[]" class="form-control company-name" placeholder="例: 株式会社ITF" required />
             </div>
             <div class="col-md-6">
-              <label for="company_address" class="form-label">会社住所</label>
-              <input type="text" name="company_address[]" class="form-control" placeholder="例: 東京都渋谷区1-2-3" />
+              <label for="company_address_0" class="form-label">会社住所</label>
+              <input type="text" id="company_address_0" name="company_address[]" class="form-control" placeholder="例: 東京都渋谷区1-2-3" />
             </div>
           </div>
           <div class="row mb-3">
             <div class="col-md-4">
-              <label for="business_type" class="form-label">業種 *</label>
-              <input type="text" name="business_type[]" class="form-control business-type" placeholder="例: ITサービス" required />
+              <label for="business_type_0" class="form-label">業種 *</label>
+              <input type="text" id="business_type_0" name="business_type[]" class="form-control business-type" placeholder="例: ITサービス" required />
             </div>
             <div class="col-md-4">
-              <label for="job_role" class="form-label">職種 *</label>
-              <input type="text" name="job_role[]" class="form-control job-role" placeholder="例: ソフトウェアエンジニア" required />
+              <label for="job_role_0" class="form-label">職種 *</label>
+              <input type="text" id="job_role_0" name="job_role[]" class="form-control job-role" placeholder="例: ソフトウェアエンジニア" required />
             </div>
             <div class="col-md-4">
-              <label for="exp_status" class="form-label">状態 *</label>
-              <select name="exp_status[]" class="form-select exp-status" required>
+              <label for="exp_status_0" class="form-label">状態 *</label>
+              <select id="exp_status_0" name="exp_status[]" class="form-select exp-status" required>
                 <option value="">選択してください</option>
                 <option value="Current">現在勤務中</option>
                 <option value="Past">過去</option>
@@ -252,12 +295,12 @@
           </div>
           <div class="row mb-3">
             <div class="col-md-6">
-              <label for="exp_join_date" class="form-label">入社日 *</label>
-              <input type="text" name="exp_join_date[]" class="form-control date-input exp-join-date" placeholder="例: 2020/04/01" required />
+              <label for="exp_join_date_0" class="form-label">入社日 *</label>
+              <input type="text" id="exp_join_date_0" name="exp_join_date[]" class="form-control date-input exp-join-date" placeholder="例: 2020/04/01" required />
             </div>
             <div class="col-md-6">
-              <label for="exp_leave_date" class="form-label">退社日</label>
-              <input type="text" name="exp_leave_date[]" class="form-control date-input exp-leave-date" placeholder="例: 2023/03/31" />
+              <label for="exp_leave_date_0" class="form-label">退社日</label>
+              <input type="text" id="exp_leave_date_0" name="exp_leave_date[]" class="form-control date-input exp-leave-date" placeholder="例: 2023/03/31" />
             </div>
           </div>
           <button type="button" class="btn btn-danger remove-btn">削除</button>
@@ -268,11 +311,11 @@
       <!-- Certifications -->
       <h4 class="section-header">資格・スキル</h4>
       <div id="certification-section">
-        <div class="dynamic-block certification-block">
+        <div class="dynamic-block certification-block" data-block-id="cert-0">
           <div class="row mb-3">
             <div class="col-md-4">
-              <label for="cert_type" class="form-label">種類 *</label>
-              <select name="cert_type[]" class="form-select cert-type" required>
+              <label for="cert_type_0" class="form-label">種類 *</label>
+              <select id="cert_type_0" name="cert_type[]" class="form-select cert-type" required>
                 <option value="">選択してください</option>
                 <option value="Japanese">日本語</option>
                 <option value="English">英語</option>
@@ -280,18 +323,19 @@
               </select>
             </div>
             <div class="col-md-4">
-              <label for="cert_name" class="form-label">資格名 *</label>
-              <input type="text" name="cert_name[]" class="form-control cert-name" placeholder="例: JLPT N1" required />
-              <input type="text" name="custom_skill[]" class="form-control custom-skill mt-2" style="display:none;" placeholder="あなたのスキルを入力 (例: プロジェクト管理)" />
+              <label for="cert_name_0" class="form-label">資格名 *</label>
+              <input type="text" id="cert_name_0" name="cert_name[]" class="form-control cert-name" placeholder="例: JLPT N1" required />
+              <label for="custom_skill_0" class="form-label mt-2 d-none">スキル</label>
+              <input type="text" id="custom_skill_0" name="custom_skill[]" class="form-control custom-skill mt-2" style="display:none;" placeholder="あなたのスキルを入力 (例: プロジェクト管理)" />
             </div>
             <div class="col-md-4">
-              <label for="cert_score" class="form-label">スコア/結果</label>
-              <input type="text" name="cert_score[]" class="form-control" placeholder="例: 180/180" />
+              <label for="cert_score_0" class="form-label">スコア/結果</label>
+              <input type="text" id="cert_score_0" name="cert_score[]" class="form-control" placeholder="例: 180/180" />
             </div>
           </div>
           <div class="mb-3">
-            <label for="cert_date" class="form-label">取得日</label>
-            <input type="text" name="cert_date[]" class="form-control date-input" placeholder="例: 2023/12/01" />
+            <label for="cert_date_0" class="form-label">取得日</label>
+            <input type="text" id="cert_date_0" name="cert_date[]" class="form-control date-input" placeholder="例: 2023/12/01" />
           </div>
           <button type="button" class="btn btn-danger remove-btn">削除</button>
         </div>

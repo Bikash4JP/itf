@@ -150,7 +150,14 @@
                         echo '<h3 class="job-title"><a href="php/job_details.php?job_id=' . htmlspecialchars($job['id']) . '">' . htmlspecialchars($job['title']) . '</a></h3>';
                         echo '<div class="job-content">';
                         echo '<div class="job-image">';
-                        echo '<img src="' . htmlspecialchars($job['image']) . '" alt="' . htmlspecialchars($job['title']) . '">';
+                        if ($job['image']) {
+                            // Convert database path to browser-accessible path (same as staffdb.php)
+                            $image_path = str_replace('../uploads/', 'uploads/', $job['image']);
+                            // Since staffdb.php doesn't use file_exists(), let's try without it
+                            echo '<img src="' . htmlspecialchars($image_path) . '" alt="' . htmlspecialchars($job['title']) . '">';
+                        } else {
+                            echo '<img src="images/default_job_image.jpg" alt="Default Image">';
+                        }
                         echo '</div>';
                         echo '<div class="job-summary">';
                         echo '<p>' . htmlspecialchars($job['summary']) . '</p>';
