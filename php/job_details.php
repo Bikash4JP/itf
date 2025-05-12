@@ -191,14 +191,6 @@
                     <a href="../company_info.html" class="footer-link">会社概要</a>
                     <a href="../index.html#kigyo-rinen" class="footer-link">企業理念</a>
                 </div>
-                <!-- Column 4: Consumer Info -->
-                <div class="footer-col">
-                    <h3 class="footer-heading">消費者情報</h3>
-                    <p class="footer-text">よくあるご質問</p>
-                    <a href="#" class="footer-link">お客様リスト</a>
-                    <a href="../inquiry.html" class="footer-link">お問い合わせ</a>
-                    <a href="#" class="footer-btn">プライバシーポリシー</a>
-                </div>
             </div>
             <!-- Copyright -->
             <div class="footer-copyright">

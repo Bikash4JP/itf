@@ -65,7 +65,18 @@
                                     </a>
                                 </li>
                                 <li class="cta-item document flex vcenter">
-                                    <a href="/ITF/Recruitment" class="cta-item-link flex hcenter vcenter">資料請求</a>
+                                    <select id="language-selector">
+                                        <option value="ja">日本語</option>
+                                        <option value="en">English</option>
+                                        <option value="id">Indonesian</option>
+                                        <option value="vi">Vietnamese</option>
+                                        <option value="zh">Chinese</option>
+                                        <option value="ne">Nepali</option>
+                                        <option value="tl">Filipino</option>
+                                        <option value="ko">Korean</option>
+                                        <option value="hi">Hindi</option>
+                                        <option value="bn">Bengali</option>
+                                    </select>
                                 </li>
                                 <li class="cta-item inquiry flex vcenter">
                                     <a href="inquiry.html" class="cta-item-link flex hcenter vcenter">お問い合わせ</a>
@@ -290,14 +301,18 @@
             </div>
         </div>
     </footer>
-
+    <!-- i18next Scripts -->
+    <script src="https://unpkg.com/i18next@23.11.5/dist/umd/i18next.min.js"></script>
+    <script src="js/i18nextHttpBackend.min.js"></script>
+    <script src="https://unpkg.com/i18next-browser-languagedetector@7.1.0/dist/umd/i18nextBrowserLanguageDetector.min.js"></script>
+    <script src="js/i18n.js"></script>
+    <!-- Other Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/ajaxzip3.js" charset="UTF-8"></script>
     <script src="js/form.min.js"></script>
     <script src="js/main.min.js"></script>
+    <script src="js/video.js"></script>
     <script src="js/scripts.js"></script>
-    <script src="js/login.js"></script>
-    <script src="js/form-validation.js"></script>
+    <script src="js/news.js"></script>
     <script type="text/javascript" src="js/front.min.js"></script>
     <script type="text/javascript" src="js/wp-embed.min.js"></script>
 </body>
