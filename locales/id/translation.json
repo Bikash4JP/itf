@@ -1,0 +1,163 @@
+{
+    "nav": {
+        "about": "Tentang Kami",
+        "company_info": "Informasi Perusahaan",
+        "recruitment": "Perekrutan",
+        "news": "Berita",
+        "phone_inquiry": "Pertanyaan melalui Telepon",
+        "phone_hours": "09:00-19:00 (Kecuali akhir pekan dan hari libur)",
+        "inquiry": "kontak"
+    },
+    "intro": {
+        "title": "Rekruter tanaga kerja Asing Terbaik<br>dengan ITF Co., Ltd.",
+        "description": "ITF Co., Ltd. menyediakan layanan pengenalan dan perekrutan tenaga kerja asing, dengan spesialisasi dalam layanan tenaga kerja asing terkait perawatan di Tokyo dan Osaka.",
+        "register_button": "Daftar Gratis untuk Perusahaan Perekrut di Sini"
+    },
+    "troubles": {
+        "item1": "Tidak menemukan tenaga kerja yang diinginkan?<br>Perekrutan asing membuka masa depan",
+        "item2": "Pelamar tidak terkumpul?<br>Kekuatan tenaga kerja asing menyelesaikannya",
+        "item3": "Meskipun memasang iklan rekrutmen, tenaga kerja unggul tidak terkumpul<br>Permudah seleksi awal",
+        "item4": "Mempertimbangkan perekrutan tenaga kerja asing tetapi tidak tahu caranya?",
+        "text": "Ceritakan masalah perekrutan Anda kepada kami.<br>ITF akan menawarkan tenaga kerja terbaik untuk perusahaan Anda dan<br><span>mendukung aktivitas perekrutan jangka panjang</span> Anda.",
+        "bottom_head": "Mengalami masalah dalam perekrutan?<br><span class=\"f60\">Layanan Perekrutan dan Penempatan Tenaga Asing ITF</span> menyelesaikannya!"
+    },
+    "merit": {
+        "title": "Keuntungan Perekrutan Asing",
+        "item1_title": "Banyak tenaga kerja Unggul",
+        "item1_description": "Di Jepang, dengan angka kelahiran yang menurun dan populasi yang menua, mendapatkan tenaga kerja muda unggul semakin sulit. Dengan memperluas jangkauan pelamar, peluang bertemu tenaga kerja unggul meningkat. ITF Co., Ltd. mendukung layanan perekrutan asing untuk sektor perawatan, hotel, restoran, teknik, dan konstruksi di Tokyo dan Osaka.",
+        "item2_title": "Dukungan Multibahasa untuk Globalisasi",
+        "item2_description": "Layanan pelanggan asing, komunikasi dalam bahasa ibu, dan lainnya dapat menarik pelanggan asing. ITF Co., Ltd. menyediakan dukungan perekrutan asing di seluruh Jepang.",
+        "item3_title": "Kemampuan Adaptasi Tinggi",
+        "item3_description": "Orang asing yang hidup dan bekerja di negara lain memiliki kemampuan untuk beradaptasi dengan berbagai situasi. Karena berbeda dalam pendidikan dan budaya dengan orang Jepang, mereka dapat menemukan masalah yang tidak diperhatikan orang Jepang atau menghadirkan ide dan pemikiran baru. Kami memiliki keunggulan khusus dalam layanan pengenalan tenaga kerja asing untuk sektor perawatan.",
+        "item4_title": "Penyediaan Perspektif dan Ide yang Beragam",
+        "item4_description": "tenaga kerja asing membawa budaya dan latar belakang yang berbeda, memberikan perspektif dan ide baru kepada perusahaan. Hal ini mendorong inovasi dan peningkatan dalam bisnis. Kami juga dapat mendukung layanan perawatan di Tokyo dan Osaka.",
+        "item5_title": "Keahlian dan Pengetahuan Teknis Tinggi",
+        "item5_description": "Dengan merekrut tenaga kerja asing yang memiliki keahlian tinggi dan pengetahuan teknis di bidang tertentu, daya saing perusahaan dapat diperkuat, memastikan keunggulan dalam industri. Kami mengkhususkan diri dalam perekrutan asing untuk sektor perawatan dan keperawatan.",
+        "item6_title": "Pemanfaatan Jaringan Global",
+        "item6_description": "Staf asing memiliki jaringan luas yang mencakup negara asal mereka, dan memanfaatkan jaringan ini dapat memperluas peluang bisnis internasional. ITF Co., Ltd. memperkenalkan tenaga kerja perawatan asing di seluruh Jepang."
+    },
+    "about": {
+        "title": "Tentang Kami",
+        "heading": "ITF<span>(アイティーエフ)</span><strong> itu Apa?</strong>",
+        "description": "‘Illuminate The Future’ ITF, sebuah perusahaan yang mendukung orang asing yang aktif di Jepang melalui layanan perekrutan tenaga kerja asing. Kami menjadi jembatan antara perusahaan dan pencari kerja asing, menyediakan pencocokan yang akurat dan andal sesuai dengan kebutuhan kedua belah pihak. Dengan visi ‘ingin membantu lebih banyak orang asing dan lebih banyak perusahaan’, ITF bertujuan menjadi perusahaan terkemuka dalam layanan perekrutan asing untuk sektor perawatan, hotel, restoran, teknik, dan konstruksi, berpusat di Tokyo dan Osaka.",
+        "button": "Lihat Selengkapnya"
+    },
+    "footer": {
+        "business_intro": "Tentang Kami",
+        "company_info": "Informasi Perusahaan",
+        "inquiry": "Pertanyaan",
+        "location_title": "Lokasi",
+        "company_name": "ITF Co., Ltd.",
+        "location_details": "〒556-0017 Prefektur Osaka, Kota Osaka, Naniwa-ku, Minatomachi 1-4-38 Gedung Kintetsu Shin-Namba Lt. 10<br>06-6644-1800<br>〒144-0052 Tokyo, Ota-ku, Kamata 5-chome 21-13 Pegasus Station Plaza Kamata B2F-03<br>03-6424-7747<br>ueda@it-future.jp",
+        "services_title": "Panduan Layanan",
+        "services_for_companies": "Untuk Perusahaan yang Mencari tenaga kerja",
+        "support_content": "Konten Dukungan",
+        "service_introduction": "Pengenalan Layanan",
+        "benefits": "Keuntungan",
+        "gallery": "Galeri",
+        "company_info_title": "Panduan Perusahaan",
+        "president_greeting": "Sambutan Presiden",
+        "company_philosophy": "Filosofi Perusahaan",
+        "consumer_info_title": "Informasi Konsumen",
+        "faq": "Pertanyaan yang Sering Diajukan",
+        "customer_list": "Daftar Pelanggan",
+        "privacy_policy": "Kebijakan Privasi"
+    },
+    "service": {
+        "intro_title": "Pengenalan Layanan",
+        "main_title": "Rencana Pengenalan tenaga kerja Asing ITF<br class=\"sp\">Ada di Sini",
+        "description": "ITF (ITF Co., Ltd.) menyediakan layanan terpadu untuk mengatasi tantangan perekrutan perusahaan, dari pengenalan tenaga kerja dengan keterampilan khusus hingga dukungan pendaftaran, berpusat di Tokyo dan Osaka. Kami mengkhususkan diri dalam layanan perekrutan asing untuk sektor perawatan, hotel, restoran, teknik, dan konstruksi.",
+        "item1_title": "Banyak tenaga kerja Unggul",
+        "item1_subtitle": "Kami telah menerima pendaftaran dari banyak orang asing baik dari dalam maupun luar negeri.",
+        "item1_description": "Kami memiliki banyak tenaga kerja dari berbagai kebangsaan termasuk Vietnam, Indonesia, dan Tiongkok, serta tenaga kerja yang memenuhi syarat untuk Keterampilan Khusus No. 1. Kami dapat memperkenalkan tenaga kerja sesuai dengan kebutuhan Anda. Melalui kemitraan dengan berbagai lembaga pengirim, tenaga kerja asing, serta universitas, sekolah kejuruan, dan sekolah bahasa Jepang (sekitar 80 sekolah), kami dapat memperkenalkan tanaga kerja perawatan asing yang sesuai dengan kebutuhan Anda di seluruh Jepang.",
+        "item1_skill_test_title": "Tes Keterampilan",
+        "item1_skill_test_description": "Kami memperkenalkan kandidat yang telah lulus tes keterampilan yang diperlukan untuk Keterampilan Khusus No. 1, tes bahasa Jepang, tes bahasa Jepang perawatan, dan lainnya. Kami juga memperkenalkan tenaga kerja unggul yang sedang dalam status Aktivitas Khusus.",
+        "item2_title": "Pengenalan tenaga kerja Keterampilan Khusus",
+        "item2_subtitle": "Pengenalan tenaga kerja Keterampilan Khusus",
+        "item2_description": "‘Keterampilan Khusus’ yang diperkenalkan pada April 2019 adalah salah satu status residensi baru di Jepang, yang memungkinkan perekrutan tenaga kerja asing di 12 sektor termasuk makanan di luar, perawatan, dan akomodasi. Karena mereka telah lulus tes kemampuan bahasa Jepang dan keterampilan spesifik sebelum datang ke Jepang, <span class=\"bg\">mereka diharapkan dapat langsung berkontribusi sebagai tenaga siap pakai setelah bergabung.</span> Kami juga mendukung perekrutan tenaga kerja perawatan di Tokyo dan Osaka.",
+        "item3_title": "Dukungan Komprehensif",
+        "item3_subtitle": "Dukungan untuk tenaga kerja yang telah direkrut juga sangat lengkap.",
+        "item3_description": "Kami mendukung pengajuan ke lembaga administrasi, prosedur yang diperlukan untuk kehidupan sehari-hari, dan lainnya, termasuk mendengarkan konsultasi untuk meningkatkan tingkat retensi setelah bekerja. Sebagai dukungan pendaftaran, kami juga mendukung perusahaan. Kami telah menerima banyak permintaan dari perusahaan pengenalan tenaga kerja dan <span class=\"bg\">perusahaan waralaba.</span> Dukungan tenaga kerja perawatan asing di seluruh Jepang dimungkinkan.",
+        "item4_title": "Banyak Staf Berkebangsaan Asing",
+        "item4_subtitle": "Dukungan Aman dari Staf Multinasional",
+        "item4_description": "Perusahaan kami memiliki banyak staf dari berbagai kebangsaan, termasuk Vietnam, Indonesia, Tiongkok, Nepal, dan Taiwan. Hal ini memungkinkan kami memberikan dukungan dalam bahasa ibu kepada pencari kerja, sehingga Anda dapat menggunakan layanan kami dengan tenang dalam berbagai situasi seperti mendengarkan kebutuhan atau konsultasi. Karena staf kami memahami budaya dan latar belakang masing-masing negara, <span class=\"bg\">kami dapat memberikan dukungan yang lebih lancar dan hangat.</span> Kami juga dapat mendukung layanan perawatan di Tokyo dan Osaka."
+    },
+    "solution": {
+        "title": "Solusi",
+        "main_title": "Menyelesaikan Tantangan dalam Aktivitas Perekrutan Perusahaan",
+        "item1": "Tidak menemukan tenaga kerja yang diinginkan? Perekrutan asing membuka masa depan",
+        "item2": "Pelamar tidak terkumpul? Kekuatan tenaga kerja asing menyelesaikannya",
+        "item3": "Meskipun memasang iklan rekrutmen, tenaga kerja unggul tidak terkumpul. Permudah seleksi awal",
+        "item4": "Mempertimbangkan perekrutan tenaga kerja asing tetapi tidak tahu caranya?",
+        "point1_title": "Memperkenalkan Beragam tenaga kerja dari Lembaga Mitra di 11 Negara Asia",
+        "point1_description": "ITF bekerja sama dengan lembaga mitra lokal di 11 negara, terutama di Asia Tenggara, dan berkomitmen untuk merekrut dan mengembangkan pemuda yang ingin bekerja di Jepang. Kami dapat dengan cepat memperkenalkan tenaga kerja dengan keterampilan beragam sesuai dengan kebutuhan perusahaan. Kami juga mendukung layanan perekrutan asing untuk sektor perawatan, hotel, restoran, teknik, dan konstruksi di Tokyo dan Osaka.",
+        "point2_title": "Seleksi dan Rekomendasi oleh Staf yang Mendukung Bahasa Ibu, Memperkenalkan tenaga kerja Sesuai Kebutuhan dengan Tingkat Retensi Tinggi.",
+        "point2_description": "Staf kami yang mendukung bahasa ibu menjelaskan secara rinci prinsip operasional perusahaan, visi, dan kebijakan manajemen kepada kandidat lokal, memastikan pemahaman yang mendalam. Hal ini mencegah ketidaksesuaian setelah bergabung dan memungkinkan proses kerja yang lebih lancar. Dukungan tenaga kerja perawatan asing di seluruh Jepang dimungkinkan.",
+        "point3_title": "Menyediakan Peluang Kerja di Berbagai Sektor.",
+        "point3_description": "ITF memungkinkan perekrutan di 14 sektor, termasuk perawatan, manufaktur makanan, makanan di luar, akomodasi, pembersihan gedung, industri bahan dasar, manufaktur mesin industri, industri informasi listrik-elektronik, konstruksi, pembuatan kapal, perawatan otomotif, penerbangan, pertanian, dan perikanan, memungkinkan pencarian dengan hasil optimal sesuai keinginan Anda. Kami mengkhususkan diri dalam layanan perawatan di Tokyo dan Osaka."
+    },
+    "flow": {
+        "title": "Proses dari Permintaan hingga Pengenalan",
+        "step1": "Staf kami akan mengunjungi Anda untuk menanyakan detail lowongan, kriteria tenaga kerja yang diinginkan, keterampilan, dan waktu perekrutan.",
+        "step2": "Kami akan menandatangani kontrak dasar pengenalan tenaga kerja.",
+        "step3": "Kami akan memilih kandidat yang sesuai dengan kebutuhan Anda dari pencari kerja yang telah kami wawancarai.",
+        "step4": "Kami akan secara rutin merekomendasikan pencari kerja yang sesuai dengan kebutuhan Anda.",
+        "step5": "Perusahaan Anda akan melakukan seleksi dokumen berdasarkan data pencari kerja yang kami rekomendasikan. Hasil seleksi (lolos/tidak lolos) akan diberitahukan kepada kami.",
+        "step6": "Perusahaan Anda akan melakukan wawancara dan proses seleksi lainnya.",
+        "step7": "Setelah konfirmasi kehadiran di tempat kerja, biaya akan ditetapkan."
+    },
+    "languages": {
+        "title": "Tingkat Kemampuan Bahasa Jepang tenaga kerja yang Direkrut Tahun Lalu",
+        "description": "Tahun lalu, kami mendukung perekrutan tenaga kerja asing untuk berbagai perusahaan dan organisasi, memperkenalkan lebih dari 500 tenaga kerja unggul dari seluruh dunia. tenaga kerja ini memiliki tingkat kemampuan bahasa Jepang yang berbeda-beda, memungkinkan respons fleksibel sesuai dengan konten tanaga kerjaan dan lingkungan kerja. Grafik di bawah ini menunjukkan distribusi tingkat kemampuan bahasa Jepang tenaga kerja yang direkrut. Kami harap ini dapat menjadi referensi untuk rencana perekrutan asing dan penempatan tenaga kerja di sektor perawatan, hotel, restoran, teknik, dan konstruksi di Tokyo dan Osaka.",
+        "chart_title": "Distribusi Kelulusan JLPT (%)"
+    },
+    "voice": {
+        "title": "Suara Mitra",
+        "description": "Terima kasih atas kata-kata penuh penghargaan",
+        "partner1_name": "Korporasi Kesejahteraan Sosial Ryokujukai",
+        "partner1_feedback": "Menghilangkan kekhawatiran perekrutan tenaga kerja asing, dukungan yang meyakinkan hingga retensi",
+        "partner2_name": "Korporasi Medis Heiheikai",
+        "partner2_feedback": "Dari perekrutan hingga retensi, mitra tenaga kerja asing yang dapat diandalkan",
+        "partner3_name": "Hakujukai Co., Ltd.",
+        "partner3_feedback": "Umpan balik dan komentar mitra",
+        "partner4_name": "Partner 4 Co., Ltd.",
+        "partner4_feedback": "Umpan balik & kata-kata penghargaan",
+        "partner5_name": "Partner 5",
+        "partner5_feedback": "Umpan balik & kata-kata penghargaan",
+        "partner6_name": "Partner 6 Co., Ltd.",
+        "partner6_feedback": "Umpan balik & kata-kata penghargaan",
+        "partner7_name": "Partner 7 Co., Ltd.",
+        "partner7_feedback": "Umpan balik & kata-kata penghargaan",
+        "request_background_title": "Latar Belakang Permintaan",
+        "partner1_request_background": "Saat mempertimbangkan perekrutan lulusan baru tenaga kerja asing, kekhawatiran tentang bekerja di industri perawatan Jepang dan kurangnya pemahaman tentang konten tanaga kerjaan menjadi tantangan. Kami sendiri juga sedang mencari cara untuk menyampaikan daya tarik tanaga kerjaan kepada pencari kerja asing.",
+        "itf_response_title": "Respon ITF",
+        "partner1_itf_response": "Kami sangat dibantu dengan pendekatan menyeluruh dalam seluruh proses perekrutan, termasuk komunikasi dengan kandidat, tindak lanjut sebelum dan sesudah wawancara, serta perhatian cermat terhadap kesenjangan budaya dan bahasa. Khususnya, dukungan untuk pencari kerja yang belum terbiasa dengan kehidupan atau tanaga kerjaan perawatan di Jepang sangat membantu. Perekrutan tenaga kerja asing berhasil dilakukan, dan mereka terlihat bekerja secara positif di lapangan. Kami merasa bahwa dukungan ITF-lah yang membuat perekrutan dan retensi di tempat kerja berjalan lancar. Kami ingin terus meminta ITF sebagai mitra jangka panjang.",
+        "partner2_request_background": "Karena kekurangan tenaga kerja yang berkelanjutan, kami mempertimbangkan perekrutan staf perawatan asing, tetapi kami khawatir tentang hambatan budaya dan bahasa serta sistem tindak lanjut setelah perekrutan. Kami mencari mitra yang dapat secara konsisten mendukung dari pencocokan hingga retensi.",
+        "partner2_itf_response": "Mereka menangani semua tugas terkait perekrutan secara menyeluruh, sehingga proses berjalan sangat lancar. Komunikasi dengan pencari kerja, prosedur visa, hingga tindak lanjut setelah bergabung dilakukan dengan cermat, sehingga kami dapat menyerahkannya dengan tenang. Saat ini, staf asing yang direkrut aktif bekerja di lapangan dan telah membangun hubungan baik dengan staf lain. Kami merasa bahwa dukungan ITF-lah yang membuat implementasi ini begitu lancar. Kami ingin terus meminta ITF ke depannya.",
+        "partner3_request_background": "Konten tanaga kerjaan tidak tersampaikan kepada pencari kerja, sehingga meskipun mereka datang untuk wawancara, terjadi ketidaksesuaian, dan waktu perekrut menjadi terbuang. Selain itu, jumlah pelamar juga sedikit dan kami tidak puas. Setelah berkonsultasi dengan konsultan SPC, kami menerima saran yang sangat baik, sehingga kami memutuskan untuk mengajukan permintaan.",
+        "partner3_itf_response": "Setelah menyampaikan keinginan untuk ‘membuat suasana yang cerah dan energik’, desain yang sangat atmosfer berhasil dibuat. Selain itu, daya tarik situs juga meningkat, dan setelah pembaruan, jumlah pelamar meningkat 10 kali lipat dibandingkan sebelumnya. Lebih lanjut, konten tanaga kerjaan dapat disampaikan secara rinci, sehingga ketidaksesuaian berkurang signifikan. Pembuatan situs perekrutan memang membutuhkan biaya, tetapi jika mempertimbangkan efek biaya, kami mendapatkan hasil yang langsung menguntungkan, jadi kami senang telah mengajukan permintaan.",
+        "partner4_request_background": "Situs perekrutan adalah wajah perusahaan. Karena sangat terkait dengan branding, kami memilih untuk meminta RecruitmentSiteCreation.com, yang memiliki pengalaman terbanyak dan desain paling menonjol di antara berbagai perusahaan pembuatan situs yang kami teliti.",
+        "partner4_itf_response": "Kami berpikir bahwa akan bagus jika situs kami mendapatkan sedikit pelamar, tetapi setelah pembuatan situs, pelamar mulai datang setidaknya sekali seminggu. Kami tidak menyangka akan mendapatkan hasil sebanyak ini, jadi kami sangat terkejut. Tanpa keahlian dan pengetahuan perekrutan yang dimiliki RecruitmentSiteCreation.com, kami rasa situs perekrutan yang menghasilkan hasil seperti ini tidak akan tercipta.",
+        "partner5_request_background": "Kami memasang iklan perekrutan di banyak media, tetapi jumlah pelamar sedikit, dan sering terjadi ketidaksesuaian antara tenaga kerja yang diinginkan dan pelamar, yang selalu membuat kami pusing. Untuk meningkatkan dasar aktivitas perekrutan dan branding perusahaan, kami memutuskan untuk meluncurkan situs perekrutan.",
+        "partner5_itf_response": "Mereka memenuhi permintaan jangka pendek yang ditolak oleh beberapa perusahaan lain, dan meskipun dalam waktu singkat, situs yang luar biasa berhasil dibuat, yang mendapatkan ulasan positif di internal perusahaan kami. Termasuk presiden kami, semua staf puas dengan situs perekrutan yang dibuat. Kami berharap dapat terus meminta pembaruan situs dan lainnya ke depannya.",
+        "partner6_request_background": "Kegagalan kami untuk mempromosikan keunggulan perusahaan adalah tantangan perekrutan kami, jadi untuk mengatasi tantangan ini, kami meminta RecruitmentSiteCreation.com untuk membuat situs perekrutan.",
+        "partner6_itf_response": "Selama diskusi, mereka mengajarkan kami bahwa layanan yang kami anggap biasa adalah keunggulan, dan mereka merangkumnya dengan baik di situs web. Selain email dan telepon, mereka juga menyediakan kesempatan diskusi langsung, sehingga kami dapat menyampaikan pesan yang ingin kami sampaikan. Situs yang selesai benar-benar situs menarik yang dapat mengatasi tantangan perekrutan kami. Di antara orang-orang yang datang untuk wawancara, jumlah yang mengatakan ‘Saya melihat situs perekrutan’ meningkat signifikan, jadi kami merasa senang telah meminta RecruitmentSiteCreation.com.",
+        "partner7_request_background": "Kami memutuskan untuk memperbarui situs perekrutan untuk perekrutan lulusan baru 2024, dan selain perusahaan yang sebelumnya kami minta, kami mengumpulkan informasi secara luas untuk menentukan penyedia. Karena sifat industri kami, sulit untuk menyampaikan konten layanan dan tanaga kerjaan kepada pelajar, dan sulit untuk mendapatkan pengakuan, yang menjadi tantangan kami.",
+        "partner7_itf_response": "Pada diskusi awal, mereka mendengarkan secara rinci tentang bisnis dan aktivitas perekrutan kami, dan dengan jujur menunjukkan tantangan yang terlihat di situs web kami saat ini, serta memberikan saran yang sesuai dengan tujuan kami. Selama pembuatan, kami juga dapat secara rutin mengonfirmasi detail kecil, sehingga kami dapat melanjutkan pembuatan dengan tenang. Setelah situs dibuka, kami menerima banyak masukan dari pelajar dalam proses seleksi yang mengatakan ‘orang yang bekerja dan suasana perusahaan mudah dibayangkan’, dan kami merasa situs ini menjadi situs yang dapat dilihat berulang kali selama proses seleksi. Selain itu, staf kami juga memberikan ulasan positif seperti ‘desainnya menjadi sangat bagus’, dan kami menerima pujian baik dari internal maupun eksternal perusahaan."
+    },
+    "news": {
+        "title": "Pengumuman",
+        "description": "\"Berita dan pengumuman terbaru dari ITF akan dipublikasikan di sini.”",
+        "view_all": "Daftar Artikel"
+    },
+    "company": {
+        "title": "Ikhtisar Perusahaan"
+    },
+    "contact": {
+        "title": "Mempertimbangkan perekrutan tenaga kerja asing? Silakan hubungi kami<br><span>KONTAK</span>",
+        "email_text": "Jika ada yang tidak jelas, silakan<br>hubungi kami",
+        "email_button": "Pertanyaan",
+        "phone_text": "Pertanyaan melalui telepon di sini",
+        "phone_hours": "Hari kerja 09:30-18:00"
+    }
+}

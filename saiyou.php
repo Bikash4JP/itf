@@ -67,7 +67,6 @@
                                 <li class="cta-item document flex vcenter">
                                     <a href="/ITF/Recruitment" class="cta-item-link flex hcenter vcenter">資料請求</a>
                                 </li>
-                                <li class="cta-item estimation flex vcenter"><a href="#" class="cta-item-link flex hcenter vcenter staff-login-link" onclick="showLoginPopup()">社員ログイン</a></li>
                                 <li class="cta-item inquiry flex vcenter">
                                     <a href="inquiry.html" class="cta-item-link flex hcenter vcenter">お問い合わせ</a>
                                 </li>

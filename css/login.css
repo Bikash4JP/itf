@@ -1,23 +1,10 @@
-/* Login Pop-up Styles */
+/* Remove popup-related styles since we're using full page */
 body.blur #header,
 body.blur .bg,
 body.blur .news-container,
 body.blur .about_c,
 body.blur .footer {
-    filter: blur(5px);
-}
-
-.login-popup {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
+    filter: none; /* Removed blur since popup is gone */
 }
 
 .login-content {
@@ -26,17 +13,11 @@ body.blur .footer {
     border-radius: 10px;
     width: 400px;
     max-width: 90%;
-    position: relative;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-}
-
-.close-btn {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 24px;
-    cursor: pointer;
-    color: #333;
+    position: absolute; /* Use absolute to position in center */
+    top: 50%; /* Center vertically */
+    left: 50%; /* Center horizontally */
+    transform: translate(-50%, -50%); /* Adjust for element's own dimensions */
 }
 
 .login-message {
@@ -73,6 +54,7 @@ body.blur .footer {
 #loginForm button:hover {
     background-color: #008cba;
 }
+
 /* View Password Checkbox */
 .view-password-label {
     display: flex;
