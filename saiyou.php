@@ -291,23 +291,6 @@
         </div>
     </footer>
 
-    <div class="login-popup" id="loginPopup" role="dialog" aria-labelledby="login-message" aria-modal="true">
-        <div class="login-content">
-            <span class="close-btn" onclick="hideLoginPopup()">×</span>
-            <form id="loginForm" method="POST" action="php/login.php">
-                <input type="hidden" name="csrf_token" value="">
-                <p class="login-message">管理者から提供されたユーザーIDとパスワードを入力してください。3回以上間違えるとブロックされますのでご注意ください。</p>
-                <input type="text" name="username" placeholder="ユーザー名" required>
-                <input type="password" name="password" id="passwordField" placeholder="パスワード" required>
-                <label class="view-password-label">
-                    <input type="checkbox" id="viewPasswordCheckbox" onclick="togglePasswordVisibility()">
-                    <span>パスワードを表示</span>
-                </label>
-                <button type="submit">サインイン</button>
-            </form>
-        </div>
-    </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/ajaxzip3.js" charset="UTF-8"></script>
     <script src="js/form.min.js"></script>
