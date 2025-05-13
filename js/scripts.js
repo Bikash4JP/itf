@@ -22,6 +22,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const mailButton = document.getElementById("mailBtn");
 
   mailButton.addEventListener("click", function () {
-      window.location.href = "mailto:ueda@it-future.jp";
+      window.location.href = "mailto:info@it-future.jp";
   });
 });
