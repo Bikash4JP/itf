@@ -148,3 +148,75 @@
         height: 300px;
     }
   }
+
+
+
+ /* Shortcut Links Styling */
+.shortcut-links {
+    display: flex;
+    z-index: 1000;
+}
+
+/* PC View: Fixed on the left, vertically stacked */
+@media (min-width: 769px) {
+    .shortcut-links {
+        position: fixed;
+        top: 50%;
+        left: 20px;
+        transform: translateY(-50%);
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 0; /* Reset margin-top for PC view */
+    }
+
+    .shortcut-btn {
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+}
+
+/* Mobile View: Horizontal row below intro, sticky on scroll */
+@media (max-width: 768px) {
+    .shortcut-links {
+        position: static; /* Initially static, below the intro content */
+        flex-direction: row;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 8px;
+        padding: 10px;
+        background-color: #f8f9fa;
+        justify-content: flex-start;
+        -webkit-overflow-scrolling: touch; /* Smooth scrolling on mobile */
+    }
+
+    .shortcut-links.sticky {
+        position: fixed;
+        top: 0; /* Will be adjusted by JS to account for header height */
+        left: 0;
+        right: 0;
+        background-color: #f8f9fa;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .shortcut-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+        flex: 0 0 auto;
+    }
+}
+
+.shortcut-btn {
+    display: block;
+    background-color: #2594d4; /* Green color */
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.shortcut-btn:hover {
+    background-color: #e69f4f; /* Darker green on hover */
+    transform: scale(1.05);
+}
