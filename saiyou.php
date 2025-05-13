@@ -267,34 +267,28 @@
                         06-6644-1800 <br>
                         〒144-0052 東京都大田区蒲田5丁目21-13<br>
                         03-6424-7747<br>
-                        ueda@it-future.jp
-                    </p>
+                         info@it-future.jp
+                        </p>
+                    </div>
+                    <div class="footer-col">
+                        <h3 class="footer-heading" data-i18n="footer.services_title">サービス案内</h3>
+                        <a href="index.html#solution_03" class="footer-link" data-i18n="footer.services_for_companies">人財をお探しの企業様</a>
+                        <a href="about.html#support-naiyou" class="footer-link" data-i18n="footer.support_content">サポート内容</a>
+                        <a href="index.html#service-naiyo" class="footer-link" data-i18n="footer.service_introduction">サービス紹介</a>
+                        <a href="index.html#merit" class="footer-link" data-i18n="footer.benefits">メリット</a>
+                    </div>
+                    <div class="footer-col">
+                        <h3 class="footer-heading" data-i18n="footer.company_info_title">会社案内</h3>
+                        <a href="inquiry.html" class="footer-link" data-i18n="footer.president_greeting">代表者挨拶</a>
+                        <a href="company_info.html" class="footer-link" data-i18n="footer.company_info">会社概要</a>
+                        <a href="index.html#kigyo-rinen" class="footer-link" data-i18n="footer.company_philosophy">企業理念</a>
+                    </div>
+                    <div class="footer-col">
+                        <h3 class="footer-heading" data-i18n="footer.consumer_info_title">消費者情報</h3>
+                        <a href="inquiry.html" class="footer-link" data-i18n="footer.inquiry">お問い合わせ</a>
+                        <a href="#" class="footer-btn" data-i18n="footer.privacy_policy">プライバシーポリシー</a>
+                    </div>
                 </div>
-                <!-- Column 2: Services -->
-                <div class="footer-col">
-                    <h3 class="footer-heading">サービス案内</h3>
-                    <a href="index.html#solution_03" class="footer-link">人財をお探しの企業様</a>
-                    <a href="about.html#support-naiyou" class="footer-link">サポート内容</a>
-                    <a href="#" class="footer-link">サービス紹介</a>
-                    <a href="index.html#merit" class="footer-link">メリット</a>
-                    <a href="#" class="footer-link">ギャラリー</a>
-                </div>
-                <!-- Column 3: Company -->
-                <div class="footer-col">
-                    <h3 class="footer-heading">会社案内</h3>
-                    <a href="inquiry.html" class="footer-link">代表者挨拶</a>
-                    <a href="company_info.html" class="footer-link">会社概要</a>
-                    <a href="index.html#kigyo-rinen" class="footer-link">企業理念</a>
-                </div>
-                <!-- Column 4: Consumer Info -->
-                <div class="footer-col">
-                    <h3 class="footer-heading">消費者情報</h3>
-                    <p class="footer-text">よくあるご質問</p>
-                    <a href="#" class="footer-link">お客様リスト</a>
-                    <a href="inquiry.html" class="footer-link">お問い合わせ</a>
-                    <a href="#" class="footer-btn">プライバシーポリシー</a>
-                </div>
-            </div>
             <!-- Copyright -->
             <div class="footer-copyright">
                 © ITF co. Ltd. ALL Rights Reserved
