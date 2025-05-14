@@ -155,7 +155,6 @@
         left: 50%;
         transform: translate(-50%, -50%);
         z-index: 3; /* Ensure text is above image */
-        background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
         padding: 20px; /* Add padding around text */
         border-radius: 10px; /* Rounded corners for aesthetics */
         text-align: center; /* Keep text centered */
