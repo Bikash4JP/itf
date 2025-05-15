@@ -152,68 +152,67 @@
 
 @media (max-width: 576px) {
     .unique-intro9-section {
-        padding: 5px 0; /* Further reduce padding for mobile */
+        padding: 10px 0; /* Section ka padding kam kiya */
+        position: relative; /* Relative positioning for z-index control */
     }
 
-    .unique-intro9-section .unique-title {
-        font-size: 24px;
-        margin-bottom: 15px; /* Reduce margin to close gap */
+    .unique-intro9-section .unique-row {
+        gap: 0; /* Text aur image ke beech gap hata diya */
     }
 
-    .unique-intro9-section .unique-sub-title {
-        font-size: 16px;
-        margin-bottom: 10px; /* Reduce margin to close gap */
+    /* Intro One (Text Column) */
+    .unique-intro9-section .unique-row > .unique-col-lg-6:first-child {
+        position: relative;
+        z-index: 3; /* Text image ke upar rahega */
+        margin-bottom: -150px; /* Text ko neeche khicha taki image ke saath overlap ho */
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* Text ko vertically center kiya section ke beech mein */
+        min-height: 200px; /* Text ko beech mein lane ke liye minimum height di */
     }
 
-    .unique-intro9-section .unique-desc p {
-        font-size: 14px;
-        margin-bottom: 20px; /* Reduce margin to close gap */
+    /* Intro Two (Image Column) */
+    .unique-intro9-section .unique-row > .unique-col-lg-6:last-child {
+        margin-top: -50px; /* Image ko thoda upar kiya taki section chota ho */
     }
 
-    .unique-intro9-section .unique-btn {
-        padding: 10px 20px;
-        font-size: 14px;
+    .unique-intro9-section .unique-inner-img-two {
+        opacity: 0.5; /* Opacity kam ki taki Intro One saaf dikhe */
+    }
+
+    .unique-intro9-section .unique-inner-img-two img {
+        max-width: 100%; /* Image column ke andar fit ho */
+        height: auto;
+        display: block; /* Extra space hata diya */
+    }
+
+    /* Image ke neeche extra space na rahe */
+    .unique-intro9-section .unique-intro9-image-wrap {
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+        line-height: 0; /* Extra space hata diya */
+    }
+
+    /* ITF company name ke liye fix */
+    #semi {
+        font-size: 36px;
+        white-space: nowrap;
+        line-height: 1;
+    }
+
+    #semi #ee {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 2px 6px;
+        border-radius: 5px;
+        font-weight: bold;
+        transform: rotate(-10deg);
+        display: inline-block;
     }
 
     .unique-intro9-section .unique-worldRotate {
         width: 300px;
         height: 300px;
-    }
-
-    .unique-intro9-section .unique-inner-img-two img {
-        max-width: 80%; /* Reduce image size for mobile */
-        clip-path: inset(0 0 30% 0); /* Crop 30% from the bottom of the image */
-    }
-
-    .unique-intro9-section .unique-row {
-        gap: 10px; /* Further reduce gap between text and image in mobile */
-    }
-
-    /* Ensure Intro 2 has no margin-bottom */
-    .unique-intro9-section .unique-intro9-image-wrap {
-        margin-bottom: 0 !important; /* Force no margin-bottom for Intro 2 */
-    }
-
-    /* Fix for ITF company name on mobile */
-    #semi {
-        font-size: 36px; /* Reduce font size to fit on one line */
-        white-space: nowrap; /* Prevent line break */
-        line-height: 1; /* Reduce line height to match smaller font */
-    }
-
-    #semi #ee {
-        color: #ffffff; /* Set color to white for "へ" on mobile */
-        background: rgba(255, 255, 255, 0.2); /* Subtle background to make it pop */
-        padding: 2px 6px; /* Small padding for background */
-        border-radius: 5px; /* Rounded background */
-        font-weight: bold; /* Make it stand out */
-        transform: rotate(-10deg); /* Slight tilt for a playful effect */
-        display: inline-block; /* Ensure transform works correctly */
-    }
-
-    /* Bring Intro One lower with overlap */
-    .unique-intro9-section .unique-row > .unique-col-lg-6:first-child {
-        margin-bottom: -100px; /* Adjust this value to control overlap */
     }
 }
 /* ---------------------------------------------------------------------------------------------------------------___________________________________________________________ */
