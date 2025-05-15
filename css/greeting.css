@@ -1,0 +1,113 @@
+/* Greeting Section Styling */
+.greeting {
+    padding: 60px 0; /* Consistent with other sections */
+}
+
+.greeting-title {
+    font-size: 40px;
+    font-weight: bold;
+    color: rgb(35, 128, 165); /* Skyblue as requested */
+    text-align: center;
+    margin-bottom: 40px; /* Space below the title */
+}
+
+.greeting-container {
+    display: flex;
+    gap: 20px;
+}
+
+.greeting-image {
+    flex: 0 0 40%; /* 40% width for image section */
+    max-width: 40%;
+    background: #333; /* Dark background as per sample */
+    /* padding: 20px; */
+    border-radius: 10px;
+    display: flex;
+    align-items: center; /* Center the image vertically */
+    justify-content: center; /* Center the image horizontally */
+}
+
+.greeting-image img {
+    width: auto; /* Maintain aspect ratio */
+    height: 100%; /* Fit to the container height */
+    max-width: 100%; /* Prevent overflow */
+    border-radius: 5px;
+}
+
+.greeting-content {
+    flex: 0 0 60%; /* 60% width for text section */
+    max-width: 60%;
+}
+
+.greeting-subheading {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.greeting-text {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 20px;
+    line-height: 1.8;
+}
+
+.greeting-signature {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 991px) {
+    .greeting-container {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .greeting-image,
+    .greeting-content {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    .greeting-image {
+        text-align: center;
+        height: auto !important; /* Reset height for mobile stacking */
+    }
+
+    .greeting-image img {
+        max-width: 300px;
+        height: auto; /* Reset for mobile */
+    }
+
+    .greeting-subheading,
+    .greeting-text,
+    .greeting-signature {
+        text-align: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .greeting {
+        padding: 40px 0;
+    }
+
+    .greeting-title {
+        font-size: 32px;
+    }
+
+    .greeting-image img {
+        max-width: 250px;
+    }
+
+    .greeting-subheading {
+        font-size: 20px;
+    }
+
+    .greeting-text,
+    .greeting-signature {
+        font-size: 14px;
+    }
+}

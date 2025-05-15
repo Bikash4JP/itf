@@ -191,11 +191,11 @@
 }
 
 
- /* Shortcut Links Styling */
+/* Shortcut Links Styling */
 .shortcut-links {
     display: flex;
     z-index: 1000;
-    margin-top: 20px; /* Space between intro and buttons */
+    margin-top: 0px; /* Space between intro and buttons */
 }
 
 /* Horizontal row style for all screen sizes */
@@ -207,7 +207,7 @@
     gap: 8px;
     padding: 10px;
     background-color: #f8f9fa;
-    justify-content: flex-start;
+    justify-content: center; /* Center the buttons */
     -webkit-overflow-scrolling: touch; /* Smooth scrolling */
 }
 
@@ -226,6 +226,7 @@
     font-size: 14px;
     flex: 0 0 auto;
     border-radius: 20px; /* More rounded for a modern look */
+    white-space: nowrap; /* Prevent text wrapping */
 }
 
 /* Responsive adjustments for smaller screens */
@@ -238,7 +239,7 @@
 
 .shortcut-btn {
     display: block;
-    background-color: #28a745; /* Green color */
+    background-color: #2594d4; /* Blue color as per existing CSS */
     color: #fff;
     text-decoration: none;
     transition: background-color 0.3s ease, transform 0.3s ease;
@@ -247,6 +248,6 @@
 }
 
 .shortcut-btn:hover {
-    background-color: #218838; /* Darker green on hover */
+    background-color: #e69f4f; /* Orange on hover as per existing CSS */
     transform: scale(1.05);
 }

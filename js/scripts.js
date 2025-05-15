@@ -27,17 +27,52 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
-window.addEventListener('scroll', function() {
+// JavaScript to handle sticky behavior on mobile for the shortcuts
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+window.addEventListener('scroll', debounce(function() {
     const shortcutLinks = document.querySelector('.shortcut-links');
     const header = document.querySelector('#header');
     const headerHeight = header.offsetHeight;
-    const shortcutLinksTop = shortcutLinks.getBoundingClientRect().top + window.scrollY;
+    const introSection = document.querySelector('.unique-intro9-section');
+    const introBottom = introSection.offsetTop + introSection.offsetHeight;
 
-    if (window.scrollY >= shortcutLinksTop - headerHeight) {
+    if (window.scrollY >= introBottom - headerHeight) {
         shortcutLinks.classList.add('sticky');
         shortcutLinks.style.top = headerHeight + 'px';
     } else {
         shortcutLinks.classList.remove('sticky');
         shortcutLinks.style.top = 'auto';
     }
-});
+}, 0)); // Debounce delay of 50ms
+
+
+
+// -------------------------------------------------------------------------------------------------------------------------------------
+function matchGreetingHeights() {
+    const greetingImage = document.querySelector('.greeting-image');
+    const greetingContent = document.querySelector('.greeting-content');
+
+    if (greetingImage && greetingContent && window.innerWidth > 991) {
+        const contentHeight = greetingContent.offsetHeight;
+        greetingImage.style.height = `${contentHeight}px`;
+    } else {
+        greetingImage.style.height = 'auto'; // Reset for mobile
+    }
+}
+
+// Run on page load
+window.addEventListener('load', matchGreetingHeights);
+
+// Run on window resize
+window.addEventListener('resize', matchGreetingHeights);
