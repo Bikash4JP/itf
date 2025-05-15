@@ -1,0 +1,133 @@
+{
+  "nav": {
+    "about": "About Us",
+    "company_info": "Company Info",
+    "news": "News",
+    "phone_inquiry": "Contact by Phone",
+    "phone_hours": "09:00-19:00 (Excluding weekends and holidays)",
+    "inquiry": "Contact"
+  },
+  "intro": {
+    "title": "For Foreign Talent Recruitment,<br>Trust ITF Co. Ltd.",
+    "description": "We assist your company in recruiting the talent it needs.",
+    "register_button": "Contact Now for a Free Consultation"
+  },
+  "shortcut": {
+    "itf_point": "ITF Points"
+  },
+  "troubles": {
+    "item1": "Can’t find the talent you need? Open the future with foreign recruitment",
+    "item2": "Not enough applicants? Solve it with the power of foreign talent",
+    "item3": "Struggling to attract top talent despite job postings? Streamline initial screening",
+    "item4": "Considering hiring foreign talent but lack the expertise?",
+    "text": "Share your recruitment challenges with us.<br>ITF will propose the best talent for your company<br>and support your <span>future recruitment activities</span>.",
+    "bottom_head": "Facing recruitment challenges?<br><span class=\"f60\">ITF’s Foreign Recruitment and Talent Dispatch Services</span> can help!"
+  },
+  "merit": {
+    "title": "Benefits of Hiring Foreign Talent",
+    "item1_title": "Abundance of Top Talent",
+    "item1_description": "In Japan, with declining birthrates and an aging population, securing young, top talent is increasingly difficult. Expanding your applicant pool increases the chances of meeting exceptional talent. ITF Co. Ltd. supports foreign recruitment for caregiving, hospitality, restaurant, engineering, and construction industries in Tokyo and Osaka.",
+    "item2_title": "Multilingual Support for Globalization",
+    "item2_description": "Serve foreign customers and promote in their native languages to attract more foreign clients. ITF Co. Ltd. provides foreign recruitment support nationwide in Japan.",
+    "item3_title": "High Adaptability",
+    "item3_description": "Foreign talent possesses the ability to adapt to various situations while living and working abroad. With different educational and cultural backgrounds compared to Japanese workers, they can identify issues unnoticed by locals and bring fresh ideas and perspectives. We specialize in foreign talent introduction for caregiving.",
+    "item4_title": "Diverse Perspectives and Ideas",
+    "item4_description": "Foreign talent brings diverse cultures and backgrounds, offering new perspectives and ideas to your company. This fosters innovation and operational improvements. We also support caregiving services in Tokyo and Osaka.",
+    "item5_title": "Advanced Expertise and Skills",
+    "item5_description": "Hiring foreign talent with advanced expertise and skills in specific fields strengthens your company’s competitiveness, ensuring an edge in the industry. We specialize in foreign recruitment for caregiving and nursing.",
+    "item6_title": "Leveraging Global Networks",
+    "item6_description": "Foreign staff have extensive networks, including in their home countries, which can be leveraged to expand international business opportunities. ITF Co. Ltd. introduces foreign caregiving talent nationwide in Japan."
+  },
+  "about": {
+    "title": "About Us",
+    "heading": "What is ITF<span>(アイティーエフ)</span><strong>?</strong>",
+    "description": "『Illuminate The Future』 ITF, a company that supports foreign talent working in Japan through recruitment services. We act as a bridge between companies and foreign job seekers, providing accurate and reliable matching tailored to the needs of both parties. With the vision of 'helping as many foreign individuals and companies as possible,' ITF aims to be a leading company in foreign recruitment services for caregiving, hospitality, restaurant, engineering, and construction industries, based in Tokyo and Osaka.",
+    "button": "Learn More"
+  },
+  "service": {
+    "intro_title": "Service Introduction",
+    "main_title": "ITF’s Foreign Talent<br class=\"sp\">Introduction Plans Are Here",
+    "description": "ITF (ITF Co. Ltd.) provides comprehensive recruitment solutions, from introducing skilled and professional foreign talent to registration support, based in Tokyo and Osaka. We specialize in foreign recruitment services for caregiving, hospitality, restaurant, engineering, and construction industries.",
+    "item1_title": "Abundance of Top Talent",
+    "item1_subtitle": "We have numerous foreign registrants from both domestic and international sources.",
+    "item1_description": "We have talent from various nationalities, including Vietnamese, Indonesians, and Chinese, as well as those qualified for Specific Skills 1. We can introduce talent based on your needs. Through partnerships with multiple sending organizations, foreign talent, universities, vocational schools, and Japanese language schools (approximately 10 schools), we can introduce caregiving professionals matching your requirements nationwide in Japan.",
+    "item1_skill_test_description": "We introduce candidates who have passed the skills tests, Japanese language tests, and caregiving Japanese tests required for Specific Skills 1. We also introduce top talent under Specific Activities status.",
+    "item2_title": "Introduction of Specific Skills Talent",
+    "item2_subtitle": "Introduction of Specific Skills Talent",
+    "item2_description": "Introduced in April 2019, 'Specific Skills' is a new residency status allowing the recruitment of foreign talent in 12 industries, including restaurants, caregiving, and hospitality. Since they have passed Japanese language and industry-specific skills tests before arriving in Japan, they are expected to be <span class=\"bg\">immediately effective on-site after joining.</span> We also support caregiving talent recruitment in Tokyo and Osaka.",
+    "item3_title": "Comprehensive Support",
+    "item3_subtitle": "We provide robust support for recruited talent.",
+    "item3_description": "We offer comprehensive support, including administrative procedures, daily life necessities, and more, to improve retention rates, with staff from their home countries providing dedicated assistance. As part of registration support, we also assist companies with onboarding. We have received requests from various companies. We can support foreign caregiving talent nationwide in Japan.",
+    "item4_title": "Diverse Foreign Staff",
+    "item4_subtitle": "Reliable Support by Multinational Staff",
+    "item4_description": "Our company employs a diverse staff, including Vietnamese, Indonesians, Chinese, Nepalese, and more. This allows us to provide support in the native languages of job seekers, ensuring they can use our services with confidence in various situations such as interviews or consultations. With staff who understand the cultures and backgrounds of each country, we deliver <span class=\"bg\">smoother and more heartfelt support.</span> We also support caregiving services in Tokyo and Osaka."
+  },
+  "solution": {
+    "title": "Solutions",
+    "main_title": "Addressing These Challenges in Corporate Recruitment",
+    "item1": "Can’t find the talent you need? Open the future with foreign recruitment",
+    "item2": "Not enough applicants? Solve it with the power of foreign talent",
+    "item3": "Struggling to attract top talent despite job postings? Streamline initial screening",
+    "item4": "Considering hiring foreign talent but lack the expertise?",
+    "point1_title": "Introducing Diverse Talent from 6 Asian Countries",
+    "point1_description": "ITF collaborates with partner organizations in 6 countries, primarily in Southeast Asia, and is dedicated to recruiting and training young individuals eager to work in Japan. We can quickly introduce talent with diverse skills to meet your company’s needs. We also support foreign recruitment services for caregiving, hospitality, restaurant, engineering, and construction industries in Tokyo and Osaka.",
+    "point2_title": "Selection and Recommendation by Native Language Staff to Meet Needs and Achieve High Retention Rates",
+    "point2_description": "Our native language staff carefully explain your company’s philosophy, vision, and operational policies to local candidates, ensuring deep understanding. This prevents post-hire mismatches and enables a smoother start to employment. We support foreign caregiving talent nationwide in Japan.",
+    "point3_title": "Providing Employment Opportunities Across a Wide Range of Industries",
+    "point3_description": "ITF enables recruitment in 14 industries, including caregiving, food and beverage manufacturing, restaurants, hospitality, building cleaning, material industries, industrial machinery manufacturing, electronics and IT, construction, shipbuilding, automotive maintenance, aviation, agriculture, and fisheries, allowing you to easily search for the best results tailored to your needs. We specialize in caregiving services in Tokyo and Osaka."
+  },
+  "flow": {
+    "title": "Process from Request to Introduction",
+    "step1": "Our staff will visit to discuss job details, desired talent profile, skills, hiring timeline, and more.",
+    "step2": "We will sign a basic talent introduction contract.",
+    "step3": "We will select candidates who match your needs from the job seekers we’ve interviewed.",
+    "step4": "We will recommend candidates that meet your company’s needs on an ongoing basis.",
+    "step5": "You will conduct document screening based on the candidate data we recommend. Please inform us of the screening results (pass or fail).",
+    "step6": "We will handle various work visa applications. (Special documents may be requested.)",
+    "step7": "After completing the onboarding process, the fee will be finalized."
+  },
+  "languages": {
+    "title": "Japanese Proficiency Levels of Talent Hired Last Year",
+    "description": "Last year, we supported the recruitment of foreign talent for various companies and organizations, introducing over 1,000 top talents from around the world. These talents possess varying levels of Japanese proficiency, allowing flexible adjustments to job requirements and work environments. The graph below shows the distribution of Japanese proficiency levels of the hired talent. We hope this serves as a reference for your foreign recruitment plans and talent placement in Tokyo and Osaka for caregiving, hospitality, restaurant, engineering, and construction industries.",
+    "chart_title": "JLPT Pass Rate Distribution (%)"
+  },
+  "greeting": {
+    "title": "President’s Greeting",
+    "subheading": "President of ITF Co. Ltd.",
+    "signature": "President of ITF Co. Ltd. <br> Ueda Katsuhiko"
+  },
+  "news": {
+    "title": "News",
+    "description": "The latest news and announcements from ITF will be posted here.",
+    "view_all": "View All Articles"
+  },
+  "company": {
+    "title": "Company Overview"
+  },
+  "contact": {
+    "title": "If you’re considering hiring foreign talent, feel free to contact us<br><span>CONTACT</span>",
+    "email_text": "Feel free to reach out with any questions",
+    "email_button": "Contact",
+    "phone_text": "Contact us by phone here",
+    "phone_hours": "Weekdays 9:30~18:00"
+  },
+  "footer": {
+    "business_intro": "About Us",
+    "company_info": "Company Info",
+    "inquiry": "Contact",
+    "location_title": "Our Locations",
+    "company_name": "ITF Co. Ltd.",
+    "location_details": "〒556-0017 Osaka Prefecture, Osaka City, Naniwa-ku, Minatomachi 1-4-38 Kintetsu Shin-Namba Building 10F<br>06-6644-1800<br>〒144-0052 Tokyo, Ota-ku, Kamata 5-chome 21-13 Pegasus Station Plaza Kamata B2F-03<br>03-6424-7747<br>info@it-future.jp",
+    "services_title": "Our Services",
+    "services_for_companies": "For Companies Seeking Talent",
+    "support_content": "Our Support",
+    "service_introduction": "Service Introduction",
+    "benefits": "Benefits",
+    "news": "News",
+    "company_info_title": "About the Company",
+    "president_greeting": "President’s Greeting",
+    "company_philosophy": "Our Philosophy",
+    "consumer_info_title": "Customer Information",
+    "privacy_policy": "Privacy Policy"
+  }
+}

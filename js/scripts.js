@@ -76,3 +76,30 @@ window.addEventListener('load', matchGreetingHeights);
 
 // Run on window resize
 window.addEventListener('resize', matchGreetingHeights);
+
+// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Back to Top Button Functionality
+document.addEventListener('DOMContentLoaded', () => {
+    const backToTopButton = document.getElementById('back-to-top');
+
+    // Show/hide button based on scroll position
+    window.addEventListener('scroll', () => {
+        const scrollPosition = window.scrollY;
+        const viewportHeight = window.innerHeight;
+
+        if (scrollPosition > viewportHeight) {
+            backToTopButton.classList.add('visible');
+        } else {
+            backToTopButton.classList.remove('visible');
+        }
+    });
+
+    // Smooth scroll to top on click
+    backToTopButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+});
