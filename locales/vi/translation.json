@@ -1,0 +1,132 @@
+{
+  "nav": {
+    "about": "Giới thiệu",
+    "company_info": "Thông tin Công ty",
+    "news": "Tin tức",
+    "phone_inquiry": "Liên hệ qua Điện thoại",
+    "phone_hours": "09:00-19:00 (Trừ cuối tuần và ngày lễ)",
+    "inquiry": "Liên hệ"
+  },
+  "intro": {
+    "title": "Tuyển dụng Nhân tài Nước ngoài Tốt nhất<br>với ITF Co., Ltd.",
+    "description": "Chúng tôi hỗ trợ công ty của bạn trong việc tuyển dụng nhân tài cần thiết.",
+    "register_button": "Liên hệ Ngay để Tư vấn Miễn phí"
+  },
+  "shortcut": {
+    "itf_point": "Điểm nổi bật của ITF"
+  },
+  "troubles": {
+    "item1": "Không tìm được nhân tài mong muốn? Mở ra tương lai với tuyển dụng nước ngoài",
+    "item2": "Không đủ ứng viên? Giải quyết với sức mạnh của nhân tài nước ngoài",
+    "item3": "Đăng tin tuyển dụng nhưng không thu hút được nhân tài xuất sắc? Làm mượt mà quá trình sơ tuyển",
+    "item4": "Muốn tuyển dụng nhân tài nước ngoài nhưng không có kinh nghiệm?",
+    "text": "Hãy chia sẻ khó khăn trong tuyển dụng của bạn. ITF sẽ đề xuất nhân tài phù hợp nhất cho công ty bạn và hỗ trợ hoạt động tuyển dụng trong tương lai.",
+    "bottom_head": "Gặp khó khăn trong tuyển dụng? Giải quyết với dịch vụ giới thiệu và phân bổ nhân tài nước ngoài của ITF!"
+  },
+  "merit": {
+    "title": "Lợi ích của Tuyển dụng Nhân tài Nước ngoài",
+    "item1_title": "Nguồn Nhân tài Xuất sắc Dồi dào",
+    "item1_description": "Tại Nhật Bản, nơi tỷ lệ sinh giảm và dân số già hóa, việc tuyển dụng nhân tài trẻ xuất sắc ngày càng khó. Mở rộng phạm vi ứng viên giúp tăng cơ hội gặp gỡ nhân tài xuất sắc. ITF Co., Ltd. hỗ trợ tuyển dụng nhân tài nước ngoài cho ngành chăm sóc, khách sạn, nhà hàng, kỹ sư và xây dựng tại Tokyo và Osaka.",
+    "item2_title": "Hỗ trợ Đa ngôn ngữ cho Toàn cầu hóa",
+    "item2_description": "Phục vụ khách hàng nước ngoài và quảng bá bằng ngôn ngữ mẹ đẻ để thu hút thêm khách hàng nước ngoài. ITF Co., Ltd. cung cấp hỗ trợ tuyển dụng nước ngoài trên toàn Nhật Bản.",
+    "item3_title": "Khả năng Thích nghi Cao",
+    "item3_description": "Nhân tài nước ngoài có khả năng thích nghi với nhiều tình huống khác nhau khi sống và làm việc ở nước ngoài. Với nền tảng giáo dục và văn hóa khác biệt so với người Nhật, họ có thể phát hiện những vấn đề mà người Nhật không nhận ra hoặc mang đến những ý tưởng và suy nghĩ mới. Chúng tôi nổi bật trong dịch vụ giới thiệu nhân tài nước ngoài cho ngành chăm sóc.",
+    "item4_title": "Cung cấp Góc nhìn và Ý tưởng Đa dạng",
+    "item4_description": "Nhân tài nước ngoài mang đến văn hóa và nền tảng đa dạng, cung cấp những góc nhìn và ý tưởng mới cho doanh nghiệp. Điều này thúc đẩy đổi mới và cải thiện trong hoạt động. Chúng tôi cũng hỗ trợ dịch vụ chăm sóc tại Tokyo và Osaka.",
+    "item5_title": "Kiến thức và Kỹ năng Chuyên môn Cao",
+    "item5_description": "Việc tuyển dụng nhân tài nước ngoài có kiến thức và kỹ năng chuyên môn cao trong lĩnh vực cụ thể giúp tăng cường sức cạnh tranh của doanh nghiệp, đảm bảo vị thế dẫn đầu trong ngành. Chúng tôi chuyên về tuyển dụng nước ngoài cho ngành chăm sóc và điều dưỡng.",
+    "item6_title": "Tận dụng Mạng lưới Toàn cầu",
+    "item6_description": "Nhân viên nước ngoài có mạng lưới rộng lớn bao gồm cả tại quốc gia quê hương của họ, điều này có thể được tận dụng để mở rộng cơ hội kinh doanh quốc tế. ITF Co., Ltd. giới thiệu nhân tài chăm sóc nước ngoài trên toàn Nhật Bản."
+  },
+  "about": {
+    "title": "Về Chúng Tôi",
+    "heading": "ITF là gì<span>(アイティーエフ)</span><strong>?</strong>",
+    "description": "『Illuminate The Future』 ITF, một công ty hỗ trợ nhân tài nước ngoài làm việc tại Nhật Bản thông qua dịch vụ tuyển dụng. Chúng tôi là cầu nối giữa doanh nghiệp và người tìm việc nước ngoài, cung cấp sự kết nối chính xác và đáng tin cậy phù hợp với nhu cầu của cả hai bên. Với tinh thần 'muốn giúp đỡ càng nhiều người nước ngoài và doanh nghiệp càng tốt', ITF hướng tới trở thành công ty hàng đầu trong dịch vụ tuyển dụng nước ngoài cho ngành chăm sóc, khách sạn, nhà hàng, kỹ sư và xây dựng, có trụ sở tại Tokyo và Osaka.",
+    "button": "Xem Thêm"
+  },
+  "service": {
+    "intro_title": "Giới thiệu Dịch vụ",
+    "main_title": "Kế hoạch Giới thiệu Nhân tài Nước ngoài của ITF<br class=\"sp\">Có tại Đây",
+    "description": "ITF (ITF Co., Ltd.) cung cấp giải pháp tuyển dụng và hỗ trợ toàn diện, từ việc giới thiệu nhân tài có kỹ năng đặc biệt và chuyên gia nước ngoài đến hỗ trợ đăng ký, đặt trụ sở tại Tokyo và Osaka. Chúng tôi chuyên về dịch vụ tuyển dụng nước ngoài cho ngành chăm sóc, khách sạn, nhà hàng, kỹ sư và xây dựng.",
+    "item1_title": "Nguồn Nhân tài Xuất sắc Dồi dào",
+    "item1_subtitle": "Chúng tôi có nhiều ứng viên nước ngoài từ trong và ngoài nước đăng ký.",
+    "item1_description": "Chúng tôi có nhiều nhân tài từ các quốc gia như Việt Nam, Indonesia và Trung Quốc, bao gồm cả nhân tài thuộc diện Kỹ năng Đặc biệt 1. Chúng tôi có thể giới thiệu theo nhu cầu của bạn. Thông qua quan hệ đối tác với nhiều tổ chức gửi lao động, nhân tài nước ngoài, trường đại học, trường nghề và trường dạy tiếng Nhật (khoảng 10 trường), chúng tôi có thể giới thiệu nhân tài chăm sóc nước ngoài phù hợp với nhu cầu của bạn trên toàn Nhật Bản.",
+    "item1_skill_test_description": "Chúng tôi giới thiệu các ứng viên đã vượt qua kỳ thi kỹ năng, kỳ thi tiếng Nhật và kỳ thi tiếng Nhật chăm sóc cần thiết cho Kỹ năng Đặc biệt 1. Chúng tôi cũng giới thiệu nhân tài xuất sắc trong trạng thái Hoạt động Đặc biệt.",
+    "item2_title": "Giới thiệu Nhân tài Kỹ năng Đặc biệt",
+    "item2_subtitle": "Giới thiệu Nhân tài Kỹ năng Đặc biệt",
+    "item2_description": "Được giới thiệu vào tháng 4 năm 2019, 'Kỹ năng Đặc biệt' là một trong những tư cách lưu trú mới cho phép tuyển dụng nhân tài nước ngoài trong 12 ngành, bao gồm nhà hàng, chăm sóc và khách sạn. Vì đã vượt qua kỳ thi năng lực tiếng Nhật và kỹ năng đặc thù theo ngành trước khi đến Nhật Bản, họ được kỳ vọng sẽ trở thành lực lượng lao động sẵn sàng làm việc ngay sau khi gia nhập. Chúng tôi cũng hỗ trợ tuyển dụng nhân tài chăm sóc tại Tokyo và Osaka.",
+    "item3_title": "Hỗ trợ Toàn diện",
+    "item3_subtitle": "Hỗ trợ toàn diện cũng được cung cấp cho nhân tài đã được tuyển dụng.",
+    "item3_description": "Chúng tôi cung cấp hỗ trợ toàn diện như các thủ tục hành chính hiện tại, thủ tục cần thiết cho cuộc sống hàng ngày và hơn thế nữa, để cải thiện tỷ lệ giữ chân, với đội ngũ nhân viên từ quốc gia của họ luôn tận tâm. Là một phần của hỗ trợ đăng ký, chúng tôi cũng hỗ trợ các công ty về việc tiếp nhận. Chúng tôi đã nhận được yêu cầu từ nhiều công ty khác nhau. Chúng tôi có thể hỗ trợ nhân tài chăm sóc nước ngoài trên toàn Nhật Bản.",
+    "item4_title": "Nhiều Nhân viên Nước ngoài đang Làm việc",
+    "item4_subtitle": "Hỗ trợ Đáng tin cậy bởi Đội ngũ Đa quốc gia",
+    "item4_description": "Công ty chúng tôi có nhiều nhân viên từ các quốc gia khác nhau như Việt Nam, Indonesia, Trung Quốc, Nepal và hơn thế nữa. Nhờ đó, chúng tôi có thể cung cấp hỗ trợ bằng tiếng mẹ đẻ cho người tìm việc, cho phép họ sử dụng dịch vụ của chúng tôi một cách yên tâm trong nhiều tình huống khác nhau như phỏng vấn hoặc tư vấn. Vì đội ngũ của chúng tôi hiểu biết về văn hóa và nền tảng của từng quốc gia, chúng tôi có thể mang đến sự hỗ trợ mượt mà và ấm áp hơn. Chúng tôi cũng hỗ trợ dịch vụ chăm sóc tại Tokyo và Osaka."
+  },
+  "solution": {
+    "title": "Giải pháp",
+    "main_title": "Giải quyết Những Thách thức trong Hoạt động Tuyển dụng của Doanh nghiệp",
+    "item1": "Không tìm được nhân tài mong muốn? Mở ra tương lai với tuyển dụng nước ngoài",
+    "item2": "Không đủ ứng viên? Giải quyết với sức mạnh của nhân tài nước ngoài",
+    "item3": "Đăng tin tuyển dụng nhưng không thu hút được nhân tài xuất sắc? Làm mượt mà quá trình sơ tuyển",
+    "item4": "Muốn tuyển dụng nhân tài nước ngoài nhưng không có kinh nghiệm?",
+    "point1_title": "Giới thiệu Nhân tài Đa dạng từ 6 Quốc gia Châu Á",
+    "point1_description": "ITF hợp tác với các tổ chức đối tác tại 6 quốc gia, chủ yếu ở Đông Nam Á, và cam kết tuyển dụng và đào tạo những người trẻ muốn làm việc tại Nhật Bản. Chúng tôi có thể nhanh chóng giới thiệu nhân tài với nhiều kỹ năng khác nhau theo nhu cầu của doanh nghiệp. Chúng tôi cũng hỗ trợ dịch vụ tuyển dụng nước ngoài cho ngành chăm sóc, khách sạn, nhà hàng, kỹ sư và xây dựng tại Tokyo và Osaka.",
+    "point2_title": "Tuyển chọn và Giới thiệu bởi Đội ngũ Nói tiếng Mẹ đẻ để Đáp ứng Nhu cầu và Đạt được Tỷ lệ Giữ chân Cao",
+    "point2_description": "Đội ngũ nhân viên của chúng tôi nói tiếng mẹ đẻ giải thích chi tiết về triết lý kinh doanh, tầm nhìn và chính sách vận hành của công ty cho các ứng viên địa phương, đảm bảo sự hiểu biết sâu sắc. Điều này giúp ngăn ngừa sự không phù hợp sau khi gia nhập và cho phép bắt đầu công việc mượt mà hơn. Chúng tôi hỗ trợ nhân tài chăm sóc nước ngoài trên toàn Nhật Bản.",
+    "point3_title": "Cung cấp Cơ hội Việc làm trong Nhiều Ngành nghề",
+    "point3_description": "ITF cho phép tuyển dụng trong 14 ngành, bao gồm chăm sóc, sản xuất thực phẩm và đồ uống, nhà hàng, khách sạn, vệ sinh tòa nhà, ngành vật liệu cơ bản, sản xuất máy móc công nghiệp, ngành điện tử và thông tin, xây dựng, đóng tàu, bảo trì ô tô, hàng không, nông nghiệp và ngư nghiệp, cho phép tìm kiếm kết quả tối ưu theo mong muốn của bạn. Chúng tôi chuyên về dịch vụ chăm sóc tại Tokyo và Osaka."
+  },
+  "flow": {
+    "title": "Quy trình từ Yêu cầu đến Giới thiệu",
+    "step1": "Nhân viên của chúng tôi sẽ đến gặp bạn để tìm hiểu về nội dung tuyển dụng, hình mẫu nhân tài mong muốn, kỹ năng và thời gian tuyển dụng.",
+    "step2": "Chúng tôi sẽ ký kết hợp đồng cơ bản giới thiệu nhân tài.",
+    "step3": "Chúng tôi sẽ chọn lọc các ứng viên phù hợp với nhu cầu của bạn từ những người tìm việc mà chúng tôi đã phỏng vấn.",
+    "step4": "Chúng tôi sẽ giới thiệu các ứng viên phù hợp với nhu cầu của công ty bạn theo từng thời điểm.",
+    "step5": "Bạn sẽ tiến hành sàng lọc hồ sơ dựa trên dữ liệu ứng viên mà chúng tôi giới thiệu. Vui lòng liên hệ với chúng tôi về kết quả sàng lọc (dù đậu hay trượt).",
+    "step6": "Chúng tôi sẽ xử lý các thủ tục xin visa làm việc khác nhau. (Các tài liệu đặc biệt sẽ được yêu cầu).",
+    "step7": "Sau khi hoàn tất thủ tục nhập cảnh, phí dịch vụ sẽ được xác định."
+  },
+  "languages": {
+    "title": "Trình độ Tiếng Nhật của Nhân tài Được Tuyển dụng Năm Ngoái",
+    "description": "Năm ngoái, chúng tôi đã hỗ trợ tuyển dụng nhân tài nước ngoài cho nhiều công ty và tổ chức khác nhau, giới thiệu hơn 1000 nhân tài xuất sắc từ khắp nơi trên thế giới. Những nhân tài này có trình độ tiếng Nhật khác nhau, cho phép điều chỉnh linh hoạt theo yêu cầu công việc và môi trường làm việc. Biểu đồ dưới đây cho thấy phân bố trình độ tiếng Nhật của nhân tài được tuyển dụng. Chúng tôi hy vọng điều này sẽ là tham khảo cho kế hoạch tuyển dụng nước ngoài và phân bổ nhân tài của bạn tại Tokyo và Osaka cho ngành chăm sóc, khách sạn, nhà hàng, kỹ sư và xây dựng.",
+    "chart_title": "Phân bố Người Đạt Chứng chỉ JLPT (%)"
+  },
+  "greeting": {
+    "title": "Lời Chào từ Đại diện",
+    "subheading": "Chủ tịch Hội đồng Quản trị ITF Co., Ltd.",
+    "signature": "Chủ tịch Hội đồng Quản trị ITF Co., Ltd. <br> Ueda Katsuhiko"
+  },
+  "news": {
+    "title": "Tin tức",
+    "description": "Tin tức và thông báo mới nhất từ ITF sẽ được đăng tại đây.",
+    "view_all": "Xem Tất cả Bài viết"
+  },
+  "company": {
+    "title": "Tổng quan Công ty"
+  },
+  "contact": {
+    "title": "Nếu bạn đang cân nhắc tuyển dụng nhân tài nước ngoài, đừng ngần ngại liên hệ với chúng tôi<br><span>LIÊN HỆ</span>",
+    "email_text": "Đừng ngần ngại liên hệ với chúng tôi nếu bạn có bất kỳ câu hỏi nào",
+    "email_button": "Liên hệ",
+    "phone_text": "Liên hệ qua điện thoại tại đây",
+    "phone_hours": "Ngày thường 9:30~18:00"
+  },
+  "footer": {
+    "business_intro": "Giới thiệu",
+    "company_info": "Thông tin Công ty",
+    "inquiry": "Liên hệ",
+    "location_title": "Địa điểm",
+    "company_name": "ITF Co., Ltd.",
+    "location_details": "〒556-0017 Tỉnh Osaka, Thành phố Osaka, Quận Naniwa, Minatomachi 1-4-38 Tòa nhà Kintetsu Shin-Namba Tầng 10<br>06-6644-1800<br>〒144-0052 Tokyo, Quận Ota, Kamata 5-chome 21-13 Pegasus Station Plaza Kamata B2F-03<br>03-6424-7747<br>info@it-future.jp",
+    "services_title": "Dịch vụ của Chúng tôi",
+    "services_for_companies": "Dành cho Công ty Cần Nhân tài",
+    "support_content": "Hỗ trợ của Chúng tôi",
+    "service_introduction": "Giới thiệu Dịch vụ",
+    "benefits": "Lợi ích",
+    "company_info_title": "Về Công ty",
+    "president_greeting": "Lời Chào của Chủ tịch",
+    "company_philosophy": "Triết lý của Chúng tôi",
+    "consumer_info_title": "Thông tin Khách hàng",
+    "privacy_policy": "Chính sách Bảo mật"
+  }
+}
