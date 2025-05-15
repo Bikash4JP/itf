@@ -281,12 +281,12 @@
                         <h3 class="footer-heading" data-i18n="footer.company_info_title">会社案内</h3>
                         <a href="inquiry.html" class="footer-link" data-i18n="footer.president_greeting">代表者挨拶</a>
                         <a href="company_info.html" class="footer-link" data-i18n="footer.company_info">会社概要</a>
-                        <a href="index.html#kigyo-rinen" class="footer-link" data-i18n="footer.company_philosophy">企業理念</a>
+                        <a href="index.html#work-step" class="footer-link" data-i18n="footer.introduction_flow">紹介の流れ</a>
                     </div>
                     <div class="footer-col">
                         <h3 class="footer-heading" data-i18n="footer.consumer_info_title">消費者情報</h3>
                         <a href="inquiry.html" class="footer-link" data-i18n="footer.inquiry">お問い合わせ</a>
-                        <a href="#" class="footer-btn" data-i18n="footer.privacy_policy">プライバシーポリシー</a>
+                        <a href="privacy.html" class="footer-btn" data-i18n="footer.privacy_policy">プライバシーポリシー</a>
                     </div>
                 </div>
             <!-- Copyright -->

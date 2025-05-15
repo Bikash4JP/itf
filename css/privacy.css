@@ -1,0 +1,110 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa; /* Light gray background for a clean look */
+    font-family: 'Noto Sans JP', sans-serif;
+}
+
+/* Main Article Styles */
+.l-main {
+    text-align: center; /* Centers the inline-block button */
+}
+
+/* Privacy Policy Section Styles */
+.privacy-policy-section {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    max-width: 800px; /* Optimal reading width */
+    margin: 40px auto; /* Centers the section with auto margins */
+}
+
+.privacy-policy-section h1 {
+    font-size: 32px;
+    color: #2594d4;
+    font-weight: bolder;
+    margin: 60px 0px;
+    text-align: center;
+    border-bottom: 4px solid #2594d4;
+}
+
+.privacy-policy-section h2 {
+    font-size: 24px;
+    color: #059ee6;
+    margin: 30px 0 15px;
+    font-weight: bold;
+}
+
+.privacy-policy-section p,
+.privacy-policy-section ul li {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 15px;
+    line-height: 1.6; /* Improved readability */
+}
+.privacy-policy-section ul,
+.privacy-policy-section ol {
+    text-align: left;
+}
+.privacy-policy-section p {
+    text-align: left;
+}
+.privacy-policy-section ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    margin-bottom: 15px;
+}
+
+/* Back to Recent Page Link */
+.back-to-recent {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #2594d4;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    margin: 20px 0; /* Adds vertical spacing */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+}
+
+.back-to-recent:hover {
+    background-color: #e69f4f;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Enhanced shadow on hover */
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .privacy-policy-section {
+        margin: 20px 20px; /* Reduced margins for tablets */
+        padding: 25px;
+    }
+}
+
+@media (max-width: 576px) {
+    .privacy-policy-section {
+        margin: 10px 10px; /* Minimal margins for mobile */
+        padding: 20px;
+    }
+
+    .privacy-policy-section h1 {
+        font-size: 24px;
+        margin-bottom: 40px;
+    }
+
+    .privacy-policy-section h2 {
+        font-size: 20px;
+    }
+
+    .privacy-policy-section p,
+    .privacy-policy-section ul li {
+        font-size: 14px;
+    }
+
+    .back-to-recent {
+        padding: 8px 15px;
+        font-size: 14px;
+    }
+}
