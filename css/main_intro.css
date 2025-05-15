@@ -182,6 +182,7 @@
 
     .unique-intro9-section .unique-inner-img-two img {
         max-width: 80%; /* Reduce image size for mobile */
+        clip-path: inset(0 0 30% 0); /* Crop 30% from the bottom of the image */
     }
 
     .unique-intro9-section .unique-row {
@@ -208,6 +209,11 @@
         font-weight: bold; /* Make it stand out */
         transform: rotate(-10deg); /* Slight tilt for a playful effect */
         display: inline-block; /* Ensure transform works correctly */
+    }
+
+    /* Bring Intro One lower with overlap */
+    .unique-intro9-section .unique-row > .unique-col-lg-6:first-child {
+        margin-bottom: -100px; /* Adjust this value to control overlap */
     }
 }
 /* ---------------------------------------------------------------------------------------------------------------___________________________________________________________ */
