@@ -1,3 +1,4 @@
+/* Existing CSS (unchanged) */
 .unique-intro9-section {
     background: linear-gradient(rgb(51, 174, 223), rgb(231, 219, 195));
     position: relative;
@@ -18,17 +19,20 @@
     flex-wrap: wrap;
     align-items: center;
 }
-#semi{
-  color: rgb(53, 51, 49);
-  font-family: Georgia, 'Times New Roman', Times, serif;
-  font-size: 60px;
-  font-weight: bolder;
-  font-style: unset;
-  margin-bottom: 0px;
+
+#semi {
+    color: rgb(53, 51, 49);
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: 60px;
+    font-weight: bolder;
+    font-style: unset;
+    margin-bottom: 0px;
 }
-#semi#ee{
-  color: whitesmoke;
+
+#semi #ee {
+    color: whitesmoke; /* Default color for larger screens */
 }
+
 /* Columns */
 .unique-intro9-section .unique-col-lg-6 {
     flex: 0 0 50%;
@@ -188,8 +192,25 @@
     .unique-intro9-section .unique-intro9-image-wrap {
         margin-bottom: 0 !important; /* Force no margin-bottom for Intro 2 */
     }
-}
 
+    /* Fix for ITF company name on mobile */
+    #semi {
+        font-size: 36px; /* Reduce font size to fit on one line */
+        white-space: nowrap; /* Prevent line break */
+        line-height: 1; /* Reduce line height to match smaller font */
+    }
+
+    #semi #ee {
+        color: #ffffff; /* Set color to white for "へ" on mobile */
+        background: rgba(255, 255, 255, 0.2); /* Subtle background to make it pop */
+        padding: 2px 6px; /* Small padding for background */
+        border-radius: 5px; /* Rounded background */
+        font-weight: bold; /* Make it stand out */
+        transform: rotate(-10deg); /* Slight tilt for a playful effect */
+        display: inline-block; /* Ensure transform works correctly */
+    }
+}
+/* ---------------------------------------------------------------------------------------------------------------___________________________________________________________ */
 
 /* Shortcut Links Styling */
 .shortcut-links {
@@ -231,9 +252,15 @@
 
 /* Responsive adjustments for smaller screens */
 @media (max-width: 576px) {
+    .shortcut-links {
+        padding: 5px; /* Reduced padding for the container */
+        gap: 3px; /* Reduced gap between buttons */
+        justify-content: flex-start; /* Align to start for better scrolling */
+    }
+
     .shortcut-btn {
-        padding: 8px 12px;
-        font-size: 12px;
+        padding: 5px 8px; /* Further reduced padding for buttons */
+        font-size: 10px; /* Smaller font size to fit more buttons */
     }
 }
 
