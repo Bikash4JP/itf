@@ -113,7 +113,7 @@
   },
   "footer": {
     "business_intro": "事業紹介",
-    "company_info": "企業情報",
+    "company_info": "会社概要",
     "inquiry": "お問い合わせ",
     "location_title": "所在地",
     "company_name": "株式会社アイティーエフ",
@@ -123,6 +123,7 @@
     "support_content": "サポート内容",
     "service_introduction": "サービス紹介",
     "benefits": "メリット",
+    "news": "お知らせ",
     "company_info_title": "会社案内",
     "president_greeting": "代表者挨拶",
     "company_philosophy": "企業理念",
