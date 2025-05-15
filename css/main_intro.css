@@ -152,7 +152,7 @@
 
 @media (max-width: 576px) {
     .unique-intro9-section {
-        padding: 20px 0; /* Further reduce padding for mobile */
+        padding: 5px 0; /* Further reduce padding for mobile */
     }
 
     .unique-intro9-section .unique-title {
