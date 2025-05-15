@@ -37,6 +37,7 @@
 .greeting-content {
     flex: 0 0 60%; /* 60% width for text section */
     max-width: 60%;
+    border-right: 5px solid rgb(27, 154, 185);
 }
 
 .greeting-subheading {

@@ -70,7 +70,7 @@
     "item3": "Struggling to attract top talent despite job postings? Streamline initial screening",
     "item4": "Considering hiring foreign talent but lack the expertise?",
     "point1_title": "Introducing Diverse Talent from 6 Asian Countries",
-    "point1_description": "ITF collaborates with partner organizations in 6 countries, primarily in Southeast Asia, and is dedicated to recruiting and training young individuals eager to work in Japan. We can quickly introduce talent with diverse skills to meet your company’s needs. We also support foreign recruitment services for caregiving, hospitality, restaurant, engineering, and construction industries in Tokyo and Osaka.",
+    "point1_description": "ITF collaborates with partner organizations in 6 countries, primarily in Southeast Asia, and is dedicated to recruiting and training young individuals eager to work in Japan. We can quickly introduce talent with diverse skills to meet your company’s needs. We also support foreign recruitment services for caregiving, hospitality, restaurant, engineering, and construction industries in all over Japan.",
     "point2_title": "Selection and Recommendation by Native Language Staff to Meet Needs and Achieve High Retention Rates",
     "point2_description": "Our native language staff carefully explain your company’s philosophy, vision, and operational policies to local candidates, ensuring deep understanding. This prevents post-hire mismatches and enables a smoother start to employment. We support foreign caregiving talent nationwide in Japan.",
     "point3_title": "Providing Employment Opportunities Across a Wide Range of Industries",
@@ -113,7 +113,7 @@
   },
   "footer": {
     "business_intro": "About Us",
-    "company_info": "Company Info",
+    "company_info": "Company Overview",
     "inquiry": "Contact",
     "location_title": "Our Locations",
     "company_name": "ITF Co. Ltd.",
@@ -126,8 +126,9 @@
     "news": "News",
     "company_info_title": "About the Company",
     "president_greeting": "President’s Greeting",
-    "company_philosophy": "Our Philosophy",
+    "introduction_flow": "Introduction Flow",
     "consumer_info_title": "Customer Information",
-    "privacy_policy": "Privacy Policy"
+    "privacy_policy": "Privacy Policy",
+    "point" : "USP of ITF"
   }
 }
