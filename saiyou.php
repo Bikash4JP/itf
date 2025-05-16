@@ -254,20 +254,19 @@
     <aside class="l-side"></aside>
 
     <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-row">
-                <!-- Column 1: Location -->
-                <div class="footer-col">
-                    <h3 class="footer-heading">所在地</h3>
-                    <div class="footer-link">
-                        <a href="index.html" style="color: white;">株式会社アイティエフ</a>
-                    </div>
-                    <p class="footer-text">
-                        〒556-0017 大阪府大阪市浪速区湊町1-4-38 近鉄新難波ビル10F<br>
-                        06-6644-1800 <br>
-                        〒144-0052 東京都大田区蒲田5丁目21-13<br>
-                        03-6424-7747<br>
-                         info@it-future.jp
+            <div class="footer-container">
+                <div class="footer-row">
+                    <div class="footer-col">
+                        <h3 class="footer-heading" data-i18n="footer.location_title">所在地</h3>
+                        <div class="footer-link">
+                            <a href="index.html" style="color: white;" data-i18n="footer.company_name">株式会社アイティーエフ</a>
+                        </div>
+                        <p class="footer-text" data-i18n="footer.location_details">
+                            〒556-0017 大阪府大阪市浪速区湊町1-4-38 近鉄新難波ビル10F<br>
+                            06-6644-1800<br>
+                            〒144-0052 東京都大田区蒲田5丁目21-13<br>
+                            03-6424-7747<br>
+                            info@it-future.jp
                         </p>
                     </div>
                     <div class="footer-col">
@@ -279,22 +278,19 @@
                     </div>
                     <div class="footer-col">
                         <h3 class="footer-heading" data-i18n="footer.company_info_title">会社案内</h3>
-                        <a href="inquiry.html" class="footer-link" data-i18n="footer.president_greeting">代表者挨拶</a>
+                        <a href="index.html#greeting" class="footer-link" data-i18n="footer.president_greeting">代表者挨拶</a>
                         <a href="company_info.html" class="footer-link" data-i18n="footer.company_info">会社概要</a>
                         <a href="index.html#work-step" class="footer-link" data-i18n="footer.introduction_flow">紹介の流れ</a>
                     </div>
                     <div class="footer-col">
-                        <h3 class="footer-heading" data-i18n="footer.consumer_info_title">消費者情報</h3>
-                        <a href="inquiry.html" class="footer-link" data-i18n="footer.inquiry">お問い合わせ</a>
                         <a href="privacy.html" class="footer-btn" data-i18n="footer.privacy_policy">プライバシーポリシー</a>
                     </div>
                 </div>
-            <!-- Copyright -->
-            <div class="footer-copyright">
-                © ITF co. Ltd. ALL Rights Reserved
+                <div class="footer-copyright">
+                    © ITF co. Ltd. ALL Rights Reserved
+                </div>
             </div>
-        </div>
-    </footer>
+        </footer>
     <!-- i18next Scripts -->
     <script src="https://unpkg.com/i18next@23.11.5/dist/umd/i18next.min.js"></script>
     <script src="js/i18nextHttpBackend.min.js"></script>

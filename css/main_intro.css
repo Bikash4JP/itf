@@ -151,7 +151,7 @@
 
 @media (max-width: 576px) {
     .unique-intro9-section {
-        height: 700px; /* Remove fixed height for better responsiveness */
+        height: auto; /* Remove fixed height for better responsiveness */
         padding: 60px 0 30px; /* More top padding to push down content */
         text-align: center;
         position: relative;
@@ -159,13 +159,13 @@
     }
 
     .unique-intro9-content {
-        margin-top: 30px; /* Push content lower */
+        margin-top: 200px; /* Push content lower */
         padding: 0 15px;
     }
 
     .unique-intro9-section .unique-title {
         font-size: 24px;
-        margin-bottom: 15px;
+        /* margin-bottom: 15px; */
     }
 
     .unique-intro9-section .unique-sub-title {

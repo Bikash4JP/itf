@@ -75,11 +75,16 @@
                 "Osaka",
                 "Japan"
             ],
-            "serviceType": "介護向け外国人財紹介サービス"
+            "serviceType": "外国人財紹介サービス"
         }
     }
     </script>
-
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/t">
     <link href="https://fonts.googleapis.com/css?family=Lato:400,700,900|Noto+Sans+JP:400,500,700&subset=japanese&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" media="all" href="css/common.css">
     <link rel="stylesheet" id="wp-block-library-css" href="css/style.min.css" type="text/css" media="all">
@@ -87,9 +92,10 @@
     <link rel="stylesheet" id="wp-pagenavi-css" href="css/pagenavi-css.css" type="text/css" media="all">
     <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="css/greeting.css">
+    <link rel="stylesheet" href="css/top.css">
     <link rel="stylesheet" href="css/main_intro.css">
-    <script type="text/javascript" src="js/jquery.js"></script>
-    <script type="text/javascript" src="js/jquery-migrate.min.js"></script>
+    <script src="js/jquery-3.7.1.min.js" crossorigin="anonymous"></script> <!-- ORJ uses this version -->
+    <script src="js/rellax.min.js"></script> <!-- Required for top.js parallax -->
     <link rel="icon" href="images/titlle logo.PNG" sizes="32x32">
     <link rel="icon" href="images/titlle logo.PNG" sizes="192x192">
     <link rel="apple-touch-icon-precomposed" href="images/titlle logo.PNG">
@@ -120,7 +126,6 @@
                             <ul class="contents pc-flex str hend max">
                                 <li class="contents-item"><a href="about.html" data-i18n="nav.about">事業紹介</a></li>
                                 <li class="contents-item"><a href="company_info.html" data-i18n="nav.company_info">企業情報</a></li>
-                                <!-- <li class="contents-item"><a href="saiyou.php" data-i18n="nav.recruitment">新着採用</a></li> -->
                                 <li class="contents-item"><a href="news.html" data-i18n="nav.news">新着情報</a></li>
                             </ul>
                             <ul class="cta pc-flex max str">
@@ -156,44 +161,54 @@
     </header><br>
     <div class="l-top">
         <article class="l-main">
-            <!-- Add the shortcut links section here -->
-            
-            <div class="unique-intro9-section section" data-bg-color="#edf3fa">
-                <div class="unique-container">
-                    <div class="unique-row align-items-center">
-                        
-                        <!-- Intro One Content Start -->
-                        <div class="unique-col-lg-6 col-md-6" data-aos="fade-up">
-                            <div class="unique-intro9-content text-center text-md-start">
-                                <!-- <span class="unique-sub-title">グローバル人財活用</span> -->
-                                <h2 class="unique-title">外国籍人財のことなら </h2><p id="semi">アイティーエフ <span id="ee"></span>へ </p>
-                                <div class="unique-desc">
-                                    <p>御社が必要とする人財採用のお手伝いをします。</p>
-                                </div>
-                                <a href="tel:06-6644-1800" class="unique-btn phone-link"> 今すぐ無料ご相談電話する</a>
-                            </div>
-                        </div>
-                        <!-- Intro One Content End -->
-                        <!-- Intro two Course Start -->
-                        <div class="unique-col-lg-6 col-md-6" data-aos="fade-up">
-                            <div class="unique-intro9-image-wrap">
-                                <div class="unique-intro9-image">
-                                    <div class="inner-img-one">
-                                        <img class="unique-worldRotate" src="images/titlle logo.PNG" alt="株式会社アイティーエフ ロゴ">
-                                    </div>
-                                    <div class="unique-inner-img-two">
-                                        <img src="images/ChatGPT Image Apr 8, 2025, 10_16_11 AM.png" alt="東京での外国人財紹介サービス">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Intro two Course End -->
-                    </div>
+            <section>
+                <div class="topSlider" id="topSlider">
+                    <img src="images/mv01_pc_content.png" alt="" class="topImagesBG u-only_pc_tab">
+                    <img src="images/mv01_sp_content.png" alt="" class="topImagesBG u-only_sp">
+                    <ul id="topImages">
+                        <li class="topImagesInner topImagesInner--01">
+                            <a href="company_info.html">
+                                <img src="images/mv01_pc_content.png" alt="" class="topImagesBody u-only_pc_tab">
+                                <img src="images/mv01_sp_content.png" alt="" class="topImagesBody u-only_sp">
+                            </a>
+                        </li>
+                        <li class="topImagesInner topImagesInner--02">
+                            <a href="about.html#itf-reu">
+                                <img src="images/mv02_pc_content.png" alt="" class="topImagesBody u-only_pc_tab">
+                                <img src="images/mv02_sp_content.png" alt="" class="topImagesBody u-only_sp">
+                            </a>
+                        </li>
+                        <li class="topImagesInner topImagesInner--03">
+                            <a href="index.html#service-naiyo">
+                                <img src="images/mv03_pc_content.png" alt="" class="topImagesBody u-only_pc_tab">
+                                <img src="images/mv03_sp_content.png" alt="" class="topImagesBody u-only_sp">
+                            </a>
+                        </li>
+                        <li class="topImagesInner topImagesInner--04">
+                            <a href="index.html#ITF-point">
+                                <img src="images/mv04_pc_content.png" alt="" class="topImagesBody u-only_pc_tab">
+                                <img src="images/mv04_sp_content.png" alt="" class="topImagesBody u-only_sp">
+                            </a>
+                        </li>
+                        <li class="topImagesInner topImagesInner--05">
+                            <a href="index.html#work-step">
+                                <img src="images/mv05_pc_content.png" alt="" class="topImagesBody u-only_pc_tab">
+                                <img src="images/mv05_sp_content.png" alt="" class="topImagesBody u-only_sp">
+                            </a>
+                        </li>
+                        <li class="topImagesInner topImagesInner--06">
+                            <a href="index.html#osirase">
+                                <img src="images/mv06_pc_content.png" alt="" class="topImagesBody u-only_pc_tab">
+                                <img src="images/mv06_sp_content.png" alt="" class="topImagesBody u-only_sp">
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="topController" id="topController"></div>
                 </div>
-            </div>
+            </section>
+            <!-- Rest of your content remains unchanged -->
             <div class="shortcut-links">
-                <!-- <a href="about.html#support-naiyou" class="shortcut-btn" data-i18n="footer.support_content">サポート内容</a> -->
-                <a href="index.html#service-naiyou"class="shortcut-btn" data-i18n="footer.service_introduction">サービス紹介</a>
+                <a href="index.html#service-naiyou" class="shortcut-btn" data-i18n="footer.service_introduction">サービス紹介</a>
                 <a href="index.html#merit" class="shortcut-btn" data-i18n="footer.benefits">メリット</a>
                 <a href="index.html#greeting" class="shortcut-btn" data-i18n="footer.president_greeting">代表者挨拶</a>
                 <a href="index.html#ITF-point" class="shortcut-btn" data-i18n="footer.point">ITFのポイント</a>
@@ -549,36 +564,34 @@
             </div>
 
             <!-- New Representative's Greeting Section -->
-<section class="l-section greeting" id="greeting">
-    <div class="wrap w1200 sp-wrap">
-        <h2 class="greeting-title" data-i18n="greeting.title">代表者挨拶</h2>
-        <div class="greeting-container">
-            <div class="greeting-image">
-                <img src="images/owner.png" alt="代表者写真">
-            </div>
-            <div class="greeting-content">
-                <h3 class="greeting-subheading" data-i18n="greeting.subheading">株式会社アイティーエフ 代表取締役</h3>
-                <p class="greeting-text">
-                    私どもは、外国籍人財紹介会社として、「一人でも多くの外国籍人財と1社でも多くの企業様のために、人と人を繋げる架け橋となる」ことをミッションに掲げ、日々活動しております。<br>
-                    グローバル化が加速する現代において、多様な文化や価値観を持つ外国籍人財は、企業の成長と革新に不可欠な存在です。私たちは、それぞれの企業様のニーズを深く理解し、最適なスキルと経験、そして熱意を持った外国籍人財をご紹介することで、企業様の発展に貢献したいと考えております。<br>
-                    また、日本で働くことを志す外国籍人財の方々にとっては、言葉や文化、生活習慣の違いなど、多くの挑戦があることと存じます。私たちは、単なる人財紹介に留まらず、彼らが安心して日本で活躍できるよう、きめ細やかなサポート体制を整えております。<br>
-                    私たちのビジョンは、「全員が外国籍人財紹介・外国籍サポートのプロフェッショナルになる」ことです。常に専門性を高め、変化する社会のニーズに対応できるよう、社員一同邁進してまいります。<br>
-                    このビジョンを実現するために、私たちは以下の5つのバリューを大切にしています。<br><br>
-                    • 責任: プロフェッショナルとしての自覚を持ち、常に責任ある行動をとります。<br>
-                    • 思いやり: 相手の立場に立ち、寄り添ったサポートを心がけます。<br>
-                    • 傾聴: 企業様と求職者の方々の声に真摯に耳を傾け、本質的なニーズを理解します。<br>
-                    • 行動力: 迅速かつ丁寧な対応を心がけ、具体的な行動で信頼を築きます。<br>
-                    • 調整力: 円滑なコミュニケーションと最適なマッチングを実現します。<br><br>
-                    私たちは、人と企業を結びつける架け橋として、国籍や文化を超えた豊かな社会の実現に貢献できることを誇りに思っております。<br>
-                    今後とも、皆様のご期待にお応えできるよう、より一層の努力を重ねてまいりますので、何卒ご指導ご支援賜りますようお願い申し上げます。
-                </p>
-                <p class="greeting-signature">株式会社アイティーエフ <br> 代表取締役 上田 勝彦</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-
+            <section class="l-section greeting" id="greeting">
+                <div class="wrap w1200 sp-wrap">
+                    <h2 class="greeting-title" data-i18n="greeting.title">代表者挨拶</h2>
+                    <div class="greeting-container">
+                        <div class="greeting-image">
+                            <img src="images/owner.png" alt="代表者写真">
+                        </div>
+                        <div class="greeting-content">
+                            <h3 class="greeting-subheading" data-i18n="greeting.subheading">株式会社アイティーエフ 代表取締役</h3>
+                            <p class="greeting-text">
+                                私どもは、外国籍人財紹介会社として、「一人でも多くの外国籍人財と1社でも多くの企業様のために、人と人を繋げる架け橋となる」ことをミッションに掲げ、日々活動しております。
+                                グローバル化が加速する現代において、多様な文化や価値観を持つ外国籍人財は、企業の成長と革新に不可欠な存在です。私たちは、それぞれの企業様のニーズを深く理解し、最適なスキルと経験、そして熱意を持った外国籍人財をご紹介することで、企業様の発展に貢献したいと考えております。<br>
+                                また、日本で働くことを志す外国籍人財の方々にとっては、言葉や文化、生活習慣の違いなど、多くの挑戦があることと存じます。私たちは、単なる人財紹介に留まらず、彼らが安心して日本で活躍できるよう、きめ細やかなサポート体制を整えております。<br>
+                                私たちのビジョンは、「全員が外国籍人財紹介・外国籍サポートのプロフェッショナルになる」ことです。常に専門性を高め、変化する社会のニーズに対応できるよう、社員一同邁進してまいります。
+                                このビジョンを実現するために、私たちは以下の5つのバリューを大切にしています。<br>
+                                • 責任: プロフェッショナルとしての自覚を持ち、常に責任ある行動をとります。<br>
+                                • 思いやり: 相手の立場に立ち、寄り添ったサポートを心がけます。<br>
+                                • 傾聴: 企業様と求職者の方々の声に真摯に耳を傾け、本質的なニーズを理解します。<br>
+                                • 行動力: 迅速かつ丁寧な対応を心がけ、具体的な行動で信頼を築きます。<br>
+                                • 調整力: 円滑なコミュニケーションと最適なマッチングを実現します。<br>
+                                私たちは、人と企業を結びつける架け橋として、国籍や文化を超えた豊かな社会の実現に貢献できることを誇りに思っております。
+                                今後とも、皆様のご期待にお応えできるよう、より一層の努力を重ねてまいりますので、何卒ご指導ご支援賜りますようお願い申し上げます。
+                            </p>
+                            <p class="greeting-signature">株式会社アイティーエフ <br> 代表取締役 上田 勝彦</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
             <section class="l-section column" id="osirase">
                 <div class="wrapper pc-flex bet">
@@ -656,13 +669,11 @@
                     </div>
                     <div class="footer-col">
                         <h3 class="footer-heading" data-i18n="footer.company_info_title">会社案内</h3>
-                        <a href="inquiry.html" class="footer-link" data-i18n="footer.president_greeting">代表者挨拶</a>
+                        <a href="index.html#greeting" class="footer-link" data-i18n="footer.president_greeting">代表者挨拶</a>
                         <a href="company_info.html" class="footer-link" data-i18n="footer.company_info">会社概要</a>
                         <a href="index.html#work-step" class="footer-link" data-i18n="footer.introduction_flow">紹介の流れ</a>
                     </div>
                     <div class="footer-col">
-                        <h3 class="footer-heading" data-i18n="footer.consumer_info_title">消費者情報</h3>
-                        <a href="inquiry.html" class="footer-link" data-i18n="footer.inquiry">お問い合わせ</a>
                         <a href="privacy.html" class="footer-btn" data-i18n="footer.privacy_policy">プライバシーポリシー</a>
                     </div>
                 </div>
@@ -673,11 +684,11 @@
         </footer>
     </div>
     <!-- Add this just before the closing </body> tag -->
-<a href="#" id="back-to-top" class="back-to-top" title="Back to Top">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="18 15 12 9 6 15"></polyline>
-    </svg>
-</a>
+    <a href="#" id="back-to-top" class="back-to-top" title="Back to Top">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+    </a>
     <!-- i18next Scripts -->
     <script src="https://unpkg.com/i18next@23.11.5/dist/umd/i18next.min.js"></script>
     <script src="js/i18nextHttpBackend.min.js"></script>
@@ -687,6 +698,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/form.min.js"></script>
     <script src="js/main.min.js"></script>
+    <script src="js/top.js"></script>
     <script src="js/video.js"></script>
     <script src="js/scripts.js"></script>
     <script src="js/news.js"></script>
