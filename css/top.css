@@ -146,12 +146,12 @@ ul {
 }
 
 .topImagesInner--05 {
-    background: url(../images/mv05_pc.png) no-repeat center center;
+    background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),url(../images/mv05_pc.png) no-repeat center center;
     background-size: cover;
 }
 
 .topImagesInner--06 {
-    background: url(../images/mv06_pc.png) no-repeat center center;
+    background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),url(../images/mv06_pc.jpg) no-repeat center center;
     background-size: cover;
 }
 
