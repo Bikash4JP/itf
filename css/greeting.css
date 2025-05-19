@@ -19,7 +19,7 @@
 .greeting-image {
     flex: 0 0 40%; /* 40% width for image section */
     max-width: 40%;
-    background: #333; /* Dark background as per sample */
+    /* background: #008cff; Dark background as per sample */
     /* padding: 20px; */
     border-radius: 10px;
     display: flex;

@@ -4,9 +4,10 @@ document.addEventListener('DOMContentLoaded', function() {
       bar.style.setProperty('--jlpt-final-height', bar.style.height);
       bar.style.setProperty('--jlpt-order', index);
     });
-  });
-  // phone call js 
-  document.addEventListener("DOMContentLoaded", function () {
+});
+
+// Phone call JS 
+document.addEventListener("DOMContentLoaded", function () {
     const phoneLink = document.querySelector(".phone-link");
 
     phoneLink.addEventListener("click", function (e) {
@@ -17,15 +18,15 @@ document.addEventListener('DOMContentLoaded', function() {
         // For mobile, the browser will handle `tel:` automatically.
     });
 });
-// mail redirectors Js =======================================================
+
+// Mail redirectors JS
 document.addEventListener("DOMContentLoaded", function () {
-  const mailButton = document.getElementById("mailBtn");
+    const mailButton = document.getElementById("mailBtn");
 
-  mailButton.addEventListener("click", function () {
-      window.location.href = "mailto:info@it-future.jp";
-  });
+    mailButton.addEventListener("click", function () {
+        window.location.href = "mailto:info@it-future.jp";
+    });
 });
-
 
 // JavaScript to handle sticky behavior on mobile for the shortcuts
 function debounce(func, wait) {
@@ -43,9 +44,9 @@ function debounce(func, wait) {
 window.addEventListener('scroll', debounce(function() {
     const shortcutLinks = document.querySelector('.shortcut-links');
     const header = document.querySelector('#header');
-    const headerHeight = header.offsetHeight;
-    const introSection = document.querySelector('.unique-intro9-section');
-    const introBottom = introSection.offsetTop + introSection.offsetHeight;
+    const headerHeight = header ? header.offsetHeight : 0;
+    const introSection = document.querySelector('.topSlider'); // Updated to target the new intro section
+    const introBottom = introSection ? (introSection.offsetTop + introSection.offsetHeight) : 0;
 
     if (window.scrollY >= introBottom - headerHeight) {
         shortcutLinks.classList.add('sticky');
@@ -54,11 +55,9 @@ window.addEventListener('scroll', debounce(function() {
         shortcutLinks.classList.remove('sticky');
         shortcutLinks.style.top = 'auto';
     }
-}, 0)); // Debounce delay of 50ms
+}, 50)); // Debounce delay of 50ms
 
-
-
-// -------------------------------------------------------------------------------------------------------------------------------------
+// Match Greeting Heights
 function matchGreetingHeights() {
     const greetingImage = document.querySelector('.greeting-image');
     const greetingContent = document.querySelector('.greeting-content');
@@ -77,7 +76,6 @@ window.addEventListener('load', matchGreetingHeights);
 // Run on window resize
 window.addEventListener('resize', matchGreetingHeights);
 
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Back to Top Button Functionality
 document.addEventListener('DOMContentLoaded', () => {
     const backToTopButton = document.getElementById('back-to-top');
