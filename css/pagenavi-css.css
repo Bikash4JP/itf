@@ -385,8 +385,8 @@ p.sl li{
 
   /* last access image style start fromhrrre ============================================= */
   .acc_img img {
-    height: 100px;
-    width: 450px;
+    height: 200px;
+    width: 800px;
     object-fit: cover; /* Ensures the image fits within the specified dimensions */
     transition: all 0.3s ease; /* Smooth transition for the hover effect */
 }
