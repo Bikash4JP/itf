@@ -416,6 +416,8 @@
                         <a href="index.html#merit" class="footer-link" data-i18n="footer.benefits">メリット</a>
                         <a href="index.html#work-step" class="footer-link"
                             data-i18n="footer.introduction_flow">紹介の流れ</a>
+                            <a href="about.html#support-naiyou" class="footer-link"
+                            data-i18n="footer.support_content">サポート内容</a>
                     </div>
                     <div class="footer-col">
                         <h3 class="footer-heading" data-i18n="footer.company_info_title">会社案内</h3>
@@ -423,7 +425,6 @@
                             data-i18n="footer.president_greeting">代表者挨拶</a>
                         <a href="company_info.html" class="footer-link" data-i18n="footer.company_info">会社概要</a>
                         <a href="about.html#support-naiyou" class="footer-link"
-                            data-i18n="footer.support_content">サポート内容</a>
                     </div>
                     <div class="footer-col">
                         <a href="privacy.html" class="footer-btn" data-i18n="footer.privacy_policy">プライバシーポリシー</a>
