@@ -7,14 +7,13 @@
 
 .greeting-title {
     display: table;                  /* Shrink to fit the text width */
-    margin: 0 auto;                  /* Center this “table” horizontally */
+    margin: 30px auto;               /* Center horizontally with 30px top and bottom margin */
     font-size: 40px;
     font-weight: bold;
     color: rgb(35, 128, 165);        /* Sky‑blue text */
     padding-bottom: 8px;             /* Space for the underline */
     border-bottom: 6px solid rgb(35, 128, 165);
-    margin-bottom: 30px;
-    /* We removed text-align: center here, since display: table + margin:auto makes it centered. */
+    text-align: center;              /* Center the text inside the element (optional) */
 }
 
 /* Float + Clearfix container */
