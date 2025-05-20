@@ -268,7 +268,8 @@
     .shortcut-links {
         padding: 5px; /* Reduced padding for the container */
         gap: 3px; /* Reduced gap between buttons */
-        justify-content: flex-start; /* Align to start for better scrolling */
+        justify-content: center; /* Align to center for better scrolling */
+        
     }
 
     .shortcut-btn {
