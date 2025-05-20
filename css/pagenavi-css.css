@@ -87,8 +87,9 @@ http://wordpress.org/extend/plugins/wp-pagenavi/
 }
 
 .about-button {
-  background-color: white;
+  background-color: rgb(230, 167, 52);
   border: 2px solid #ddd;
+  border-radius: 10px;
   padding: 10px 20px;
   font-size: 16px;
   cursor: pointer;
@@ -96,7 +97,7 @@ http://wordpress.org/extend/plugins/wp-pagenavi/
   transition: background 0.3s;
 }
 .about-button:hover {
-  background-color: #f8f8f8;
+  background-color: #23a1eb;
 }
 .l-section.senryaku {
   padding: 5px 0; /* 10px padding top and bottom, 0 for left and right */

@@ -1,45 +1,57 @@
-/* Greeting Section Styling */
+/* ==============================
+   Greeting Section Styling
+   ============================== */
 .greeting {
-    padding: 60px 0; /* Consistent with other sections */
+    padding: 60px 0; /* Vertical spacing around the entire section */
 }
 
 .greeting-title {
+    display: table;                  /* Shrink to fit the text width */
+    margin: 0 auto;                  /* Center this “table” horizontally */
     font-size: 40px;
     font-weight: bold;
-    color: rgb(35, 128, 165); /* Skyblue as requested */
-    text-align: center;
-    margin-bottom: 40px; /* Space below the title */
+    color: rgb(35, 128, 165);        /* Sky‑blue text */
+    padding-bottom: 8px;             /* Space for the underline */
+    border-bottom: 6px solid rgb(35, 128, 165);
+    margin-bottom: 30px;
+    /* We removed text-align: center here, since display: table + margin:auto makes it centered. */
 }
 
+/* Float + Clearfix container */
 .greeting-container {
-    display: flex;
-    gap: 20px;
+    position: relative;
+    border-right: 5px solid rgb(35, 128, 165); /* Vertical sky‑blue line on the right */
+    padding-right: 20px;                       /* Breathing room between text and border */
+}
+.greeting-container::after {
+    content: "";
+    display: table;
+    clear: both;
 }
 
+/* Portrait box (floated left) */
 .greeting-image {
-    flex: 0 0 40%; /* 40% width for image section */
-    max-width: 40%;
-    /* background: #008cff; Dark background as per sample */
-    /* padding: 20px; */
+    float: left;
+    width: 40%;              /* Portrait area takes up 40% of width on desktop */
+    max-width: 350px;        /* Cap the width on very large screens */
+    margin-right: 20px;      /* Gap between portrait and text */
     border-radius: 10px;
+    padding: 10px;           /* Inner padding so the photo isn’t flush to the edges */
+    box-sizing: border-box;  /* Ensure padding does not expand beyond 40% */
     display: flex;
-    align-items: center; /* Center the image vertically */
-    justify-content: center; /* Center the image horizontally */
+    align-items: center;     /* Vertically center the <img> */
+    justify-content: center; /* Horizontally center the <img> */
 }
 
 .greeting-image img {
-    width: auto; /* Maintain aspect ratio */
-    height: 100%; /* Fit to the container height */
-    max-width: 100%; /* Prevent overflow */
+    max-width: 100%;
+    height: auto;
     border-radius: 5px;
+    display: block;
 }
 
-.greeting-content {
-    flex: 0 0 60%; /* 60% width for text section */
-    max-width: 60%;
-    border-right: 5px solid rgb(27, 154, 185);
-}
-
+/* Main content: let text flow to the right, then under the portrait once it reaches its bottom */
+/* Subheading (“株式会社アイティーエフ 代表取締役”) */
 .greeting-subheading {
     font-size: 24px;
     font-weight: bold;
@@ -47,6 +59,7 @@
     margin-bottom: 15px;
 }
 
+/* Paragraph text */
 .greeting-text {
     font-size: 16px;
     color: #666;
@@ -54,35 +67,41 @@
     line-height: 1.8;
 }
 
+/* Signature at the bottom‑right of the content block */
 .greeting-signature {
+    display: block;
     font-size: 16px;
     font-weight: bold;
     color: #333;
+    text-align: right; /* Pushes the signature to the right edge */
+    margin-top: 20px;  /* Some space above the signature */
 }
 
-/* Responsive Adjustments */
+/* ==============================
+   Responsive Adjustments
+   ============================== */
+
+/* Tablet / small‑desktop */
 @media (max-width: 991px) {
+    /* Remove the vertical right border on narrower screens */
     .greeting-container {
-        flex-direction: column;
-        gap: 15px;
+        border-right: none;
+        padding-right: 0;
     }
 
-    .greeting-image,
-    .greeting-content {
-        flex: 0 0 100%;
-        max-width: 100%;
-    }
-
+    /* Stack portrait on top of text */
     .greeting-image {
-        text-align: center;
-        height: auto !important; /* Reset height for mobile stacking */
+        float: none;         /* Disable float */
+        width: 100%;         /* Full‑width portrait */
+        margin-right: 0;     /* No side margin */
+        margin-bottom: 20px; /* Space below portrait */
+        text-align: center;  
     }
-
     .greeting-image img {
-        max-width: 300px;
-        height: auto; /* Reset for mobile */
+        max-width: 300px;    /* Limit image width on tablet */
+        height: auto;
     }
-
+    /* Center all text blocks on tablet */
     .greeting-subheading,
     .greeting-text,
     .greeting-signature {
@@ -90,23 +109,21 @@
     }
 }
 
+/* Mobile (small) */
 @media (max-width: 576px) {
     .greeting {
-        padding: 40px 0;
+        padding: 40px 0; /* Less vertical padding on very small screens */
     }
-
     .greeting-title {
         font-size: 32px;
+        padding-bottom: 6px; /* Slightly smaller underline padding */
     }
-
     .greeting-image img {
-        max-width: 250px;
+        max-width: 250px; /* Even narrower image on phone */
     }
-
     .greeting-subheading {
         font-size: 20px;
     }
-
     .greeting-text,
     .greeting-signature {
         font-size: 14px;

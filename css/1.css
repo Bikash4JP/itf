@@ -209,7 +209,7 @@ ul {
 
 /* Background Images */
 .topImagesInner--01.js-current {
-    background:linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),  url(../images/mv01_pc.png) no-repeat center center;
+    background: url(../images/mv01_pc.png) no-repeat center center;
     background-size: cover;
 }
 
@@ -219,7 +219,7 @@ ul {
 }
 
 .topImagesInner--03.js-current {
-    background:linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),  url(../images/mv03_pc.jpg) no-repeat center center;
+    background: url(../images/mv03_pc.png) no-repeat center center;
     background-size: cover;
 }
 
@@ -248,7 +248,7 @@ ul {
         background-size: cover;
     }
     .topImagesInner--03.js-current {
-        background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url(../images/mv03_sp.jpg) no-repeat center center;
+        background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url(../images/mv03_sp.png) no-repeat center center;
         background-size: cover;
     }
     .topImagesInner--04.js-current {
