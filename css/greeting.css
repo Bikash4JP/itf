@@ -103,7 +103,6 @@
     }
     /* Center all text blocks on tablet */
     .greeting-subheading,
-    .greeting-text,
     .greeting-signature {
         text-align: center;
     }

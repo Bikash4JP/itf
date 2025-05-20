@@ -1,3 +1,228 @@
+.unique-intro9-section {
+    background: linear-gradient(rgb(51, 174, 223), rgb(231, 219, 195));
+    position: relative;
+    overflow: hidden;
+    margin-top: 50px;
+    height: 775px; /* PC view height */
+}
+
+/* Container and Row */
+.unique-intro9-section .unique-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0;
+}
+
+.unique-intro9-section .unique-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+#semi {
+    color: rgb(53, 51, 49);
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: 60px;
+    font-weight: bolder;
+    font-style: unset;
+    margin-bottom: 0px;
+}
+
+#semi #ee {
+    color: whitesmoke; /* Default color for larger screens */
+}
+
+/* Columns */
+.unique-intro9-section .unique-col-lg-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+    padding: 15px;
+}
+
+/* Text Content Styling (Intro 1) */
+.unique-intro9-section .unique-intro9-content {
+    text-align: left;
+}
+
+.unique-intro9-section .unique-sub-title {
+    display: block;
+    font-size: 18px;
+    color: #53173c;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.unique-intro9-section .unique-title {
+    font-size: 36px;
+    font-weight: bold;
+    color: #333;
+    line-height: 1.2;
+    margin-bottom: 20px;
+}
+
+.unique-intro9-section .unique-desc p {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+/* Button Styling */
+.unique-intro9-section .unique-btn {
+    display: inline-block;
+    padding: 12px 30px;
+    background-color: #00a99d;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.unique-intro9-section .unique-btn:hover {
+    background-color: #008c82;
+}
+
+/* Image Side Styling (Intro 2) */
+.unique-intro9-section .unique-intro9-image-wrap {
+    position: relative;
+    text-align: center;
+    margin-bottom: 0; /* Ensure no extra space below Intro 2 */
+}
+
+.unique-intro9-section .unique-intro9-image {
+    position: relative;
+}
+
+/* Background Globe (World Rotate) */
+.unique-intro9-section .unique-worldRotate {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 500px;
+    height: 500px;
+    opacity: 0.1;
+    z-index: 1;
+}
+
+.unique-inner-img-two {
+    opacity: 0.8;
+}
+
+/* Main Image (Person with Laptop) */
+.unique-intro9-section .unique-inner-img-two img {
+    position: relative;
+    z-index: 2;
+    max-width: 100%;
+    height: auto;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 991px) {
+    .unique-intro9-section {
+        height: auto; /* Remove fixed height for tablet and mobile */
+        padding: 30px 0; /* Add padding to control spacing */
+    }
+
+    .unique-intro9-section .unique-col-lg-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+        padding: 10px; /* Reduce padding for tighter layout */
+    }
+
+    .unique-intro9-section .unique-row {
+        flex-direction: column; /* Explicitly stack Intro 1 above Intro 2 */
+        gap: 20px; /* Add a small gap between text and image */
+    }
+
+    .unique-intro9-section .unique-intro9-content {
+        text-align: center;
+    }
+
+    .unique-intro9-section .unique-title {
+        font-size: 28px;
+    }
+
+    .unique-intro9-section .unique-worldRotate {
+        width: 400px;
+        height: 400px;
+    }
+}
+
+@media (max-width: 576px) {
+    .unique-intro9-section {
+        height: auto; /* Remove fixed height for better responsiveness */
+        padding: 60px 0 30px; /* More top padding to push down content */
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .unique-intro9-content {
+        margin-top: 200px; /* Push content lower */
+        padding: 0 15px;
+    }
+
+    .unique-intro9-section .unique-title {
+        font-size: 24px;
+        /* margin-bottom: 15px; */
+    }
+
+    .unique-intro9-section .unique-sub-title {
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+
+    .unique-intro9-section .unique-desc p {
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+
+    .unique-intro9-section .unique-btn {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+
+    #semi {
+        font-size: 36px;
+        white-space: nowrap;
+        line-height: 1.2;
+    }
+
+    #semi #ee {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 2px 6px;
+        border-radius: 5px;
+        font-weight: bold;
+        transform: rotate(-10deg);
+        display: inline-block;
+    }
+
+    .unique-intro9-section .unique-inner-img-two {
+        transform-origin: bottom center;
+        margin-top: 20px;
+        margin-bottom: -20px; /* Pull up the bottom space */
+    }
+
+    .unique-intro9-section .unique-inner-img-two img {
+        max-width: 85%;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+    }
+
+    .unique-intro9-section .unique-worldRotate {
+        width: 280px;
+        height: 280px;
+    }
+
+    .unique-intro9-section .unique-row {
+        gap: 10px;
+    }
+}
+
+
 /* ---------------------------------------------------------------------------------------------------------------___________________________________________________________ */
 
 /* Shortcut Links Styling */
