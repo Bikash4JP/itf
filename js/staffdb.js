@@ -7,13 +7,62 @@ document.addEventListener('DOMContentLoaded', function() {
     const editButton = previewPopup.querySelector('.preview-actions button:first-child');
     const submitButton = previewPopup.querySelector('.preview-actions button:last-child');
 
+    // Fetch posts on page load
+    fetchPosts();
+
+    // Function to fetch and render posts
+    function fetchPosts() {
+        // Get session ID from cookies (if available)
+        const sessionId = document.cookie.split('; ').find(row => row.startsWith('PHPSESSID'))?.split('=')[1] || '';
+        
+        fetch('/php/fetch_staff_posts.php' + (sessionId ? `?session_id=${sessionId}` : ''), {
+            method: 'GET',
+            credentials: 'include',
+            mode: 'cors',
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            console.log('Fetch Posts Response Status:', response.status);
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(`HTTP error! status: ${response.status}, response: ${text}`);
+                });
+            }
+            return response.text();
+        })
+        .then(text => {
+            console.log('Raw Response Text:', text);
+            if (!text.trim()) {
+                throw new Error('Empty response received');
+            }
+            try {
+                const data = JSON.parse(text);
+                if (data.success) {
+                    renderStaffPosts(data.posts);
+                } else {
+                    console.error('Fetch Posts Failed:', data.message);
+                    document.getElementById('postsList').innerHTML = `<p>エラー: ${data.message}</p>`;
+                }
+            } catch (error) {
+                throw new Error(`Failed to parse JSON: ${error.message}, raw response: ${text}`);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching posts:', error);
+            document.getElementById('postsList').innerHTML = '<p>投稿の取得中にエラーが発生しました。詳細: ' + error.message + '</p>';
+        });
+    }
+
     function showPreview(formData, formType) {
-        const previewUrl = 'php/preview_post.php';
+        const previewUrl = '/php/preview_post.php';
         console.log('Sending fetch request to:', previewUrl);
         console.log('Full URL:', new URL(previewUrl, window.location.origin).href);
         fetch(previewUrl, {
             method: 'POST',
-            body: formData
+            body: formData,
+            credentials: 'include'
         })
         .then(response => {
             console.log('Preview response status:', response.status);
@@ -66,12 +115,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const formData = new FormData(formToSubmit);
-        const submitUrl = 'php/submit_post.php';
+        const submitUrl = '/php/submit_post.php';
         console.log('Sending fetch request to:', submitUrl);
         console.log('Full URL:', new URL(submitUrl, window.location.origin).href);
         fetch(submitUrl, {
             method: 'POST',
-            body: formData
+            body: formData,
+            credentials: 'include'
         })
         .then(response => {
             console.log('Submit response status:', response.status);
@@ -89,6 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (formToSubmit) {
                     formToSubmit.reset();
                 }
+                fetchPosts();
             } else {
                 alert(data.message);
             }
@@ -99,10 +150,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     };
 
-    // Functions for conditional form fields
     function toggleSalaryInput() {
         const salaryAmountGroup = document.getElementById('salary-amount-group');
         const salaryInput = document.getElementById('salary');
+        if (!salaryAmountGroup || !salaryInput) return;
         if (document.querySelector('input[name="salary_type"]:checked').value === 'amount') {
             salaryAmountGroup.style.display = 'block';
             salaryInput.required = true;
@@ -114,11 +165,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function toggleBonusAmount() {
         const bonusAmountGroup = document.getElementById('bonus-amount-group');
+        if (!bonusAmountGroup) return;
         bonusAmountGroup.style.display = document.querySelector('input[name="bonuses"]:checked').value === '1' ? 'block' : 'none';
     }
 
     function toggleRentSupport() {
         const rentSupportGroup = document.getElementById('rent-support-group');
+        if (!rentSupportGroup) return;
         rentSupportGroup.style.display = document.querySelector('input[name="living_support"]:checked').value === '1' ? 'block' : 'none';
         toggleRentSupportInput();
     }
@@ -126,6 +179,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function toggleRentSupportInput() {
         const rentSupportAmountGroup = document.getElementById('rent-support-amount-group');
         const rentSupportInput = document.getElementById('rent_support_amount');
+        if (!rentSupportAmountGroup || !rentSupportInput) return;
         if (document.querySelector('input[name="living_support"]:checked')?.value === '1') {
             rentSupportAmountGroup.style.display = 'block';
             rentSupportInput.required = document.querySelector('input[name="rent_support_type"]:checked').value === 'amount';
@@ -137,15 +191,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function toggleTransportAmount() {
         const transportAmountGroup = document.getElementById('transport-amount-group');
+        if (!transportAmountGroup) return;
         transportAmountGroup.style.display = document.querySelector('input[name="transportation_charges"]:checked').value === '1' ? 'block' : 'none';
     }
 
     function toggleIncrementCondition() {
         const incrementConditionGroup = document.getElementById('increment-condition-group');
+        if (!incrementConditionGroup) return;
         incrementConditionGroup.style.display = document.querySelector('input[name="salary_increment"]:checked').value === '1' ? 'block' : 'none';
     }
 
-    // Add event listeners for conditional fields
     const salaryTypeRadios = document.querySelectorAll('input[name="salary_type"]');
     const bonusesRadios = document.querySelectorAll('input[name="bonuses"]');
     const livingSupportRadios = document.querySelectorAll('input[name="living_support"]');
@@ -160,7 +215,6 @@ document.addEventListener('DOMContentLoaded', function() {
     transportationRadios.forEach(radio => radio.addEventListener('change', toggleTransportAmount));
     salaryIncrementRadios.forEach(radio => radio.addEventListener('change', toggleIncrementCondition));
 
-    // Initial state
     toggleSalaryInput();
     toggleBonusAmount();
     toggleRentSupport();
@@ -176,6 +230,32 @@ document.addEventListener('DOMContentLoaded', function() {
     if (submitButton) {
         submitButton.addEventListener('click', submitForm);
     }
+
+    const postSummary = document.getElementById('post-summary');
+    const jobSummary = document.getElementById('job-summary');
+    const postWordCount = document.getElementById('post-word-count');
+    const jobWordCount = document.getElementById('job-word-count');
+
+    function updateWordCount(textarea, wordCountElement) {
+        const text = textarea.value.trim();
+        const words = text ? text.split(/\s+/).length : 0;
+        wordCountElement.textContent = words;
+        if (words > 100) {
+            wordCountElement.style.color = 'red';
+        } else {
+            wordCountElement.style.color = 'black';
+        }
+    }
+
+    if (postSummary && postWordCount) {
+        postSummary.addEventListener('input', () => updateWordCount(postSummary, postWordCount));
+        updateWordCount(postSummary, postWordCount);
+    }
+
+    if (jobSummary && jobWordCount) {
+        jobSummary.addEventListener('input', () => updateWordCount(jobSummary, jobWordCount));
+        updateWordCount(jobSummary, jobWordCount);
+    }
 });
 
 window.showForm = function(formId) {
@@ -185,32 +265,13 @@ window.showForm = function(formId) {
 window.hideForm = function(formId) {
     document.getElementById(formId + 'Form').style.display = 'none';
 };
-// js/staff.js
-// Fetch posts when the page loads
-document.addEventListener('DOMContentLoaded', () => {
-    fetch('php/fetch_staff_posts.php', {
-        method: 'GET',
-        credentials: 'include' // Ensure session cookies are sent
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            renderStaffPosts(data.posts);
-        } else {
-            console.error(data.message);
-            document.getElementById('postsList').innerHTML = `<p>${data.message}</p>`;
-        }
-    })
-    .catch(error => {
-        console.error('Error fetching posts:', error);
-        document.getElementById('postsList').innerHTML = '<p>投稿の取得中にエラーが発生しました。</p>';
-    });
-});
 
-// Render posts to the page
 function renderStaffPosts(posts) {
     const postsList = document.getElementById('postsList');
-    if (!postsList) return;
+    if (!postsList) {
+        console.error('postsList element not found');
+        return;
+    }
 
     postsList.innerHTML = '';
 
@@ -223,7 +284,6 @@ function renderStaffPosts(posts) {
         const postItem = document.createElement('div');
         postItem.className = `post-item ${post.post_type === 'job' ? 'post-item--job' : 'post-item--news'}`;
 
-        // Post Meta
         const meta = document.createElement('div');
         meta.className = 'post-meta';
         meta.innerHTML = `
@@ -232,17 +292,15 @@ function renderStaffPosts(posts) {
             <span class="posted-by">Posted By: ${post.posted_by}</span>
         `;
 
-        // Post Title
         const title = document.createElement('div');
         title.className = 'post-title';
-        title.innerHTML = `<a href="post_view.php?id=${post.id}">${post.title}</a>`;
+        title.innerHTML = `<a href="/php/post_view.php?id=${post.id}">${post.title}</a>`;
 
-        // Post Image or Placeholder
         let image = '';
         if (post.image) {
             image = `
                 <div class="post-image">
-                    <img src="${post.image}" alt="${post.title}">
+                    <img src="${post.image}" alt="${post.title}" onerror="this.onerror=null; this.src='/images/placeholder.jpg';">
                 </div>
             `;
         } else {
@@ -253,12 +311,10 @@ function renderStaffPosts(posts) {
             `;
         }
 
-        // Post Summary
         const summary = document.createElement('div');
         summary.className = 'post-summary';
-        summary.textContent = post.short_summary;
+        summary.textContent = post.short_summary || '概要がありません。';
 
-        // Job Details (if applicable)
         let jobDetails = '';
         if (post.post_type === 'job') {
             jobDetails = `
@@ -272,7 +328,6 @@ function renderStaffPosts(posts) {
             `;
         }
 
-        // Construct the post item
         postItem.innerHTML = `
             ${image}
             <div class="post-content">
@@ -286,4 +341,3 @@ function renderStaffPosts(posts) {
         postsList.appendChild(postItem);
     });
 }
-// for staff control ---------------------------------------------------------------------------

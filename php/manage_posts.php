@@ -90,16 +90,17 @@ $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <header>
         <div class="logo"><a href="../index.html"><img src="../images/logo.png" alt="ITF Logo"></a></div>
         <nav>
-            <ul>
-                <li><a href="../staffdb.php">Home</a></li>
-                <li><a href="#" onclick="showForm('posts')">Add Posts</a></li>
-                <li><a href="#" onclick="showForm('jobs')">Add Jobs</a></li>
-                <li><a href="manage_posts.php">Manage Posts</a></li>
-                <li><a href="profile.php">Profile</a></li>
-                <li><a href="dashboard.php">DashBoard</a></li>
-                <li><a href="logout.php">Logout</a></li>
-            </ul>
-        </nav>
+    <ul>
+        <li><a href="../#000000staffdb.php">ホーム</a></li>
+        <!-- <li><a href="#" onclick="showForm('posts')">投稿を追加</a></li>
+        <li><a href="#" onclick="showForm('jobs')">求人を追加</a></li> -->
+        <li><a href="manage_posts.php">投稿を管理</a></li>
+        <li><a href="profile.php">プロフィール</a></li>
+        <li><a href="dashboard.php">ダッシュボード</a></li>
+        <li><a href="logout.php">ログアウト</a></li>
+    </ul>
+</nav>
+
     </header>
 
     <section class="hero">

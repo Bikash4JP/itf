@@ -1,10 +1,35 @@
 <?php
-ini_set('session.cookie_path', '/itf');
+ini_set('session.cookie_path', '/');
+ini_set('session.cookie_domain', '.it-future.jp');
+ini_set('session.cookie_lifetime', 86400);
+ini_set('session.cookie_secure', true);
+ini_set('session.cookie_httponly', true);
+ini_set('session.cookie_samesite', 'Lax');
+
 session_start();
 
 if (!isset($_SESSION['id']) || !isset($_SESSION['username'])) {
-    header("Location: php/login.php");
+    header("Location: /php/login.php");
     exit;
+}
+
+// Include database connection
+require_once 'php/db_connect.php';
+
+// Fetch staff name from the staff table
+$staff_id = $_SESSION['id'];
+try {
+    $stmt = $pdo->prepare("SELECT name FROM staff WHERE id = ?");
+    $stmt->execute([$staff_id]);
+    $staff = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($staff && isset($staff['name'])) {
+        $staff_name = htmlspecialchars($staff['name']);
+    } else {
+        $staff_name = htmlspecialchars($_SESSION['username']); // Fallback to username if name not found
+    }
+} catch (PDOException $e) {
+    $staff_name = htmlspecialchars($_SESSION['username']); // Fallback in case of error
 }
 
 $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -16,7 +41,7 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>スタッフダッシュボード</title>
-    <link rel="stylesheet" href="css/staffdb.css">
+    <link rel="stylesheet" href="css/staffdb.css?v=1.4">
     <link rel="stylesheet" href="css/news.css">
 </head>
 <body>
@@ -24,27 +49,27 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         <div class="logo"><a href="index.html"><img src="images/logo.png" alt="ITF Logo"></a></div>
         <nav>
     <ul>
-        <li><a href="staffdb.php">Home</a></li>
-        <li><a href="#" onclick="showForm('posts')">Add Posts</a></li>
-        <li><a href="#" onclick="showForm('jobs')">Add Jobs</a></li>
-        <li><a href="php/manage_posts.php">Manage Posts</a></li>
-        <li><a href="php/profile.php">Profile</a></li>
-        <li><a href="php/dashboard.php">DashBoard</a></li>
-        <li><a href="php/logout.php">Logout</a></li>
+        <li><a href="staffdb.php">ホーム</a></li>
+        <li><a href="#" onclick="showForm('posts')">投稿を追加</a></li>
+        <li><a href="#" onclick="showForm('jobs')">求人を追加</a></li>
+        <li><a href="php/manage_posts.php">投稿を管理</a></li>
+        <li><a href="php/profile.php">プロフィール</a></li>
+        <li><a href="php/dashboard.php">ダッシュボード</a></li>
+        <li><a href="php/logout.php">ログアウト</a></li>
     </ul>
 </nav>
+
     </header>
 
     <section class="hero">
-    <h1>スタッフダッシュボード</h1>
-    <p>ようこそ、<?php echo htmlspecialchars($_SESSION['username']); ?>さん！</p>
-    <p>今日も一日宜しくお願い致します。</p>
-    <p>現在の時刻: <?php 
-        date_default_timezone_set('Asia/Tokyo');
-        echo date('Y年m月d日 H:i:s'); 
-    ?></p>
-</section>
-    
+        <p>ようこそ<br><h1><?php echo $staff_name; ?></h1>さん！</p>
+        <p>今日も一日宜しくお願い致します。</p>
+        <p>現在の時刻: <?php 
+            date_default_timezone_set('Asia/Tokyo');
+            echo date('Y年m月d日 H:i:s'); 
+        ?></p>
+    </section>
+
     <section class="recent-posts">
         <h2>新規投稿</h2>
         <div id="postsList"></div>
@@ -58,6 +83,7 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                 <input type="hidden" name="form_type" value="posts">
                 <input type="hidden" name="date" value="<?php echo date('Y-m-d'); ?>">
                 <input type="hidden" name="posted_by" value="<?php echo htmlspecialchars($_SESSION['username']); ?>">
+                <input type="hidden" name="staff_id" value="<?php echo htmlspecialchars($_SESSION['id']); ?>">
                 <h3>Add News/Announcement</h3>
                 <label for="post-title">タイトル *</label>
                 <input type="text" id="post-title" name="title" required>
@@ -93,21 +119,17 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                 <input type="hidden" name="form_type" value="jobs">
                 <input type="hidden" name="date" value="<?php echo date('Y-m-d'); ?>">
                 <input type="hidden" name="posted_by" value="<?php echo htmlspecialchars($_SESSION['username']); ?>">
+                <input type="hidden" name="staff_id" value="<?php echo htmlspecialchars($_SESSION['id']); ?>">
                 <h3>Add Job Posting</h3>
-
                 <label for="job-title">タイトル *</label>
                 <input type="text" id="job-title" name="title" required>
-
                 <label for="job-summary">概要 (70-100 words) *</label>
                 <textarea id="job-summary" name="summary" required></textarea>
                 <p class="word-count">Words: <span id="job-word-count">0</span>/100</p>
-
                 <label for="job-content">内容 *</label>
                 <textarea id="job-content" name="content" rows="10" required></textarea>
-
                 <label for="company_name">会社名 *</label>
                 <input type="text" id="company_name" name="company_name" required>
-
                 <label for="job_location">勤務地 (都道府県) *</label>
                 <select id="job_location" name="job_location" required>
                     <option value="北海道">北海道</option>
@@ -158,7 +180,6 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                     <option value="鹿児島県">鹿児島県</option>
                     <option value="沖縄県">沖縄県</option>
                 </select>
-
                 <label for="job_category">職種カテゴリ *</label>
                 <select id="job_category" name="job_category" required>
                     <option value="介護">介護</option>
@@ -166,14 +187,12 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                     <option value="事務">事務</option>
                     <option value="工場作業員">工場作業員</option>
                 </select>
-
                 <label for="job_type">雇用形態 *</label>
                 <select id="job_type" name="job_type" required>
                     <option value="正社員">正社員</option>
                     <option value="パートタイム">パートタイム</option>
                     <option value="契約社員">契約社員</option>
                 </select>
-
                 <label>給与 *</label>
                 <label><input type="radio" name="salary_type" value="amount" checked> 金額</label>
                 <label><input type="radio" name="salary_type" value="negotiable"> 応相談</label>
@@ -181,7 +200,6 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                     <label for="salary">給与額:</label>
                     <input type="number" id="salary" name="salary" required>
                 </div>
-
                 <label>賞与:</label>
                 <label><input type="radio" name="bonuses" value="0" checked> なし</label>
                 <label><input type="radio" name="bonuses" value="1"> あり</label>
@@ -189,7 +207,6 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                     <label for="bonus_amount">賞与額:</label>
                     <input type="number" id="bonus_amount" name="bonus_amount">
                 </div>
-
                 <label>住宅手当:</label>
                 <label><input type="radio" name="living_support" value="0" checked> なし</label>
                 <label><input type="radio" name="living_support" value="1"> あり</label>
@@ -202,11 +219,9 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                         <input type="number" id="rent_support_amount" name="rent_support_amount">
                     </div>
                 </div>
-
                 <label>保険:</label>
                 <label><input type="radio" name="insurance" value="0" checked> なし</label>
                 <label><input type="radio" name="insurance" value="1"> あり</label>
-
                 <label>交通費:</label>
                 <label><input type="radio" name="transportation_charges" value="0" checked> なし</label>
                 <label><input type="radio" name="transportation_charges" value="1"> あり</label>
@@ -214,7 +229,6 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                     <label for="transport_amount">月額上限:</label>
                     <input type="number" id="transport_amount" name="transport_amount">
                 </div>
-
                 <label>昇給:</label>
                 <label><input type="radio" name="salary_increment" value="0" checked> なし</label>
                 <label><input type="radio" name="salary_increment" value="1"> あり</label>
@@ -222,7 +236,6 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                     <label for="increment_condition">昇給条件:</label>
                     <textarea id="increment_condition" name="increment_condition"></textarea>
                 </div>
-
                 <label for="japanese_level">必要日本語レベル *</label>
                 <select id="japanese_level" name="japanese_level" required>
                     <option value="N1">N1</option>
@@ -231,22 +244,16 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                     <option value="N4">N4</option>
                     <option value="N5">N5</option>
                 </select>
-
                 <label for="experience">経験 *</label>
                 <input type="text" id="experience" name="experience" required>
-
                 <label for="minimum_leave_per_year">年間最低休暇日数 *</label>
                 <input type="number" id="minimum_leave_per_year" name="minimum_leave_per_year" required>
-
                 <label for="employee_size">現在の従業員数 *</label>
                 <input type="number" id="employee_size" name="employee_size" required>
-
                 <label for="required_vacancy">募集人数 *</label>
                 <input type="number" id="required_vacancy" name="required_vacancy" required>
-
                 <label for="jobs-image">画像 (JPEG or PNG, max 2MB)</label>
                 <input type="file" id="jobs-image" name="image">
-
                 <div class="buttons">
                     <button type="button" onclick="previewForm('jobs')">プレビュー</button>
                     <button type="submit">投稿</button>
