@@ -23,18 +23,27 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     <header>
         <div class="logo"><a href="index.html"><img src="images/logo.png" alt="ITF Logo"></a></div>
         <nav>
-            <ul>
-                <li><a href="staffdb.php">Home</a></li>
-                <li><a href="#" onclick="showForm('posts')">Add Posts</a></li>
-                <li><a href="#" onclick="showForm('jobs')">Add Jobs</a></li>
-                <li><a href="dashboard.html">DashBoard</a></li>
-            </ul>
-        </nav>
+    <ul>
+        <li><a href="staffdb.php">Home</a></li>
+        <li><a href="#" onclick="showForm('posts')">Add Posts</a></li>
+        <li><a href="#" onclick="showForm('jobs')">Add Jobs</a></li>
+        <li><a href="php/manage_posts.php">Manage Posts</a></li>
+        <li><a href="php/profile.php">Profile</a></li>
+        <li><a href="php/dashboard.php">DashBoard</a></li>
+        <li><a href="php/logout.php">Logout</a></li>
+    </ul>
+</nav>
     </header>
 
     <section class="hero">
-        <h1>スタッフダッシュボード</h1>
-    </section>
+    <h1>スタッフダッシュボード</h1>
+    <p>ようこそ、<?php echo htmlspecialchars($_SESSION['username']); ?>さん！</p>
+    <p>今日も一日宜しくお願い致します。</p>
+    <p>現在の時刻: <?php 
+        date_default_timezone_set('Asia/Tokyo');
+        echo date('Y年m月d日 H:i:s'); 
+    ?></p>
+</section>
     
     <section class="recent-posts">
         <h2>新規投稿</h2>
