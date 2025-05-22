@@ -105,13 +105,8 @@
         <div class="content-wrapper">
             <div class="results">
                 <?php
-                // Database connection
-                try {
-                    $db = new PDO('mysql:host=localhost;dbname=itf', 'root', '');
-                    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                } catch (PDOException $e) {
-                    die("Database connection failed: " . $e->getMessage());
-                }
+                // Include database connection
+                require_once 'php/db_connect.php';
 
                 // Build query with filters
                 $query = "SELECT * FROM posts WHERE post_type = 'job'";
@@ -149,7 +144,7 @@
                 }
 
                 $query .= " ORDER BY date DESC";
-                $stmt = $db->prepare($query);
+                $stmt = $pdo->prepare($query);
                 $stmt->execute($params);
                 $jobs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -198,7 +193,7 @@
                         <select name="location">
                             <option value="">全て</option>
                             <?php
-                            $locations = $db->query("SELECT DISTINCT job_location FROM posts WHERE post_type = 'job'")->fetchAll(PDO::FETCH_COLUMN);
+                            $locations = $pdo->query("SELECT DISTINCT job_location FROM posts WHERE post_type = 'job'")->fetchAll(PDO::FETCH_COLUMN);
                             foreach ($locations as $location) {
                                 $selected = isset($_GET['location']) && $_GET['location'] === $location ? 'selected' : '';
                                 echo "<option value=\"" . htmlspecialchars($location) . "\" $selected>" . htmlspecialchars($location) . "</option>";
@@ -211,7 +206,7 @@
                         <select name="job_type">
                             <option value="">全て</option>
                             <?php
-                            $job_types = $db->query("SELECT DISTINCT job_type FROM posts WHERE post_type = 'job'")->fetchAll(PDO::FETCH_COLUMN);
+                            $job_types = $pdo->query("SELECT DISTINCT job_type FROM posts WHERE post_type = 'job'")->fetchAll(PDO::FETCH_COLUMN);
                             foreach ($job_types as $job_type) {
                                 $selected = isset($_GET['job_type']) && $_GET['job_type'] === $job_type ? 'selected' : '';
                                 echo "<option value=\"" . htmlspecialchars($job_type) . "\" $selected>" . htmlspecialchars($job_type) . "</option>";
@@ -224,7 +219,7 @@
                         <select name="japanese_level">
                             <option value="">全て</option>
                             <?php
-                            $japanese_levels = $db->query("SELECT DISTINCT japanese_level FROM posts WHERE post_type = 'job'")->fetchAll(PDO::FETCH_COLUMN);
+                            $japanese_levels = $pdo->query("SELECT DISTINCT japanese_level FROM posts WHERE post_type = 'job'")->fetchAll(PDO::FETCH_COLUMN);
                             foreach ($japanese_levels as $japanese_level) {
                                 $selected = isset($_GET['japanese_level']) && $_GET['japanese_level'] === $japanese_level ? 'selected' : '';
                                 echo "<option value=\"" . htmlspecialchars($japanese_level) . "\" $selected>" . htmlspecialchars($japanese_level) . "</option>";
@@ -237,7 +232,7 @@
                         <select name="job_category">
                             <option value="">全て</option>
                             <?php
-                            $categories = $db->query("SELECT DISTINCT job_category FROM posts WHERE post_type = 'job'")->fetchAll(PDO::FETCH_COLUMN);
+                            $categories = $pdo->query("SELECT DISTINCT job_category FROM posts WHERE post_type = 'job'")->fetchAll(PDO::FETCH_COLUMN);
                             foreach ($categories as $category) {
                                 $selected = isset($_GET['job_category']) && $_GET['job_category'] === $category ? 'selected' : '';
                                 echo "<option value=\"" . htmlspecialchars($category) . "\" $selected>" . htmlspecialchars($category) . "</option>";
@@ -254,43 +249,56 @@
     <aside class="l-side"></aside>
 
     <footer class="footer">
-            <div class="footer-container">
-                <div class="footer-row">
-                    <div class="footer-col">
-                        <h3 class="footer-heading" data-i18n="footer.location_title">所在地</h3>
-                        <div class="footer-link">
-                            <a href="index.html" style="color: white;" data-i18n="footer.company_name">株式会社アイティーエフ</a>
-                        </div>
-                        <p class="footer-text" data-i18n="footer.location_details">
-                            〒556-0017 大阪府大阪市浪速区湊町1-4-38 近鉄新難波ビル10F<br>
-                            06-6644-1800<br>
-                            〒144-0052 東京都大田区蒲田5丁目21-13<br>
-                            03-6424-7747<br>
-                            info@it-future.jp
-                        </p>
+        <div class="footer-container">
+            <div class="footer-row">
+                <div class="footer-col">
+                    <h3 class="footer-heading" data-i18n="footer.location_title">所在地</h3>
+                    <div class="footer-link">
+                        <a href="index.html" style="color: white;" data-i18n="footer.company_name">株式会社アイティーエフ</a>
                     </div>
-                    <div class="footer-col">
-                        <h3 class="footer-heading" data-i18n="footer.services_title">サービス案内</h3>
-                        <a href="index.html#solution_03" class="footer-link" data-i18n="footer.services_for_companies">人財をお探しの企業様</a>
-                        <a href="about.html#support-naiyou" class="footer-link" data-i18n="footer.support_content">サポート内容</a>
-                        <a href="index.html#service-naiyo" class="footer-link" data-i18n="footer.service_introduction">サービス紹介</a>
-                        <a href="index.html#merit" class="footer-link" data-i18n="footer.benefits">メリット</a>
-                    </div>
-                    <div class="footer-col">
-                        <h3 class="footer-heading" data-i18n="footer.company_info_title">会社案内</h3>
-                        <a href="index.html#greeting" class="footer-link" data-i18n="footer.president_greeting">代表者挨拶</a>
-                        <a href="company_info.html" class="footer-link" data-i18n="footer.company_info">会社概要</a>
-                        <a href="index.html#work-step" class="footer-link" data-i18n="footer.introduction_flow">紹介の流れ</a>
-                    </div>
-                    <div class="footer-col">
-                        <a href="privacy.html" class="footer-btn" data-i18n="footer.privacy_policy">プライバシーポリシー</a>
-                    </div>
+                    <p class="footer-text" data-i18n="footer.location_details">
+                        〒556-0017 大阪府大阪市浪速区湊町1-4-38 近鉄新難波ビル10F<br>
+                        06-6644-1800<br>
+                        〒144-0052 東京都大田区蒲田5丁目21-13<br>
+                        03-6424-7747<br>
+                        info@it-future.jp
+                    </p>
                 </div>
-                <div class="footer-copyright">
-                    © ITF co. Ltd. ALL Rights Reserved
+                <div class="footer-col">
+                    <h3 class="footer-heading" data-i18n="footer.services_title">サービス案内</h3>
+                    <a href="index.html#solution_03" class="footer-link"
+                        data-i18n="footer.services_for_companies">人財をお探しの企業様</a>
+                    
+                    <a href="index.html#service-naiyo" class="footer-link"
+                        data-i18n="footer.service_introduction">サービス紹介</a>
+                    <a href="index.html#merit" class="footer-link" data-i18n="footer.benefits">メリット</a>
+                    <a href="index.html#work-step" class="footer-link"
+                        data-i18n="footer.introduction_flow">紹介の流れ</a>
+                        <a href="about.html#support-naiyou" class="footer-link"
+                        data-i18n="footer.support_content">サポート内容</a>
+                </div>
+                <div class="footer-col">
+                    <h3 class="footer-heading" data-i18n="footer.company_info_title">会社案内</h3>
+                    <a href="greeting.html" class="footer-link"
+                        data-i18n="footer.president_greeting">代表者挨拶</a>
+                    <a href="company_info.html" class="footer-link" data-i18n="footer.company_info">会社概要</a>
+                </div>
+                <div class="footer-col">
+                    <a href="privacy.html" class="footer-btn" data-i18n="footer.privacy_policy">プライバシーポリシー</a>
                 </div>
             </div>
-        </footer>
+            <div class="footer-copyright">
+                © ITF co. Ltd. ALL Rights Reserved
+            </div>
+        </div>
+    </footer>
+    <!-- Add this just before the closing </body> tag -->
+    <a href="#" id="back-to-top" class="back-to-top" title="Back to Top">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+    </a>
     <!-- i18next Scripts -->
     <script src="https://unpkg.com/i18next@23.11.5/dist/umd/i18next.min.js"></script>
     <script src="js/i18nextHttpBackend.min.js"></script>

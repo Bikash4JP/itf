@@ -1,9 +1,9 @@
 <?php
-ini_set('session.cookie_path', '/IDT');
+ini_set('session.cookie_path', '/itf');
 session_start();
 
 if (!isset($_SESSION['id']) || !isset($_SESSION['username'])) {
-    header("Location: /IDT/php/login.php");
+    header("Location: php/login.php");
     exit;
 }
 

@@ -90,7 +90,7 @@
                                     </a>
                                 </li>
                                 <li class="cta-item document flex vcenter">
-                                    <a href="/ITF/Recruitment" class="cta-item-link flex hcenter vcenter">資料請求</a>
+                                    <a href="/itf/Recruitment" class="cta-item-link flex hcenter vcenter">資料請求</a>
                                 </li>
                                 <li class="cta-item inquiry flex vcenter">
                                     <a href="../inquiry.html" class="cta-item-link flex hcenter vcenter">お問い合わせ</a>
@@ -106,13 +106,8 @@
     <!-- Job Details Section -->
     <section class="job-details-section">
         <?php
-        // Database connection
-        try {
-            $db = new PDO('mysql:host=localhost;dbname=itf', 'root', '');
-            $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        } catch (PDOException $e) {
-            die("Database connection failed: " . $e->getMessage());
-        }
+        // Include database connection
+        require_once 'db_connect.php';
 
         // Get job ID from URL
         $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
@@ -122,7 +117,7 @@
         }
 
         // Fetch job details
-        $stmt = $db->prepare("SELECT * FROM posts WHERE id = ? AND post_type = 'job'");
+        $stmt = $pdo->prepare("SELECT * FROM posts WHERE id = ? AND post_type = 'job'");
         $stmt->execute([$job_id]);
         $job = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -159,53 +154,70 @@
     </section>
 
     <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-row">
-                <!-- Column 1: Location -->
-                <div class="footer-col">
-                    <h3 class="footer-heading">所在地</h3>
-                    <div class="footer-link">
-                        <a href="../index.html" style="color: white;">株式会社アイティエフ</a>
+            <div class="footer-container">
+                <div class="footer-row">
+                    <div class="footer-col">
+                        <h3 class="footer-heading" data-i18n="footer.location_title">所在地</h3>
+                        <div class="footer-link">
+                            <a href="index.html" style="color: white;" data-i18n="footer.company_name">株式会社アイティーエフ</a>
+                        </div>
+                        <p class="footer-text" data-i18n="footer.location_details">
+                            〒556-0017 大阪府大阪市浪速区湊町1-4-38 近鉄新難波ビル10F<br>
+                            06-6644-1800<br>
+                            〒144-0052 東京都大田区蒲田5丁目21-13<br>
+                            03-6424-7747<br>
+                            info@it-future.jp
+                        </p>
                     </div>
-                    <p class="footer-text">
-                        〒556-0017 大阪府大阪市浪速区湊町1-4-38 近鉄新難波ビル10F<br>
-                        06-6644-1800 <br>
-                        〒144-0052 東京都大田区蒲田5丁目21-13<br>
-                        03-6424-7747<br>
-                        ueda@it-future.jp
-                    </p>
+                    <div class="footer-col">
+                        <h3 class="footer-heading" data-i18n="footer.services_title">サービス案内</h3>
+                        <a href="index.html#solution_03" class="footer-link"
+                            data-i18n="footer.services_for_companies">人財をお探しの企業様</a>
+                        
+                        <a href="index.html#service-naiyo" class="footer-link"
+                            data-i18n="footer.service_introduction">サービス紹介</a>
+                        <a href="index.html#merit" class="footer-link" data-i18n="footer.benefits">メリット</a>
+                        <a href="index.html#work-step" class="footer-link"
+                            data-i18n="footer.introduction_flow">紹介の流れ</a>
+                            <a href="about.html#support-naiyou" class="footer-link"
+                            data-i18n="footer.support_content">サポート内容</a>
+                    </div>
+                    <div class="footer-col">
+                        <h3 class="footer-heading" data-i18n="footer.company_info_title">会社案内</h3>
+                        <a href="greeting.html" class="footer-link"
+                            data-i18n="footer.president_greeting">代表者挨拶</a>
+                        <a href="company_info.html" class="footer-link" data-i18n="footer.company_info">会社概要</a>
+                    </div>
+                    <div class="footer-col">
+                        <a href="privacy.html" class="footer-btn" data-i18n="footer.privacy_policy">プライバシーポリシー</a>
+                    </div>
                 </div>
-                <!-- Column 2: Services -->
-                <div class="footer-col">
-                    <h3 class="footer-heading">サービス案内</h3>
-                    <a href="../index.html#solution_03" class="footer-link">人財をお探しの企業様</a>
-                    <a href="../about.html#support-naiyou" class="footer-link">サポート内容</a>
-                    <a href="#" class="footer-link">サービス紹介</a>
-                    <a href="../index.html#merit" class="footer-link">メリット</a>
-                    <a href="#" class="footer-link">ギャラリー</a>
-                </div>
-                <!-- Column 3: Company -->
-                <div class="footer-col">
-                    <h3 class="footer-heading">会社案内</h3>
-                    <a href="../inquiry.html" class="footer-link">代表者挨拶</a>
-                    <a href="../company_info.html" class="footer-link">会社概要</a>
-                    <a href="../index.html#kigyo-rinen" class="footer-link">企業理念</a>
+                <div class="footer-copyright">
+                    © ITF co. Ltd. ALL Rights Reserved
                 </div>
             </div>
-            <!-- Copyright -->
-            <div class="footer-copyright">
-                © ITF co. Ltd. ALL Rights Reserved
-            </div>
-        </div>
-    </footer>
+        </footer>
+    </div>
+    <!-- Add this just before the closing </body> tag -->
+    <a href="#" id="back-to-top" class="back-to-top" title="Back to Top">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+    </a>
+     <!-- i18next Scripts -->
+    <script src="https://unpkg.com/i18next@23.11.5/dist/umd/i18next.min.js"></script>
+    <script src="js/i18nextHttpBackend.min.js"></script>
+    <script src="https://unpkg.com/i18next-browser-languagedetector@7.1.0/dist/umd/i18nextBrowserLanguageDetector.min.js"></script>
+    <script src="js/i18n.js"></script>
+    <!-- Other Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/ajaxzip3.js" charset="UTF-8"></script>
-    <script src="../js/form.min.js"></script>
-    <script src="../js/main.min.js"></script>
-    <script src="../js/scripts.js"></script>
-    <script src="../js/login.js"></script>
-    <script src="../js/form-validation.js"></script>
-    <script type="text/javascript" src="../js/front.min.js"></script>
-    <script type="text/javascript" src="../js/wp-embed.min.js"></script>
+    <script src="js/form.min.js"></script>
+    <script src="js/main.min.js"></script>
+    <script src="js/video.js"></script>
+    <script src="js/scripts.js"></script>
+    <script src="js/news.js"></script>
+    <script type="text/javascript" src="js/front.min.js"></script>
+    <script type="text/javascript" src="js/wp-embed.min.js"></script>
 </body>
 </html>

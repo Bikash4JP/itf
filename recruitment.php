@@ -424,7 +424,6 @@
                         <a href="greeting.html" class="footer-link"
                             data-i18n="footer.president_greeting">代表者挨拶</a>
                         <a href="company_info.html" class="footer-link" data-i18n="footer.company_info">会社概要</a>
-                        <a href="about.html#support-naiyou" class="footer-link"
                     </div>
                     <div class="footer-col">
                         <a href="privacy.html" class="footer-btn" data-i18n="footer.privacy_policy">プライバシーポリシー</a>
@@ -443,7 +442,19 @@
             <polyline points="18 15 12 9 6 15"></polyline>
         </svg>
     </a>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="js/recruit.js"></script>
+     <!-- i18next Scripts -->
+    <script src="https://unpkg.com/i18next@23.11.5/dist/umd/i18next.min.js"></script>
+    <script src="js/i18nextHttpBackend.min.js"></script>
+    <script src="https://unpkg.com/i18next-browser-languagedetector@7.1.0/dist/umd/i18nextBrowserLanguageDetector.min.js"></script>
+    <script src="js/i18n.js"></script>
+    <!-- Other Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/form.min.js"></script>
+    <script src="js/main.min.js"></script>
+    <script src="js/video.js"></script>
+    <script src="js/scripts.js"></script>
+    <script src="js/news.js"></script>
+    <script type="text/javascript" src="js/front.min.js"></script>
+    <script type="text/javascript" src="js/wp-embed.min.js"></script>
 </body>
 </html>

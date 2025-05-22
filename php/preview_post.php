@@ -1,5 +1,5 @@
 <?php
-ini_set('session.cookie_path', '/IDT');
+ini_set('session.cookie_path', '/itf');
 session_start();
 
 // Retrieve form data from POST request
@@ -41,7 +41,7 @@ $form_type = isset($_SESSION['preview_form_type']) ? $_SESSION['preview_form_typ
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>プレビュー</title>
-    <link rel="stylesheet" href="/IDT/css/test.css">
+    <link rel="stylesheet" href="../css/test.css">
 </head>
 <body>
     <div class="news-item">

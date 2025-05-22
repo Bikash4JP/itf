@@ -3,8 +3,8 @@ let newsData = []; // Initialize as empty; will be populated from fetch
 // Function to fetch news data from the server
 async function fetchNewsData() {
     try {
-        console.log('Fetching news data from /IDT/php/fetch_news.php...');
-        const response = await fetch('/IDT/php/fetch_news.php');
+        console.log('Fetching news data from /php/fetch_news.php...');
+        const response = await fetch('/php/fetch_news.php'); // Updated path
         if (!response.ok) {
             throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
         }
@@ -16,11 +16,13 @@ async function fetchNewsData() {
     } catch (error) {
         console.error('Error fetching news data:', error);
         alert('ニュースデータの取得に失敗しました。詳細: ' + error.message);
+        newsData = []; // Ensure newsData is an empty array on error
     }
 }
 
 // Function to extract first 50 words from the summary
 function getShortSummary(summary) {
+    if (!summary) return "";
     const words = summary.split(/\s+/); // Split by whitespace
     const shortSummary = words.slice(0, 50).join(" "); // Take first 50 words
     return shortSummary + (words.length > 50 ? "..." : ""); // Add ellipsis if summary is longer
@@ -30,6 +32,11 @@ function renderIndexNews() {
     const newsList = document.querySelector(".list ul");
     if (!newsList) return;
     newsList.innerHTML = "";
+    // Check if newsData is an array and not empty
+    if (!Array.isArray(newsData) || newsData.length === 0) {
+        newsList.innerHTML = "<li>ニュースデータがありません。</li>";
+        return;
+    }
     // Sort to ensure latest-to-oldest order
     const sortedNews = [...newsData].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     const latestNews = sortedNews.slice(0, 3); // Take the first 3 items
@@ -61,6 +68,11 @@ function renderNews(filteredData) {
     if (!newsList) return;
     newsList.innerHTML = "";
     console.log('Rendering news with filtered data:', filteredData);
+    // Check if filteredData is an array and not empty
+    if (!Array.isArray(filteredData) || filteredData.length === 0) {
+        newsList.innerHTML = "<div>ニュースデータがありません。</div>";
+        return;
+    }
     // Sort to ensure latest-to-oldest order
     const sortedData = [...filteredData].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     sortedData.forEach((item) => {
@@ -197,11 +209,14 @@ document.addEventListener("DOMContentLoaded", async () => {
                         <a href="news.html" class="read-more">おしらせへ戻る</a>
                     </div>
                 `;
+            } else {
+                const newsList = document.getElementById("newsList");
+                newsList.innerHTML = "<div>ニュースが見つかりませんでした。</div>";
             }
         } else {
             console.log("newsId is not present, rendering all news items...");
             // Ensure default view is sorted latest-to-oldest
-            const sortedNewsData = [...newsData].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            const sortedNewsData = Array.isArray(newsData) ? [...newsData].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) : [];
             renderNews(sortedNewsData);
 
             const categoryFilter = document.getElementById("categoryFilter");

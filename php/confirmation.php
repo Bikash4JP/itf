@@ -15,19 +15,30 @@
     <div class="container my-5">
         <h2>応募が完了しました</h2>
         <p>履歴書をダウンロードしてください:</p>
-        <a href="../resumes/<?php echo htmlspecialchars($_GET['applicant_id'], ENT_QUOTES, 'UTF-8'); ?>_resume.xlsx" class="btn btn-primary">履歴書をダウンロード</a>
+        <?php
+        // Include database connection
+        require_once 'php/db_connect.php';
+
+        // Load the Excel file for preview
+        require dirname(__DIR__) . '/vendor/autoload.php';
+        use PhpOffice\PhpSpreadsheet\IOFactory;
+
+        // Sanitize applicant_id to prevent path traversal
+        $applicant_id = basename(htmlspecialchars($_GET['applicant_id'], ENT_QUOTES, 'UTF-8'));
+        $resume_path = "../resumes/{$applicant_id}_resume.xlsx";
+
+        // Check if file exists and is readable
+        if (!file_exists($resume_path) || !is_readable($resume_path)) {
+            echo "履歴書ファイルが見つかりません。";
+            exit();
+        }
+        ?>
+        <a href="../resumes/<?php echo htmlspecialchars($applicant_id, ENT_QUOTES, 'UTF-8'); ?>_resume.xlsx" class="btn btn-primary">履歴書をダウンロード</a>
         <button class="btn btn-secondary mt-2" onclick="showPreview()">プレビューを表示</button>
 
         <!-- Preview Container -->
         <div id="previewContainer" class="preview-container">
             <?php
-            // Load the Excel file for preview
-            require dirname(__DIR__) . '/vendor/autoload.php';
-            use PhpOffice\PhpSpreadsheet\IOFactory;
-
-            $applicant_id = htmlspecialchars($_GET['applicant_id'], ENT_QUOTES, 'UTF-8');
-            $resume_path = "../resumes/{$applicant_id}_resume.xlsx";
-
             if (file_exists($resume_path)) {
                 try {
                     $spreadsheet = IOFactory::load($resume_path);
@@ -47,11 +58,10 @@
                             foreach ($worksheet->getMergeCells() as $mergeRange) {
                                 if ($cell->isInRange($mergeRange)) {
                                     $isMerged = true;
-                                    // If this is not the top-left cell of the merged range, skip it
                                     $range = explode(':', $mergeRange);
                                     $topLeftCell = $range[0];
                                     if ($topLeftCell !== $cell->getCoordinate()) {
-                                        continue 2; // Skip to the next row
+                                        continue 2;
                                     }
                                     break;
                                 }
@@ -64,8 +74,6 @@
                 } catch (Exception $e) {
                     echo "プレビューの読み込みに失敗しました: " . $e->getMessage();
                 }
-            } else {
-                echo "履歴書ファイルが見つかりません。";
             }
             ?>
         </div>

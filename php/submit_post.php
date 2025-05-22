@@ -1,5 +1,5 @@
 <?php
-ini_set('session.cookie_path', '/IDT');
+ini_set('session.cookie_path', '/itf');
 session_start();
 header("Content-Type: application/json");
 
@@ -15,10 +15,10 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_tok
     exit;
 }
 
-try {
-    // Database connection
-    $pdo = new PDO("mysql:host=localhost;dbname=itf", "root", "", [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+// Include database connection
+require_once 'db_connect.php';
 
+try {
     $form_type = $_POST['form_type'] ?? '';
     $post_type = $_POST['post_type'] ?? ($form_type === 'jobs' ? 'job' : 'news');
     $title = $_POST['title'] ?? '';

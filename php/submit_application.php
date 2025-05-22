@@ -4,7 +4,7 @@ $autoloadPath = dirname(__DIR__) . '/vendor/autoload.php';
 
 // Check if the autoload file exists
 if (!file_exists($autoloadPath)) {
-    die("Error: Composer autoload file not found at: $autoloadPath. Please ensure you ran 'composer require phpoffice/phpspreadsheet:1.29.0' in the project root directory (C:\\xampp\\htdocs\\IDT).");
+    die("Error: Composer autoload file not found at: $autoloadPath. Please ensure you ran 'composer require phpoffice/phpspreadsheet:1.29.0' in the project root directory (/home/it-future/www/itf).");
 }
 
 // Require the autoload file
@@ -14,13 +14,8 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
-// Database connection
-try {
-    $db = new PDO('mysql:host=localhost;dbname=itf', 'root', '');
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
-}
+// Include database connection
+require_once 'db_connect.php';
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

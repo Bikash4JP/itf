@@ -1,4 +1,3 @@
-// i18next Initialization (Same as index.html)
 i18next
     .use(i18nextHttpBackend)
     .use(i18nextBrowserLanguageDetector)

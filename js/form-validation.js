@@ -61,10 +61,10 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Add to form data
             formData.append('inquiry_types', selectedInquiries);
-            formData.append('_cc', 'info@it-future.jp');
+            formData.append('_cc', 'bikash@it-future.jp'); // CC to bikash@it-future.jp
             formData.append('_subject', `【ITF問い合わせ】${formData.get('company')} - ${formData.get('name')}`);
             
-            // Send to Formspree
+            // Send to Formspree (primary email: bikash4jp@gmail.com)
             const response = await fetch('https://formspree.io/f/xrbprkko', {
                 method: 'POST',
                 body: formData,
@@ -114,7 +114,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     '※このメールはフォーム送信失敗時に代替手段として送信されました'
                 ].join('%0A');
                 
-                window.location.href = `mailto:bikash4jp@gmail.com?subject=【ITF問い合わせ】${encodeURIComponent(formData.get('company'))}&body=${mailtoBody}`;
+                // Primary email to bikash4jp@gmail.com, CC to info@it-future.jp
+                window.location.href = `mailto:bikash4jp@gmail.com?cc=info@it-future.jp&subject=【ITF問い合わせ】${encodeURIComponent(formData.get('company'))}&body=${mailtoBody}`;
             }
         } finally {
             submitBtn.disabled = false;

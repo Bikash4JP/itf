@@ -1,20 +1,8 @@
 <?php
 session_start();
 
-// Database connection (replace with your credentials)
-$host = 'localhost';
-$dbname = 'itf';
-$username = 'root';
-$password = '';
-
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    $response = array('success' => false, 'message' => 'Database connection failed: ' . $e->getMessage());
-    echo json_encode($response);
-    exit();
-}
+// Include database connection
+require_once 'db_connect.php';
 
 // Generate CSRF token if not already set
 if (!isset($_SESSION['csrf_token'])) {
@@ -92,8 +80,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>スタッフログイン - 株式会社アイティーエフ</title>
-    <link rel="stylesheet" href="../css/login.css"> <!-- Keeping the same stylesheet -->
-    <script src="../js/login.js"></script> <!-- Updated login.js will be used -->
+    <link rel="stylesheet" href="../css/login.css">
+    <script src="../js/login.js"></script>
 </head>
 <body>
     <div class="login-content">

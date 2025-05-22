@@ -57,25 +57,6 @@ window.addEventListener('scroll', debounce(function() {
     }
 }, 50)); // Debounce delay of 50ms
 
-// Match Greeting Heights
-function matchGreetingHeights() {
-    const greetingImage = document.querySelector('.greeting-image');
-    const greetingContent = document.querySelector('.greeting-content');
-
-    if (greetingImage && greetingContent && window.innerWidth > 991) {
-        const contentHeight = greetingContent.offsetHeight;
-        greetingImage.style.height = `${contentHeight}px`;
-    } else {
-        greetingImage.style.height = 'auto'; // Reset for mobile
-    }
-}
-
-// Run on page load
-window.addEventListener('load', matchGreetingHeights);
-
-// Run on window resize
-window.addEventListener('resize', matchGreetingHeights);
-
 // Back to Top Button Functionality
 document.addEventListener('DOMContentLoaded', () => {
     const backToTopButton = document.getElementById('back-to-top');
@@ -159,32 +140,6 @@ window.addEventListener('scroll', debounce(function() {
         shortcutLinks.style.top = 'auto';
     }
 }, 50));
-
-// Match Greeting Heights
-function matchGreetingHeights() {
-    const greetingImage = document.querySelector('.greeting-image');
-    const image = greetingImage.querySelector('img');
-
-    if (greetingImage && image && window.innerWidth > 991) {
-        // Get the width of the greeting-image container
-        const containerWidth = greetingImage.offsetWidth;
-
-        // Image aspect ratio is 2364/1773 ≈ 4:3
-        const aspectRatio = 2364 / 1773; // ≈ 1.33
-        const desiredHeight = containerWidth / aspectRatio;
-
-        // Set the greeting-image height based on the aspect ratio
-        greetingImage.style.height = `${desiredHeight}px`;
-    } else {
-        greetingImage.style.height = 'auto'; // Reset for mobile
-    }
-}
-
-// Run on page load
-window.addEventListener('load', matchGreetingHeights);
-
-// Run on window resize
-window.addEventListener('resize', matchGreetingHeights);
 
 // Back to Top Button Functionality
 document.addEventListener('DOMContentLoaded', () => {
