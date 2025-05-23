@@ -88,7 +88,6 @@
             </div>
         </div>
     </header><br>
-
     <!-- Main Background with Overlay -->
     <section class="bg">
         <div class="overlay">
@@ -269,7 +268,7 @@
                     <a href="index.html#solution_03" class="footer-link"
                         data-i18n="footer.services_for_companies">人財をお探しの企業様</a>
                     
-                    <a href="index.html#service-naiyo" class="footer-link"
+                    <a href="index.html#service-naiyou" class="footer-link"
                         data-i18n="footer.service_introduction">サービス紹介</a>
                     <a href="index.html#merit" class="footer-link" data-i18n="footer.benefits">メリット</a>
                     <a href="index.html#work-step" class="footer-link"

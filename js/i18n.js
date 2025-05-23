@@ -64,7 +64,7 @@ function storeOriginalContent() {
     const key = element.getAttribute('data-i18n');
     if (!originalContents[key]) { // Only store if not already set to prevent overwriting
       originalContents[key] = element.innerHTML;
-      console.log(`Stored original content for key '${key}':`, originalContents[key]);
+      // console.log(`Stored original content for key '${key}':`, originalContents[key]);
     }
   });
 }
@@ -75,7 +75,7 @@ function updateContent() {
     const originalContent = originalContents[key] || element.innerHTML;
     if (i18next.language === 'ja') {
       // For Japanese, always restore the original HTML content
-      console.log(`Restoring original content for key '${key}' (language: ja):`, originalContent);
+      // console.log(`Restoring original content for key '${key}' (language: ja):`, originalContent);
       element.innerHTML = originalContent;
     } else {
       // For other languages, apply the translation

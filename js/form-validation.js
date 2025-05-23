@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Add to form data
             formData.append('inquiry_types', selectedInquiries);
-            formData.append('_cc', 'bikash@it-future.jp'); // CC to bikash@it-future.jp
+            formData.append('_cc', 'info@it-future.jp'); // CC to bikash@it-future.jp
             formData.append('_subject', `【ITF問い合わせ】${formData.get('company')} - ${formData.get('name')}`);
             
             // Send to Formspree (primary email: bikash4jp@gmail.com)

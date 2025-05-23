@@ -255,3 +255,1057 @@ Attempting database connection at 2025-05-22 09:30:05
 Database connection successful at 2025-05-22 09:30:05
 Attempting database connection at 2025-05-22 09:30:23
 Database connection successful at 2025-05-22 09:30:23
+Attempting database connection at 2025-05-22 15:46:04
+Database connection successful at 2025-05-22 15:46:04
+Database connection included successfully at 2025-05-22 15:46:04
+Attempting to fetch posts at 2025-05-22 15:46:04
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 15:46:04
+Successfully fetched 2 posts at 2025-05-22 15:46:04
+Attempting database connection at 2025-05-22 15:46:05
+Database connection successful at 2025-05-22 15:46:05
+Database connection included successfully at 2025-05-22 15:46:05
+Attempting to fetch posts at 2025-05-22 15:46:05
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 15:46:05
+Successfully fetched 2 posts at 2025-05-22 15:46:05
+Attempting database connection at 2025-05-22 15:46:05
+Database connection successful at 2025-05-22 15:46:05
+Database connection included successfully at 2025-05-22 15:46:05
+Attempting to fetch posts at 2025-05-22 15:46:05
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 15:46:05
+Successfully fetched 2 posts at 2025-05-22 15:46:05
+Attempting database connection at 2025-05-22 15:46:05
+Database connection successful at 2025-05-22 15:46:05
+Database connection included successfully at 2025-05-22 15:46:05
+Attempting to fetch posts at 2025-05-22 15:46:05
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 15:46:05
+Successfully fetched 2 posts at 2025-05-22 15:46:05
+Attempting database connection at 2025-05-22 15:46:05
+Database connection successful at 2025-05-22 15:46:05
+Database connection included successfully at 2025-05-22 15:46:05
+Attempting to fetch posts at 2025-05-22 15:46:05
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 15:46:05
+Successfully fetched 2 posts at 2025-05-22 15:46:05
+Attempting database connection at 2025-05-22 15:46:05
+Database connection successful at 2025-05-22 15:46:05
+Database connection included successfully at 2025-05-22 15:46:05
+Attempting to fetch posts at 2025-05-22 15:46:05
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 15:46:05
+Successfully fetched 2 posts at 2025-05-22 15:46:05
+Attempting database connection at 2025-05-22 15:46:06
+Database connection successful at 2025-05-22 15:46:06
+Database connection included successfully at 2025-05-22 15:46:06
+Attempting to fetch posts at 2025-05-22 15:46:06
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 15:46:06
+Successfully fetched 2 posts at 2025-05-22 15:46:06
+Attempting database connection at 2025-05-22 15:46:41
+Database connection successful at 2025-05-22 15:46:41
+Attempting database connection at 2025-05-22 15:46:51
+Database connection successful at 2025-05-22 15:46:52
+Attempting database connection at 2025-05-22 15:46:56
+Database connection successful at 2025-05-22 15:46:56
+Attempting database connection at 2025-05-22 15:46:56
+Database connection successful at 2025-05-22 15:46:56
+Database connection included successfully at 2025-05-22 15:46:56
+Attempting to fetch posts at 2025-05-22 15:46:56
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 15:46:56
+Successfully fetched 2 posts at 2025-05-22 15:46:56
+Attempting database connection at 2025-05-22 15:47:06
+Database connection successful at 2025-05-22 15:47:06
+Attempting database connection at 2025-05-22 15:49:49
+Database connection successful at 2025-05-22 15:49:49
+Database connection included successfully at 2025-05-22 15:49:49
+Attempting to fetch posts at 2025-05-22 15:49:49
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 15:49:49
+Successfully fetched 2 posts at 2025-05-22 15:49:49
+Attempting database connection at 2025-05-22 15:50:13
+Database connection successful at 2025-05-22 15:50:13
+Attempting database connection at 2025-05-22 15:52:17
+Database connection successful at 2025-05-22 15:52:17
+Attempting database connection at 2025-05-22 15:52:29
+Database connection successful at 2025-05-22 15:52:29
+Attempting database connection at 2025-05-22 15:52:32
+Database connection successful at 2025-05-22 15:52:32
+Attempting database connection at 2025-05-22 15:52:38
+Database connection successful at 2025-05-22 15:52:38
+Attempting database connection at 2025-05-22 15:52:47
+Database connection successful at 2025-05-22 15:52:47
+Attempting database connection at 2025-05-22 15:53:02
+Database connection successful at 2025-05-22 15:53:02
+Attempting database connection at 2025-05-22 15:53:34
+Database connection successful at 2025-05-22 15:53:34
+Attempting database connection at 2025-05-22 15:53:54
+Database connection successful at 2025-05-22 15:53:54
+Database connection included successfully at 2025-05-22 15:53:54
+Attempting to fetch posts at 2025-05-22 15:53:54
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 15:53:54
+Successfully fetched 2 posts at 2025-05-22 15:53:54
+Attempting database connection at 2025-05-22 15:54:25
+Database connection successful at 2025-05-22 15:54:25
+Attempting database connection at 2025-05-22 15:55:02
+Database connection successful at 2025-05-22 15:55:02
+Attempting database connection at 2025-05-22 15:55:25
+Database connection successful at 2025-05-22 15:55:25
+Attempting database connection at 2025-05-22 15:55:51
+Database connection successful at 2025-05-22 15:55:51
+Attempting database connection at 2025-05-22 15:56:02
+Database connection successful at 2025-05-22 15:56:02
+Attempting database connection at 2025-05-22 15:57:10
+Database connection successful at 2025-05-22 15:57:10
+Database connection included successfully at 2025-05-22 15:57:10
+Attempting to fetch posts at 2025-05-22 15:57:10
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 15:57:10
+Successfully fetched 2 posts at 2025-05-22 15:57:10
+Attempting database connection at 2025-05-22 15:58:05
+Database connection successful at 2025-05-22 15:58:05
+Attempting database connection at 2025-05-22 15:58:07
+Database connection successful at 2025-05-22 15:58:07
+Attempting database connection at 2025-05-22 15:58:11
+Database connection successful at 2025-05-22 15:58:11
+Database connection included successfully at 2025-05-22 15:58:11
+Attempting to fetch posts at 2025-05-22 15:58:11
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 15:58:11
+Successfully fetched 2 posts at 2025-05-22 15:58:11
+Attempting database connection at 2025-05-22 16:04:25
+Database connection successful at 2025-05-22 16:04:25
+Attempting database connection at 2025-05-22 16:04:37
+Database connection successful at 2025-05-22 16:04:37
+Attempting database connection at 2025-05-22 16:07:15
+Database connection successful at 2025-05-22 16:07:15
+Database connection included successfully at 2025-05-22 16:07:15
+Attempting to fetch posts at 2025-05-22 16:07:15
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 16:07:15
+Successfully fetched 2 posts at 2025-05-22 16:07:15
+Attempting database connection at 2025-05-22 16:08:40
+Database connection successful at 2025-05-22 16:08:40
+Database connection included successfully at 2025-05-22 16:08:40
+Attempting to fetch posts at 2025-05-22 16:08:40
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 16:08:40
+Successfully fetched 2 posts at 2025-05-22 16:08:40
+Attempting database connection at 2025-05-22 16:08:43
+Database connection successful at 2025-05-22 16:08:43
+Database connection included successfully at 2025-05-22 16:08:43
+Attempting to fetch posts at 2025-05-22 16:08:43
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 16:08:43
+Successfully fetched 2 posts at 2025-05-22 16:08:43
+Attempting database connection at 2025-05-22 16:08:43
+Database connection successful at 2025-05-22 16:08:43
+Database connection included successfully at 2025-05-22 16:08:43
+Attempting to fetch posts at 2025-05-22 16:08:43
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 16:08:43
+Successfully fetched 2 posts at 2025-05-22 16:08:43
+Attempting database connection at 2025-05-22 16:10:14
+Database connection successful at 2025-05-22 16:10:14
+Database connection included successfully at 2025-05-22 16:10:14
+Attempting to fetch posts at 2025-05-22 16:10:14
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 16:10:14
+Successfully fetched 2 posts at 2025-05-22 16:10:14
+Attempting database connection at 2025-05-22 16:11:45
+Database connection successful at 2025-05-22 16:11:45
+Attempting database connection at 2025-05-22 16:26:50
+Database connection successful at 2025-05-22 16:26:50
+Database connection included successfully at 2025-05-22 16:26:50
+Attempting to fetch posts at 2025-05-22 16:26:50
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 16:26:50
+Successfully fetched 2 posts at 2025-05-22 16:26:50
+Attempting database connection at 2025-05-22 16:27:11
+Database connection successful at 2025-05-22 16:27:11
+Attempting database connection at 2025-05-22 16:29:15
+Database connection successful at 2025-05-22 16:29:15
+Database connection included successfully at 2025-05-22 16:29:15
+Attempting to fetch posts at 2025-05-22 16:29:15
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 16:29:15
+Successfully fetched 2 posts at 2025-05-22 16:29:15
+Attempting database connection at 2025-05-22 16:32:28
+Database connection successful at 2025-05-22 16:32:28
+Attempting database connection at 2025-05-22 16:39:25
+Database connection successful at 2025-05-22 16:39:25
+Database connection included successfully at 2025-05-22 16:39:25
+Attempting to fetch posts at 2025-05-22 16:39:25
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 16:39:25
+Successfully fetched 2 posts at 2025-05-22 16:39:25
+Attempting database connection at 2025-05-22 16:41:33
+Database connection successful at 2025-05-22 16:41:33
+Database connection included successfully at 2025-05-22 16:41:33
+Attempting to fetch posts at 2025-05-22 16:41:33
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 16:41:33
+Successfully fetched 2 posts at 2025-05-22 16:41:33
+Attempting database connection at 2025-05-22 16:42:07
+Database connection successful at 2025-05-22 16:42:07
+Database connection included successfully at 2025-05-22 16:42:07
+Attempting to fetch posts at 2025-05-22 16:42:07
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 16:42:07
+Successfully fetched 2 posts at 2025-05-22 16:42:07
+Attempting database connection at 2025-05-22 16:42:07
+Database connection successful at 2025-05-22 16:42:07
+Database connection included successfully at 2025-05-22 16:42:07
+Attempting to fetch posts at 2025-05-22 16:42:07
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 16:42:07
+Successfully fetched 2 posts at 2025-05-22 16:42:07
+Attempting database connection at 2025-05-22 16:45:25
+Database connection successful at 2025-05-22 16:45:25
+Database connection included successfully at 2025-05-22 16:45:25
+Attempting to fetch posts at 2025-05-22 16:45:25
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 16:45:25
+Successfully fetched 2 posts at 2025-05-22 16:45:25
+Attempting database connection at 2025-05-22 16:45:25
+Database connection successful at 2025-05-22 16:45:25
+Database connection included successfully at 2025-05-22 16:45:25
+Attempting to fetch posts at 2025-05-22 16:45:25
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 16:45:25
+Successfully fetched 2 posts at 2025-05-22 16:45:25
+Attempting database connection at 2025-05-22 16:45:26
+Database connection successful at 2025-05-22 16:45:26
+Database connection included successfully at 2025-05-22 16:45:26
+Attempting to fetch posts at 2025-05-22 16:45:26
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 16:45:26
+Successfully fetched 2 posts at 2025-05-22 16:45:26
+Attempting database connection at 2025-05-22 16:49:11
+Database connection successful at 2025-05-22 16:49:11
+Database connection included successfully at 2025-05-22 16:49:11
+Attempting to fetch posts at 2025-05-22 16:49:11
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 16:49:11
+Successfully fetched 2 posts at 2025-05-22 16:49:11
+Attempting database connection at 2025-05-22 16:49:13
+Database connection successful at 2025-05-22 16:49:13
+Database connection included successfully at 2025-05-22 16:49:13
+Attempting to fetch posts at 2025-05-22 16:49:13
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 16:49:13
+Successfully fetched 2 posts at 2025-05-22 16:49:13
+Attempting database connection at 2025-05-22 16:49:13
+Database connection successful at 2025-05-22 16:49:13
+Database connection included successfully at 2025-05-22 16:49:13
+Attempting to fetch posts at 2025-05-22 16:49:13
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 16:49:13
+Successfully fetched 2 posts at 2025-05-22 16:49:13
+Attempting database connection at 2025-05-22 16:49:21
+Database connection successful at 2025-05-22 16:49:21
+Database connection included successfully at 2025-05-22 16:49:21
+Attempting to fetch posts at 2025-05-22 16:49:21
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 16:49:21
+Successfully fetched 2 posts at 2025-05-22 16:49:21
+Attempting database connection at 2025-05-22 16:49:22
+Database connection successful at 2025-05-22 16:49:22
+Database connection included successfully at 2025-05-22 16:49:22
+Attempting to fetch posts at 2025-05-22 16:49:22
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 16:49:22
+Successfully fetched 2 posts at 2025-05-22 16:49:22
+Attempting database connection at 2025-05-22 16:49:22
+Database connection successful at 2025-05-22 16:49:22
+Database connection included successfully at 2025-05-22 16:49:22
+Attempting to fetch posts at 2025-05-22 16:49:22
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 16:49:22
+Successfully fetched 2 posts at 2025-05-22 16:49:22
+Attempting database connection at 2025-05-22 16:49:22
+Database connection successful at 2025-05-22 16:49:22
+Database connection included successfully at 2025-05-22 16:49:22
+Attempting to fetch posts at 2025-05-22 16:49:22
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 16:49:22
+Successfully fetched 2 posts at 2025-05-22 16:49:22
+Attempting database connection at 2025-05-22 16:49:22
+Database connection successful at 2025-05-22 16:49:22
+Database connection included successfully at 2025-05-22 16:49:22
+Attempting to fetch posts at 2025-05-22 16:49:22
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 16:49:22
+Successfully fetched 2 posts at 2025-05-22 16:49:22
+Attempting database connection at 2025-05-22 16:51:19
+Database connection successful at 2025-05-22 16:51:19
+Database connection included successfully at 2025-05-22 16:51:19
+Attempting to fetch posts at 2025-05-22 16:51:19
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 16:51:19
+Successfully fetched 2 posts at 2025-05-22 16:51:19
+Attempting database connection at 2025-05-22 16:51:19
+Database connection successful at 2025-05-22 16:51:19
+Database connection included successfully at 2025-05-22 16:51:19
+Attempting to fetch posts at 2025-05-22 16:51:19
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 16:51:19
+Successfully fetched 2 posts at 2025-05-22 16:51:19
+Attempting database connection at 2025-05-22 16:51:20
+Database connection successful at 2025-05-22 16:51:20
+Database connection included successfully at 2025-05-22 16:51:20
+Attempting to fetch posts at 2025-05-22 16:51:20
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 16:51:20
+Successfully fetched 2 posts at 2025-05-22 16:51:20
+Attempting database connection at 2025-05-22 17:00:55
+Database connection successful at 2025-05-22 17:00:55
+Attempting database connection at 2025-05-22 17:00:57
+Database connection successful at 2025-05-22 17:00:57
+Attempting database connection at 2025-05-22 17:01:52
+Database connection successful at 2025-05-22 17:01:52
+Database connection included successfully at 2025-05-22 17:01:52
+Attempting to fetch posts at 2025-05-22 17:01:52
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:01:52
+Successfully fetched 2 posts at 2025-05-22 17:01:52
+Attempting database connection at 2025-05-22 17:01:52
+Database connection successful at 2025-05-22 17:01:52
+Database connection included successfully at 2025-05-22 17:01:52
+Attempting to fetch posts at 2025-05-22 17:01:52
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:01:52
+Successfully fetched 2 posts at 2025-05-22 17:01:52
+Attempting database connection at 2025-05-22 17:01:53
+Database connection successful at 2025-05-22 17:01:53
+Database connection included successfully at 2025-05-22 17:01:53
+Attempting to fetch posts at 2025-05-22 17:01:53
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:01:53
+Successfully fetched 2 posts at 2025-05-22 17:01:53
+Attempting database connection at 2025-05-22 17:01:53
+Database connection successful at 2025-05-22 17:01:53
+Database connection included successfully at 2025-05-22 17:01:53
+Attempting to fetch posts at 2025-05-22 17:01:53
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:01:53
+Successfully fetched 2 posts at 2025-05-22 17:01:53
+Attempting database connection at 2025-05-22 17:02:01
+Database connection successful at 2025-05-22 17:02:01
+Attempting database connection at 2025-05-22 17:02:55
+Database connection successful at 2025-05-22 17:02:55
+Attempting database connection at 2025-05-22 17:13:45
+Database connection successful at 2025-05-22 17:13:45
+Attempting database connection at 2025-05-22 17:16:58
+Database connection successful at 2025-05-22 17:16:58
+Attempting database connection at 2025-05-22 17:17:07
+Database connection successful at 2025-05-22 17:17:07
+Attempting database connection at 2025-05-22 17:17:08
+Database connection successful at 2025-05-22 17:17:08
+Attempting database connection at 2025-05-22 17:18:38
+Database connection successful at 2025-05-22 17:18:38
+Attempting database connection at 2025-05-22 17:19:36
+Database connection successful at 2025-05-22 17:19:36
+Attempting database connection at 2025-05-22 17:21:06
+Database connection successful at 2025-05-22 17:21:06
+Database connection included successfully at 2025-05-22 17:21:06
+Attempting to fetch posts at 2025-05-22 17:21:06
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:21:06
+Successfully fetched 2 posts at 2025-05-22 17:21:06
+Attempting database connection at 2025-05-22 17:21:12
+Database connection successful at 2025-05-22 17:21:12
+Database connection included successfully at 2025-05-22 17:21:12
+Attempting to fetch posts at 2025-05-22 17:21:12
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:21:12
+Successfully fetched 2 posts at 2025-05-22 17:21:12
+Attempting database connection at 2025-05-22 17:21:12
+Database connection successful at 2025-05-22 17:21:12
+Database connection included successfully at 2025-05-22 17:21:12
+Attempting to fetch posts at 2025-05-22 17:21:12
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:21:12
+Successfully fetched 2 posts at 2025-05-22 17:21:12
+Attempting database connection at 2025-05-22 17:21:13
+Database connection successful at 2025-05-22 17:21:13
+Database connection included successfully at 2025-05-22 17:21:13
+Attempting to fetch posts at 2025-05-22 17:21:13
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:21:13
+Successfully fetched 2 posts at 2025-05-22 17:21:13
+Attempting database connection at 2025-05-22 17:21:47
+Database connection successful at 2025-05-22 17:21:47
+Attempting database connection at 2025-05-22 17:22:05
+Database connection successful at 2025-05-22 17:22:05
+Attempting database connection at 2025-05-22 17:22:05
+Database connection successful at 2025-05-22 17:22:05
+Database connection included successfully at 2025-05-22 17:22:05
+Attempting to fetch posts at 2025-05-22 17:22:05
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:22:05
+Successfully fetched 2 posts at 2025-05-22 17:22:05
+Attempting database connection at 2025-05-22 17:22:43
+Database connection successful at 2025-05-22 17:22:43
+Database connection included successfully at 2025-05-22 17:22:43
+Attempting to fetch posts at 2025-05-22 17:22:43
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:22:43
+Successfully fetched 2 posts at 2025-05-22 17:22:43
+Attempting database connection at 2025-05-22 17:22:46
+Database connection successful at 2025-05-22 17:22:46
+Database connection included successfully at 2025-05-22 17:22:46
+Attempting to fetch posts at 2025-05-22 17:22:46
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:22:46
+Successfully fetched 2 posts at 2025-05-22 17:22:46
+Attempting database connection at 2025-05-22 17:25:06
+Database connection successful at 2025-05-22 17:25:06
+Attempting database connection at 2025-05-22 17:25:30
+Database connection successful at 2025-05-22 17:25:30
+Attempting database connection at 2025-05-22 17:25:31
+Database connection successful at 2025-05-22 17:25:31
+Attempting database connection at 2025-05-22 17:25:31
+Database connection successful at 2025-05-22 17:25:31
+Database connection included successfully at 2025-05-22 17:25:31
+Attempting to fetch posts at 2025-05-22 17:25:31
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:25:31
+Successfully fetched 2 posts at 2025-05-22 17:25:31
+Attempting database connection at 2025-05-22 17:25:53
+Database connection successful at 2025-05-22 17:25:53
+Database connection included successfully at 2025-05-22 17:25:53
+Attempting to fetch posts at 2025-05-22 17:25:53
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:25:53
+Successfully fetched 2 posts at 2025-05-22 17:25:53
+Attempting database connection at 2025-05-22 17:25:53
+Database connection successful at 2025-05-22 17:25:53
+Database connection included successfully at 2025-05-22 17:25:53
+Attempting to fetch posts at 2025-05-22 17:25:53
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:25:53
+Successfully fetched 2 posts at 2025-05-22 17:25:53
+Attempting database connection at 2025-05-22 17:26:27
+Database connection successful at 2025-05-22 17:26:27
+Attempting database connection at 2025-05-22 17:26:36
+Database connection successful at 2025-05-22 17:26:36
+Attempting database connection at 2025-05-22 17:26:38
+Database connection successful at 2025-05-22 17:26:38
+Database connection included successfully at 2025-05-22 17:26:38
+Attempting to fetch posts at 2025-05-22 17:26:38
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:26:38
+Successfully fetched 2 posts at 2025-05-22 17:26:38
+Attempting database connection at 2025-05-22 17:26:50
+Database connection successful at 2025-05-22 17:26:50
+Attempting database connection at 2025-05-22 17:26:54
+Database connection successful at 2025-05-22 17:26:54
+Attempting database connection at 2025-05-22 17:26:54
+Database connection successful at 2025-05-22 17:26:54
+Database connection included successfully at 2025-05-22 17:26:54
+Attempting to fetch posts at 2025-05-22 17:26:54
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:26:54
+Successfully fetched 2 posts at 2025-05-22 17:26:54
+Attempting database connection at 2025-05-22 17:31:20
+Database connection successful at 2025-05-22 17:31:20
+Attempting database connection at 2025-05-22 17:32:19
+Database connection successful at 2025-05-22 17:32:19
+Attempting database connection at 2025-05-22 17:33:45
+Database connection successful at 2025-05-22 17:33:45
+Attempting database connection at 2025-05-22 17:35:14
+Database connection successful at 2025-05-22 17:35:14
+Database connection included successfully at 2025-05-22 17:35:14
+Attempting to fetch posts at 2025-05-22 17:35:14
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:35:14
+Successfully fetched 2 posts at 2025-05-22 17:35:14
+Attempting database connection at 2025-05-22 17:35:14
+Database connection successful at 2025-05-22 17:35:14
+Database connection included successfully at 2025-05-22 17:35:14
+Attempting to fetch posts at 2025-05-22 17:35:14
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:35:14
+Successfully fetched 2 posts at 2025-05-22 17:35:14
+Attempting database connection at 2025-05-22 17:35:14
+Database connection successful at 2025-05-22 17:35:14
+Database connection included successfully at 2025-05-22 17:35:14
+Attempting to fetch posts at 2025-05-22 17:35:14
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:35:14
+Successfully fetched 2 posts at 2025-05-22 17:35:14
+Attempting database connection at 2025-05-22 17:35:32
+Database connection successful at 2025-05-22 17:35:32
+Attempting database connection at 2025-05-22 17:35:39
+Database connection successful at 2025-05-22 17:35:39
+Attempting database connection at 2025-05-22 17:35:42
+Database connection successful at 2025-05-22 17:35:42
+Attempting database connection at 2025-05-22 17:35:42
+Database connection successful at 2025-05-22 17:35:42
+Database connection included successfully at 2025-05-22 17:35:42
+Attempting to fetch posts at 2025-05-22 17:35:42
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:35:42
+Successfully fetched 2 posts at 2025-05-22 17:35:42
+Attempting database connection at 2025-05-22 17:40:29
+Database connection successful at 2025-05-22 17:40:29
+Database connection included successfully at 2025-05-22 17:40:29
+Attempting to fetch posts at 2025-05-22 17:40:29
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:40:29
+Successfully fetched 2 posts at 2025-05-22 17:40:29
+Attempting database connection at 2025-05-22 17:40:30
+Database connection successful at 2025-05-22 17:40:30
+Database connection included successfully at 2025-05-22 17:40:30
+Attempting to fetch posts at 2025-05-22 17:40:30
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:40:30
+Successfully fetched 2 posts at 2025-05-22 17:40:30
+Attempting database connection at 2025-05-22 17:40:31
+Database connection successful at 2025-05-22 17:40:31
+Database connection included successfully at 2025-05-22 17:40:31
+Attempting to fetch posts at 2025-05-22 17:40:31
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:40:31
+Successfully fetched 2 posts at 2025-05-22 17:40:31
+Attempting database connection at 2025-05-22 17:42:21
+Database connection successful at 2025-05-22 17:42:21
+Attempting database connection at 2025-05-22 17:42:22
+Database connection successful at 2025-05-22 17:42:22
+Attempting database connection at 2025-05-22 17:42:23
+Database connection successful at 2025-05-22 17:42:23
+Database connection included successfully at 2025-05-22 17:42:23
+Attempting to fetch posts at 2025-05-22 17:42:23
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:42:23
+Successfully fetched 2 posts at 2025-05-22 17:42:23
+Attempting database connection at 2025-05-22 17:46:01
+Database connection successful at 2025-05-22 17:46:01
+Attempting database connection at 2025-05-22 17:46:01
+Database connection successful at 2025-05-22 17:46:01
+Database connection included successfully at 2025-05-22 17:46:01
+Attempting to fetch posts at 2025-05-22 17:46:01
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:46:01
+Successfully fetched 2 posts at 2025-05-22 17:46:01
+Attempting database connection at 2025-05-22 17:47:19
+Database connection successful at 2025-05-22 17:47:19
+Attempting database connection at 2025-05-22 17:47:19
+Database connection successful at 2025-05-22 17:47:19
+Database connection included successfully at 2025-05-22 17:47:19
+Attempting to fetch posts at 2025-05-22 17:47:19
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:47:19
+Successfully fetched 2 posts at 2025-05-22 17:47:19
+Attempting database connection at 2025-05-22 17:47:32
+Database connection successful at 2025-05-22 17:47:32
+Attempting database connection at 2025-05-22 17:47:32
+Database connection successful at 2025-05-22 17:47:32
+Database connection included successfully at 2025-05-22 17:47:32
+Attempting to fetch posts at 2025-05-22 17:47:32
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:47:32
+Successfully fetched 2 posts at 2025-05-22 17:47:32
+Attempting database connection at 2025-05-22 17:47:33
+Database connection successful at 2025-05-22 17:47:33
+Attempting database connection at 2025-05-22 17:47:33
+Database connection successful at 2025-05-22 17:47:33
+Database connection included successfully at 2025-05-22 17:47:33
+Attempting to fetch posts at 2025-05-22 17:47:33
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:47:33
+Successfully fetched 2 posts at 2025-05-22 17:47:33
+Attempting database connection at 2025-05-22 17:47:41
+Database connection successful at 2025-05-22 17:47:41
+Attempting database connection at 2025-05-22 17:47:41
+Database connection successful at 2025-05-22 17:47:41
+Database connection included successfully at 2025-05-22 17:47:41
+Attempting to fetch posts at 2025-05-22 17:47:41
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:47:41
+Successfully fetched 2 posts at 2025-05-22 17:47:41
+Attempting database connection at 2025-05-22 17:47:41
+Database connection successful at 2025-05-22 17:47:41
+Attempting database connection at 2025-05-22 17:47:41
+Database connection successful at 2025-05-22 17:47:41
+Database connection included successfully at 2025-05-22 17:47:41
+Attempting to fetch posts at 2025-05-22 17:47:41
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:47:41
+Successfully fetched 2 posts at 2025-05-22 17:47:41
+Attempting database connection at 2025-05-22 17:54:41
+Database connection successful at 2025-05-22 17:54:41
+Attempting database connection at 2025-05-22 17:54:42
+Database connection successful at 2025-05-22 17:54:42
+Attempting database connection at 2025-05-22 17:54:43
+Database connection successful at 2025-05-22 17:54:43
+Attempting database connection at 2025-05-22 17:54:44
+Database connection successful at 2025-05-22 17:54:44
+Database connection included successfully at 2025-05-22 17:54:44
+Attempting to fetch posts at 2025-05-22 17:54:44
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:54:44
+Successfully fetched 2 posts at 2025-05-22 17:54:44
+Attempting database connection at 2025-05-22 17:55:16
+Database connection successful at 2025-05-22 17:55:16
+Attempting database connection at 2025-05-22 17:55:19
+Database connection successful at 2025-05-22 17:55:19
+Attempting database connection at 2025-05-22 17:55:19
+Database connection successful at 2025-05-22 17:55:19
+Attempting database connection at 2025-05-22 17:55:19
+Database connection successful at 2025-05-22 17:55:19
+Database connection included successfully at 2025-05-22 17:55:19
+Attempting to fetch posts at 2025-05-22 17:55:19
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:55:19
+Successfully fetched 2 posts at 2025-05-22 17:55:19
+Attempting database connection at 2025-05-22 17:56:41
+Database connection successful at 2025-05-22 17:56:41
+Attempting database connection at 2025-05-22 17:56:52
+Database connection successful at 2025-05-22 17:56:52
+Attempting database connection at 2025-05-22 17:56:53
+Database connection successful at 2025-05-22 17:56:53
+Attempting database connection at 2025-05-22 17:56:53
+Database connection successful at 2025-05-22 17:56:53
+Database connection included successfully at 2025-05-22 17:56:53
+Attempting to fetch posts at 2025-05-22 17:56:53
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:56:53
+Successfully fetched 2 posts at 2025-05-22 17:56:53
+Attempting database connection at 2025-05-22 17:57:49
+Database connection successful at 2025-05-22 17:57:49
+Attempting database connection at 2025-05-22 17:57:49
+Database connection successful at 2025-05-22 17:57:49
+Database connection included successfully at 2025-05-22 17:57:49
+Attempting to fetch posts at 2025-05-22 17:57:49
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:57:49
+Successfully fetched 2 posts at 2025-05-22 17:57:49
+Attempting database connection at 2025-05-22 17:57:50
+Database connection successful at 2025-05-22 17:57:50
+Attempting database connection at 2025-05-22 17:57:50
+Database connection successful at 2025-05-22 17:57:50
+Database connection included successfully at 2025-05-22 17:57:50
+Attempting to fetch posts at 2025-05-22 17:57:50
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:57:50
+Successfully fetched 2 posts at 2025-05-22 17:57:50
+Attempting database connection at 2025-05-22 17:58:10
+Database connection successful at 2025-05-22 17:58:10
+Attempting database connection at 2025-05-22 17:58:10
+Database connection successful at 2025-05-22 17:58:10
+Database connection included successfully at 2025-05-22 17:58:10
+Attempting to fetch posts at 2025-05-22 17:58:10
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:58:10
+Successfully fetched 2 posts at 2025-05-22 17:58:10
+Attempting database connection at 2025-05-22 17:59:25
+Database connection successful at 2025-05-22 17:59:25
+Attempting database connection at 2025-05-22 17:59:25
+Database connection successful at 2025-05-22 17:59:25
+Database connection included successfully at 2025-05-22 17:59:25
+Attempting to fetch posts at 2025-05-22 17:59:25
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:59:25
+Successfully fetched 2 posts at 2025-05-22 17:59:25
+Attempting database connection at 2025-05-22 17:59:37
+Database connection successful at 2025-05-22 17:59:37
+Attempting database connection at 2025-05-22 17:59:37
+Database connection successful at 2025-05-22 17:59:37
+Database connection included successfully at 2025-05-22 17:59:37
+Attempting to fetch posts at 2025-05-22 17:59:37
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:59:37
+Successfully fetched 2 posts at 2025-05-22 17:59:37
+Attempting database connection at 2025-05-22 17:59:37
+Database connection successful at 2025-05-22 17:59:37
+Attempting database connection at 2025-05-22 17:59:37
+Database connection successful at 2025-05-22 17:59:37
+Database connection included successfully at 2025-05-22 17:59:37
+Attempting to fetch posts at 2025-05-22 17:59:37
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:59:37
+Successfully fetched 2 posts at 2025-05-22 17:59:37
+Attempting database connection at 2025-05-22 17:59:37
+Database connection successful at 2025-05-22 17:59:37
+Attempting database connection at 2025-05-22 17:59:37
+Database connection successful at 2025-05-22 17:59:37
+Database connection included successfully at 2025-05-22 17:59:37
+Attempting to fetch posts at 2025-05-22 17:59:37
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:59:37
+Successfully fetched 2 posts at 2025-05-22 17:59:37
+Attempting database connection at 2025-05-22 17:59:37
+Database connection successful at 2025-05-22 17:59:37
+Attempting database connection at 2025-05-22 17:59:37
+Database connection successful at 2025-05-22 17:59:37
+Database connection included successfully at 2025-05-22 17:59:37
+Attempting to fetch posts at 2025-05-22 17:59:37
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:59:37
+Successfully fetched 2 posts at 2025-05-22 17:59:37
+Attempting database connection at 2025-05-22 17:59:38
+Database connection successful at 2025-05-22 17:59:38
+Attempting database connection at 2025-05-22 17:59:38
+Database connection successful at 2025-05-22 17:59:38
+Database connection included successfully at 2025-05-22 17:59:38
+Attempting to fetch posts at 2025-05-22 17:59:38
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:59:38
+Successfully fetched 2 posts at 2025-05-22 17:59:38
+Attempting database connection at 2025-05-22 17:59:44
+Database connection successful at 2025-05-22 17:59:44
+Attempting database connection at 2025-05-22 17:59:46
+Database connection successful at 2025-05-22 17:59:46
+Attempting database connection at 2025-05-22 17:59:46
+Database connection successful at 2025-05-22 17:59:46
+Attempting database connection at 2025-05-22 17:59:46
+Database connection successful at 2025-05-22 17:59:46
+Database connection included successfully at 2025-05-22 17:59:46
+Attempting to fetch posts at 2025-05-22 17:59:46
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 17:59:46
+Successfully fetched 2 posts at 2025-05-22 17:59:46
+Attempting database connection at 2025-05-22 17:59:59
+Database connection successful at 2025-05-22 17:59:59
+Attempting database connection at 2025-05-22 18:00:01
+Database connection successful at 2025-05-22 18:00:01
+Attempting database connection at 2025-05-22 18:00:01
+Database connection successful at 2025-05-22 18:00:01
+Attempting database connection at 2025-05-22 18:00:01
+Database connection successful at 2025-05-22 18:00:01
+Database connection included successfully at 2025-05-22 18:00:01
+Attempting to fetch posts at 2025-05-22 18:00:01
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 18:00:01
+Successfully fetched 2 posts at 2025-05-22 18:00:01
+Attempting database connection at 2025-05-22 18:02:14
+Database connection successful at 2025-05-22 18:02:14
+Attempting database connection at 2025-05-22 18:02:15
+Database connection successful at 2025-05-22 18:02:15
+Database connection included successfully at 2025-05-22 18:02:15
+Attempting to fetch posts at 2025-05-22 18:02:15
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 18:02:15
+Successfully fetched 2 posts at 2025-05-22 18:02:15
+Attempting database connection at 2025-05-22 18:02:15
+Database connection successful at 2025-05-22 18:02:15
+Attempting database connection at 2025-05-22 18:02:15
+Database connection successful at 2025-05-22 18:02:15
+Database connection included successfully at 2025-05-22 18:02:15
+Attempting to fetch posts at 2025-05-22 18:02:15
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 18:02:15
+Successfully fetched 2 posts at 2025-05-22 18:02:15
+Attempting database connection at 2025-05-22 18:02:42
+Database connection successful at 2025-05-22 18:02:42
+Attempting database connection at 2025-05-22 18:02:43
+Database connection successful at 2025-05-22 18:02:43
+Database connection included successfully at 2025-05-22 18:02:43
+Attempting to fetch posts at 2025-05-22 18:02:43
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 18:02:43
+Successfully fetched 2 posts at 2025-05-22 18:02:43
+Attempting database connection at 2025-05-22 18:02:44
+Database connection successful at 2025-05-22 18:02:44
+Attempting database connection at 2025-05-22 18:03:10
+Database connection successful at 2025-05-22 18:03:10
+Attempting database connection at 2025-05-22 18:03:30
+Database connection successful at 2025-05-22 18:03:30
+Attempting database connection at 2025-05-22 18:04:14
+Database connection successful at 2025-05-22 18:04:14
+Attempting database connection at 2025-05-22 18:04:14
+Database connection successful at 2025-05-22 18:04:14
+Attempting database connection at 2025-05-22 18:05:11
+Database connection successful at 2025-05-22 18:05:11
+Attempting database connection at 2025-05-22 18:05:29
+Database connection successful at 2025-05-22 18:05:29
+Attempting database connection at 2025-05-22 18:05:46
+Database connection successful at 2025-05-22 18:05:46
+Attempting database connection at 2025-05-22 18:06:25
+Database connection successful at 2025-05-22 18:06:25
+Attempting database connection at 2025-05-22 18:07:01
+Database connection successful at 2025-05-22 18:07:01
+Attempting database connection at 2025-05-22 18:07:24
+Database connection successful at 2025-05-22 18:07:24
+Attempting database connection at 2025-05-22 18:07:54
+Database connection successful at 2025-05-22 18:07:54
+Attempting database connection at 2025-05-22 18:07:56
+Database connection successful at 2025-05-22 18:07:56
+Attempting database connection at 2025-05-22 18:10:18
+Database connection successful at 2025-05-22 18:10:18
+Attempting database connection at 2025-05-22 18:10:18
+Database connection successful at 2025-05-22 18:10:18
+Database connection included successfully at 2025-05-22 18:10:18
+Attempting to fetch posts at 2025-05-22 18:10:18
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 18:10:18
+Successfully fetched 2 posts at 2025-05-22 18:10:18
+Attempting database connection at 2025-05-22 18:10:19
+Database connection successful at 2025-05-22 18:10:19
+Attempting database connection at 2025-05-22 18:10:19
+Database connection successful at 2025-05-22 18:10:19
+Database connection included successfully at 2025-05-22 18:10:19
+Attempting to fetch posts at 2025-05-22 18:10:19
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 18:10:19
+Successfully fetched 2 posts at 2025-05-22 18:10:19
+Attempting database connection at 2025-05-22 18:10:21
+Database connection successful at 2025-05-22 18:10:21
+Attempting database connection at 2025-05-22 18:11:17
+Database connection successful at 2025-05-22 18:11:17
+Attempting database connection at 2025-05-22 18:11:18
+Database connection successful at 2025-05-22 18:11:18
+Attempting database connection at 2025-05-22 18:11:19
+Database connection successful at 2025-05-22 18:11:19
+Attempting database connection at 2025-05-22 18:12:42
+Database connection successful at 2025-05-22 18:12:42
+Attempting database connection at 2025-05-22 18:12:43
+Database connection successful at 2025-05-22 18:12:43
+Attempting database connection at 2025-05-22 18:12:43
+Database connection successful at 2025-05-22 18:12:43
+Database connection included successfully at 2025-05-22 18:12:43
+Attempting to fetch posts at 2025-05-22 18:12:43
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 18:12:43
+Successfully fetched 2 posts at 2025-05-22 18:12:43
+Attempting database connection at 2025-05-22 18:13:12
+Database connection successful at 2025-05-22 18:13:12
+Attempting database connection at 2025-05-22 18:13:16
+Database connection successful at 2025-05-22 18:13:16
+Attempting database connection at 2025-05-22 18:13:16
+Database connection successful at 2025-05-22 18:13:16
+Database connection included successfully at 2025-05-22 18:13:16
+Attempting to fetch posts at 2025-05-22 18:13:16
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 18:13:16
+Successfully fetched 2 posts at 2025-05-22 18:13:16
+Attempting database connection at 2025-05-22 18:13:20
+Database connection successful at 2025-05-22 18:13:20
+Attempting database connection at 2025-05-22 18:13:20
+Database connection successful at 2025-05-22 18:13:20
+Database connection included successfully at 2025-05-22 18:13:20
+Attempting to fetch posts at 2025-05-22 18:13:20
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 18:13:20
+Successfully fetched 2 posts at 2025-05-22 18:13:20
+Attempting database connection at 2025-05-22 18:14:11
+Database connection successful at 2025-05-22 18:14:11
+Attempting database connection at 2025-05-22 18:14:11
+Database connection successful at 2025-05-22 18:14:11
+Database connection included successfully at 2025-05-22 18:14:11
+Attempting to fetch posts at 2025-05-22 18:14:11
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 18:14:11
+Successfully fetched 2 posts at 2025-05-22 18:14:11
+Attempting database connection at 2025-05-22 18:14:13
+Database connection successful at 2025-05-22 18:14:13
+Attempting database connection at 2025-05-22 18:14:28
+Database connection successful at 2025-05-22 18:14:28
+Attempting database connection at 2025-05-22 18:19:07
+Database connection successful at 2025-05-22 18:19:07
+Attempting database connection at 2025-05-22 18:19:08
+Database connection successful at 2025-05-22 18:19:08
+Attempting database connection at 2025-05-22 18:19:32
+Database connection successful at 2025-05-22 18:19:32
+Attempting database connection at 2025-05-22 18:19:35
+Database connection successful at 2025-05-22 18:19:35
+Attempting database connection at 2025-05-22 18:19:43
+Database connection successful at 2025-05-22 18:19:43
+Attempting database connection at 2025-05-22 18:19:46
+Database connection successful at 2025-05-22 18:19:46
+Attempting database connection at 2025-05-22 18:19:46
+Database connection successful at 2025-05-22 18:19:46
+Database connection included successfully at 2025-05-22 18:19:46
+Attempting to fetch posts at 2025-05-22 18:19:46
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 18:19:46
+Successfully fetched 2 posts at 2025-05-22 18:19:46
+Attempting database connection at 2025-05-22 18:19:58
+Database connection successful at 2025-05-22 18:19:58
+Attempting database connection at 2025-05-22 18:20:03
+Database connection successful at 2025-05-22 18:20:03
+Attempting database connection at 2025-05-22 18:20:03
+Database connection successful at 2025-05-22 18:20:03
+Database connection included successfully at 2025-05-22 18:20:03
+Attempting to fetch posts at 2025-05-22 18:20:03
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 18:20:03
+Successfully fetched 2 posts at 2025-05-22 18:20:03
+Attempting database connection at 2025-05-22 18:20:04
+Database connection successful at 2025-05-22 18:20:04
+Attempting database connection at 2025-05-22 18:20:05
+Database connection successful at 2025-05-22 18:20:05
+Attempting database connection at 2025-05-22 18:20:05
+Database connection successful at 2025-05-22 18:20:05
+Database connection included successfully at 2025-05-22 18:20:05
+Attempting to fetch posts at 2025-05-22 18:20:05
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 18:20:05
+Successfully fetched 2 posts at 2025-05-22 18:20:05
+Attempting database connection at 2025-05-22 18:20:14
+Database connection successful at 2025-05-22 18:20:14
+Attempting database connection at 2025-05-22 18:20:14
+Database connection successful at 2025-05-22 18:20:14
+Database connection included successfully at 2025-05-22 18:20:14
+Attempting to fetch posts at 2025-05-22 18:20:14
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 18:20:14
+Successfully fetched 2 posts at 2025-05-22 18:20:14
+Attempting database connection at 2025-05-22 18:20:20
+Database connection successful at 2025-05-22 18:20:20
+Attempting database connection at 2025-05-22 18:20:23
+Database connection successful at 2025-05-22 18:20:23
+Attempting database connection at 2025-05-22 18:20:23
+Database connection successful at 2025-05-22 18:20:23
+Database connection included successfully at 2025-05-22 18:20:23
+Attempting to fetch posts at 2025-05-22 18:20:23
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 18:20:23
+Successfully fetched 2 posts at 2025-05-22 18:20:23
+Attempting database connection at 2025-05-22 18:20:43
+Database connection successful at 2025-05-22 18:20:43
+Attempting database connection at 2025-05-22 18:20:46
+Database connection successful at 2025-05-22 18:20:46
+Attempting database connection at 2025-05-22 18:20:46
+Database connection successful at 2025-05-22 18:20:46
+Database connection included successfully at 2025-05-22 18:20:46
+Attempting to fetch posts at 2025-05-22 18:20:46
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 18:20:46
+Successfully fetched 2 posts at 2025-05-22 18:20:46
+Attempting database connection at 2025-05-22 19:16:38
+Database connection successful at 2025-05-22 19:16:38
+Attempting database connection at 2025-05-22 19:42:20
+Database connection successful at 2025-05-22 19:42:20
+Attempting database connection at 2025-05-22 19:42:29
+Database connection successful at 2025-05-22 19:42:29
+Attempting database connection at 2025-05-22 19:42:31
+Database connection successful at 2025-05-22 19:42:31
+Attempting database connection at 2025-05-22 19:53:13
+Database connection successful at 2025-05-22 19:53:13
+Attempting database connection at 2025-05-22 19:53:23
+Database connection successful at 2025-05-22 19:53:23
+Attempting database connection at 2025-05-22 19:53:29
+Database connection successful at 2025-05-22 19:53:29
+Attempting database connection at 2025-05-22 19:54:16
+Database connection successful at 2025-05-22 19:54:16
+Attempting database connection at 2025-05-22 19:54:39
+Database connection successful at 2025-05-22 19:54:39
+Attempting database connection at 2025-05-22 19:54:55
+Database connection successful at 2025-05-22 19:54:55
+Attempting database connection at 2025-05-22 20:40:37
+Database connection successful at 2025-05-22 20:40:37
+Attempting database connection at 2025-05-22 20:58:35
+Database connection successful at 2025-05-22 20:58:35
+Attempting database connection at 2025-05-22 21:13:55
+Database connection successful at 2025-05-22 21:13:55
+Attempting database connection at 2025-05-22 21:43:32
+Database connection successful at 2025-05-22 21:43:32
+Attempting database connection at 2025-05-22 22:52:34
+Database connection successful at 2025-05-22 22:52:34
+Attempting database connection at 2025-05-22 22:52:42
+Database connection successful at 2025-05-22 22:52:42
+Attempting database connection at 2025-05-22 23:03:42
+Database connection successful at 2025-05-22 23:03:43
+Attempting database connection at 2025-05-22 23:04:07
+Database connection successful at 2025-05-22 23:04:07
+Attempting database connection at 2025-05-22 23:04:33
+Database connection successful at 2025-05-22 23:04:33
+Attempting database connection at 2025-05-22 23:04:33
+Database connection successful at 2025-05-22 23:04:33
+Attempting database connection at 2025-05-22 23:04:33
+Database connection successful at 2025-05-22 23:04:33
+Database connection included successfully at 2025-05-22 23:04:33
+Attempting to fetch posts at 2025-05-22 23:04:33
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 23:04:33
+Successfully fetched 2 posts at 2025-05-22 23:04:33
+Attempting database connection at 2025-05-22 23:05:02
+Database connection successful at 2025-05-22 23:05:02
+Attempting database connection at 2025-05-22 23:11:12
+Database connection successful at 2025-05-22 23:11:12
+Attempting database connection at 2025-05-22 23:11:12
+Database connection successful at 2025-05-22 23:11:12
+Attempting database connection at 2025-05-22 23:12:29
+Database connection successful at 2025-05-22 23:12:29
+Attempting database connection at 2025-05-22 23:12:32
+Database connection successful at 2025-05-22 23:12:32
+Attempting database connection at 2025-05-22 23:12:41
+Database connection successful at 2025-05-22 23:12:41
+Attempting database connection at 2025-05-22 23:18:04
+Database connection successful at 2025-05-22 23:18:04
+Attempting database connection at 2025-05-22 23:18:22
+Database connection successful at 2025-05-22 23:18:22
+Attempting database connection at 2025-05-22 23:18:22
+Database connection successful at 2025-05-22 23:18:22
+Attempting database connection at 2025-05-22 23:18:22
+Database connection successful at 2025-05-22 23:18:22
+Database connection included successfully at 2025-05-22 23:18:22
+Attempting to fetch posts at 2025-05-22 23:18:22
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 23:18:22
+Successfully fetched 2 posts at 2025-05-22 23:18:22
+Attempting database connection at 2025-05-22 23:18:40
+Database connection successful at 2025-05-22 23:18:40
+Attempting database connection at 2025-05-22 23:19:21
+Database connection successful at 2025-05-22 23:19:21
+Attempting database connection at 2025-05-22 23:19:21
+Database connection successful at 2025-05-22 23:19:21
+Database connection included successfully at 2025-05-22 23:19:21
+Attempting to fetch posts at 2025-05-22 23:19:21
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 23:19:21
+Successfully fetched 2 posts at 2025-05-22 23:19:21
+Attempting database connection at 2025-05-22 23:20:06
+Database connection successful at 2025-05-22 23:20:06
+Attempting database connection at 2025-05-22 23:20:11
+Database connection successful at 2025-05-22 23:20:11
+Attempting database connection at 2025-05-22 23:20:11
+Database connection successful at 2025-05-22 23:20:11
+Database connection included successfully at 2025-05-22 23:20:11
+Attempting to fetch posts at 2025-05-22 23:20:11
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 23:20:11
+Successfully fetched 2 posts at 2025-05-22 23:20:11
+Attempting database connection at 2025-05-22 23:20:13
+Database connection successful at 2025-05-22 23:20:13
+Attempting database connection at 2025-05-22 23:20:25
+Database connection successful at 2025-05-22 23:20:25
+Attempting database connection at 2025-05-22 23:20:34
+Database connection successful at 2025-05-22 23:20:34
+Attempting database connection at 2025-05-22 23:21:05
+Database connection successful at 2025-05-22 23:21:05
+Attempting database connection at 2025-05-22 23:21:17
+Database connection successful at 2025-05-22 23:21:17
+Attempting database connection at 2025-05-22 23:22:41
+Database connection successful at 2025-05-22 23:22:41
+Attempting database connection at 2025-05-22 23:22:47
+Database connection successful at 2025-05-22 23:22:47
+Attempting database connection at 2025-05-22 23:22:48
+Database connection successful at 2025-05-22 23:22:48
+Attempting database connection at 2025-05-22 23:22:58
+Database connection successful at 2025-05-22 23:22:58
+Attempting database connection at 2025-05-22 23:23:03
+Database connection successful at 2025-05-22 23:23:03
+Attempting database connection at 2025-05-22 23:23:03
+Database connection successful at 2025-05-22 23:23:03
+Database connection included successfully at 2025-05-22 23:23:03
+Attempting to fetch posts at 2025-05-22 23:23:03
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-22 23:23:03
+Successfully fetched 2 posts at 2025-05-22 23:23:03
+Attempting database connection at 2025-05-22 23:23:18
+Database connection successful at 2025-05-22 23:23:18
+Attempting database connection at 2025-05-23 00:32:05
+Database connection successful at 2025-05-23 00:32:05
+Attempting database connection at 2025-05-23 02:37:41
+Database connection successful at 2025-05-23 02:37:41
+Attempting database connection at 2025-05-23 07:12:35
+Database connection successful at 2025-05-23 07:12:35
+Attempting database connection at 2025-05-23 08:52:56
+Database connection successful at 2025-05-23 08:52:56
+Attempting database connection at 2025-05-23 08:53:19
+Database connection successful at 2025-05-23 08:53:19
+Attempting database connection at 2025-05-23 08:54:04
+Database connection successful at 2025-05-23 08:54:04
+Attempting database connection at 2025-05-23 08:54:04
+Database connection successful at 2025-05-23 08:54:04
+Attempting database connection at 2025-05-23 08:54:05
+Database connection successful at 2025-05-23 08:54:05
+Database connection included successfully at 2025-05-23 08:54:05
+Attempting to fetch posts at 2025-05-23 08:54:05
+Executing query: SELECT * FROM posts ORDER BY date DESC LIMIT 20 at 2025-05-23 08:54:05
+Successfully fetched 2 posts at 2025-05-23 08:54:05
+Attempting database connection at 2025-05-23 08:54:16
+Database connection successful at 2025-05-23 08:54:16
+Attempting database connection at 2025-05-23 08:54:20
+Database connection successful at 2025-05-23 08:54:20
+Attempting database connection at 2025-05-23 09:09:07
+Database connection successful at 2025-05-23 09:09:07
+Attempting database connection at 2025-05-23 09:10:36
+Database connection successful at 2025-05-23 09:10:36
+Attempting database connection at 2025-05-23 09:12:38
+Database connection successful at 2025-05-23 09:12:38
+Attempting database connection at 2025-05-23 09:12:54
+Database connection successful at 2025-05-23 09:12:54
+Attempting database connection at 2025-05-23 09:13:08
+Database connection successful at 2025-05-23 09:13:08
+Attempting database connection at 2025-05-23 09:13:16
+Database connection successful at 2025-05-23 09:13:16
+Attempting database connection at 2025-05-23 09:13:24
+Database connection successful at 2025-05-23 09:13:24
+Attempting database connection at 2025-05-23 09:14:09
+Database connection successful at 2025-05-23 09:14:09
+Attempting database connection at 2025-05-23 09:15:02
+Database connection successful at 2025-05-23 09:15:02
+Attempting database connection at 2025-05-23 09:15:32
+Database connection successful at 2025-05-23 09:15:32
+Attempting database connection at 2025-05-23 09:18:01
+Database connection successful at 2025-05-23 09:18:01
+Attempting database connection at 2025-05-23 09:18:31
+Database connection successful at 2025-05-23 09:18:31
+Attempting database connection at 2025-05-23 09:18:37
+Database connection successful at 2025-05-23 09:18:37
+Attempting database connection at 2025-05-23 09:19:16
+Database connection successful at 2025-05-23 09:19:16
+Attempting database connection at 2025-05-23 09:35:49
+Database connection successful at 2025-05-23 09:35:49
+Attempting database connection at 2025-05-23 09:36:21
+Database connection successful at 2025-05-23 09:36:21
+Attempting database connection at 2025-05-23 09:39:34
+Database connection successful at 2025-05-23 09:39:34
+Attempting database connection at 2025-05-23 09:39:34
+Database connection successful at 2025-05-23 09:39:34
+Attempting database connection at 2025-05-23 09:45:03
+Database connection successful at 2025-05-23 09:45:03
+Attempting database connection at 2025-05-23 09:45:05
+Database connection successful at 2025-05-23 09:45:05
+Attempting database connection at 2025-05-23 09:45:06
+Database connection successful at 2025-05-23 09:45:06
+Attempting database connection at 2025-05-23 09:45:07
+Database connection successful at 2025-05-23 09:45:07
+Attempting database connection at 2025-05-23 09:45:56
+Database connection successful at 2025-05-23 09:45:56
+Attempting database connection at 2025-05-23 09:46:08
+Database connection successful at 2025-05-23 09:46:08
+Attempting database connection at 2025-05-23 09:50:11
+Database connection successful at 2025-05-23 09:50:11
+Attempting database connection at 2025-05-23 09:50:12
+Database connection successful at 2025-05-23 09:50:12
+Attempting database connection at 2025-05-23 09:50:55
+Database connection successful at 2025-05-23 09:50:55
+Attempting database connection at 2025-05-23 09:50:59
+Database connection successful at 2025-05-23 09:50:59
+Attempting database connection at 2025-05-23 09:52:27
+Database connection successful at 2025-05-23 09:52:27
+Attempting database connection at 2025-05-23 09:52:31
+Database connection successful at 2025-05-23 09:52:31
+Attempting database connection at 2025-05-23 09:53:34
+Database connection successful at 2025-05-23 09:53:34
+Attempting database connection at 2025-05-23 09:54:27
+Database connection successful at 2025-05-23 09:54:27
+Attempting database connection at 2025-05-23 09:54:44
+Database connection successful at 2025-05-23 09:54:44
+Attempting database connection at 2025-05-23 09:55:06
+Database connection successful at 2025-05-23 09:55:06
+Attempting database connection at 2025-05-23 09:56:31
+Database connection successful at 2025-05-23 09:56:31
+Attempting database connection at 2025-05-23 10:02:23
+Database connection successful at 2025-05-23 10:02:23
+Attempting database connection at 2025-05-23 10:03:47
+Database connection successful at 2025-05-23 10:03:47
+Attempting database connection at 2025-05-23 10:03:48
+Database connection successful at 2025-05-23 10:03:48
+Attempting database connection at 2025-05-23 10:03:48
+Database connection successful at 2025-05-23 10:03:48
+Attempting database connection at 2025-05-23 10:03:48
+Database connection successful at 2025-05-23 10:03:48
+Attempting database connection at 2025-05-23 10:03:48
+Database connection successful at 2025-05-23 10:03:48
+Attempting database connection at 2025-05-23 10:03:49
+Database connection successful at 2025-05-23 10:03:49
