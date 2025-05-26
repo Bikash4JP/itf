@@ -28,10 +28,10 @@
     <link rel="stylesheet" href="css/login.css">
     <script type="text/javascript" src="js/jquery.js"></script>
     <script type="text/javascript" src="js/jquery-migrate.min.js"></script>
-    <link rel="icon" href="images/titlle logo.PNG" sizes="32x32">
-    <link rel="icon" href="images/titlle logo.PNG" sizes="192x192">
-    <link rel="apple-touch-icon-precomposed" href="images/titlle logo.PNG">
-    <meta name="msapplication-TileImage" content="images/titlle logo.PNG">
+    <link rel="icon" href="images/url_logo.PNG" sizes="32x32">
+    <link rel="icon" href="images/url_logo.PNG" sizes="192x192">
+    <link rel="apple-touch-icon-precomposed" href="images/url_logo.PNG">
+    <meta name="msapplication-TileImage" content="images/url_logo.PNG">
     <meta name="theme-color" content="#000000">
 </head>
 
@@ -306,10 +306,7 @@
     <!-- Other Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/form.min.js"></script>
-    <script src="js/main.min.js"></script>
-    <script src="js/video.js"></script>
-    <script src="js/scripts.js"></script>
-    <script src="js/news.js"></script>
+    <script src="js/recruit.js"></script>
     <script type="text/javascript" src="js/front.min.js"></script>
     <script type="text/javascript" src="js/wp-embed.min.js"></script>
 </body>

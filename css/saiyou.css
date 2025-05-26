@@ -135,8 +135,9 @@ section.bg .search-form button i {
 }
 
 .job-summary p {
-  margin: 6px 0;
+  margin: 6px ;
   font-size: 0.95rem;
+  text-align: left;
 }
 
 .job-divider {

@@ -1,3 +1,5 @@
+// js/staffdb.js
+
 document.addEventListener('DOMContentLoaded', function() {
     const postsForm = document.getElementById('postsFormSubmit');
     const jobsForm = document.getElementById('jobsFormSubmit');
@@ -12,10 +14,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to fetch and render posts
     function fetchPosts() {
-        // Get session ID from cookies (if available)
-        const sessionId = document.cookie.split('; ').find(row => row.startsWith('PHPSESSID'))?.split('=')[1] || '';
-        
-        fetch('/php/fetch_staff_posts.php' + (sessionId ? `?session_id=${sessionId}` : ''), {
+        console.log('Fetching posts from /php/fetch_staff_posts.php');
+        fetch('/php/fetch_staff_posts.php', {
             method: 'GET',
             credentials: 'include',
             mode: 'cors',
@@ -51,7 +51,8 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Error fetching posts:', error);
-            document.getElementById('postsList').innerHTML = '<p>投稿の取得中にエラーが発生しました。詳細: ' + error.message + '</p>';
+            document.getElementById('postsList').innerHTML =
+                '<p>投稿の取得中にエラーが発生しました。詳細: ' + error.message + '</p>';
         });
     }
 
@@ -166,13 +167,15 @@ document.addEventListener('DOMContentLoaded', function() {
     function toggleBonusAmount() {
         const bonusAmountGroup = document.getElementById('bonus-amount-group');
         if (!bonusAmountGroup) return;
-        bonusAmountGroup.style.display = document.querySelector('input[name="bonuses"]:checked').value === '1' ? 'block' : 'none';
+        bonusAmountGroup.style.display =
+            document.querySelector('input[name="bonuses"]:checked').value === '1' ? 'block' : 'none';
     }
 
     function toggleRentSupport() {
         const rentSupportGroup = document.getElementById('rent-support-group');
         if (!rentSupportGroup) return;
-        rentSupportGroup.style.display = document.querySelector('input[name="living_support"]:checked').value === '1' ? 'block' : 'none';
+        rentSupportGroup.style.display =
+            document.querySelector('input[name="living_support"]:checked').value === '1' ? 'block' : 'none';
         toggleRentSupportInput();
     }
 
@@ -182,7 +185,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!rentSupportAmountGroup || !rentSupportInput) return;
         if (document.querySelector('input[name="living_support"]:checked')?.value === '1') {
             rentSupportAmountGroup.style.display = 'block';
-            rentSupportInput.required = document.querySelector('input[name="rent_support_type"]:checked').value === 'amount';
+            rentSupportInput.required =
+                document.querySelector('input[name="rent_support_type"]:checked').value === 'amount';
         } else {
             rentSupportAmountGroup.style.display = 'none';
             rentSupportInput.required = false;
@@ -192,13 +196,15 @@ document.addEventListener('DOMContentLoaded', function() {
     function toggleTransportAmount() {
         const transportAmountGroup = document.getElementById('transport-amount-group');
         if (!transportAmountGroup) return;
-        transportAmountGroup.style.display = document.querySelector('input[name="transportation_charges"]:checked').value === '1' ? 'block' : 'none';
+        transportAmountGroup.style.display =
+            document.querySelector('input[name="transportation_charges"]:checked').value === '1' ? 'block' : 'none';
     }
 
     function toggleIncrementCondition() {
         const incrementConditionGroup = document.getElementById('increment-condition-group');
         if (!incrementConditionGroup) return;
-        incrementConditionGroup.style.display = document.querySelector('input[name="salary_increment"]:checked').value === '1' ? 'block' : 'none';
+        incrementConditionGroup.style.display =
+            document.querySelector('input[name="salary_increment"]:checked').value === '1' ? 'block' : 'none';
     }
 
     const salaryTypeRadios = document.querySelectorAll('input[name="salary_type"]');
@@ -215,6 +221,7 @@ document.addEventListener('DOMContentLoaded', function() {
     transportationRadios.forEach(radio => radio.addEventListener('change', toggleTransportAmount));
     salaryIncrementRadios.forEach(radio => radio.addEventListener('change', toggleIncrementCondition));
 
+    // Initialize toggle states on load
     toggleSalaryInput();
     toggleBonusAmount();
     toggleRentSupport();
@@ -258,6 +265,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Functions outside DOMContentLoaded for showing/hiding forms
 window.showForm = function(formId) {
     document.getElementById(formId + 'Form').style.display = 'block';
 };
@@ -266,6 +274,7 @@ window.hideForm = function(formId) {
     document.getElementById(formId + 'Form').style.display = 'none';
 };
 
+// Function to render posts into #postsList
 function renderStaffPosts(posts) {
     const postsList = document.getElementById('postsList');
     if (!postsList) {
@@ -284,6 +293,7 @@ function renderStaffPosts(posts) {
         const postItem = document.createElement('div');
         postItem.className = `post-item ${post.post_type === 'job' ? 'post-item--job' : 'post-item--news'}`;
 
+        // Meta information
         const meta = document.createElement('div');
         meta.className = 'post-meta';
         meta.innerHTML = `
@@ -292,29 +302,34 @@ function renderStaffPosts(posts) {
             <span class="posted-by">Posted By: ${post.posted_by}</span>
         `;
 
+        // Title
         const title = document.createElement('div');
         title.className = 'post-title';
         title.innerHTML = `<a href="/php/post_view.php?id=${post.id}">${post.title}</a>`;
 
-        let image = '';
+        // Image (if exists)
+        let imageHTML = '';
         if (post.image) {
-            image = `
+            imageHTML = `
                 <div class="post-image">
-                    <img src="${post.image}" alt="${post.title}" onerror="this.onerror=null; this.src='/images/placeholder.jpg';">
+                    <img src="${post.image}" alt="${post.title}"
+                         onerror="this.onerror=null; this.src='/images/placeholder.jpg';">
                 </div>
             `;
         } else {
-            image = `
+            imageHTML = `
                 <div class="post-image">
                     <div class="image-placeholder">IMAGE (If Attached)</div>
                 </div>
             `;
         }
 
+        // Short summary
         const summary = document.createElement('div');
         summary.className = 'post-summary';
         summary.textContent = post.short_summary || '概要がありません。';
 
+        // Job-specific details
         let jobDetails = '';
         if (post.post_type === 'job') {
             jobDetails = `
@@ -329,7 +344,7 @@ function renderStaffPosts(posts) {
         }
 
         postItem.innerHTML = `
-            ${image}
+            ${imageHTML}
             <div class="post-content">
                 ${meta.outerHTML}
                 ${title.outerHTML}
