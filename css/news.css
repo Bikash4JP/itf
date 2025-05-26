@@ -140,47 +140,49 @@ body {
     margin-bottom: 20px;
     border-bottom: 1px solid skyblue;
     padding-bottom: 20px;
-    overflow: hidden; /* Ensure border-bottom applies correctly */
+    overflow: hidden;
 }
 
 .news-wrapper {
     display: flex;
-    gap: 20px; /* Space between image and content */
-    align-items: flex-start; /* Align items at the top */
+    gap: 20px;
+    align-items: flex-start;
 }
 
 /* Full view specific styles */
 .full-view-wrapper {
-    display: block; /* Override flex for full view */
+    display: block;
 }
 
 .full-view-wrapper .news-image {
-    float: left; /* Restore float for wrapping */
+    float: left;
     margin-right: 20px;
     margin-bottom: 20px;
 }
 
 .full-view-wrapper .news-content {
-    display: block; /* Ensure content wraps naturally */
+    display: block;
 }
 
 .news-image {
-    flex: 0 0 300px; /* Fixed width for the image container */
-    max-height: 300px; /* Maximum height */
-    min-height: 150px; /* Ensure a minimum height for initial rendering */
+    flex: 0 0 300px;
+    max-height: 300px;
 }
 
 .news-image img {
-    width: 100%; /* Ensure image takes full width of container */
-    max-height: 300px; /* Match max-height of parent */
-    min-height: 150px; /* Match min-height of parent */
-    object-fit: cover; /* Ensure image maintains aspect ratio */
-    object-position: center; /* Center the image */
-    display: block; /* Remove any extra space below the image */
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    object-position: center;
+    display: block;
 }
 
 .news-content {
-    flex: 1; /* Take remaining space */
+    flex: 1;
+}
+
+.news-wrapper > .news-content {
+    width: 100%; /* Ensure full width when news-image is absent */
 }
 
 .news-content .tag {
@@ -233,20 +235,19 @@ body {
 
 @media (max-width: 768px) {
     .news-wrapper {
-        flex-direction: column; /* Stack image and content vertically */
+        flex-direction: column;
     }
     .news-image {
-        flex: 0 0 auto; /* Reset flex basis */
-        width: 100%; /* Full width on mobile */
-        max-height: 200px; /* Adjust max-height for mobile */
-        min-height: 100px; /* Adjust min-height for mobile */
+        flex: 0 0 auto;
+        width: 100%;
+        max-height: 200px;
     }
     .news-image img {
-        max-height: 200px; /* Match max-height for mobile */
-        min-height: 100px; /* Match min-height for mobile */
+        max-height: 200px;
     }
     .news-content {
         flex: 1;
+        width: 100%;
     }
     .news-content .title {
         font-size: 1.2em;
@@ -265,8 +266,8 @@ body {
 
     /* Full view specific styles for mobile */
     .full-view-wrapper .news-image {
-        float: none; /* Remove float on mobile */
-        width: 100%; /* Full width on mobile */
+        float: none;
+        width: 100%;
         margin-right: 0;
         margin-bottom: 15px;
     }
@@ -274,12 +275,10 @@ body {
 
 @media (max-width: 480px) {
     .news-image {
-        max-height: 150px; /* Adjust max-height for smaller screens */
-        min-height: 80px; /* Adjust min-height for smaller screens */
+        max-height: 150px;
     }
     .news-image img {
-        max-height: 150px; /* Match max-height for smaller screens */
-        min-height: 80px; /* Match min-height for smaller screens */
+        max-height: 150px;
     }
     .news-content .title {
         font-size: 1em;
@@ -292,17 +291,3 @@ body {
         font-size: 0.85em;
     }
 }
-/* Staff Login Link Styling */
-.cta-item.estimation .staff-login-link {
-    background-color: #0077ee;
-    color: white;
-    padding: 8px 16px;
-    border-radius: 5px;
-    text-decoration: none;
-}
-
-.cta-item.estimation .staff-login-link:hover {
-    background-color: orange;
-    color: black;
-}
-

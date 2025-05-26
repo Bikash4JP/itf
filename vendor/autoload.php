@@ -20,9 +20,3 @@ if (PHP_VERSION_ID < 50600) {
 require_once __DIR__ . '/composer/autoload_real.php';
 
 return ComposerAutoloaderInit9e0acc0175fd91a1243d4c92193af115::getLoader();
-[$me_path, $applicant_id];
-
-    // Redirect to confirmation page with download link
-    header("Location: /confirmation?applicant_id=$applicant_id");
-    exit;
-?>

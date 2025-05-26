@@ -4,42 +4,40 @@ let newsData = []; // Initialize as empty; will be populated from fetch
 async function fetchNewsData() {
     try {
         console.log('Fetching news data from /php/fetch_news.php...');
-        const response = await fetch('/php/fetch_news.php'); // Updated path
+        const response = await fetch('/php/fetch_news.php');
         if (!response.ok) {
             throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
         }
         newsData = await response.json();
-        console.log('Fetched news data:', newsData); // Log the fetched data
+        console.log('Fetched news data:', newsData);
         if (newsData.error) {
             throw new Error(newsData.error);
         }
     } catch (error) {
         console.error('Error fetching news data:', error);
         alert('ニュースデータの取得に失敗しました。詳細: ' + error.message);
-        newsData = []; // Ensure newsData is an empty array on error
+        newsData = [];
     }
 }
 
 // Function to extract first 50 words from the summary
 function getShortSummary(summary) {
     if (!summary) return "";
-    const words = summary.split(/\s+/); // Split by whitespace
-    const shortSummary = words.slice(0, 50).join(" "); // Take first 50 words
-    return shortSummary + (words.length > 50 ? "..." : ""); // Add ellipsis if summary is longer
+    const words = summary.split(/\s+/);
+    const shortSummary = words.slice(0, 50).join(" ");
+    return shortSummary + (words.length > 50 ? "..." : "");
 }
 
 function renderIndexNews() {
     const newsList = document.querySelector(".list ul");
     if (!newsList) return;
     newsList.innerHTML = "";
-    // Check if newsData is an array and not empty
     if (!Array.isArray(newsData) || newsData.length === 0) {
         newsList.innerHTML = "<li>ニュースデータがありません。</li>";
         return;
     }
-    // Sort to ensure latest-to-oldest order
     const sortedNews = [...newsData].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    const latestNews = sortedNews.slice(0, 3); // Take the first 3 items
+    const latestNews = sortedNews.slice(0, 3);
     latestNews.forEach((item) => {
         const index = newsData.indexOf(newsData.find(news => news.title === item.title && news.date === item.date));
         const shortSummary = getShortSummary(item.summary);
@@ -68,27 +66,30 @@ function renderNews(filteredData) {
     if (!newsList) return;
     newsList.innerHTML = "";
     console.log('Rendering news with filtered data:', filteredData);
-    // Check if filteredData is an array and not empty
     if (!Array.isArray(filteredData) || filteredData.length === 0) {
         newsList.innerHTML = "<div>ニュースデータがありません。</div>";
         return;
     }
-    // Sort to ensure latest-to-oldest order
     const sortedData = [...filteredData].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     sortedData.forEach((item) => {
         const index = newsData.indexOf(item);
         const shortSummary = getShortSummary(item.summary);
+        // Check if the news item has a valid image
+        const hasImage = item.image && typeof item.image === 'string' && item.image.trim() !== '' && item.image.toLowerCase() !== 'null';
+        console.log(`Rendering news item: ${item.title}, image: ${item.image}, hasImage: ${hasImage}`);
+        const imageHtml = hasImage ? `
+            <div class="news-image">
+                <img src="${item.image}" alt="${item.title}" onerror="this.parentElement.style.display='none';">
+            </div>
+        ` : '';
         newsList.innerHTML += `
             <div class="news-item">
                 <div class="news-wrapper">
-                    <div class="news-image">
-                        <img src="${item.image || 'images/default-news.jpg'}" alt="${item.title}">
-                    </div>
+                    ${imageHtml}
                     <div class="news-content">
                         <div class="tag">
                             <span class="date">${item.date}</span>
                             <span class="category">${item.category}</span>
-                            <span class="posted-by">Posted By: ${item.posted_by}</span>
                         </div>
                         <div class="title">${item.title}</div>
                         <div class="summary">${shortSummary} <a href="news.html?id=${index}" class="summary-link">もっと見る。。。</a></div>
@@ -187,18 +188,45 @@ document.addEventListener("DOMContentLoaded", async () => {
             console.log("newsId is present, rendering single news item...");
             const selectedNews = newsData[newsId];
             if (selectedNews) {
+                // Update SEO meta tags for single news view
+                document.title = selectedNews.title + ' - 株式会社アイティーエフ';
+                const metaDescription = document.querySelector('meta[name="description"]');
+                if (metaDescription) {
+                    metaDescription.setAttribute('content', selectedNews.summary.substring(0, 150) + '...');
+                }
+                const metaOgTitle = document.querySelector('meta[property="og:title"]');
+                if (metaOgTitle) {
+                    metaOgTitle.setAttribute('content', selectedNews.title + ' - 株式会社アイティーエフ');
+                }
+                const metaOgDescription = document.querySelector('meta[property="og:description"]');
+                if (metaOgDescription) {
+                    metaOgDescription.setAttribute('content', selectedNews.summary.substring(0, 150) + '...');
+                }
+                const metaTwitterTitle = document.querySelector('meta[name="twitter:title"]');
+                if (metaTwitterTitle) {
+                    metaTwitterTitle.setAttribute('content', selectedNews.title + ' - 株式会社アイティーエフ');
+                }
+                const metaTwitterDescription = document.querySelector('meta[name="twitter:description"]');
+                if (metaTwitterDescription) {
+                    metaTwitterDescription.setAttribute('content', selectedNews.summary.substring(0, 150) + '...');
+                }
+
+                const hasImage = selectedNews.image && typeof selectedNews.image === 'string' && selectedNews.image.trim() !== '' && selectedNews.image.toLowerCase() !== 'null';
+                console.log(`Rendering single news item: ${selectedNews.title}, image: ${selectedNews.image}, hasImage: ${hasImage}`);
+                const imageHtml = hasImage ? `
+                    <div class="news-image">
+                        <img src="${selectedNews.image}" alt="${selectedNews.title}" onerror="this.parentElement.style.display='none';">
+                    </div>
+                ` : '';
                 const newsList = document.getElementById("newsList");
                 newsList.innerHTML = `
                     <div class="news-item">
                         <div class="news-wrapper full-view-wrapper">
-                            <div class="news-image">
-                                <img src="${selectedNews.image || 'images/default-news.jpg'}" alt="${selectedNews.title}">
-                            </div>
+                            ${imageHtml}
                             <div class="news-content">
                                 <div class="tag">
                                     <span class="date">${selectedNews.date}</span>
                                     <span class="category">${selectedNews.category}</span>
-                                    <span class="posted-by">Posted By: ${selectedNews.posted_by}</span>
                                 </div>
                                 <div class="title">${selectedNews.title}</div>
                                 <div class="summary">${selectedNews.content}</div>
@@ -215,7 +243,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         } else {
             console.log("newsId is not present, rendering all news items...");
-            // Ensure default view is sorted latest-to-oldest
             const sortedNewsData = Array.isArray(newsData) ? [...newsData].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) : [];
             renderNews(sortedNewsData);
 
@@ -223,7 +250,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             const dateFilter = document.getElementById("dateFilter");
 
             if (dateFilter) {
-                // Set default value to "desc" (latest to oldest)
                 dateFilter.value = "desc";
                 console.log("dateFilter found, setting default to desc and adding event listener...");
                 dateFilter.addEventListener("change", filterNews);

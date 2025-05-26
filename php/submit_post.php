@@ -1,5 +1,10 @@
 <?php
-ini_set('session.cookie_path', '/itf');
+ini_set('session.cookie_path', '/');
+ini_set('session.cookie_domain', '.it-future.jp');
+ini_set('session.cookie_lifetime', 86400);
+ini_set('session.cookie_secure', true);
+ini_set('session.cookie_httponly', true);
+ini_set('session.cookie_samesite', 'Lax');
 session_start();
 header("Content-Type: application/json");
 
@@ -32,7 +37,7 @@ try {
     // Handle image upload
     $image_path = null;
     if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-        $upload_dir = '../uploads/';
+        $upload_dir = '../Uploads/';
         // Ensure the uploads directory exists
         if (!is_dir($upload_dir)) {
             mkdir($upload_dir, 0755, true);
