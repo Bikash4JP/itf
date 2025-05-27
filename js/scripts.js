@@ -23,9 +23,12 @@ document.addEventListener("DOMContentLoaded", function () {
 document.addEventListener("DOMContentLoaded", function () {
     const mailButton = document.getElementById("mailBtn");
 
-    mailButton.addEventListener("click", function () {
-        window.location.href = "mailto:info@it-future.jp";
-    });
+    // Add null check to prevent errors on pages without mailButton
+    if (mailButton) {
+        mailButton.addEventListener("click", function () {
+            window.location.href = "mailto:info@it-future.jp";
+        });
+    }
 });
 
 // Back to Top Button Functionality
