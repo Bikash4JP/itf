@@ -1,101 +1,91 @@
-i18next
-  .use(i18nextHttpBackend)
-  .use(i18nextBrowserLanguageDetector)
-  .init({
-    lng: 'ja', // Default language is Japanese
-    fallbackLng: false, // Disable fallback to prevent automatic file load
-    // Skip loading translations for 'ja'
-    preload: [], // Prevent preloading any languages
-    ns: ['translation'], // Namespace for translations
-    defaultNS: 'translation',
-    backend: {
-      loadPath: 'locales/{{lng}}/translation.json', // Path to translation files
-      // Custom load function to skip loading for 'ja'
-      load: (languages, namespaces, callback) => {
-        console.log('Attempting to load translation for language:', languages[0]);
-        if (languages[0] === 'ja') {
-          // Skip loading translation file for 'ja'
-          console.log('Skipping translation file load for ja');
-          callback(null, {});
-        } else {
-          // Load translation file for other languages
-          console.log('Fetching translation file:', `locales/${languages[0]}/translation.json`);
-          fetch(`locales/${languages[0]}/translation.json`)
-            .then(response => {
-              if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-              }
-              return response.json();
-            })
-            .then(data => {
-              console.log(`Translation file loaded for ${languages[0]}:`, data);
-              callback(null, data);
-            })
-            .catch(err => {
-              console.error(`Error loading translation file for ${languages[0]}:`, err);
-              callback(err, {});
+document.addEventListener('DOMContentLoaded', function() {
+    // Store the original HTML content of all elements with data-i18n attributes
+    const elements = document.querySelectorAll('[data-i18n]');
+    const originalContents = new Map();
+    elements.forEach(element => {
+        originalContents.set(element, element.innerHTML);
+    });
+
+    // Initialize i18next
+    i18next
+        .use(i18nextHttpBackend)
+        .use(i18nextBrowserLanguageDetector)
+        .init({
+            lng: 'ja', // Default language
+            fallbackLng: false, // Disable fallback to avoid loading translations for 'ja'
+            supportedLngs: ['en', 'id', 'vi', 'zh', 'ne', 'tl', 'ko', 'hi', 'bn'], // Languages that have translation files
+            backend: {
+                loadPath: 'locales/{{lng}}.json'
+            },
+            detection: {
+                order: ['localStorage', 'navigator'],
+                caches: ['localStorage']
+            },
+            interpolation: {
+                escapeValue: false // React already escapes by default, not needed for pure HTML
+            },
+            load: 'currentOnly' // Only load the current language, not fallback
+        }, (err, t) => {
+            if (err) {
+                // If the error is due to missing 'ja' translation (which is expected), proceed anyway
+                if (i18next.language === 'ja') {
+                    updateContent();
+                    return;
+                }
+                console.error('i18next initialization error:', err);
+                return;
+            }
+
+            // Function to update translations
+            function updateContent() {
+                const currentLang = i18next.language;
+
+                if (currentLang === 'ja') {
+                    // Revert to original HTML content for Japanese
+                    elements.forEach(element => {
+                        element.innerHTML = originalContents.get(element);
+                    });
+                } else {
+                    // Apply translations for other languages
+                    elements.forEach(element => {
+                        const key = element.getAttribute('data-i18n');
+                        element.innerHTML = i18next.t(key);
+                    });
+                }
+            }
+
+            // Initial content update
+            updateContent();
+
+            // Language selector handling
+            const languageSelector = document.getElementById('language-selector');
+            if (languageSelector) {
+                // Set the selector to the current language
+                languageSelector.value = i18next.language || 'ja';
+
+                languageSelector.addEventListener('change', (e) => {
+                    const newLang = e.target.value;
+                    if (newLang === 'ja') {
+                        // For Japanese, revert to original content without loading translations
+                        i18next.changeLanguage('ja', () => {
+                            updateContent();
+                        });
+                    } else {
+                        // For other languages, load the translation file
+                        i18next.changeLanguage(newLang, (err) => {
+                            if (err) {
+                                console.error('Error changing language:', err);
+                                return;
+                            }
+                            updateContent();
+                        });
+                    }
+                });
+            }
+
+            // Listen for language changes
+            i18next.on('languageChanged', () => {
+                updateContent();
             });
-        }
-      }
-    },
-    // Include 'ja' in supported languages, but it won't load a file due to custom load function
-    supportedLngs: ['ja', 'id', 'vi', 'en', 'zh', 'ne', 'tl', 'ko', 'hi', 'bn'],
-    escapeValue: false, // React already safes from XSS
-    debug: true // Enable debug logging to see translation loading
-  }, (err, t) => {
-    if (err) {
-      console.error('i18next initialization error:', err);
-      // Proceed with updateContent even if there's an error
-      storeOriginalContent();
-      updateContent();
-      return;
-    }
-    console.log('i18next initialized with language:', i18next.language);
-    // Store original content before any updates
-    storeOriginalContent();
-    updateContent();
-  });
-
-// Object to store the original HTML content of each element
-const originalContents = {};
-
-function storeOriginalContent() {
-  document.querySelectorAll('[data-i18n]').forEach(element => {
-    const key = element.getAttribute('data-i18n');
-    if (!originalContents[key]) { // Only store if not already set to prevent overwriting
-      originalContents[key] = element.innerHTML;
-      // console.log(`Stored original content for key '${key}':`, originalContents[key]);
-    }
-  });
-}
-
-function updateContent() {
-  document.querySelectorAll('[data-i18n]').forEach(element => {
-    const key = element.getAttribute('data-i18n');
-    const originalContent = originalContents[key] || element.innerHTML;
-    if (i18next.language === 'ja') {
-      // For Japanese, always restore the original HTML content
-      // console.log(`Restoring original content for key '${key}' (language: ja):`, originalContent);
-      element.innerHTML = originalContent;
-    } else {
-      // For other languages, apply the translation
-      const translated = i18next.t(key);
-      console.log(`Translating key '${key}' for language '${i18next.language}':`, translated);
-      // If the translation is the same as the key or undefined, fall back to original content
-      element.innerHTML = (translated === key || translated === undefined) ? originalContent : translated;
-    }
-  });
-}
-
-document.getElementById('language-selector').addEventListener('change', (event) => {
-  const newLang = event.target.value;
-  console.log('Switching language to:', newLang);
-  i18next.changeLanguage(newLang).then(() => {
-    console.log('Language switched to:', i18next.language);
-    updateContent();
-  }).catch(err => {
-    console.error('Error switching language:', err);
-    // Ensure updateContent is called even if there's an error
-    updateContent();
-  });
+        });
 });
