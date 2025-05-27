@@ -22,10 +22,10 @@ try {
             // Verify if the image file exists
             $image_path = __DIR__ . '/../' . $item['image'];
             if (!file_exists($image_path)) {
-                $item['image'] = 'images/default-news.jpg'; // Fallback to default image
+                $item['image'] = null; // Set to null if image file doesn't exist
             }
         } else {
-            $item['image'] = 'images/default-news.jpg'; // Fallback if image is empty
+            $item['image'] = null; // Set to null if no image is provided
         }
     }
     unset($item); // Unset reference to avoid issues

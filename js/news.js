@@ -72,11 +72,11 @@ function renderNews(filteredData) {
     sortedData.forEach((item) => {
         const index = newsData.indexOf(item);
         const shortSummary = getShortSummary(item.summary);
-        const hasImage = item.image && typeof item.image === 'string' && item.image.trim() !== '' && item.image.toLowerCase() !== 'null';
+        const hasImage = item.image && typeof item.image === 'string' && item.image.trim() !== '' && item.image !== 'null';
         console.log(`Rendering news item: ${item.title || 'Unknown title'}, image: ${item.image || 'No image'}, hasImage: ${hasImage}`);
         const imageHtml = hasImage ? `
             <div class="news-image">
-                <img src="${item.image}" alt="${item.title}" onerror="this.parentElement.style.display='none';">
+                <img src="${item.image}" alt="${item.title || 'News Image'}" onerror="this.parentElement.style.display='none';">
             </div>
         ` : '';
         newsList.innerHTML += `
@@ -183,33 +183,34 @@ document.addEventListener("DOMContentLoaded", async () => {
             console.log("newsId is present, rendering single news item...");
             const selectedNews = newsData[newsId];
             if (selectedNews) {
-                document.title = selectedNews.title + ' - 株式会社アイティーエフ';
+                // Update meta tags for SEO with service keywords
+                document.title = `${selectedNews.title} - 株式会社アイティーエフ | 介護・ホテル・外食向けニュース`;
                 const metaDescription = document.querySelector('meta[name="description"]');
                 if (metaDescription) {
-                    metaDescription.setAttribute('content', selectedNews.summary.substring(0, 150) + '...');
+                    metaDescription.setAttribute('content', `${selectedNews.summary.substring(0, 150)}... 介護、ホテル、外食向け外国人材紹介の最新情報。`);
                 }
                 const metaOgTitle = document.querySelector('meta[property="og:title"]');
                 if (metaOgTitle) {
-                    metaOgTitle.setAttribute('content', selectedNews.title + ' - 株式会社アイティーエフ');
+                    metaOgTitle.setAttribute('content', `${selectedNews.title} - 株式会社アイティーエフ | 介護・ホテル・外食向けニュース`);
                 }
                 const metaOgDescription = document.querySelector('meta[property="og:description"]');
                 if (metaOgDescription) {
-                    metaOgDescription.setAttribute('content', selectedNews.summary.substring(0, 150) + '...');
+                    metaOgDescription.setAttribute('content', `${selectedNews.summary.substring(0, 150)}... 介護、ホテル、外食向け外国人材紹介の最新情報。`);
                 }
                 const metaTwitterTitle = document.querySelector('meta[name="twitter:title"]');
                 if (metaTwitterTitle) {
-                    metaTwitterTitle.setAttribute('content', selectedNews.title + ' - 株式会社アイティーエフ');
+                    metaTwitterTitle.setAttribute('content', `${selectedNews.title} - 株式会社アイティーエフ | 介護・ホテル・外食向けニュース`);
                 }
                 const metaTwitterDescription = document.querySelector('meta[name="twitter:description"]');
                 if (metaTwitterDescription) {
-                    metaTwitterDescription.setAttribute('content', selectedNews.summary.substring(0, 150) + '...');
+                    metaTwitterDescription.setAttribute('content', `${selectedNews.summary.substring(0, 150)}... 介護、ホテル、外食向け外国人材紹介の最新情報。`);
                 }
 
-                const hasImage = selectedNews.image && typeof selectedNews.image === 'string' && selectedNews.image.trim() !== '' && selectedNews.image.toLowerCase() !== 'null';
+                const hasImage = selectedNews.image && typeof selectedNews.image === 'string' && selectedNews.image.trim() !== '' && selectedNews.image !== 'null';
                 console.log(`Rendering single news item: ${selectedNews.title || 'Unknown title'}, image: ${selectedNews.image || 'No image'}, hasImage: ${hasImage}`);
                 const imageHtml = hasImage ? `
                     <div class="news-image">
-                        <img src="${selectedNews.image}" alt="${selectedNews.title}" onerror="this.parentElement.style.display='none';">
+                        <img src="${selectedNews.image}" alt="${selectedNews.title || 'News Image'}" onerror="this.parentElement.style.display='none';">
                     </div>
                 ` : '';
                 const newsList = document.getElementById("newsList");
