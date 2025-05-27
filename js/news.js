@@ -1,6 +1,5 @@
-let newsData = []; // Initialize as empty; will be populated from fetch
+let newsData = [];
 
-// Function to fetch news data from the server
 async function fetchNewsData() {
     try {
         console.log('Fetching news data from /php/fetch_news.php...');
@@ -15,12 +14,11 @@ async function fetchNewsData() {
         }
     } catch (error) {
         console.error('Error fetching news data:', error);
-        alert('ニュースデータの取得に失敗しました。詳細: ' + error.message);
+        alert(`ニュースデータの取得に失敗しました。詳細: ${error.message || 'Unknown error'}`);
         newsData = [];
     }
 }
 
-// Function to extract first 50 words from the summary
 function getShortSummary(summary) {
     if (!summary) return "";
     const words = summary.split(/\s+/);
@@ -74,9 +72,8 @@ function renderNews(filteredData) {
     sortedData.forEach((item) => {
         const index = newsData.indexOf(item);
         const shortSummary = getShortSummary(item.summary);
-        // Check if the news item has a valid image
         const hasImage = item.image && typeof item.image === 'string' && item.image.trim() !== '' && item.image.toLowerCase() !== 'null';
-        console.log(`Rendering news item: ${item.title}, image: ${item.image}, hasImage: ${hasImage}`);
+        console.log(`Rendering news item: ${item.title || 'Unknown title'}, image: ${item.image || 'No image'}, hasImage: ${hasImage}`);
         const imageHtml = hasImage ? `
             <div class="news-image">
                 <img src="${item.image}" alt="${item.title}" onerror="this.parentElement.style.display='none';">
@@ -133,14 +130,14 @@ function filterNews() {
         filtered.sort((a, b) => {
             const dateA = new Date(a.created_at);
             const dateB = new Date(b.created_at);
-            console.log(`Sorting: ${a.title} (${a.created_at}) vs ${b.title} (${b.created_at}) -> ${dateB - dateA}`);
+            console.log(`Sorting: ${a.title || 'Unknown title'} (${a.created_at}) vs ${b.title || 'Unknown title'} (${b.created_at}) -> ${dateB - dateA}`);
             return dateB - dateA;
         });
     } else if (dateOrder === "asc") {
         filtered.sort((a, b) => {
             const dateA = new Date(a.created_at);
             const dateB = new Date(b.created_at);
-            console.log(`Sorting: ${a.title} (${a.created_at}) vs ${b.title} (${b.created_at}) -> ${dateA - dateB}`);
+            console.log(`Sorting: ${a.title || 'Unknown title'} (${a.created_at}) vs ${b.title || 'Unknown title'} (${b.created_at}) -> ${dateA - dateB}`);
             return dateA - dateB;
         });
     }
@@ -166,8 +163,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             filterBar.style.display = "flex";
             console.log("Showing filter bar because newsId is not present");
         }
-    } else {
-        console.warn("filter-bar element not found");
     }
 
     const introText = document.querySelector(".text");
@@ -179,16 +174,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
-    if (document.querySelector(".list ul")) {
-        console.log("Rendering index news...");
-        renderIndexNews();
-    } else if (document.getElementById("newsList")) {
+    console.log("Rendering index news...");
+    renderIndexNews();
+
+    if (document.getElementById("newsList")) {
         console.log("Found newsList element, proceeding...");
         if (newsId !== null) {
             console.log("newsId is present, rendering single news item...");
             const selectedNews = newsData[newsId];
             if (selectedNews) {
-                // Update SEO meta tags for single news view
                 document.title = selectedNews.title + ' - 株式会社アイティーエフ';
                 const metaDescription = document.querySelector('meta[name="description"]');
                 if (metaDescription) {
@@ -212,7 +206,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 }
 
                 const hasImage = selectedNews.image && typeof selectedNews.image === 'string' && selectedNews.image.trim() !== '' && selectedNews.image.toLowerCase() !== 'null';
-                console.log(`Rendering single news item: ${selectedNews.title}, image: ${selectedNews.image}, hasImage: ${hasImage}`);
+                console.log(`Rendering single news item: ${selectedNews.title || 'Unknown title'}, image: ${selectedNews.image || 'No image'}, hasImage: ${hasImage}`);
                 const imageHtml = hasImage ? `
                     <div class="news-image">
                         <img src="${selectedNews.image}" alt="${selectedNews.title}" onerror="this.parentElement.style.display='none';">
@@ -253,19 +247,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                 dateFilter.value = "desc";
                 console.log("dateFilter found, setting default to desc and adding event listener...");
                 dateFilter.addEventListener("change", filterNews);
-            } else {
-                console.warn("dateFilter element not found");
             }
 
             if (categoryFilter) {
                 console.log("categoryFilter found, adding event listener...");
                 categoryFilter.addEventListener("change", filterNews);
-            } else {
-                console.warn("categoryFilter element not found");
             }
         }
-    } else {
-        console.warn("newsList element not found");
     }
 
     window.addEventListener("resize", adjustImageHeights);
