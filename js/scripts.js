@@ -55,4 +55,21 @@ document.addEventListener('DOMContentLoaded', () => {
             behavior: 'smooth'
         });
     });
+
+    const rellaxElements = document.querySelectorAll('.rellax');
+    if (rellaxElements.length > 0) {
+        console.log("Rellax elements found, initializing Rellax...");
+        new Rellax('.rellax', {
+            speed: -2,
+            center: false,
+            wrapper: null,
+            relativeToWrapper: false,
+            round: true,
+            vertical: true,
+            horizontal: false,
+            breakpoints: [576, 768, 1201]
+        });
+    } else {
+        console.log("No Rellax elements found on this page, skipping initialization.");
+    }
 });
