@@ -8,7 +8,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <link href="https://fonts.googleapis.com/css?family=Lato:400,700,900|Noto+Sans+JP:400,500,700&subset=japanese&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" media="all" href="css/common.css">
-    <title>株式会社アイティーエフ</title>
+    <title>株式会社アイティーエフ 採用サイート</title>
     <meta name="description" content="株式会社アイティーエフは、大阪と東京に拠点を持ち、外国人人材紹介サービスと外貨両替サービスを提供しています。外国人と企業の架け橋となり、信頼されるサポートを提供することを使命としています。">
     <meta name="robots" content="max-image-preview:large">
     <meta property="og:locale" content="ja_JP">
@@ -28,10 +28,11 @@
     <link rel="stylesheet" href="css/login.css">
     <script type="text/javascript" src="js/jquery.js"></script>
     <script type="text/javascript" src="js/jquery-migrate.min.js"></script>
-    <link rel="icon" href="images/url_logo.PNG" sizes="32x32">
-    <link rel="icon" href="images/url_logo.PNG" sizes="192x192">
-    <link rel="apple-touch-icon-precomposed" href="images/url_logo.PNG">
-    <meta name="msapplication-TileImage" content="images/url_logo.PNG">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+<link rel="manifest" href="images/site.webmanifest">
+<meta name="msapplication-TileImage" content="images/url_logo.PNG">
     <meta name="theme-color" content="#000000">
 </head>
 
