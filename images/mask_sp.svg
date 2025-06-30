@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="804" height="1168" viewBox="0 0 804 1168">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+        stroke: #000;
+        stroke-width: 1px;
+        fill-rule: evenodd;
+      }
+    </style>
+  </defs>
+  <path id="trapezoid_sp" class="trapezoid_sp" d="M212.16,0.883L803,1V1167l-802.3-.06Z"/>
+</svg>
