@@ -1,0 +1,15 @@
+{
+    "name": "itf",
+    "host": "it-future.sakura.ne.jp",
+    "protocol": "sftp",
+    "port": 22,
+    "username": "it-future",
+    "password": "59x6gpuv8f",
+    "remotePath": "/home/it-future/www/itf/",
+    "uploadOnSave": true,
+    "ignore": [
+        "**/.vscode",
+        "**/.git",
+        "**/.DS_Store"
+    ]
+}

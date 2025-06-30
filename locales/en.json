@@ -217,5 +217,34 @@
         "description": "Last year, we supported the overseas talent recruitment of various companies and organizations, introducing over 1,000 excellent talents from around the world. These talents possess varying levels of Japanese proficiency, allowing flexible adaptation to job requirements and workplace environments. The graph below shows the distribution of Japanese language proficiency levels among the hired talent. We hope this serves as a reference for your foreign recruitment plans and talent placement in caregiving, hotels, and restaurants.",
         "chart_title": "JLPT Pass Rate Distribution (%)",
         "cta": "Inquire About Talent Recruitment for Caregiving, Hotels, and Restaurants"
+    },
+    "company_info": {
+        "title": "Company Information",
+        "name_title": "Company Name",
+        "name": "ITF Co., Ltd.",
+        "president_title": "Representative Director",
+        "president": "Katsuhiko Ueda",
+        "established_title": "Established",
+        "established": "July 20, 2018 (Heisei 30)",
+        "tel_title": "TEL",
+        "tel": "Head Office: 06-6644-1800\nTokyo Office: 03-6424-7747",
+        "fax_title": "FAX",
+        "fax": "06-6644-1801",
+        "services_title": "Business Activities",
+        "services": {
+            "job_introduction": "Paid Job Placement Services under the Employment Security Act",
+            "translation": "Foreign Language Translation and Interpretation Services",
+            "visa_consulting": "Consulting Services for Work Visa Acquisition",
+            "recruitment_consulting": "Recruitment Consulting Services"
+        },
+        "capital_title": "Capital",
+        "capital": "10 million JPY",
+        "licenses_title": "Licenses",
+        "licenses": "Paid Job Placement Business Permit Number: 27-ユ-303557\nRegistered Support Organization Number: 22登-007102",
+        "main_office_title": "Main Office",
+        "main_office_address": "〒556-0017 1-4-38 Naniwa-ku, Minatomachi, Osaka City, Osaka Prefecture, Kintetsu Shin-Namba Building 10F",
+        "tokyo_office_title": "Tokyo Office",
+        "tokyo_office_address": "〒144-0052 5-21-13 Kamata, Ota-ku, Tokyo, Pegasus Station Plaza Kamata B2F-03",
+        "overlay": "Company Information"
     }
 }
