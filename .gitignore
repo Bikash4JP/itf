@@ -18,3 +18,7 @@ sitemap.xml
 # Ignore the sitemap file
 
 # Ignore the node_modules directory for Node.js dependencies
+php/App/
+# Ignore the App directory in PHP
+APP/
+# Ignore the APP directory 
