@@ -54,7 +54,7 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         <li><a href="#" onclick="showForm('jobs')">求人を追加</a></li>
         <li><a href="php/manage_posts.php">投稿を管理</a></li>
         <li><a href="php/profile.php">プロフィール</a></li>
-        <li><a href="php/dashboard.php">ダッシュボード</a></li>
+        <li><a href="php/App/public/index.html">ダッシュボード</a></li>
         <li><a href="php/logout.php">ログアウト</a></li>
     </ul>
 </nav>

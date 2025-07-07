@@ -1,0 +1,20 @@
+php/db_connect.php
+# Ignore the database connection file
+php/config.php
+# Ignore the configuration file
+vendor/
+# Ignore the vendor directory for Composer dependencies
+# Ignore the vendor directory for Composer dependencies
+node_modules/
+resumes/
+# Ignore the resumes directory for storing generated resumes
+.env
+# Ignore the environment configuration file
+.sftp.json
+# Ignore the SFTP configuration file
+itf.sql
+# Ignore the SQL file for the initial database schema
+sitemap.xml
+# Ignore the sitemap file
+
+# Ignore the node_modules directory for Node.js dependencies
