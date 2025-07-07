@@ -22,3 +22,8 @@ php/App/
 # Ignore the App directory in PHP
 APP/
 # Ignore the APP directory 
+# ljk
+uploads/
+# Ignore the uploads directory for user-uploaded files
+php/uploads/
+# Ignore the uploads directory in PHP
