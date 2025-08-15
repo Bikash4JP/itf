@@ -46,7 +46,7 @@ if (isset($_GET['query'])) {
     error_log("Received query: $query");
     if (!empty($query)) {
         // Split query into keywords and handle multiple spaces
-        $keywords = array_filter(preg_split('/\s+/', $query)); // Split by any whitespace
+        $keywords = array_filter(preg_split('/\s+/', $query));
         $conditions = [];
         $params = [];
         $i = 0;
@@ -58,17 +58,19 @@ if (isset($_GET['query'])) {
         }
         $sql = "SELECT DISTINCT * FROM talents WHERE " . implode(' AND ', $conditions);
         error_log("Generated SQL: $sql, Params: " . json_encode($params));
-        try {
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute($params);
-            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            error_log("Query executed, Results count: " . count($results));
-        } catch (PDOException $e) {
-            error_log("Query error: " . $e->getMessage() . ", SQL: $sql");
-            $results = ['error' => 'Database query failed: ' . $e->getMessage()];
-        }
     } else {
-        $results = ['error' => 'Query parameter is empty'];
+        // If query is empty, return all records
+        $sql = "SELECT DISTINCT * FROM talents";
+        error_log("No query provided, fetching all records: $sql");
+    }
+    try {
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params ?? []);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        error_log("Query executed, Results count: " . count($results));
+    } catch (PDOException $e) {
+        error_log("Query error: " . $e->getMessage() . ", SQL: $sql");
+        $results = ['error' => 'Database query failed: ' . $e->getMessage()];
     }
 } elseif (isset($_POST['add']) || isset($_POST['update'])) {
     $name = $_POST['name'] ?? '';
