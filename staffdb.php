@@ -46,15 +46,14 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 </head>
 <body>
     <header>
-        <div class="logo"><a href="index.html"><img src="images/logo.png" alt="ITF Logo"></a></div>
-        <nav>
+        <div class="logo"><a href="https://it-future.jp/"><img src="images/logo.png" alt="ITF Logo"></a></div>
+<nav>
     <ul>
         <li><a href="staffdb.php">ホーム</a></li>
         <li><a href="#" onclick="showForm('posts')">投稿を追加</a></li>
         <li><a href="#" onclick="showForm('jobs')">求人を追加</a></li>
         <li><a href="php/manage_posts.php">投稿を管理</a></li>
-        <li><a href="php/profile.php">プロフィール</a></li>
-        <li><a href="php/App/public/index.html">ダッシュボード</a></li>
+        <li><a href="php/search.php">検索</a></li> <!-- Added search link -->
         <li><a href="php/logout.php">ログアウト</a></li>
     </ul>
 </nav>
