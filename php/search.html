@@ -1,67 +1,53 @@
-<?php
-session_start();
-if (!isset($_SESSION['staff_logged_in'])) {
-    header("Location: login.php");
-    exit();
-}
-include 'db_connect.php';
-?>
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ダッシュボード - 労働者検索</title>
+    <title>労働者検索</title>
     <link rel="stylesheet" href="../css/staffdb.css">
-    <link rel="stylesheet" href="../css/news.css">
     <style>
         .search-container {
+            max-width: 1200px;
+            margin: 20px auto;
             text-align: center;
-            margin: 20px 0;
         }
         #searchInput {
-            width: 50%;
             padding: 10px;
             font-size: 16px;
             border: 2px solid #09b2e6;
             border-radius: 5px;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #09b2e6;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #077e9e;
+            width: 50%;
         }
         #resultsContainer {
             display: none;
-            margin-top: 20px;
+            max-width: 1200px;
+            margin: 20px auto;
         }
         #loading {
-            display: none;
             text-align: center;
             padding: 10px;
             background-color: #fff;
             border: 1px solid #ddd;
+            display: none;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-        }
-        th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: left;
+            margin-top: 20px;
         }
         th {
-            background-color: #06adf0;
+            background-color: rgb(6, 173, 240);
             color: white;
+            font-weight: bold;
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+            font-weight: bold;
         }
         .details-grid {
             display: flex;
@@ -81,24 +67,26 @@ include 'db_connect.php';
             font-weight: bold;
             border-bottom: 2px solid #000;
             margin-bottom: 10px;
-            color: #0bb4e7;
+            color: rgb(11, 180, 231);
             padding: 5px;
             border-radius: 5px;
         }
-        ul {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
+        .details-buttons {
+            text-align: center;
+            margin-top: 20px;
+            border-top: 2px solid #09b2e6;
+            padding-top: 10px;
         }
-        li {
-            margin-bottom: 5px;
+        .details-buttons .edit-btn {
+            padding: 8px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
-        a {
-            color: #0066cc;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
+        .details-buttons .edit-btn:hover {
+            background-color: #218838;
         }
         @media (max-width: 768px) {
             #searchInput {
@@ -109,57 +97,94 @@ include 'db_connect.php';
 </head>
 <body>
     <header>
-        <div class="logo"><a href="../index.html"><img src="../images/logo.png" alt="ITF Logo"></a></div>
+        <div class="logo"><a href="https://it-future.jp/"><img src="../images/logo.png" alt="ITF Logo"></a></div>
         <nav>
             <ul>
                 <li><a href="../staffdb.php">ホーム</a></li>
-                <li><a href="manage_posts.php">投稿を管理</a></li>
-                <li><a href="profile.php">プロフィール</a></li>
-                <li><a href="dashboard.php">ダッシュボード</a></li>
-                <li><a href="logout.php">ログアウト</a></li>
+                <li><a href="#" onclick="showForm('posts')">投稿を追加</a></li>
+                <li><a href="#" onclick="showForm('jobs')">求人を追加</a></li>
+                <li><a href="php/manage_posts.php">投稿を管理</a></li>
+                <li><a href="php/search.html" class="active">検索</a></li>
+                <li><a href="php/logout.php">ログアウト</a></li>
             </ul>
         </nav>
     </header>
 
-    <section class="hero">
-        <h1>ダッシュボード - 労働者検索</h1>
-    </section>
-
     <div class="search-container">
-        <input type="text" id="searchInput" placeholder="複数のキーワードで検索 (例: 'ABC N2')..." onkeyup="searchWorkers()">
-        <button onclick="searchWorkers()">検索</button>
+        <input type="text" id="searchInput" placeholder="キーワードを入力..." onkeyup="fetchData(this.value)">
+        <div id="resultsContainer">
+            <div id="loading" style="display:none;">読み込み中...</div>
+            <table>
+                <thead id="tableHead"></thead>
+                <tbody id="resultsBody"></tbody>
+            </table>
+            <div id="fullDetails" class="details-grid" style="display:none;"></div>
+        </div>
     </div>
 
-    <div id="resultsContainer">
-        <div id="loading" style="display:none;">読み込み中...</div>
-        <table>
-            <thead id="tableHead"></thead>
-            <tbody id="resultsBody"></tbody>
-        </table>
-        <div id="fullDetails" class="details-grid" style="display:none;"></div>
+    <div id="workerForm" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeForm()">×</span>
+            <h2 id="formTitle"></h2>
+            <div id="formSteps"></div>
+            <div id="stepButtons">
+                <button id="prevStepBtn" style="display:none;" onclick="prevStep()">前へ</button>
+                <button id="nextStepBtn" onclick="nextStep()">次へ</button>
+                <button id="submitFormBtn" style="display:none;" onclick="submitForm(event)">保存</button>
+            </div>
+        </div>
     </div>
 
     <script>
         let workers = [];
+        let currentStep = 0;
+        const steps = ['personal', 'company', 'additional', 'business'];
 
-        function fetchSheetData(query = '') {
+        function fetchData(query = '') {
             const loading = document.getElementById('loading');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const fullDetails = document.getElementById('fullDetails');
             loading.style.display = 'block';
-            fetch(`https://it-future.jp/php/dashboard.php?query=${encodeURIComponent(query)}`)
+            resultsContainer.style.display = 'none';
+            fullDetails.style.display = 'none';
+
+            console.log('Fetching with query:', query); // Debug query value
+            if (!query || query.trim() === '') {
+                loading.style.display = 'none';
+                const resultsBody = document.getElementById('resultsBody');
+                resultsBody.innerHTML = '<tr><td colspan="5">キーワードを入力してください</td></tr>';
+                return;
+            }
+
+            fetch('https://it-future.jp/php/search.php?query=' + encodeURIComponent(query))
                 .then(response => {
-                    if (!response.ok) throw new Error(`Network error! Status: ${response.status}`);
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok: ' + response.status + ' - ' + response.statusText);
+                    }
                     return response.json();
                 })
                 .then(data => {
                     loading.style.display = 'none';
-                    workers = data.values || [];
-                    console.log('Workers array populated:', workers.length, 'workers');
-                    searchWorkers();
+                    if (data.error) {
+                        alert('エラー: ' + data.error);
+                        console.error('Error:', data.error);
+                    } else if (Array.isArray(data)) {
+                        workers = data; // Update workers array with fetched data
+                        if (data.length === 1) {
+                            showFullDetails(data[0]['雇用者情報（アルファベット）'] || '');
+                        } else if (data.length > 1) {
+                            renderResults();
+                        } else {
+                            const resultsBody = document.getElementById('resultsBody');
+                            resultsBody.innerHTML = '<tr><td colspan="5">一致するデータがありません</td></tr>';
+                            console.log('No matching data found');
+                        }
+                    }
                 })
                 .catch(error => {
-                    console.error('Error:', error.message);
-                    loading.textContent = 'エラー: データの読み込みに失敗しました - ' + error.message;
-                    loading.style.display = 'block';
+                    loading.style.display = 'none';
+                    alert('エラー: ' + error.message);
+                    console.error('Fetch error:', error);
                 });
         }
 
@@ -177,63 +202,34 @@ include 'db_connect.php';
             console.log('Table headers rendered');
         }
 
-        function searchWorkers() {
-            const input = document.getElementById('searchInput').value.toLowerCase().trim();
-            const resultsBody = document.getElementById('resultsBody');
+        function renderResults() {
             const resultsContainer = document.getElementById('resultsContainer');
-            const fullDetails = document.getElementById('fullDetails');
+            const resultsBody = document.getElementById('resultsBody');
+            resultsContainer.style.display = 'block';
+            renderTableHeaders();
+            document.querySelector('table').style.display = 'table';
             resultsBody.innerHTML = '';
-            fullDetails.style.display = 'none';
-            resultsContainer.style.display = 'none';
-
-            if (!input) {
-                resultsContainer.style.display = 'none';
-                return;
-            }
-
-            const keywords = input.split(/\s+/).filter(keyword => keyword.length > 0);
-            console.log('Keywords processed:', keywords);
-
-            if (keywords.length === 0) {
-                return;
-            }
-
-            const filteredWorkers = workers.filter(worker => {
-                return keywords.every(keyword => {
-                    return Object.values(worker).some(value =>
-                        value && value.toString().toLowerCase().includes(keyword)
-                    );
-                });
+            workers.forEach((worker, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><a href="#" onclick="showFullDetails('${worker['雇用者情報（アルファベット）'] || ''}'); return false;">${worker['雇用者情報（アルファベット）'] || ''}</a></td>
+                    <td>${worker['雇用者情報（生年月日）'] || ''}</td>
+                    <td>${worker['支援者住所'] || ''}</td>
+                    <td>${worker['施設名（勤務先）'] || ''}</td>
+                `;
+                resultsBody.appendChild(row);
             });
-
-            if (filteredWorkers.length === 0) {
-                resultsBody.innerHTML = '<tr><td colspan="5">一致する労働者が見つかりませんでした</td></tr>';
-                console.log('No matching workers found for keywords:', keywords);
-            } else {
-                resultsContainer.style.display = 'block';
-                if (filteredWorkers.length > 1) {
-                    renderTableHeaders();
-                    document.querySelector('table').style.display = 'table';
-                    filteredWorkers.forEach((worker, index) => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${index + 1}</td>
-                            <td><a href="#" onclick="showFullDetails('${worker['雇用者情報（アルファベット）']}'); return false;">${worker['雇用者情報（アルファベット）'] || ''}</a></td>
-                            <td>${worker['雇用者情報（生年月日）'] || ''}</td>
-                            <td>${worker['支援者住所'] || ''}</td>
-                            <td>${worker['施設名（勤務先）'] || ''}</td>
-                        `;
-                        resultsBody.appendChild(row);
-                    });
-                } else if (filteredWorkers.length === 1) {
-                    showFullDetails(filteredWorkers[0]['雇用者情報（アルファベット）']);
-                }
-            }
         }
 
         function showFullDetails(name) {
-            const worker = workers.find(w => w['雇用者情報（アルファベット）'] === name);
-            if (!worker) return;
+            console.log('Showing full details for:', name); // Debug name
+            const worker = workers.find(w => (w['雇用者情報（アルファベット）'] || '').toString() === name.toString());
+            if (!worker) {
+                console.error('Worker not found for name:', name);
+                alert('データが見つかりませんでした');
+                return;
+            }
 
             const fullDetails = document.getElementById('fullDetails');
             fullDetails.innerHTML = `
@@ -291,7 +287,7 @@ include 'db_connect.php';
                 </div>
             `;
             fullDetails.style.display = 'block';
-            document.querySelector('table').style.display = 'none';
+            resultsContainer.style.display = 'none';
         }
 
         function addWorker() {
@@ -305,8 +301,11 @@ include 'db_connect.php';
         }
 
         function editWorker(name) {
-            const worker = workers.find(w => w['雇用者情報（アルファベット）'] === name);
-            if (!worker) return;
+            const worker = workers.find(w => (w['雇用者情報（アルファベット）'] || '').toString() === name.toString());
+            if (!worker) {
+                console.error('Worker not found for name:', name);
+                return;
+            }
 
             currentStep = 0;
             const form = document.getElementById('workerForm');
@@ -383,27 +382,43 @@ include 'db_connect.php';
             headers.forEach(header => values.push(formData.get(header) || ''));
             const name = formData.get('雇用者情報（アルファベット）');
             const method = document.getElementById('formTitle').textContent === '人材情報を追加' ? 'POST' : 'PUT';
-            const url = `https://it-future.jp/php/dashboard.php`; // Temporary - should be API endpoint
 
-            fetch(url, {
-                method: method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, values })
+            fetch('php/search.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({
+                    [method === 'POST' ? 'add' : 'update']: '1',
+                    name: name,
+                    values: JSON.stringify(values)
+                }).toString()
             })
-            .then(response => {
-                if (!response.ok) throw new Error('Submit failed');
-                console.log(`${method === 'POST' ? 'Added' : 'Updated'} successfully`);
-                closeForm();
-                fetchSheetData(); // Refresh data
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('エラー: ' + data.error);
+                    console.error('Error:', data.error);
+                } else {
+                    console.log(data.message);
+                    closeForm();
+                    fetchData(); // Refresh data
+                }
             })
-            .catch(error => console.error('Submit Error:', error));
+            .catch(error => {
+                alert('エラー: ' + error.message);
+                console.error('Fetch error:', error);
+            });
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            fetchSheetData(); // Initial load
+        // Event listener for search input
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('keyup', () => {
+            const query = searchInput.value.trim();
+            console.log('Input value:', query); // Debug input
+            fetchData(query);
         });
-        document.getElementById('addWorkerBtn').addEventListener('click', addWorker);
-        document.getElementById('submitFormBtn').addEventListener('click', submitForm);
+
+        // Initial data fetch (optional)
+        fetchData();
     </script>
 </body>
 </html>

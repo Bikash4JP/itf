@@ -27,3 +27,9 @@ uploads/
 # Ignore the uploads directory for user-uploaded files
 php/uploads/
 # Ignore the uploads directory in PHP
+.htaccess
+# Ignore the .htaccess file for Apache configuration
+templates/
+# Ignore the templates directory for resume templates
+.sftpignore
+# Ignore the SFTP ignore file
