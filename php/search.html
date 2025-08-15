@@ -111,22 +111,26 @@
     </header>
 
     <div class="search-container">
-        <input type="text" id="searchInput" placeholder="キーワードを入力..." onkeyup="fetchData(this.value)">
-        <div id="resultsContainer">
-            <div id="loading" style="display:none;">読み込み中...</div>
-            <table>
-                <thead id="tableHead"></thead>
-                <tbody id="resultsBody"></tbody>
-            </table>
-            <div id="fullDetails" class="details-grid" style="display:none;"></div>
+        <input type="text" id="searchInput" placeholder="複数のキーワードで検索 (例: 'ABC N2' または 'アサガオ 社会福祉法人 一粒')..." onkeyup="searchWorkers()">
+        <button id="addWorkerBtn">人材情報を追加</button>
+    </div>
+    <div id="resultsContainer" style="display:none;">
+        <div id="loading" style="display:none;">読み込み中...</div>
+        <table>
+            <thead id="tableHead"></thead>
+            <tbody id="resultsBody"></tbody>
+        </table>
+        <div id="fullDetails" class="details-grid" style="display:none;">
+            <!-- 4 boxes and button will be added by JS -->
         </div>
     </div>
-
     <div id="workerForm" class="modal" style="display:none;">
         <div class="modal-content">
             <span class="close-btn" onclick="closeForm()">×</span>
             <h2 id="formTitle"></h2>
-            <div id="formSteps"></div>
+            <div id="formSteps">
+                <!-- Steps will be dynamically added by JS -->
+            </div>
             <div id="stepButtons">
                 <button id="prevStepBtn" style="display:none;" onclick="prevStep()">前へ</button>
                 <button id="nextStepBtn" onclick="nextStep()">次へ</button>
@@ -170,8 +174,10 @@
                         console.error('Error:', data.error);
                     } else if (Array.isArray(data)) {
                         workers = data; // Update workers array with fetched data
+                        console.log('Fetched workers:', workers); // Debug fetched data
                         if (data.length === 1) {
-                            showFullDetails(data[0]['雇用者情報（アルファベット）'] || '');
+                            const name = data[0]['雇用者情報（アルファベット）'] || '';
+                            if (name) showFullDetails(encodeURIComponent(name));
                         } else if (data.length > 1) {
                             renderResults();
                         } else {
@@ -210,10 +216,12 @@
             document.querySelector('table').style.display = 'table';
             resultsBody.innerHTML = '';
             workers.forEach((worker, index) => {
-                const row = document.createElement('tr');
+                const name = worker['雇用者情報（アルファベット）'] || '';
+                const encodedName = encodeURIComponent(name); // Encode for URL safety
+                const row = document.createElement('tr'); // Moved inside loop
                 row.innerHTML = `
                     <td>${index + 1}</td>
-                    <td><a href="#" onclick="showFullDetails('${worker['雇用者情報（アルファベット）'] || ''}'); return false;">${worker['雇用者情報（アルファベット）'] || ''}</a></td>
+                    <td><a href="#" onclick="showFullDetails('${encodedName}'); return false;">${name}</a></td>
                     <td>${worker['雇用者情報（生年月日）'] || ''}</td>
                     <td>${worker['支援者住所'] || ''}</td>
                     <td>${worker['施設名（勤務先）'] || ''}</td>
@@ -223,72 +231,74 @@
         }
 
         function showFullDetails(name) {
-            console.log('Showing full details for:', name); // Debug name
-            const worker = workers.find(w => (w['雇用者情報（アルファベット）'] || '').toString() === name.toString());
-            if (!worker) {
-                console.error('Worker not found for name:', name);
-                alert('データが見つかりませんでした');
-                return;
-            }
+    console.log('Showing full details for:', name); // Debug name
+    const decodedName = decodeURIComponent(name); // Decode if encoded
+    console.log('Decoded name for search:', decodedName); // Debug decoded name
+    const worker = workers.find(w => (w['雇用者情報（アルファベット）'] || '') === decodedName); // Match as per old logic
+    if (!worker) {
+        console.error('Worker not found for name:', decodedName);
+        alert('データが見つかりませんでした');
+        return;
+    }
 
-            const fullDetails = document.getElementById('fullDetails');
-            fullDetails.innerHTML = `
-                <div class="box">
-                    <div class="title">個人情報</div>
-                    <ul>
-                        <li>名前: ${worker['雇用者情報（アルファベット）'] || ''}</li>
-                        <li>カタカナ名: ${worker['雇用者情報（カタカナ）'] || ''}</li>
-                        <li>生年月日: ${worker['雇用者情報（生年月日）'] || ''}</li>
-                        <li>住所: ${worker['支援者住所'] || ''}</li>
-                        <li>電話番号: ${worker['連絡先①'] || ''}</li>
-                        <li>性別: ${worker['雇用者情報（性別）'] || ''}</li>
-                        <li>国籍: ${worker['雇用者情報（国籍）'] || ''}</li>
-                        <li>年齢: ${worker['年齢'] || ''}</li>
-                    </ul>
-                </div>
-                <div class="box">
-                    <div class="title">会社情報</div>
-                    <ul>
-                        <li>クライアント名: ${worker['施設名（勤務先）'] || ''}</li>
-                        <li>入社日: ${worker['入社日'] || ''}</li>
-                        <li>退職日: ${worker['支援退職日'] || ''}</li>
-                        <li>状態: ${worker['状態'] || ''}</li>
-                        <li>エリア: ${worker['エリア'] || ''}</li>
-                        <li>受け入れ期間: ${worker['受け入れ期間'] || ''}</li>
-                        <li>受入機関（郵便番号）: ${worker['受入機関（郵便番号）'] || ''}</li>
-                        <li>受入機関（電話番号）: ${worker['受入機関（電話番号）'] || ''}</li>
-                    </ul>
-                </div>
-                <div class="box">
-                    <div class="title">追加情報</div>
-                    <ul>
-                        <li>在留カード番号: ${worker['雇用者在留番号'] || ''}</li>
-                        <li>在留カード有効期限: ${worker['雇用者在留期限'] || ''}</li>
-                        <li>更新回数: ${worker['更新回数'] || ''}</li>
-                        <li>管理番号: ${worker['管理番号'] || ''}</li>
-                        <li>担当責任者: ${worker['担当責任者'] || ''}</li>
-                        <li>正担当者: ${worker['正担当者'] || ''}</li>
-                        <li>紹介元: ${worker['紹介元'] || ''}</li>
-                        <li>住居タイプ: ${worker['住居タイプ'] || ''}</li>
-                    </ul>
-                </div>
-                <div class="box">
-                    <div class="title">ビジネス情報</div>
-                    <ul>
-                        <li>管理費: ${worker['管理費'] || ''}</li>
-                        <li>紹介料: ${worker['紹介料'] || ''}</li>
-                        <li>基本契約書: ${worker['基本契約書'] || ''}</li>
-                        <li>委託契約書: ${worker['委託契約書'] || ''}</li>
-                        <li>会社担当者: ${worker['担当者（企業）'] || ''}</li>
-                    </ul>
-                </div>
-                <div class="details-buttons">
-                    <button class="edit-btn" onclick="editWorker('${name}')">編集</button>
-                </div>
-            `;
-            fullDetails.style.display = 'block';
-            resultsContainer.style.display = 'none';
-        }
+    const fullDetails = document.getElementById('fullDetails');
+    fullDetails.innerHTML = `
+        <div class="box">
+            <div class="title">個人情報</div>
+            <ul>
+                <li>名前: ${worker['雇用者情報（アルファベット）'] || ''}</li>
+                <li>カタカナ名: ${worker['雇用者情報（カタカナ）'] || ''}</li>
+                <li>生年月日: ${worker['雇用者情報（生年月日）'] || ''}</li>
+                <li>住所: ${worker['支援者住所'] || ''}</li>
+                <li>電話番号: ${worker['連絡先①'] || ''}</li>
+                <li>性別: ${worker['雇用者情報（性別）'] || ''}</li>
+                <li>国籍: ${worker['雇用者情報（国籍）'] || ''}</li>
+                <li>年齢: ${worker['年齢'] || ''}</li>
+            </ul>
+        </div>
+        <div class="box">
+            <div class="title">会社情報</div>
+            <ul>
+                <li>クライアント名: ${worker['施設名（勤務先）'] || ''}</li>
+                <li>入社日: ${worker['入社日'] || ''}</li>
+                <li>退職日: ${worker['支援退職日'] || ''}</li>
+                <li>状態: ${worker['状態'] || ''}</li>
+                <li>エリア: ${worker['エリア'] || ''}</li>
+                <li>受け入れ期間: ${worker['受け入れ期間'] || ''}</li>
+                <li>受入機関（郵便番号）: ${worker['受入機関（郵便番号）'] || ''}</li>
+                <li>受入機関（電話番号）: ${worker['受入機関（電話番号）'] || ''}</li>
+            </ul>
+        </div>
+        <div class="box">
+            <div class="title">追加情報</div>
+            <ul>
+                <li>在留カード番号: ${worker['雇用者在留番号'] || ''}</li>
+                <li>在留カード有効期限: ${worker['雇用者在留期限'] || ''}</li>
+                <li>更新回数: ${worker['更新回数'] || ''}</li>
+                <li>管理番号: ${worker['管理番号'] || ''}</li>
+                <li>担当責任者: ${worker['担当責任者'] || ''}</li>
+                <li>正担当者: ${worker['正担当者'] || ''}</li>
+                <li>紹介元: ${worker['紹介元'] || ''}</li>
+                <li>住居タイプ: ${worker['住居タイプ'] || ''}</li>
+            </ul>
+        </div>
+        <div class="box">
+            <div class="title">ビジネス情報</div>
+            <ul>
+                <li>管理費: ${worker['管理費'] || ''}</li>
+                <li>紹介料: ${worker['紹介料'] || ''}</li>
+                <li>基本契約書: ${worker['基本契約書'] || ''}</li>
+                <li>委託契約書: ${worker['委託契約書'] || ''}</li>
+                <li>会社担当者: ${worker['担当者（企業）'] || ''}</li>
+            </ul>
+        </div>
+        <div class="details-buttons">
+            <button class="edit-btn" onclick="editWorker('${name}')">編集</button>
+        </div>
+    `;
+    fullDetails.style.display = 'flex';
+    document.querySelector('table').style.display = 'none';
+}
 
         function addWorker() {
             currentStep = 0;
