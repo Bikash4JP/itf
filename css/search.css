@@ -1,20 +1,132 @@
-.search-container {
-    max-width: 1200px;
-    margin: 20px auto;
+/* Header */
+header {
+    background-color: #a9a9a9;
+    padding: 10px;
+    text-align: center;
+    color: white;
+    margin-bottom: 40px;
+}
+
+/* Main Layout */
+.main-container {
+    display: flex;
+    width: 100%;
+    min-height: calc(100vh - 60px);
+}
+
+/* Sidebar Menu */
+.menu-bar {
+    width: 20%;
+    background-color: #fff;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.menu-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(100% - 3px);
+    width: 3px;
+    background-color: #000;
+    height: auto;
+}
+
+.menu-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #000;
+}
+
+.menu-bar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+.menu-bar li {
+    margin-bottom: 15px;
+    padding: 0 30px;
     text-align: center;
 }
+
+.menu-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: #d3d3d3;
+    border: 1px solid #1e90ff;
+    border-radius: 15px;
+    color: #1e90ff;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.menu-btn:hover {
+    background-color: #c0c0c0;
+}
+
+/* Content Area */
+.content-area {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Search Container */
+.search-container {
+    width: 80%;
+    border: 2px solid rgb(29, 150, 219);
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 50px 50px 10px 50px;
+}
+
 #searchInput {
     padding: 10px;
     font-size: 16px;
-    border: 2px solid #09b2e6;
+    border: none;
     border-radius: 5px;
-    width: 50%;
+    width: 60%;
+    margin-right: 10px;
+    outline: none;
 }
+
+#searchInput::placeholder {
+    color: #666;
+}
+
+/* Info Text Box */
+.info-text {
+    margin-top: 20px;
+    width: 80%;
+    padding: 40px;
+    background-color: #58a0e9;
+    color: white;
+    text-align: center;
+    border-radius: 5px;
+    font-size: 18px;
+    display: block;
+}
+
+/* Results */
 #resultsContainer {
     display: none;
     max-width: 1200px;
-    margin: 20px auto;
+    margin: 10px auto 20px auto;
 }
+
 #loading {
     text-align: center;
     padding: 10px;
@@ -22,11 +134,13 @@
     border: 1px solid #ddd;
     display: none;
 }
+
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
 }
+
 th {
     background-color: rgb(6, 173, 240);
     color: white;
@@ -35,19 +149,21 @@ th {
     text-align: left;
     border: 1px solid #ddd;
 }
+
 td {
     padding: 10px;
     text-align: left;
     border: 1px solid #ddd;
     font-weight: bold;
 }
+
 .details-grid {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
     margin-top: 20px;
-    display: none;
 }
+
 .box {
     flex: 1;
     min-width: 45%;
@@ -55,6 +171,7 @@ td {
     border: 1px solid #ddd;
     background-color: #fff;
 }
+
 .title {
     font-size: 20px;
     font-weight: bold;
@@ -64,12 +181,14 @@ td {
     padding: 5px;
     border-radius: 5px;
 }
+
 .details-buttons {
     text-align: center;
     margin-top: 20px;
     border-top: 2px solid #09b2e6;
     padding-top: 10px;
 }
+
 .details-buttons .edit-btn {
     padding: 8px 15px;
     background-color: #28a745;
@@ -78,11 +197,51 @@ td {
     border-radius: 5px;
     cursor: pointer;
 }
+
 .details-buttons .edit-btn:hover {
     background-color: #218838;
 }
+
+.details-border {
+    width: 100%;
+    height: 2px;
+    background-color: skyblue;
+    margin: 20px 0;
+}
+
+.print-btn {
+    padding: 10px 20px;
+    background-color: #1e90ff;
+    color: white;
+    border: 2px solid #1e90ff;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 20px;
+    align-self: center;
+}
+
+.print-btn:hover {
+    background-color: #104e8b;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
+    .main-container {
+        flex-direction: column;
+    }
+    .menu-bar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 2px solid #000;
+    }
+    .content-area {
+        width: 100%;
+    }
     #searchInput {
-        width: 80%;
+        width: 70%;
+    }
+    .info-text {
+        width: 95%;
     }
 }
