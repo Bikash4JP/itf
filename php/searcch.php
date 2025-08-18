@@ -1,5 +1,19 @@
+<?php
+ini_set('session.cookie_path', '/itf');
+session_start();
+
+if (!isset($_SESSION['id']) || !isset($_SESSION['username'])) {
+    header("Location: login.php");
+    exit;
+}
+
+// Database connection
+require_once 'db_connect.php';
+?>
+
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,6 +25,7 @@
             margin: 20px auto;
             text-align: center;
         }
+
         #searchInput {
             padding: 10px;
             font-size: 16px;
@@ -18,11 +33,41 @@
             border-radius: 5px;
             width: 50%;
         }
+
+        .suggestions {
+            position: absolute;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 50%;
+            max-height: 150px;
+            overflow-y: auto;
+            z-index: 1000;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .suggestions div {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .suggestions div:hover {
+            background-color: #f0f0f0;
+        }
+
+        @media (max-width: 768px) {
+            .suggestions {
+                width: 80%;
+            }
+        }
+
         #resultsContainer {
             display: none;
             max-width: 1200px;
             margin: 20px auto;
         }
+
         #loading {
             text-align: center;
             padding: 10px;
@@ -30,11 +75,13 @@
             border: 1px solid #ddd;
             display: none;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
         }
+
         th {
             background-color: rgb(6, 173, 240);
             color: white;
@@ -43,18 +90,21 @@
             text-align: left;
             border: 1px solid #ddd;
         }
+
         td {
             padding: 10px;
             text-align: left;
             border: 1px solid #ddd;
             font-weight: bold;
         }
+
         .details-grid {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             margin-top: 20px;
         }
+
         .box {
             flex: 1;
             min-width: 45%;
@@ -62,6 +112,7 @@
             border: 1px solid #ddd;
             background-color: #fff;
         }
+
         .title {
             font-size: 20px;
             font-weight: bold;
@@ -71,12 +122,14 @@
             padding: 5px;
             border-radius: 5px;
         }
+
         .details-buttons {
             text-align: center;
             margin-top: 20px;
             border-top: 2px solid #09b2e6;
             padding-top: 10px;
         }
+
         .details-buttons .edit-btn {
             padding: 8px 15px;
             background-color: #28a745;
@@ -85,9 +138,11 @@
             border-radius: 5px;
             cursor: pointer;
         }
+
         .details-buttons .edit-btn:hover {
             background-color: #218838;
         }
+
         @media (max-width: 768px) {
             #searchInput {
                 width: 80%;
@@ -95,6 +150,7 @@
         }
     </style>
 </head>
+
 <body>
     <header>
         <div class="logo"><a href="https://it-future.jp/"><img src="../images/logo.png" alt="ITF Logo"></a></div>
@@ -111,7 +167,9 @@
     </header>
 
     <div class="search-container">
-        <input type="text" id="searchInput" placeholder="複数のキーワードで検索 (例: 'ABC N2' または 'アサガオ 社会福祉法人 一粒')..." onkeyup="searchWorkers()">
+        <input type="text" id="searchInput" placeholder="複数のキーワードで検索 (スペースで区切って検索)..." onkeyup="searchWorkers()"
+            onfocus="showSuggestions()" onblur="hideSuggestions()">
+        <div id="suggestions" class="suggestions"></div>
         <button id="addWorkerBtn">人材情報を追加</button>
     </div>
     <div id="resultsContainer" style="display:none;">
@@ -405,21 +463,21 @@
                     values: JSON.stringify(values)
                 }).toString()
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    alert('エラー: ' + data.error);
-                    console.error('Error:', data.error);
-                } else {
-                    console.log(data.message);
-                    closeForm();
-                    fetchData(); // Refresh data
-                }
-            })
-            .catch(error => {
-                alert('エラー: ' + error.message);
-                console.error('Fetch error:', error);
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert('エラー: ' + data.error);
+                        console.error('Error:', data.error);
+                    } else {
+                        console.log(data.message);
+                        closeForm();
+                        fetchData(); // Refresh data
+                    }
+                })
+                .catch(error => {
+                    alert('エラー: ' + error.message);
+                    console.error('Fetch error:', error);
+                });
         }
 
         // Event listener for search input
@@ -430,4 +488,5 @@
         fetchData();
     </script>
 </body>
+
 </html>
