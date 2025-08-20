@@ -28,9 +28,9 @@ require_once 'db_connect.php';
                 <li><a href="../staffdb.php">ホーム</a></li>
                 <li><a href="#" onclick="showForm('posts')">投稿を追加</a></li>
                 <li><a href="#" onclick="showForm('jobs')">求人を追加</a></li>
-                <li><a href="php/manage_posts.php">投稿を管理</a></li>
-                <li><a href="php/search.php" class="active">検索</a></li>
-                <li><a href="php/logout.php">ログアウト</a></li>
+                <li><a href="manage_posts.php">投稿を管理</a></li>
+                <li><a href="searcch.php" class="active">検索</a></li>
+                <li><a href="logout.php">ログアウト</a></li>
             </ul>
         </nav>
     </header>
@@ -38,14 +38,15 @@ require_once 'db_connect.php';
     <div class="main-container">
         <!-- Sidebar Menu -->
         <div class="menu-bar">
+            <div class="menu-icon"><img src="../images/searcch.png" alt="Search Icon"></div>
             <div class="menu-title">Menus</div>
             <ul>
-                <li><a href="#" class="menu-btn">人材を追加</a></li>
-                <li><a href="#" class="menu-btn">人材を編集</a></li>
-                <li><a href="#" class="menu-btn">請求書リクエスト</a></li>
-                <li><a href="#" class="menu-btn">今月の入社</a></li>
-                <li><a href="#" class="menu-btn">未定1</a></li>
-                <li><a href="#" class="menu-btn">未定2</a></li>
+                <li><a href="addstaff.php" class="menu-btn">人材を追加</a></li>
+                <li><a href="t.html" class="menu-btn">人材を編集</a></li>
+                <li><a href="t.html" class="menu-btn">請求書リクエスト</a></li>
+                <li><a href="t.html" class="menu-btn">今月の入社</a></li>
+                <li><a href="t.html" class="menu-btn">未定1</a></li>
+                <li><a href="t.html" class="menu-btn">未定2</a></li>
             </ul>
         </div>
 
@@ -54,8 +55,8 @@ require_once 'db_connect.php';
             <!-- Search box -->
             <div class="search-container">
                 <input type="text" id="searchInput" placeholder="スペースで区切って検索できます..." onkeyup="searchWorkers()" onfocus="showSuggestions()" onblur="hideSuggestions()" onkeypress="handleEnter(event)">
-                <div id="suggestions" class="suggestions"></div>
             </div>
+            <div id="suggestions" class="suggestions"></div>
 
             <!-- Info text -->
             <div class="info-text">

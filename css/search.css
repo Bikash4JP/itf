@@ -4,7 +4,7 @@ header {
     padding: 10px;
     text-align: center;
     color: white;
-    margin-bottom: 40px;
+    margin-bottom: 20px;
 }
 
 /* Main Layout */
@@ -22,24 +22,37 @@ header {
     display: flex;
     flex-direction: column;
     align-items: center;
-    position: relative;
+    position: fixed; /* Keep menu bar fixed */
+    top: 80px; /* Below header with 20px gap */
+    bottom: 0;
+    overflow-y: auto; /* Allow scrolling if content overflows */
+}
+
+.menu-icon {
+    height: 50px; /* Space for image icon */
+    margin-bottom: 10px;
+}
+
+.menu-icon img {
+    max-height: 100%;
+    max-width: 100%;
 }
 
 .menu-bar::after {
     content: '';
     position: absolute;
-    top: 0;
-    bottom: 0;
+    top: 70px; /* Start below icon and title */
+    bottom: 20px; /* End above padding */
     left: calc(100% - 3px);
     width: 3px;
     background-color: #000;
-    height: auto;
+    height: auto; /* Adjusts to content height */
 }
 
 .menu-title {
     font-size: 18px;
     font-weight: bold;
-    margin-bottom: 20px;
+    margin: 30px;
     color: #000;
 }
 
@@ -48,6 +61,7 @@ header {
     padding: 0;
     margin: 0;
     width: 100%;
+    padding-top: 30px;
 }
 
 .menu-bar li {
@@ -80,6 +94,8 @@ header {
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-left: 21%; /* Adjust for fixed menu bar width */
+    overflow-y: auto; /* Allow scrolling for results */
 }
 
 /* Search Container */
@@ -107,6 +123,30 @@ header {
     color: #666;
 }
 
+/* Suggestions Dropdown */
+.suggestions {
+    position: absolute;
+    top: 120px;
+    left: 21%; /* Align with content area */
+    width: 58%; /* Adjusted to fit within content area */
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+}
+
+.suggestions div {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.suggestions div:hover {
+    background-color: #f0f0f0;
+}
+
 /* Info Text Box */
 .info-text {
     margin-top: 20px;
@@ -123,7 +163,7 @@ header {
 /* Results */
 #resultsContainer {
     display: none;
-    max-width: 1200px;
+    max-width: 100%;
     margin: 10px auto 20px auto;
 }
 
@@ -182,26 +222,6 @@ td {
     border-radius: 5px;
 }
 
-.details-buttons {
-    text-align: center;
-    margin-top: 20px;
-    border-top: 2px solid #09b2e6;
-    padding-top: 10px;
-}
-
-.details-buttons .edit-btn {
-    padding: 8px 15px;
-    background-color: #28a745;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.details-buttons .edit-btn:hover {
-    background-color: #218838;
-}
-
 .details-border {
     width: 100%;
     height: 2px;
@@ -232,11 +252,13 @@ td {
     }
     .menu-bar {
         width: 100%;
-        border-right: none;
+        position: static; /* Reset to static for mobile */
         border-bottom: 2px solid #000;
+        margin-bottom: 20px;
     }
     .content-area {
         width: 100%;
+        margin-left: 0;
     }
     #searchInput {
         width: 70%;
@@ -244,4 +266,70 @@ td {
     .info-text {
         width: 95%;
     }
+    .suggestions {
+        left: 5%;
+        width: 90%;
+    }
+}
+
+/* Form Styles for addstaff.php */
+.form-container {
+    width: 80%;
+    margin: 20px auto;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.form-step {
+    display: none;
+}
+
+.form-step.active {
+    display: block;
+}
+
+.step-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #0bb4e7;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #0bb4e7;
+    padding-bottom: 10px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+}
+
+input[type="text"], select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.step-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.step-btn {
+    padding: 10px 20px;
+    background-color: #1e90ff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.step-btn:hover {
+    background-color: #104e8b;
 }
