@@ -29,7 +29,7 @@
     .step-title {
       font-size: 18px;
       font-weight: bold;
-      color: #4169e1;
+      color: #00c3ff;
       padding: 5px 15px;
       background: #f5f7fc;
       border-radius: 4px;
@@ -87,7 +87,7 @@
     input, select {
       width: 100%;
       padding: 8px;
-      border: 1px solidrgb(0, 11, 22);
+      border: 1px solid rgb(7, 195, 241);
       border-radius: 6px;
       font-size: 14px;
       outline: none;
@@ -108,7 +108,7 @@
     }
 
     .btn-next {
-      background: #4169e1;
+      background: #0d9ee0;
       color: white;
     }
 
