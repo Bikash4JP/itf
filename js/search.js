@@ -50,10 +50,10 @@ function saveKeyword(keyword) {
     if (index >= 0) {
         keywords[index].count += 1;
     } else {
-        keywords.push({ text: keyword, count: 1 });
+        keywords.push({ text: keyword, count: 1, timestamp: Date.now() });
     }
-    keywords.sort((a, b) => b.count - a.count);
-    keywords = keywords.slice(0, 5);
+    keywords.sort((a, b) => b.count - a.count || b.timestamp - a.timestamp); // Sort by count, then by recent
+    keywords = keywords.slice(0, 10); // Limit to 10
     localStorage.setItem('frequentKeywords', JSON.stringify(keywords));
 }
 
@@ -61,7 +61,7 @@ function showSuggestions() {
     const input = document.getElementById('searchInput').value.toLowerCase().trim();
     const suggestions = document.getElementById('suggestions');
     const keywords = loadFrequentKeywords();
-    const filtered = keywords.filter(k => k.text.includes(input));
+    const filtered = keywords.filter(k => k.text.includes(input)).slice(0, 10); // Limit to 10 displayed
     if (filtered.length === 0) {
         suggestions.style.display = 'none';
         return;
@@ -212,7 +212,7 @@ function printDetails() {
     const fullDetails = document.getElementById('fullDetails').innerHTML;
     const printWindow = window.open('', '', 'height=600,width=800');
     printWindow.document.write('<html><head><title>Print Details</title>');
-    printWindow.document.write('<style>@page { size: A4; margin: 1cm; } body { font-family: Arial, sans-serif; font-size: 12pt; } .box { border: 1px solid #ddd; padding: 10px; margin: 5px 0; } .title { font-size: 16pt; font-weight: bold; border-bottom: 2px solid #000; margin-bottom: 5px; color: #0bb4e7; padding: 5px; } ul { list-style: none; padding: 0; } li { margin-bottom: 5px; font-size: 10pt; } .details-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; page-break-inside: avoid; }</style>');
+    printWindow.document.write('<style>@page { size: A4; margin: 1cm; } body { font-family: Arial, sans-serif; font-size: 12pt; } .box { border: 1px solid #ddd; padding: 10px; margin: 5px 0; page-break-inside: avoid; } .title { font-size: 16pt; font-weight: bold; border-bottom: 2px solid #000; margin-bottom: 5px; color: #0bb4e7; padding: 5px; } ul { list-style: none; padding: 0; } li { margin-bottom: 5px; font-size: 10pt; } .details-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; page-break-inside: avoid; } @media print { body { margin: 0; } }</style>');
     printWindow.document.write('</head><body>');
     printWindow.document.write('<div class="details-grid">' + fullDetails + '</div>');
     printWindow.document.write('</body></html>');
