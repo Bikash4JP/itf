@@ -72,7 +72,10 @@ require_once 'db_connect.php';
                 </table>
                 <div id="fullDetails" class="details-grid" style="display:none;"></div>
                 <div class="details-border"></div>
-                <button id="printDetailsBtn" class="print-btn" style="display:none;" onclick="printDetails()">情報えんさつ</button>
+                <div class="button-group" style="display:none; text-align: center;">
+                    <button id="editDetailsBtn" class="edit-btn" onclick="editWorker()">編集</button>
+                    <button id="printDetailsBtn" class="print-btn" onclick="printDetails()">情報印刷</button>
+                </div>
             </div>
         </div>
     </div>

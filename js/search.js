@@ -52,8 +52,8 @@ function saveKeyword(keyword) {
     } else {
         keywords.push({ text: keyword, count: 1, timestamp: Date.now() });
     }
-    keywords.sort((a, b) => b.count - a.count || b.timestamp - a.timestamp); // Sort by count, then by recent
-    keywords = keywords.slice(0, 10); // Limit to 10
+    keywords.sort((a, b) => b.count - a.count || b.timestamp - a.timestamp);
+    keywords = keywords.slice(0, 10);
     localStorage.setItem('frequentKeywords', JSON.stringify(keywords));
 }
 
@@ -61,7 +61,7 @@ function showSuggestions() {
     const input = document.getElementById('searchInput').value.toLowerCase().trim();
     const suggestions = document.getElementById('suggestions');
     const keywords = loadFrequentKeywords();
-    const filtered = keywords.filter(k => k.text.includes(input)).slice(0, 10); // Limit to 10 displayed
+    const filtered = keywords.filter(k => k.text.includes(input)).slice(0, 10);
     if (filtered.length === 0) {
         suggestions.style.display = 'none';
         return;
@@ -150,6 +150,7 @@ function showFullDetails(name) {
     const fullDetails = document.getElementById('fullDetails');
     const resultsContainer = document.getElementById('resultsContainer');
     const infoText = document.querySelector('.info-text');
+    const buttonGroup = document.querySelector('.button-group');
     fullDetails.innerHTML = `
         <div class="box">
             <div class="title">個人情報</div>
@@ -205,7 +206,14 @@ function showFullDetails(name) {
     resultsContainer.style.display = 'block';
     infoText.style.display = 'none';
     document.querySelector('table').style.display = 'none';
-    document.getElementById('printDetailsBtn').style.display = 'block';
+    buttonGroup.style.display = 'block';
+}
+
+function editWorker() {
+    const name = document.querySelector('#fullDetails .box ul li:nth-child(1)').textContent.split(': ')[1];
+    if (name) {
+        window.location.href = `editstaff.php?name=${encodeURIComponent(name)}`;
+    }
 }
 
 function printDetails() {
