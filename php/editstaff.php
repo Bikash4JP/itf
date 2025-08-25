@@ -41,6 +41,11 @@ $referrerOptions = getUniqueValues($pdo, '紹介元');
 $residenceTypeOptions = getUniqueValues($pdo, '住居タイプ');
 $managementFeeOptions = getUniqueValues($pdo, '管理費');
 $referralFeeOptions = getUniqueValues($pdo, '紹介料');
+$jlptOptions = getUniqueValues($pdo, 'JLPT状況');
+$basicContractOptions = getUniqueValues($pdo, '基本契約書');
+$entrustmentContractOptions = getUniqueValues($pdo, '委託契約書');
+$companyContactOptions = getUniqueValues($pdo, '担当者（企業）');
+$acceptancePeriodOptions = getUniqueValues($pdo, '受け入れ期間');
 
 function calculateAge($dob) {
     if (!$dob) return null;
@@ -169,7 +174,14 @@ function calculateAge($dob) {
           </div>
           <div>
             <label data-english="(Acceptance Period)">受け入れ期間</label>
-            <input type="text" name="受け入れ期間" value="<?php echo htmlspecialchars($worker['受け入れ期間'] ?? ''); ?>">
+            <select name="受け入れ期間">
+              <option value="">選択してください</option>
+              <?php foreach ($acceptancePeriodOptions as $option): ?>
+                <option value="<?php echo htmlspecialchars($option); ?>" <?php if ($worker['受け入れ期間'] == $option) echo 'selected'; ?>><?php echo htmlspecialchars($option); ?></option>
+              <?php endforeach; ?>
+              <option value="+">+</option>
+            </select>
+            <input type="text" name="new_受け入れ期間" style="display:none;" placeholder="New value">
           </div>
           <div>
             <label data-english="(Institution ZIP)">受入機関（郵便番号）</label>
@@ -247,7 +259,14 @@ function calculateAge($dob) {
           </div>
           <div>
             <label data-english="(JLPT Status)">JLPT状況</label>
-            <input type="text" name="JLPT状況" value="<?php echo htmlspecialchars($worker['JLPT状況'] ?? ''); ?>">
+            <select name="JLPT状況">
+              <option value="">選択してください</option>
+              <?php foreach ($jlptOptions as $option): ?>
+                <option value="<?php echo htmlspecialchars($option); ?>" <?php if ($worker['JLPT状況'] == $option) echo 'selected'; ?>><?php echo htmlspecialchars($option); ?></option>
+              <?php endforeach; ?>
+              <option value="+">+</option>
+            </select>
+            <input type="text" name="new_JLPT状況" style="display:none;" placeholder="New value">
           </div>
         </div>
       </div>
@@ -279,15 +298,36 @@ function calculateAge($dob) {
           </div>
           <div>
             <label data-english="(Basic Contract)">基本契約書</label>
-            <input type="text" name="基本契約書" value="<?php echo htmlspecialchars($worker['基本契約書'] ?? ''); ?>">
+            <select name="基本契約書">
+              <option value="">選択してください</option>
+              <?php foreach ($basicContractOptions as $option): ?>
+                <option value="<?php echo htmlspecialchars($option); ?>" <?php if ($worker['基本契約書'] == $option) echo 'selected'; ?>><?php echo htmlspecialchars($option); ?></option>
+              <?php endforeach; ?>
+              <option value="+">+</option>
+            </select>
+            <input type="text" name="new_基本契約書" style="display:none;" placeholder="New value">
           </div>
           <div>
             <label data-english="(Entrustment Contract)">委託契約書</label>
-            <input type="text" name="委託契約書" value="<?php echo htmlspecialchars($worker['委託契約書'] ?? ''); ?>">
+            <select name="委託契約書">
+              <option value="">選択してください</option>
+              <?php foreach ($entrustmentContractOptions as $option): ?>
+                <option value="<?php echo htmlspecialchars($option); ?>" <?php if ($worker['委託契約書'] == $option) echo 'selected'; ?>><?php echo htmlspecialchars($option); ?></option>
+              <?php endforeach; ?>
+              <option value="+">+</option>
+            </select>
+            <input type="text" name="new_委託契約書" style="display:none;" placeholder="New value">
           </div>
           <div>
             <label data-english="(Company Contact)">担当者（企業）</label>
-            <input type="text" name="担当者（企業）" value="<?php echo htmlspecialchars($worker['担当者（企業）'] ?? ''); ?>">
+            <select name="担当者（企業）">
+              <option value="">選択してください</option>
+              <?php foreach ($companyContactOptions as $option): ?>
+                <option value="<?php echo htmlspecialchars($option); ?>" <?php if ($worker['担当者（企業）'] == $option) echo 'selected'; ?>><?php echo htmlspecialchars($option); ?></option>
+              <?php endforeach; ?>
+              <option value="+">+</option>
+            </select>
+            <input type="text" name="new_担当者（企業）" style="display:none;" placeholder="New value">
           </div>
         </div>
       </div>
@@ -398,7 +438,10 @@ function calculateAge($dob) {
         if (col === '年齢') {
           return calculateAge();
         }
-        return formData.get(col) || '';
+        // Handle manually entered values from + option
+        const newField = 'new_' + col;
+        const newValue = formData.get(newField);
+        return newValue !== null && newValue !== '' ? newValue : formData.get(col) || '';
       });
       const name = formData.get('original_name');
       fetch('search.php', {
