@@ -3,18 +3,22 @@ ini_set('session.cookie_path', '/itf');
 session_start();
 
 if (!isset($_SESSION['id']) || !isset($_SESSION['username'])) {
-    header("Location: login.php");
-    exit;
+  header("Location: login.php");
+  exit;
 }
 
 // Database connection
 require_once 'db_connect.php';
 
 // Fetch unique values from database
-function getUniqueValues($pdo, $column) {
-    $stmt = $pdo->prepare("SELECT DISTINCT $column FROM talents WHERE $column IS NOT NULL AND $column != ''");
-    $stmt->execute();
-    return $stmt->fetchAll(PDO::FETCH_COLUMN);
+function getUniqueValues($pdo, $column)
+{
+  $stmt = $pdo->prepare("SELECT DISTINCT $column FROM talents WHERE $column IS NOT NULL AND $column != ''");
+  $stmt->execute();
+  $options = $stmt->fetchAll(PDO::FETCH_COLUMN);
+  // Debugging: Log the fetched values to verify
+  error_log("Fetched values for $column: " . json_encode($options));
+  return $options;
 }
 
 $genderOptions = getUniqueValues($pdo, '雇用者情報（性別）');
@@ -25,18 +29,26 @@ $referrerOptions = getUniqueValues($pdo, '紹介元');
 $residenceTypeOptions = getUniqueValues($pdo, '住居タイプ');
 $managementFeeOptions = getUniqueValues($pdo, '管理費');
 $referralFeeOptions = getUniqueValues($pdo, '紹介料');
+$jlptOptions = getUniqueValues($pdo, 'JLPT状況');
+$basicContractOptions = getUniqueValues($pdo, '基本契約書');
+$entrustmentContractOptions = getUniqueValues($pdo, '委託契約書');
+$companyContactOptions = getUniqueValues($pdo, '担当者（企業）');
+$acceptancePeriodOptions = getUniqueValues($pdo, '受け入れ期間');
 
-function calculateAge($dob) {
-    if (!$dob) return null;
-    $dobDate = new DateTime($dob);
-    $today = new DateTime();
-    $age = $today->diff($dobDate)->y;
-    return $age;
+function calculateAge($dob)
+{
+  if (!$dob)
+    return null;
+  $dobDate = new DateTime($dob);
+  $today = new DateTime();
+  $age = $today->diff($dobDate)->y;
+  return $age;
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -45,6 +57,7 @@ function calculateAge($dob) {
   <link rel="stylesheet" href="../css/search.css">
   <link rel="stylesheet" href="../css/addstaff.css">
 </head>
+
 <body>
   <header>
     <div class="logo"><a href="https://it-future.jp/"><img src="../images/logo.png" alt="ITF Logo"></a></div>
@@ -86,7 +99,8 @@ function calculateAge($dob) {
           </div>
           <div>
             <label data-english="(Date of Birth)">雇用者情報（生年月日）</label>
-            <input type="text" name="雇用者情報（生年月日）" id="dobInput" placeholder="yyyy-mm-dd" oninput="formatDate(this)" maxlength="10" required>
+            <input type="text" name="雇用者情報（生年月日）" id="dobInput" placeholder="yyyy-mm-dd" oninput="formatDate(this)"
+              maxlength="10" required>
           </div>
           <div>
             <label data-english="(Support Address)">支援者住所</label>
@@ -152,7 +166,14 @@ function calculateAge($dob) {
           </div>
           <div>
             <label data-english="(Acceptance Period)">受け入れ期間</label>
-            <input type="text" name="受け入れ期間">
+            <select name="受け入れ期間">
+              <option value="">選択してください</option>
+              <?php foreach ($acceptancePeriodOptions as $option): ?>
+                <option value="<?php echo htmlspecialchars($option); ?>"><?php echo htmlspecialchars($option); ?></option>
+              <?php endforeach; ?>
+              <option value="+">+</option>
+            </select>
+            <input type="text" name="new_受け入れ期間" style="display:none;" placeholder="New value">
           </div>
           <div>
             <label data-english="(Institution ZIP)">受入機関（郵便番号）</label>
@@ -230,7 +251,14 @@ function calculateAge($dob) {
           </div>
           <div>
             <label data-english="(JLPT Status)">JLPT状況</label>
-            <input type="text" name="JLPT状況">
+            <select name="JLPT状況">
+              <option value="">選択してください</option>
+              <?php foreach ($jlptOptions as $option): ?>
+                <option value="<?php echo htmlspecialchars($option); ?>"><?php echo htmlspecialchars($option); ?></option>
+              <?php endforeach; ?>
+              <option value="+">+</option>
+            </select>
+            <input type="text" name="new_JLPT状況" style="display:none;" placeholder="New value">
           </div>
         </div>
       </div>
@@ -262,15 +290,36 @@ function calculateAge($dob) {
           </div>
           <div>
             <label data-english="(Basic Contract)">基本契約書</label>
-            <input type="text" name="基本契約書">
+            <select name="基本契約書">
+              <option value="">選択してください</option>
+              <?php foreach ($basicContractOptions as $option): ?>
+                <option value="<?php echo htmlspecialchars($option); ?>"><?php echo htmlspecialchars($option); ?></option>
+              <?php endforeach; ?>
+              <option value="+">+</option>
+            </select>
+            <input type="text" name="new_基本契約書" style="display:none;" placeholder="New value">
           </div>
           <div>
             <label data-english="(Entrustment Contract)">委託契約書</label>
-            <input type="text" name="委託契約書">
+            <select name="委託契約書">
+              <option value="">選択してください</option>
+              <?php foreach ($entrustmentContractOptions as $option): ?>
+                <option value="<?php echo htmlspecialchars($option); ?>"><?php echo htmlspecialchars($option); ?></option>
+              <?php endforeach; ?>
+              <option value="+">+</option>
+            </select>
+            <input type="text" name="new_委託契約書" style="display:none;" placeholder="New value">
           </div>
           <div>
             <label data-english="(Company Contact)">担当者（企業）</label>
-            <input type="text" name="担当者（企業）">
+            <select name="担当者（企業）">
+              <option value="">選択してください</option>
+              <?php foreach ($companyContactOptions as $option): ?>
+                <option value="<?php echo htmlspecialchars($option); ?>"><?php echo htmlspecialchars($option); ?></option>
+              <?php endforeach; ?>
+              <option value="+">+</option>
+            </select>
+            <input type="text" name="new_担当者（企業）" style="display:none;" placeholder="New value">
           </div>
         </div>
       </div>
@@ -324,9 +373,6 @@ function calculateAge($dob) {
 
       const uniqueAreas = getUniqueValues('エリア');
       areaSelect.innerHTML = '<option value="">選択してください</option>' + uniqueAreas.map(v => `<option value="${v}">${v}</option>`).join('');
-
-      const uniqueAcceptancePeriods = getUniqueValues('受け入れ期間');
-    acceptancePeriodSelect.innerHTML = '<option value="">選択してください</option>' + uniqueAcceptancePeriods.map(v => `<option value="${v}">${v}</option>`).join('');
     }
 
     function formatDate(input) {
@@ -357,13 +403,13 @@ function calculateAge($dob) {
         s.classList.toggle("active", i === step);
       });
       stepTitle.textContent = titles[step];
-      progress.style.width = ((step+1) / steps.length) * 100 + "%";
+      progress.style.width = ((step + 1) / steps.length) * 100 + "%";
       document.getElementById("prevBtn").style.display = step > 0 ? "inline-block" : "none";
-      document.getElementById("nextBtn").textContent = step === steps.length-1 ? "送信" : "次へ";
+      document.getElementById("nextBtn").textContent = step === steps.length - 1 ? "送信" : "次へ";
     }
 
     function nextStep() {
-      if (currentStep < steps.length-1) {
+      if (currentStep < steps.length - 1) {
         currentStep++;
         showStep(currentStep);
       } else {
@@ -391,31 +437,25 @@ function calculateAge($dob) {
 
     function submitForm() {
       const formData = new FormData(document.getElementById('staffForm'));
-      const name = formData.get('雇用者情報（アルファベット）') || '';
-      const company = formData.get('施設名（勤務先）') || '';
-      const dob = formData.get('雇用者情報（生年月日）') || '';
-      const phone = formData.get('連絡先①') || '';
-      checkDuplicate(name, company, dob, phone).then(isDuplicate => {
-        if (isDuplicate) {
-          alert('similar data found , can not added');
-          window.location.href = 'https://it-future.jp/php/searcch.php';
-          return;
+      let values = columns.map(col => {
+        if (col === '年齢') {
+          return calculateAge();
         }
-        let values = columns.map(col => {
-          if (col === '年齢') {
-            return calculateAge();
-          }
-          return formData.get(col) || '';
-        });
-        fetch('search.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams({
-            'add': '1',
-            name: name,
-            values: JSON.stringify(values)
-          }).toString()
-        })
+        // Handle manually entered values from + option
+        const newField = 'new_' + col;
+        const newValue = formData.get(newField);
+        return newValue !== null && newValue !== '' ? newValue : formData.get(col) || '';
+      });
+      const name = formData.get('雇用者情報（アルファベット）') || '';
+      fetch('search.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          'add': '1',
+          name: name,
+          values: JSON.stringify(values)
+        }).toString()
+      })
         .then(response => response.json())
         .then(data => {
           if (data.error) {
@@ -426,7 +466,6 @@ function calculateAge($dob) {
           }
         })
         .catch(error => alert('エラー: ' + error.message));
-      });
     }
 
     document.querySelectorAll('select').forEach(select => {
@@ -447,4 +486,5 @@ function calculateAge($dob) {
     fetchData();
   </script>
 </body>
+
 </html>
