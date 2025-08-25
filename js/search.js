@@ -56,32 +56,6 @@ function saveKeyword(keyword) {
     keywords = keywords.slice(0, 10);
     localStorage.setItem('frequentKeywords', JSON.stringify(keywords));
 }
-
-function showSuggestions() {
-    const input = document.getElementById('searchInput').value.toLowerCase().trim();
-    const suggestions = document.getElementById('suggestions');
-    const keywords = loadFrequentKeywords();
-    const filtered = keywords.filter(k => k.text.includes(input)).slice(0, 10);
-    if (filtered.length === 0) {
-        suggestions.style.display = 'none';
-        return;
-    }
-    suggestions.innerHTML = filtered.map(k => `<div onclick="selectSuggestion('${k.text}')">${k.text}</div>`).join('');
-    suggestions.style.display = 'block';
-}
-
-function hideSuggestions() {
-    setTimeout(() => {
-        document.getElementById('suggestions').style.display = 'none';
-    }, 200);
-}
-
-function selectSuggestion(keyword) {
-    document.getElementById('searchInput').value = keyword;
-    searchWorkers();
-    hideSuggestions();
-}
-
 function handleEnter(event) {
     if (event.key === 'Enter') {
         searchWorkers();
