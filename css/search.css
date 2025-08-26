@@ -103,7 +103,7 @@ header {
     width: 80%;
     height: 50px;
     border: 5px solid rgb(29, 150, 219);
-    border-radius:60px;
+    border-radius: 60px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -117,13 +117,9 @@ header {
     border: none;
     border-radius: 5px;
     outline: none;
-    
-}
-input#searchInput {
     width: 100%;
     height: 49%;
-    /* height: 60px; */
-    border: none;}
+}
 
 #searchInput::placeholder {
     color: #666;
@@ -235,7 +231,27 @@ td {
     margin: 20px 0;
 }
 
-.print-btn edit-btn{
+.button-group {
+    display: none;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.edit-btn {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.edit-btn:hover {
+    background-color: #218838;
+}
+
+.print-btn {
     padding: 10px 20px;
     background-color: #1e90ff;
     color: white;
@@ -243,37 +259,105 @@ td {
     border-radius: 5px;
     cursor: pointer;
     font-weight: bold;
-    margin-top: 20px;
-    align-self: center;
 }
 
 .print-btn:hover {
     background-color: #104e8b;
 }
 
-/* Responsive */
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .menu-bar {
+        width: 25%;
+    }
+    .content-area {
+        margin-left: 26%;
+    }
+    .suggestions {
+        left: 26%;
+        width: 54%;
+    }
+}
+
 @media (max-width: 768px) {
     .main-container {
         flex-direction: column;
     }
     .menu-bar {
         width: 100%;
-        position: static; /* Reset to static for mobile */
+        position: static;
         border-bottom: 2px solid #000;
         margin-bottom: 20px;
+        padding: 10px 0;
+    }
+    .menu-icon {
+        margin-top: 20px;
+    }
+    .menu-bar ul {
+        width: 90%;
+        padding-top: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .menu-bar li {
+        margin: 5px;
+        padding: 0 10px;
+        flex: 1 1 40%;
     }
     .content-area {
-        width: 100%;
         margin-left: 0;
+        padding: 10px;
+    }
+    .search-container {
+        width: 90%;
+        margin: 20px 10px 10px 10px;
     }
     #searchInput {
-        width: 70%;
+        font-size: 14px;
     }
     .info-text {
         width: 95%;
+        padding: 20px;
+        font-size: 16px;
     }
     .suggestions {
         left: 5%;
         width: 90%;
+    }
+    table {
+        font-size: 14px;
+    }
+    .details-grid {
+        flex-direction: column;
+    }
+    .box {
+        min-width: 100%;
+    }
+    .button-group {
+        flex-direction: column;
+        align-items: center;
+    }
+    .edit-btn, .print-btn {
+        width: 80%;
+        margin: 5px 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .menu-bar li {
+        flex: 1 1 100%;
+    }
+    #searchInput {
+        font-size: 12px;
+    }
+    .info-text {
+        font-size: 14px;
+    }
+    .box {
+        padding: 10px;
+    }
+    .title {
+        font-size: 16px;
     }
 }
