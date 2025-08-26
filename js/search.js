@@ -147,7 +147,7 @@ function showFullDetails(name) {
                 <li>退職日: ${worker['支援退職日'] || ''}</li>
                 <li>状態: ${worker['状態'] || ''}</li>
                 <li>エリア: ${worker['エリア'] || ''}</li>
-                <li>受け入れ期間: ${worker['受け入れ期間'] || ''}</li>
+                <li>受け入れ機関: ${worker['受け入れ機関'] || ''}</li>
                 <li>受入機関（郵便番号）: ${worker['受入機関（郵便番号）'] || ''}</li>
                 <li>受入機関（電話番号）: ${worker['受入機関（電話番号）'] || ''}</li>
             </ul>
