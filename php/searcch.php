@@ -54,7 +54,7 @@ require_once 'db_connect.php';
         <div class="content-area">
             <!-- Search box -->
             <div class="search-container">
-                <input type="text" id="searchInput" placeholder="スペースで区切って検索できます..." onkeyup="searchWorkers()" onfocus="showSuggestions()" onblur="hideSuggestions()" onkeypress="handleEnter(event)">
+                <input type="text" id="searchInput" placeholder="氏名、施設、住所、担当者、電話番号など何でもキーワード　スペースで区切って検索できます..." onkeyup="searchWorkers()" onfocus="showSuggestions()" onblur="hideSuggestions()" onkeypress="handleEnter(event)">
             </div>
             <div id="suggestions" class="suggestions"></div>
 
