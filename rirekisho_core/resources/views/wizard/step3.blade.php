@@ -62,6 +62,11 @@
     <div class="card mb-4">
       <div class="card-body">
         <h2 class="h5 fw-bold">連絡先</h2>
+
+        <div class="mb-2">
+          <input type="text" class="form-control" name="furigana_address" placeholder="住所（フリガナ）" value="{{ old('furigana_address', $w['furigana_address'] ?? '') }}">
+        </div>
+
         <div class="mb-2">
           <input type="text" class="form-control" name="postal_code" placeholder="郵便番号" value="{{ old('postal_code', $w['postal_code'] ?? '') }}">
         </div>
@@ -85,26 +90,14 @@
 </div>
 
 <script>
-(function(){
-  const container = document.getElementById('edu-rows');
+(() => {
+  const c = document.getElementById('edu-rows');
   const tpl = document.getElementById('edu-template').innerHTML;
-  const addBtn = document.getElementById('add-edu');
-
-  function nextIndex(){
-    let max = -1;
-    container.querySelectorAll('.edu-row').forEach(el=>{
-      const idx = parseInt(el.getAttribute('data-index'),10);
-      if(!isNaN(idx)) max = Math.max(max, idx);
-    });
-    return max+1;
-  }
-
-  addBtn.addEventListener('click', ()=>{
-    const i = nextIndex();
-    const html = tpl.replace(/__INDEX__/g, i);
+  document.getElementById('add-edu').addEventListener('click', () => {
+    const i = c.querySelectorAll('.edu-row').length;
     const div = document.createElement('div');
-    div.innerHTML = html.trim();
-    container.appendChild(div.firstElementChild);
+    div.innerHTML = tpl.replace(/__INDEX__/g, i).trim();
+    c.appendChild(div.firstElementChild);
   });
 })();
 </script>
