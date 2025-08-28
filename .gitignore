@@ -33,3 +33,5 @@ templates/
 # Ignore the templates directory for resume templates
 .sftpignore
 # Ignore the SFTP ignore file
+uploads/
+# Ignore the uploads directory for user-uploaded files
