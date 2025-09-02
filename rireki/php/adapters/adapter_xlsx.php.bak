@@ -1,0 +1,242 @@
+<?php
+require_once __DIR__ . '/../bootstrap.php';
+
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Writer\Pdf\Dompdf as PdfDompdf;
+use PhpOffice\PhpSpreadsheet\Settings;
+
+function rireki_render_pdf(array $data, string $mappingFile, string $outDir, string $token): array {
+  try {
+    if (!is_readable($mappingFile)) {
+      return ['ok'=>false, 'pdf'=>null, 'xlsx'=>null, 'err'=>"Mapping not readable: $mappingFile"];
+    }
+    $map = json_decode(file_get_contents($mappingFile), true, 512, JSON_THROW_ON_ERROR);
+
+    $tplRel  = $map['template_file'] ?? '';
+    $tplPath = realpath(dirname($mappingFile) . '/' . $tplRel);
+    if (!$tplPath || !is_readable($tplPath)) {
+      return ['ok'=>false, 'pdf'=>null, 'xlsx'=>null, 'err'=>"Template not readable: $tplRel"];
+    }
+
+    $spreadsheet = IOFactory::load($tplPath);
+    $sheet = $spreadsheet->getActiveSheet();
+    if (!empty($map['sheet_name']) && $spreadsheet->sheetNameExists($map['sheet_name'])) {
+      $sheet = $spreadsheet->getSheetByName($map['sheet_name']);
+      $spreadsheet->setActiveSheetIndexByName($map['sheet_name']);
+    }
+
+    if (!empty($map['singles'])) {
+      foreach ($map['singles'] as $key => $cell) {
+        $val = getValueByKeyPath($data, $key);
+        if ($val === null) continue;
+        $sheet->setCellValue($cell, (string)$val); // <-- FIX: use setCellValue
+      }
+    }
+
+    if (!empty($map['blocks'])) {
+      foreach ($map['blocks'] as $key => $conf) {
+        $cell = $conf['cell'] ?? null;
+        if (!$cell) continue;
+        $val = getValueByKeyPath($data, $key);
+        if ($val === null) continue;
+        $val = str_replace(["\r\n","\r"], "\n", (string)$val);
+        $sheet->setCellValue($cell, $val);         // <-- FIX: setCellValue
+        if (!empty($conf['wrap'])) {
+          $sheet->getStyle($cell)->getAlignment()->setWrapText(true);
+          $sheet->getStyle($cell)->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
+        }
+      }
+    }
+
+    $joins = $map['joins'] ?? [];
+    $data  = applyJoinRules($data, $joins);
+
+    if (!empty($map['repeaters'])) {
+      foreach ($map['repeaters'] as $repKey => $repConf) {
+        $rows = $data[$repKey] ?? [];
+        if (!is_array($rows)) continue;
+
+        $startRow = (int)($repConf['start_row'] ?? 0);
+        $rowStep  = (int)($repConf['row_step'] ?? 1);
+        $maxRows  = (int)($repConf['max_rows'] ?? count($rows));
+        $cols     = $repConf['columns'] ?? [];
+
+        $limit = min(count($rows), $maxRows);
+        for ($i=0; $i<$limit; $i++) {
+          $row = $rows[$i];
+          $r   = $startRow + ($i * $rowStep);
+          foreach ($cols as $field => $colLetter) {
+            $coord = $colLetter . $r;
+            $val   = $row[$field] ?? '';
+            $sheet->setCellValue($coord, (string)$val); // <-- FIX
+          }
+        }
+      }
+    }
+
+    if (!empty($map['photo']) && !empty($data['photo_path'])) {
+      $ph = $data['photo_path'];
+      if (is_readable($ph)) {
+        $anchor = $map['photo']['anchor_cell'] ?? 'A1';
+        $h = (int)($map['photo']['height_px'] ?? 400);
+
+        $img = new Drawing();
+        $img->setName('Photo');
+        $img->setDescription('Applicant Photo');
+        $img->setPath($ph);
+        $img->setHeight($h);
+        $img->setCoordinates($anchor);
+        $img->setWorksheet($sheet);
+      }
+    }
+
+    if (!is_dir($outDir)) { @mkdir($outDir, 0750, true); }
+
+    $xlsxPath = rtrim($outDir,'/') . '/' . $token . '.xlsx';
+    $pdfPath  = rtrim($outDir,'/') . '/' . $token . '.pdf';
+
+    IOFactory::createWriter($spreadsheet, 'Xlsx')->save($xlsxPath);
+
+    $tmp = rireki_path('tmp');
+    if (!is_dir($tmp)) { @mkdir($tmp, 0750, true); }
+    Settings::setTempDir($tmp); // <-- FIX: correct temp dir API
+
+    IOFactory::registerWriter('Pdf', PdfDompdf::class);
+    IOFactory::createWriter($spreadsheet, 'Pdf')->save($pdfPath);
+
+    return ['ok'=>true, 'pdf'=>$pdfPath, 'xlsx'=>$xlsxPath, 'err'=>null];
+
+  } catch (Throwable $e) {
+    return ['ok'=>false, 'pdf'=>null, 'xlsx'=>null, 'err'=>$e->getMessage()];
+  }
+}
+
+/** Helpers **/
+function getValueByKeyPath(array $data, string $keyPath) {
+  $parts = explode('.', $keyPath);
+  $cur = $data;
+  foreach ($parts as $p) {
+    if (!is_array($cur) || !array_key_exists($p, $cur)) return null;
+    $cur = $cur[$p];
+  }
+  return $cur;
+}
+
+function applyJoinRules(array $data, array $joins): array {
+  if (empty($joins)) return $data;
+  foreach ($joins as $fieldPath => $pattern) {
+    $parts = explode('.', $fieldPath);
+    if (count($parts) < 2) continue;
+    $repKey = $parts[0]; $destKey = $parts[1];
+    if (empty($data[$repKey]) || !is_array($data[$repKey])) continue;
+    foreach ($data[$repKey] as $i => $row) {
+      $val = $pattern;
+      foreach ($row as $k => $v) $val = str_replace('{'.$k.'}', (string)$v, $val);
+      $val = preg_replace('/\{[^\}]+\}/', '', $val);
+      $data[$repKey][$i][$destKey] = trim($val);
+    }
+  }
+  return $data;
+}
+
+function buildCanonicalData(array $post, ?array $files): array {
+  $personal = [
+    'name_kana' => trim($post['personal_name_kana'] ?? ''),
+    'name_kanji'=> trim($post['personal_name_kanji'] ?? ''),
+    'dob_yyyy'  => trim($post['dob_yyyy'] ?? ''),
+    'dob_mm'    => trim($post['dob_mm'] ?? ''),
+    'dob_dd'    => trim($post['dob_dd'] ?? ''),
+    'age'       => trim($post['age'] ?? ''),
+    'gender'    => trim($post['gender'] ?? ''),
+  ];
+  $address = [
+    'kana'     => trim($post['address_kana'] ?? ''),
+    'postcode' => trim($post['postcode'] ?? ''),
+    'full'     => trim($post['address_full'] ?? ''),
+  ];
+  $contact = [
+    'phone' => trim($post['phone'] ?? ''),
+    'email' => trim($post['email'] ?? ''),
+  ];
+
+  $education = [];
+  $years  = $post['edu_year']  ?? [];
+  $months = $post['edu_month'] ?? [];
+  $schools= $post['edu_school']?? [];
+  $n = max(count($years), count($months), count($schools));
+  for ($i=0; $i<$n; $i++) {
+    $education[] = [
+      'year'   => trim($years[$i]   ?? ''),
+      'month'  => trim($months[$i]  ?? ''),
+      'school' => trim($schools[$i] ?? ''),
+    ];
+  }
+
+  $experience = [];
+  $ey = $post['exp_year']   ?? [];
+  $em = $post['exp_month']  ?? [];
+  $ec = $post['exp_company']?? [];
+  $et = $post['exp_title']  ?? [];
+  $n  = max(count($ey), count($em), count($ec), count($et));
+  for ($i=0; $i<$n; $i++) {
+    $experience[] = [
+      'year'    => trim($ey[$i] ?? ''),
+      'month'   => trim($em[$i] ?? ''),
+      'company' => trim($ec[$i] ?? ''),
+      'title'   => trim($et[$i] ?? ''),
+    ];
+  }
+
+  $licenses = [];
+  $ly = $post['lic_year']  ?? [];
+  $lm = $post['lic_month'] ?? [];
+  $ln = $post['lic_name']  ?? [];
+  $n  = max(count($ly), count($lm), count($ln));
+  for ($i=0; $i<$n; $i++) {
+    $licenses[] = [
+      'year'        => trim($ly[$i] ?? ''),
+      'month'       => trim($lm[$i] ?? ''),
+      'certificate' => trim($ln[$i] ?? ''),
+    ];
+  }
+
+  $pr = ['self_pr' => trim($post['self_pr'] ?? '')];
+  $preferences = ['hopes' => trim($post['hopes'] ?? '')];
+
+  $photoPath = $post['photo_path'] ?? '';
+  if ($files && isset($files['photo']) && $files['photo']['error'] === UPLOAD_ERR_OK) {
+    $photoPath = moveUploadedPhoto($files['photo']);
+  }
+
+  return [
+    'personal'   => $personal,
+    'address'    => $address,
+    'contact'    => $contact,
+    'education'  => array_values(array_filter($education,  fn($r)=>implode('', $r) !== '')),
+    'experience' => array_values(array_filter($experience, fn($r)=>implode('', $r) !== '')),
+    'licenses'   => array_values(array_filter($licenses,   fn($r)=>implode('', $r) !== '')),
+    'pr'         => $pr,
+    'preferences'=> $preferences,
+    'photo_path' => $photoPath,
+  ];
+}
+
+function moveUploadedPhoto(array $file): string {
+  $dir = rireki_path('uploads/photos');
+  if (!is_dir($dir)) @mkdir($dir, 0750, true);
+  $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+  if (!in_array($ext, ['jpg','jpeg','png'], true)) $ext = 'jpg';
+  $name = bin2hex(random_bytes(8)) . '.' . $ext;
+  $dest = rtrim($dir,'/') . '/' . $name;
+  if ($file['size'] > 5 * 1024 * 1024) throw new RuntimeException('Photo too large');
+  $mime = (new finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']);
+  if (!in_array($mime, ['image/jpeg','image/png'], true)) {
+    throw new RuntimeException('Photo type not allowed');
+  }
+  if (!move_uploaded_file($file['tmp_name'], $dest)) {
+    throw new RuntimeException('Failed to move photo');
+  }
+  return $dest;
+}

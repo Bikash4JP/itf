@@ -1,6 +1,6 @@
 <?php
 // Enable error reporting for debugging (disable in production)
-ini_set('display_errors', 0);
+ini_set('display_errors', 0); // Production mein errors browser mein nahi dikhne chahiye
 ini_set('display_startup_errors', 0);
 ini_set('log_errors', 1);
 ini_set('error_log', '/home/it-future/www/itf/logs/php_errors.log');
@@ -11,7 +11,7 @@ ob_start();
 
 // Include database connection
 try {
-    require_once __DIR__ . '/db_connect.php';
+    require_once __DIR__ . '/db_connect.php'; // Correct path for db_connect.php
     if (!isset($pdo)) {
         throw new Exception("PDO object not initialized");
     }

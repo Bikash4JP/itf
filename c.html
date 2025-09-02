@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html class="h-full" lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>履歴書 | ITF</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Japanese-capable web fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- App scripts & styles (existing) -->
+  <link rel="stylesheet" href="https://dqialbc0bbit3.cloudfront.net/yutojp.com/vite/assets/tailwind-DDe6Q5_C.css" media="screen" />
+
+  <style>
+    html, body, button, input, select, textarea {
+      font-family:
+        "Noto Sans JP",
+        "Hiragino Kaku Gothic ProN",
+        "Hiragino Sans",
+        "Yu Gothic UI",
+        "Yu Gothic",
+        "Meiryo",
+        system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+    .text-align-right { text-align: right; }
+    #photo-area.drag-over { outline: 2px dashed #94a3b8; }
+    .links a.add-row { display:inline-flex; align-items:center; gap:.4rem; padding:.35rem .6rem; border-radius:.5rem; background:#e2e8f0; }
+    .links a.add-row:hover { background:#cbd5e1; }
+    a.remove-row { margin-left:.75rem; color:#b91c1c; text-decoration:underline; }
+  </style>
+</head>
+
+<body class="h-full flex flex-col min-h-screen bg-[#e2e8f0]">
+  <main class="flex-grow">
+    <div>
+      <form class="simple_form" id="new_resume_form" novalidate="novalidate" enctype="multipart/form-data"
+            action="/resumes" accept-charset="UTF-8" method="post">
+
+        <div class="resume-form-wrapper">
+          <div class="resume-form">
+            <!-- 基本情報 -->
+            <table class="resume-form__basic_info_table">
+              <tr class="resume-form__header">
+                <td colspan="2">
+                  <h1>履歴書</h1>
+                  <div class="resume-form__current_date">
+                    <div>
+                      <select id="current_date_year" name="resume_form[current_date_year]" class=""></select>
+                      <span>年</span>
+                      <select id="current_date_month" name="resume_form[current_date_month]" class=""></select>
+                      <span>月</span>
+                      <select id="current_date_day" name="resume_form[current_date_day]" class=""></select>
+                      <span>日</span><span>現在</span>
+                    </div>
+                  </div>
+                </td>
+                <td class="resume-form__image" rowspan="4">
+                  <article id="photo-area" aria-label="写真アップロード">
+                    <div id="photo-placeholder">
+                      <div>写真を貼る位置</div>
+                      <div>写真を貼る必要がある場合</div>
+                      <div>1. 縦 36～40mm</div>
+                      <div>横 24～30mm</div>
+                      <div>2. 本人単身胸から上</div>
+                      <div>3. 裏面のりづけ</div>
+                      <div>&nbsp;</div>
+                      <p>(Upload or drag & drop)</p>
+                    </div>
+                    <img id="photo-preview" style="display:none; width:100%; height:100%; object-fit:cover;" />
+                  </article>
+                  <div class="input file optional resume_form_image">
+                    <input class="file optional" accept="image/*" style="display:none;" id="photo-input" type="file" name="resume_form[image]" />
+                  </div>
+                </td>
+              </tr>
+
+              <tr class="resume-form__name_kana">
+                <th><label for="resume_form_name_kana">フリガナ</label></th>
+                <td>
+                  <div class="input string optional resume_form_name_kana">
+                    <input class="string optional" placeholder="レ　ミー　チエン　トアン" type="text" name="resume_form[name_kana]" id="resume_form_name_kana" />
+                  </div>
+                </td>
+              </tr>
+
+              <tr class="resume-form__name">
+                <th><label for="resume_form_name">氏名</label></th>
+                <td>
+                  <div class="input string optional resume_form_name">
+                    <input class="string optional" placeholder="LE MINH THIEN TOAN" type="text" name="resume_form[name]" id="resume_form_name" />
+                  </div>
+                </td>
+              </tr>
+
+              <tr class="resume-form__birthday_and_gender">
+                <th></th>
+                <td>
+                  <div class="resume-form__birthday">
+                    <select id="birth_year" name="resume_form[birthday_year]" class=""></select>
+                    <span>年</span>
+                    <select id="birth_month" name="resume_form[birthday_month]" class=""></select>
+                    <span>月</span>
+                    <select id="birth_day" name="resume_form[birthday_day]" class=""></select>
+                    <span>日生（満</span><span id="age"></span><span>歳）</span>
+                  </div>
+
+                  <div class="resume-form__gender">
+                    <label>性別</label>
+                    <div>
+                      <div class="input radio_buttons optional resume_form_gender">
+                        <input type="hidden" name="resume_form[gender]" value="" autocomplete="off" />
+                        <span class="radio">
+                          <label for="resume_form_gender_male">
+                            <input class="radio_buttons optional" type="radio" value="male" name="resume_form[gender]" id="resume_form_gender_male" />男
+                          </label>
+                        </span>
+                        <span class="radio">
+                          <label for="resume_form_gender_female">
+                            <input class="radio_buttons optional" type="radio" value="female" name="resume_form[gender]" id="resume_form_gender_female" />女
+                          </label>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <th class="resume-form__address_kana"><label for="resume_form_address_kana">フリガナ</label></th>
+                <td>
+                  <div>
+                    <div class="input string optional resume_form_address_kana">
+                      <input class="string optional" placeholder="トウキョウト　シブヤク　シブヤニチョウメ" type="text" name="resume_form[address_kana]" id="resume_form_address_kana" />
+                    </div>
+                  </div>
+                </td>
+                <td class="resume-form__tel">
+                  <div><label for="resume_form_tel">電話</label>
+                    <div class="input string optional resume_form_tel">
+                      <input class="string optional" placeholder="090-1234-5678" type="text" name="resume_form[tel]" id="resume_form_tel" />
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <th class="resume-form__address"><label for="resume_form_postal_code">現住所</label></th>
+                <td class="h-adr">
+                  <div><label>〒</label><span class="p-country-name" style="display:none;">Japan</span>
+                    <div class="input string optional resume_form_postal_code">
+                      <input class="string optional p-postal-code" placeholder="150-0022" type="text" name="resume_form[postal_code]" id="resume_form_postal_code" />
+                    </div>
+                  </div>
+                  <div class="input text optional resume_form_address">
+                    <textarea rows="2" class="text optional p-region p-locality p-street-address p-extended-address"
+                              data-kana-target="#resume_form_address_kana" placeholder="東京都渋谷区渋谷2丁目２４−１２"
+                              name="resume_form[address]" id="resume_form_address"></textarea>
+                  </div>
+                </td>
+                <td class="resume-form__email"><label for="resume_form_email">メール</label>
+                  <div class="input email optional resume_form_email">
+                    <input class="string email optional" placeholder="leminh.thientoan@gmail.com" type="email" name="resume_form[email]" id="resume_form_email" />
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <th class="resume-form__contact_address_kana"><label for="resume_form_contact_address_kana">フリガナ</label></th>
+                <td>
+                  <div>
+                    <div class="input string optional resume_form_contact_address_kana">
+                      <input class="string optional" placeholder="" type="text" name="resume_form[contact_address_kana]" id="resume_form_contact_address_kana" />
+                    </div>
+                  </div>
+                </td>
+                <td class="resume-form__contact_tel">
+                  <div><label for="resume_form_contact_tel">電話</label>
+                    <div class="input string optional resume_form_contact_tel">
+                      <input class="string optional" placeholder="" type="text" name="resume_form[contact_tel]" id="resume_form_contact_tel" />
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <th class="resume-form__contact_address"><label for="resume_form_contact_postal_code">連絡先</label></th>
+                <td class="h-adr">
+                  <div><label>〒</label><span class="p-country-name" style="display:none;">Japan</span>
+                    <div class="input string optional resume_form_contact_postal_code">
+                      <input class="string optional p-postal-code" placeholder="" type="text" name="resume_form[contact_postal_code]" id="resume_form_contact_postal_code" />
+                    </div>
+                    <span class="resume-form__contact_address_note">（現住所以外に連絡を希望する場合のみ記入）</span>
+                  </div>
+                  <div class="input text optional resume_form_contact_address">
+                    <textarea rows="2" class="text optional p-region p-locality p-street-address p-extended-address"
+                              data-kana-target="#resume_form_contact_address_kana" placeholder=""
+                              name="resume_form[contact_address]" id="resume_form_contact_address"></textarea>
+                  </div>
+                </td>
+                <td class="resume-form__contact_email"><label for="resume_form_contact_email">メール</label>
+                  <div class="input email optional resume_form_contact_email">
+                    <input class="string email optional" placeholder="" type="email" name="resume_form[contact_email]" id="resume_form_contact_email" />
+                  </div>
+                </td>
+              </tr>
+            </table>
+
+            <!-- 学歴 -->
+            <div id="resume-form__education_histories">
+              <table class="resume-form__history resume-form__education_histories_table">
+                <thead>
+                  <tr>
+                    <th>年</th>
+                    <th>月</th>
+                    <th>学歴</th>
+                  </tr>
+                </thead>
+                <tbody id="education_tbody"></tbody>
+              </table>
+              <div class="links">
+                <a href="#" class="add-row" data-section="education"><i class="fa-solid fa-plus"></i><span>学歴を追加</span></a>
+              </div>
+            </div>
+
+            <!-- 職歴 -->
+            <div id="resume-form__employment_histories">
+              <table class="resume-form__history resume-form__employment_histories_table">
+                <thead>
+                  <tr>
+                    <th>年</th>
+                    <th>月</th>
+                    <th>職歴</th>
+                  </tr>
+                </thead>
+                <tbody id="employment_tbody"></tbody>
+              </table>
+              <div class="links">
+                <a href="#" class="add-row" data-section="employment"><i class="fa-solid fa-plus"></i><span>職歴を追加</span></a>
+              </div>
+            </div>
+
+            <!-- 免許・資格 -->
+            <div id="resume-form__certificates">
+              <table class="resume-form__history resume-form__certificates_table">
+                <thead>
+                  <tr>
+                    <th>年</th>
+                    <th>月</th>
+                    <th>免許・資格</th>
+                  </tr>
+                </thead>
+                <tbody id="certificates_tbody"></tbody>
+              </table>
+              <div class="links">
+                <a href="#" class="add-row" data-section="certificates"><i class="fa-solid fa-plus"></i><span>免許・資格を追加</span></a>
+              </div>
+            </div>
+
+            <!-- 自己PR等 -->
+            <table class="resume-form__introduce_table">
+              <tbody>
+                <tr>
+                  <td class="resume-form__introduce" rowspan="3">
+                    <label for="resume_form_introduce">志望の動機、自己 PR など</label>
+                    <div class="input text optional resume_form_introduce">
+                      <textarea class="text optional" placeholder="志望動機や自己PRを具体的にご記入ください" name="resume_form[introduce]" id="resume_form_introduce"></textarea>
+                    </div>
+                  </td>
+                  <td colspan="2">
+                    <label for="resume_form_desired_commute_hour">通勤時間</label>
+                    <div>
+                      <span>約</span>
+                      <div class="input integer optional resume_form_desired_commute_hour">
+                        <input min="0" max="23" class="numeric integer optional text-align-right" type="number" step="1" name="resume_form[desired_commute_hour]" id="resume_form_desired_commute_hour" />
+                      </div>
+                      <span>時間</span>
+                      <div class="input integer optional resume_form_desired_commute_minute">
+                        <input min="0" max="59" class="numeric integer optional text-align-right" type="number" step="1" name="resume_form[desired_commute_minute]" id="resume_form_desired_commute_minute" />
+                      </div>
+                      <span>分</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="2">
+                    <label for="resume_form_dependent_count">扶養家族数（配偶者を除く）</label>
+                    <div>
+                      <div class="input integer optional resume_form_dependent_count">
+                        <input min="0" class="numeric integer optional text-align-right" type="number" step="1" name="resume_form[dependent_count]" id="resume_form_dependent_count" />
+                      </div>
+                      <span>人</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="resume-form__spouse">
+                    <label>配偶者</label>
+                    <div>
+                      <div class="input radio_buttons optional resume_form_spouse">
+                        <input type="hidden" name="resume_form[spouse]" value="" autocomplete="off" />
+                        <span class="radio"><label for="resume_form_spouse_true"><input class="radio_buttons optional" type="radio" value="true" name="resume_form[spouse]" id="resume_form_spouse_true" />有</label></span>
+                        <span class="radio"><label for="resume_form_spouse_false"><input class="radio_buttons optional" type="radio" value="false" name="resume_form[spouse]" id="resume_form_spouse_false" />無</label></span>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="resume-form__spouse_obligation">
+                    <label>配偶者の扶養義務</label>
+                    <div>
+                      <div class="input radio_buttons optional resume_form_spouse_obligation">
+                        <input type="hidden" name="resume_form[spouse_obligation]" value="" autocomplete="off" />
+                        <span class="radio"><label for="resume_form_spouse_obligation_true"><input class="radio_buttons optional" type="radio" value="true" name="resume_form[spouse_obligation]" id="resume_form_spouse_obligation_true" />有</label></span>
+                        <span class="radio"><label for="resume_form_spouse_obligation_false"><input class="radio_buttons optional" type="radio" value="false" name="resume_form[spouse_obligation]" id="resume_form_spouse_obligation_false" />無</label></span>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- 本人希望 -->
+            <table class="resume-form__personal_desires">
+              <thead>
+                <tr>
+                  <td><label for="resume_form_personal_desires">本人希望記入欄 （特に給料、職種、勤務時間、勤務地、その他についての希望などがあれば記入）</label></td>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <div class="input text optional resume_form_personal_desires">
+                      <textarea class="text optional" placeholder="希望する勤務条件や勤務地などをご記入ください" name="resume_form[personal_desires]" id="resume_form_personal_desires"></textarea>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+          </div>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <!-- Existing libs -->
+  <script charset="UTF-8" src="https://yubinbango.github.io/yubinbango/yubinbango.js"></script>
+  <script src="/js/jquery-3.7.1.min.js"></script>
+  <!-- Your new JS file -->
+  <script src="/js/rireki.js"></script>
+</body>
+</html>
