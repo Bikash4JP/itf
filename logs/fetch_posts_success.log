@@ -1067,3 +1067,38 @@ Session data: {"id":3,"username":"bikash","csrf_token":"4726fedcf63b9343ef73ebd8
 Before session check at 2025-08-26 16:57:22
 Session check passed for user bikash at 2025-08-26 16:57:22
 Attempting to include db_connect.php at 2025-08-26 16:57:22
+Script started at 2025-09-01 14:56:21
+Session started at 2025-09-01 14:56:21
+Cookies received: {"PHPSESSID":"g22vn3no5tpve3vncra99jevs6"}
+Session data: {"id":4,"username":"tokyo","csrf_token":"473d2dec6291cf2be0212054c0536d43584f3896cf01bb4973a07477d625250a"}
+Before session check at 2025-09-01 14:56:21
+Session check passed for user tokyo at 2025-09-01 14:56:21
+Attempting to include db_connect.php at 2025-09-01 14:56:21
+Script started at 2025-09-01 15:40:42
+Session started at 2025-09-01 15:40:42
+Cookies received: {"PHPSESSID":"g63c4i5vf3ivng2vq1sdp70sv0"}
+Session data: {"id":3,"username":"bikash","csrf_token":"024b8ab734f35a6d46d471dcf2223fe87d4f63676c6c1f250036a3f6cc1ab9fa"}
+Before session check at 2025-09-01 15:40:42
+Session check passed for user bikash at 2025-09-01 15:40:42
+Attempting to include db_connect.php at 2025-09-01 15:40:42
+Script started at 2025-09-02 09:02:10
+Session started at 2025-09-02 09:02:10
+Cookies received: {"PHPSESSID":"krugaef5ffa23qj0h1a2lvjgjd"}
+Session data: {"id":3,"username":"bikash","csrf_token":"98cca1570166693d06d4981d021ab2c64870f1e5a485a75b2e39cb8e10407714"}
+Before session check at 2025-09-02 09:02:10
+Session check passed for user bikash at 2025-09-02 09:02:10
+Attempting to include db_connect.php at 2025-09-02 09:02:10
+Script started at 2025-09-02 11:27:04
+Session started at 2025-09-02 11:27:04
+Cookies received: {"PHPSESSID":"krugaef5ffa23qj0h1a2lvjgjd","XSRF-TOKEN":"eyJpdiI6IjNCSHlhMUpnOG8vL3Y0cjVvc3IxWEE9PSIsInZhbHVlIjoiK01zREZCczIxenBHUUt5bktBSWx4T1NuODdwamkyNis1dTZmSVFvTlRpR3M2TjBDNzI0Z09ydGUwbHVuODAvRnQ4U2hJeUJCYlhLYURzV3djd3h1RGduR29Fc3U3TzZSZmM0U0dxcWlTdnA4VHJmYXlQY2xiV1J0dVlXaC9lTFgiLCJtYWMiOiI0OGNmYTRlODEwNTQ2N2MxOTU1MWQzYWU4YTE3YTFiMzE5NzRjYmU3ZTdhZjllMzI4NjFhOTBjZmU4ZGU4Yzk0IiwidGFnIjoiIn0=","rirekishomaker-session":"eyJpdiI6InNMeGlPNDRySTN2Mk90dWs2cjdwa1E9PSIsInZhbHVlIjoiVXlYV2RKSzRCRzBHcXc2ZnFkUzZtWmU4SXJsZFg4MnRqdXJUa3loc0xPOEt3Y2NZWW5QWW9WUzhJMGVzQnVRRkpjU2l2ZlpPcS8zVit1VktUSStRWEkzd2JMdWhHYWpYNVRJcmUrVExEVU5pQzFQVXN3bTJZeEVLU2JOM0dqOFMiLCJtYWMiOiJkMjE3ZmI0YTZjYmRjN2JhMDBiOTgzMDVkNjQwYTUyY2UyZTkxMmEwMDM0NzA4ZjU5Yjc3NDZiMGFkNmNlZDdlIiwidGFnIjoiIn0="}
+Session data: {"id":3,"username":"bikash","csrf_token":"7f471558d553de2e7f3f00d9d0a0f897e1848ad4bcf4b2a9e70d5d7a1afcc3d5"}
+Before session check at 2025-09-02 11:27:04
+Session check passed for user bikash at 2025-09-02 11:27:04
+Attempting to include db_connect.php at 2025-09-02 11:27:04
+Script started at 2025-09-02 13:38:31
+Session started at 2025-09-02 13:38:31
+Cookies received: {"PHPSESSID":"krugaef5ffa23qj0h1a2lvjgjd"}
+Session data: {"id":3,"username":"bikash","csrf_token":"bce94b3a9fc648d06ca1d7d406bbb809d26b922ef3f06d91cab3710faf2903db"}
+Before session check at 2025-09-02 13:38:31
+Session check passed for user bikash at 2025-09-02 13:38:31
+Attempting to include db_connect.php at 2025-09-02 13:38:31
