@@ -1,25 +1,33 @@
 <?php
-// /home/it-future/www/itf/rireki/php/download_rireki.php
 require_once __DIR__ . '/bootstrap.php';
 
 header('X-Content-Type-Options: nosniff');
 
 $token = $_GET['token'] ?? '';
+$fmt   = ($_GET['fmt'] ?? 'pdf') === 'xls' ? 'xls' : 'pdf';
+
 if (!preg_match('/^[A-Fa-f0-9]{64}$/', $token)) {
   http_response_code(400); exit('Bad token');
 }
 
-// Resolve path by token-based filename
 $base = realpath(rireki_path('resumes/rirekisho'));
-$target = $base . DIRECTORY_SEPARATOR . $token . '.pdf';
-$real = realpath($target);
+$ext  = $fmt === 'xls' ? '.xls' : '.pdf';
+
+$target = $base . DIRECTORY_SEPARATOR . $token . $ext;
+$real   = realpath($target);
 
 if (!$real || strpos($real, $base) !== 0 || !is_readable($real)) {
   http_response_code(404); exit('File not found');
 }
 
-$fname = 'rirekisho_' . $token . '.pdf';
-header('Content-Type: application/pdf');
+if ($fmt === 'xls') {
+  header('Content-Type: application/vnd.ms-excel');
+  $fname = 'rirekisho_' . $token . '.xls';
+} else {
+  header('Content-Type: application/pdf');
+  $fname = 'rirekisho_' . $token . '.pdf';
+}
+
 header('Content-Disposition: attachment; filename="'.$fname.'"');
 header('Content-Length: ' . filesize($real));
 readfile($real);
