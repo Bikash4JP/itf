@@ -4,22 +4,31 @@ require_once __DIR__ . '/../bootstrap.php';
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use PhpOffice\PhpSpreadsheet\Writer\Pdf\Dompdf as PdfDompdf;
-use PhpOffice\PhpSpreadsheet\Settings;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
+/**
+ * Renders both: PDF (mPDF, B5 x 2 pages) and XLS (old .xls format; no ZipArchive needed).
+ * - PDF is made by exporting two HTML views (left & right) and stitching in mPDF with JP fonts.
+ * - XLS is a single-file Excel (BIFF) to let you verify the exact sheet visually.
+ *
+ * Returns: ['ok'=>bool, 'pdf'=>?string, 'xls'=>?string, 'err'=>?string]
+ */
 function rireki_render_pdf(array $data, string $mappingFile, string $outDir, string $token): array {
   try {
     if (!is_readable($mappingFile)) {
-      return ['ok'=>false, 'pdf'=>null, 'xlsx'=>null, 'err'=>"Mapping not readable: $mappingFile"];
+      return ['ok'=>false, 'pdf'=>null, 'xls'=>null, 'err'=>"Mapping not readable: $mappingFile"];
     }
     $map = json_decode(file_get_contents($mappingFile), true, 512, JSON_THROW_ON_ERROR);
 
+    // Resolve template (relative to mappings/)
     $tplRel  = $map['template_file'] ?? '';
     $tplPath = realpath(dirname($mappingFile) . '/' . $tplRel);
     if (!$tplPath || !is_readable($tplPath)) {
-      return ['ok'=>false, 'pdf'=>null, 'xlsx'=>null, 'err'=>"Template not readable: $tplRel"];
+      return ['ok'=>false, 'pdf'=>null, 'xls'=>null, 'err'=>"Template not readable: $tplRel"];
     }
 
+    // Load workbook + target sheet
     $spreadsheet = IOFactory::load($tplPath);
     $sheet = $spreadsheet->getActiveSheet();
     if (!empty($map['sheet_name']) && $spreadsheet->sheetNameExists($map['sheet_name'])) {
@@ -27,14 +36,17 @@ function rireki_render_pdf(array $data, string $mappingFile, string $outDir, str
       $spreadsheet->setActiveSheetIndexByName($map['sheet_name']);
     }
 
+    // ===== Fill cells =====
+    // Singles
     if (!empty($map['singles'])) {
       foreach ($map['singles'] as $key => $cell) {
         $val = getValueByKeyPath($data, $key);
         if ($val === null) continue;
-        $sheet->setCellValue($cell, (string)$val); // <-- FIX: use setCellValue
+        $sheet->setCellValue($cell, (string)$val);
       }
     }
 
+    // Blocks (multiline + wrap)
     if (!empty($map['blocks'])) {
       foreach ($map['blocks'] as $key => $conf) {
         $cell = $conf['cell'] ?? null;
@@ -42,7 +54,7 @@ function rireki_render_pdf(array $data, string $mappingFile, string $outDir, str
         $val = getValueByKeyPath($data, $key);
         if ($val === null) continue;
         $val = str_replace(["\r\n","\r"], "\n", (string)$val);
-        $sheet->setCellValue($cell, $val);         // <-- FIX: setCellValue
+        $sheet->setCellValue($cell, $val);
         if (!empty($conf['wrap'])) {
           $sheet->getStyle($cell)->getAlignment()->setWrapText(true);
           $sheet->getStyle($cell)->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
@@ -50,9 +62,11 @@ function rireki_render_pdf(array $data, string $mappingFile, string $outDir, str
       }
     }
 
+    // Joins inside repeaters
     $joins = $map['joins'] ?? [];
     $data  = applyJoinRules($data, $joins);
 
+    // Repeaters
     if (!empty($map['repeaters'])) {
       foreach ($map['repeaters'] as $repKey => $repConf) {
         $rows = $data[$repKey] ?? [];
@@ -70,50 +84,186 @@ function rireki_render_pdf(array $data, string $mappingFile, string $outDir, str
           foreach ($cols as $field => $colLetter) {
             $coord = $colLetter . $r;
             $val   = $row[$field] ?? '';
-            $sheet->setCellValue($coord, (string)$val); // <-- FIX
+            $sheet->setCellValue($coord, (string)$val);
           }
         }
       }
     }
 
+    // Photo
     if (!empty($map['photo']) && !empty($data['photo_path'])) {
       $ph = $data['photo_path'];
       if (is_readable($ph)) {
         $anchor = $map['photo']['anchor_cell'] ?? 'A1';
-        $h = (int)($map['photo']['height_px'] ?? 400);
+        $h = (int)($map['photo']['height_px'] ?? 420);
 
         $img = new Drawing();
         $img->setName('Photo');
         $img->setDescription('Applicant Photo');
         $img->setPath($ph);
-        $img->setHeight($h);
+        $img->setHeight($h); // keep aspect
         $img->setCoordinates($anchor);
         $img->setWorksheet($sheet);
       }
     }
 
+    // ===== OUTPUT DIR =====
     if (!is_dir($outDir)) { @mkdir($outDir, 0750, true); }
+    $pdfPath = rtrim($outDir,'/') . '/' . $token . '.pdf';
+    $xlsPath = rtrim($outDir,'/') . '/' . $token . '.xls';
 
-    $xlsxPath = rtrim($outDir,'/') . '/' . $token . '.xlsx';
-    $pdfPath  = rtrim($outDir,'/') . '/' . $token . '.pdf';
+    // ===== 1) Save as XLS (no ZipArchive needed) =====
+    try {
+      $xlsWriter = IOFactory::createWriter($spreadsheet, 'Xls'); // BIFF8
+      $xlsWriter->save($xlsPath);
+    } catch (\Throwable $e) {
+      // non-fatal; still continue to make PDF
+      $xlsPath = null;
+    }
 
-/* XLSX save skipped to avoid ZipArchive/ZipStream requirement */
+    // ===== 2) PDF via mPDF with JP fonts & B5 2-page layout =====
+    // Make two cropped books (left & right) so HTML shows only required area.
 
-    $tmp = rireki_path('tmp');
-    if (!is_dir($tmp)) { @mkdir($tmp, 0750, true); }
-    Settings::setTempDir($tmp); // <-- FIX: correct temp dir API
+    [$rightMost, $lastRow] = [ $sheet->getHighestColumn(), max(88, $sheet->getHighestRow()) ];
 
-    IOFactory::registerWriter('Pdf', PdfDompdf::class);
-    IOFactory::createWriter($spreadsheet, 'Pdf')->save($pdfPath);
+    // LEFT BOOK: keep A..O only
+    $leftBook  = clone $spreadsheet;
+    $leftSheet = $leftBook->getActiveSheet();
+    cropSheetToColumnRange($leftSheet, 'A', 'O', 88);
 
-    return ['ok'=>true, 'pdf'=>$pdfPath, 'xlsx'=>$xlsxPath, 'err'=>null];
+    // RIGHT BOOK: keep P..rightMost
+    $rightBook  = clone $spreadsheet;
+    $rightSheet = $rightBook->getActiveSheet();
+    cropSheetToColumnRange($rightSheet, 'P', $rightMost, 88);
 
-  } catch (Throwable $e) {
-    return ['ok'=>false, 'pdf'=>null, 'xlsx'=>null, 'err'=>$e->getMessage()];
+    // HTML writers
+    $leftHtml  = sheetToHtml($leftBook);
+    $rightHtml = sheetToHtml($rightBook);
+
+    // mPDF font config — NO STATIC CALLS
+    $tmpDir = rireki_path('tmp'); if (!is_dir($tmpDir)) @mkdir($tmpDir, 0750, true);
+    $fontsDir = rireki_path('fonts');
+
+    $defaultConfig      = (new \Mpdf\Config\ConfigVariables())->getDefaults();
+    $fontDirs           = $defaultConfig['fontDir'];
+    $defaultFontConfig  = (new \Mpdf\Config\FontVariables())->getDefaults();
+    $fontData           = $defaultFontConfig['fontdata'];
+
+    $defaultFont = 'dejavusans'; // fallback
+    if (is_readable($fontsDir . '/ipaexg.ttf')) {
+      $fontDirs[] = $fontsDir;
+      $fontData['ipaexg'] = [ 'R' => 'ipaexg.ttf', 'B' => 'ipaexg.ttf' ];
+      $defaultFont = 'ipaexg';
+    } elseif (is_readable($fontsDir . '/NotoSansCJKjp-Regular.otf')) {
+      $fontDirs[] = $fontsDir;
+      $fontData['notosanscjkjp'] = [ 'R' => 'NotoSansCJKjp-Regular.otf', 'B' => 'NotoSansCJKjp-Regular.otf' ];
+      $defaultFont = 'notosanscjkjp';
+    }
+
+    $mpdf = new \Mpdf\Mpdf([
+      'mode'             => 'utf-8',
+      'format'           => 'B5',
+      'tempDir'          => $tmpDir,
+      'fontDir'          => $fontDirs,
+      'fontdata'         => $fontData,
+      'default_font'     => $defaultFont,
+      'default_font_size'=> 10,
+      'margin_top'       => 6,
+      'margin_bottom'    => 6,
+      'margin_left'      => 6,
+      'margin_right'     => 6,
+    ]);
+
+    // Minimal CSS
+    $pageCss = '<style>
+      @page { size: B5 portrait; margin: 6mm; }
+      body { font-family: ' . htmlspecialchars($defaultFont, ENT_QUOTES, 'UTF-8') . ', sans-serif; font-size: 10pt; }
+      table { border-collapse: collapse; }
+      td, th { vertical-align: top; }
+    </style>';
+
+    // ===== Stitch pages WITHOUT AddPage (avoid blank first pages)
+    $mpdf->WriteHTML(
+      $pageCss
+      . sanitizeForMpdf($leftHtml)
+      . '<pagebreak />'
+      . sanitizeForMpdf($rightHtml)
+    );
+
+    $mpdf->Output($pdfPath, \Mpdf\Output\Destination::FILE);
+
+    return ['ok'=>true, 'pdf'=>$pdfPath, 'xls'=>$xlsPath, 'err'=>null];
+
+  } catch (\Throwable $e) {
+    return ['ok'=>false, 'pdf'=>null, 'xls'=>null, 'err'=>$e->getMessage()];
   }
 }
 
-/** Helpers **/
+/** ====== Helpers ====== */
+
+/** Convert a whole Spreadsheet (first sheet active) to HTML string */
+function sheetToHtml(\PhpOffice\PhpSpreadsheet\Spreadsheet $book): string {
+  $writer = new \PhpOffice\PhpSpreadsheet\Writer\Html($book);
+  $writer->setSheetIndex($book->getActiveSheetIndex());
+  $writer->setPreCalculateFormulas(false);
+  $writer->setUseInlineCss(true);
+
+  ob_start();
+  $writer->save('php://output');
+  return ob_get_clean();
+}
+
+/**
+ * Keep only [fromCol..toCol] columns and top N rows; delete the rest.
+ * Example: cropSheetToColumnRange($sheet, 'A','O', 88) keeps A..O & rows 1..88.
+ */
+function cropSheetToColumnRange(Worksheet $sheet, string $fromCol, string $toCol, int $rowsKeep): void {
+  $fromIdx = Coordinate::columnIndexFromString(strtoupper($fromCol));
+  $toIdx   = Coordinate::columnIndexFromString(strtoupper($toCol));
+  $highest = Coordinate::columnIndexFromString($sheet->getHighestColumn());
+
+  // delete columns RIGHT of range
+  if ($toIdx < $highest) {
+    $colStart = Coordinate::stringFromColumnIndex($toIdx + 1);
+    $sheet->removeColumn($colStart, $highest - $toIdx);
+  }
+
+  // delete columns LEFT of range
+  if ($fromIdx > 1) {
+    $sheet->removeColumn('A', $fromIdx - 1);
+  }
+
+  // delete rows below rowsKeep
+  $highestRow = $sheet->getHighestRow();
+  if ($rowsKeep < $highestRow) {
+    $sheet->removeRow($rowsKeep + 1, $highestRow - $rowsKeep);
+  }
+
+  // set print area to the new bounds
+  $newHighestCol = $sheet->getHighestColumn();
+  $sheet->getPageSetup()->setPrintArea('A1:' . $newHighestCol . $rowsKeep);
+}
+
+/**
+ * Strip Spreadsheet HTML writer's forced page rules so mPDF doesn't inject blank pages.
+ */
+function sanitizeForMpdf(string $html): string {
+  // Remove UTF-8 BOM if present
+  $html = preg_replace('/^\xEF\xBB\xBF/', '', $html);
+
+  // Drop @page rules and any explicit page size
+  $html = preg_replace('/@page\s*\{[^}]*\}/i', '', $html);
+  $html = preg_replace('/\bsize\s*:\s*[^;]+;?/i', '', $html);
+
+  // Remove forced page-break styles
+  $html = preg_replace('/page-break-(before|after)\s*:\s*always;?/i', '', $html);
+  $html = preg_replace('#<br[^>]*style="[^"]*page-break-[^"]*"[^>]*/?>#i', '<br />', $html);
+  $html = preg_replace('#style="[^"]*page-break-[^"]*"#i', '', $html);
+
+  // Trim extra whitespace
+  return trim($html);
+}
+
 function getValueByKeyPath(array $data, string $keyPath) {
   $parts = explode('.', $keyPath);
   $cur = $data;
@@ -139,104 +289,4 @@ function applyJoinRules(array $data, array $joins): array {
     }
   }
   return $data;
-}
-
-function buildCanonicalData(array $post, ?array $files): array {
-  $personal = [
-    'name_kana' => trim($post['personal_name_kana'] ?? ''),
-    'name_kanji'=> trim($post['personal_name_kanji'] ?? ''),
-    'dob_yyyy'  => trim($post['dob_yyyy'] ?? ''),
-    'dob_mm'    => trim($post['dob_mm'] ?? ''),
-    'dob_dd'    => trim($post['dob_dd'] ?? ''),
-    'age'       => trim($post['age'] ?? ''),
-    'gender'    => trim($post['gender'] ?? ''),
-  ];
-  $address = [
-    'kana'     => trim($post['address_kana'] ?? ''),
-    'postcode' => trim($post['postcode'] ?? ''),
-    'full'     => trim($post['address_full'] ?? ''),
-  ];
-  $contact = [
-    'phone' => trim($post['phone'] ?? ''),
-    'email' => trim($post['email'] ?? ''),
-  ];
-
-  $education = [];
-  $years  = $post['edu_year']  ?? [];
-  $months = $post['edu_month'] ?? [];
-  $schools= $post['edu_school']?? [];
-  $n = max(count($years), count($months), count($schools));
-  for ($i=0; $i<$n; $i++) {
-    $education[] = [
-      'year'   => trim($years[$i]   ?? ''),
-      'month'  => trim($months[$i]  ?? ''),
-      'school' => trim($schools[$i] ?? ''),
-    ];
-  }
-
-  $experience = [];
-  $ey = $post['exp_year']   ?? [];
-  $em = $post['exp_month']  ?? [];
-  $ec = $post['exp_company']?? [];
-  $et = $post['exp_title']  ?? [];
-  $n  = max(count($ey), count($em), count($ec), count($et));
-  for ($i=0; $i<$n; $i++) {
-    $experience[] = [
-      'year'    => trim($ey[$i] ?? ''),
-      'month'   => trim($em[$i] ?? ''),
-      'company' => trim($ec[$i] ?? ''),
-      'title'   => trim($et[$i] ?? ''),
-    ];
-  }
-
-  $licenses = [];
-  $ly = $post['lic_year']  ?? [];
-  $lm = $post['lic_month'] ?? [];
-  $ln = $post['lic_name']  ?? [];
-  $n  = max(count($ly), count($lm), count($ln));
-  for ($i=0; $i<$n; $i++) {
-    $licenses[] = [
-      'year'        => trim($ly[$i] ?? ''),
-      'month'       => trim($lm[$i] ?? ''),
-      'certificate' => trim($ln[$i] ?? ''),
-    ];
-  }
-
-  $pr = ['self_pr' => trim($post['self_pr'] ?? '')];
-  $preferences = ['hopes' => trim($post['hopes'] ?? '')];
-
-  $photoPath = $post['photo_path'] ?? '';
-  if ($files && isset($files['photo']) && $files['photo']['error'] === UPLOAD_ERR_OK) {
-    $photoPath = moveUploadedPhoto($files['photo']);
-  }
-
-  return [
-    'personal'   => $personal,
-    'address'    => $address,
-    'contact'    => $contact,
-    'education'  => array_values(array_filter($education,  fn($r)=>implode('', $r) !== '')),
-    'experience' => array_values(array_filter($experience, fn($r)=>implode('', $r) !== '')),
-    'licenses'   => array_values(array_filter($licenses,   fn($r)=>implode('', $r) !== '')),
-    'pr'         => $pr,
-    'preferences'=> $preferences,
-    'photo_path' => $photoPath,
-  ];
-}
-
-function moveUploadedPhoto(array $file): string {
-  $dir = rireki_path('uploads/photos');
-  if (!is_dir($dir)) @mkdir($dir, 0750, true);
-  $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-  if (!in_array($ext, ['jpg','jpeg','png'], true)) $ext = 'jpg';
-  $name = bin2hex(random_bytes(8)) . '.' . $ext;
-  $dest = rtrim($dir,'/') . '/' . $name;
-  if ($file['size'] > 5 * 1024 * 1024) throw new RuntimeException('Photo too large');
-  $mime = (new finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']);
-  if (!in_array($mime, ['image/jpeg','image/png'], true)) {
-    throw new RuntimeException('Photo type not allowed');
-  }
-  if (!move_uploaded_file($file['tmp_name'], $dest)) {
-    throw new RuntimeException('Failed to move photo');
-  }
-  return $dest;
 }

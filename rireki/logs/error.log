@@ -17,3 +17,11 @@
 [2025-09-02T16:36:59+09:00] 182.236.20.99 render_fail: Class "MyCLabs\Enum\Enum" not found
 [2025-09-02T16:38:46+09:00] 182.236.20.99 render_fail: ZipStream\ZipStream::__construct(): Argument #1 ($operationMode) must be of type ZipStream\OperationMode, null given, called in /home/it-future/www/itf/vendor/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Writer/ZipStream2.php on line 25
 [2025-09-02T16:41:02+09:00] 182.236.20.99 render_fail: ZipStream\ZipStream::__construct(): Argument #1 ($operationMode) must be of type ZipStream\OperationMode, null given, called in /home/it-future/www/itf/vendor/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Writer/ZipStream2.php on line 25
+[2025-09-02T16:46:48+09:00] 182.236.20.99 render_fail: Call to undefined method PhpOffice\PhpSpreadsheet\Settings::setTempDir()
+[2025-09-02T17:03:54+09:00] 182.236.20.99 render_fail: Template not readable: ../templates/Template_A.xlsx
+[2025-09-02T17:04:55+09:00] 182.236.20.99 render_fail: Template not readable: ../templates/Template_A.xlsx
+[2025-09-02T17:04:56+09:00] 182.236.20.99 render_fail: Template not readable: ../templates/Template_A.xlsx
+[2025-09-02T17:04:56+09:00] 182.236.20.99 render_fail: Template not readable: ../templates/Template_A.xlsx
+[2025-09-02T17:04:56+09:00] 182.236.20.99 render_fail: Template not readable: ../templates/Template_A.xlsx
+[2025-09-02T17:04:57+09:00] 182.236.20.99 render_fail: Template not readable: ../templates/Template_A.xlsx
+[2025-09-02T17:42:14+09:00] 182.236.20.99 render_fail: Non-static method Mpdf\Config\ConfigVariables::getDefaults() cannot be called statically

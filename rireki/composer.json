@@ -2,6 +2,7 @@
     "require": {
         "phpoffice/phpspreadsheet": "^5.0",
         "dompdf/dompdf": "^2.0",
-        "myclabs/php-enum": "^1.8"
+        "myclabs/php-enum": "^1.8",
+        "mpdf/mpdf": "^8.2"
     }
 }
