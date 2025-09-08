@@ -1,3 +1,60 @@
 {
-  "template_file": "../templates/Template_A.xlsx"
+  "template_file": "../templates/Template_A.xlsx",
+  "photo": {
+    "anchor_cell": "M3",
+    "height_px": 420
+  },
+  "singles": {
+    "personal.name_kana": "C6",
+    "personal.name_kanji": "C9",
+    "personal.dob_yyyy": "C14",
+    "personal.dob_mm": "E14",
+    "personal.dob_dd": "G14",
+    "personal.age": "I14",
+    "personal.gender": "K15",
+    "address.kana": "C16",
+    "address.postcode": "D19",
+    "address.full": "C21",
+    "contact.phone": "M16",
+    "contact.email": "M21"
+  },
+  "blocks": {
+    "pr.self_pr": { "cell": "Q47", "wrap": true },
+    "preferences.hopes": { "cell": "Q71", "wrap": true }
+  },
+  "joins": {
+    "experience.company_title": "{company} {title}"
+  },
+  "repeaters": {
+    "education": {
+      "start_row": 38,
+      "row_step": 3,
+      "max_rows": 12,
+      "columns": {
+        "year": "B",
+        "month": "C",
+        "school": "D"
+      }
+    },
+    "experience": {
+      "start_row": 5,
+      "row_step": 3,
+      "max_rows": 12,
+      "columns": {
+        "year": "Q",
+        "month": "R",
+        "company_title": "S"
+      }
+    },
+    "licenses": {
+      "start_row": 25,
+      "row_step": 3,
+      "max_rows": 12,
+      "columns": {
+        "year": "Q",
+        "month": "R",
+        "certificate": "S"
+      }
+    }
+  }
 }
