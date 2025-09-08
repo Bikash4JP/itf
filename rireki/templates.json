@@ -1,0 +1,23 @@
+[
+  {
+    "id": "basic",
+    "label": "一般用 履歴書",
+    "preview": "/rireki/assets/templates/basic.png",
+    "mapping": "/home/it-future/www/itf/rireki/mappings/templateA.json",
+    "packs": ["core"]
+  },
+  {
+    "id": "kaigo",
+    "label": "介護向け 履歴書",
+    "preview": "/rireki/assets/templates/kaigo.png",
+    "mapping": "/home/it-future/www/itf/rireki/mappings/kaigo.json",
+    "packs": ["core", "kaigo"]
+  },
+  {
+    "id": "shinsotsu",
+    "label": "新卒向け 履歴書",
+    "preview": "/rireki/assets/templates/shinsotsu.png",
+    "mapping": "/home/it-future/www/itf/rireki/mappings/shinsotsu.json",
+    "packs": ["core", "shinsotsu"]
+  }
+]

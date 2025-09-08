@@ -1,75 +1,48 @@
 {
-  "template_code": "A",
   "template_file": "../templates/Template_A.xlsx",
-
-  "photo": {
-    "anchor_cell": "M3",
-    "width_px": 354,
-    "height_px": 472,
-    "fit": "cover"
-  },
-
+  "photo": { "anchor_cell": "M3" },
   "singles": {
+    "meta.today_jp": "J3",
     "personal.name_kana": "C6",
     "personal.name_kanji": "C9",
-
     "personal.dob_yyyy": "C14",
-    "personal.dob_mm":   "E14",
-    "personal.dob_dd":   "G14",
-    "personal.age":      "I14",
-
-    "personal.gender":   "K15",
-
-    "address.kana":      "C16",
-    "address.postcode":  "D19",
-    "address.full":      "C21",
-
-    "contact.phone":     "M16",
-    "contact.email":     "M21",
-
-    "pr.self_pr":        "Q47",
-    "preferences.hopes": "Q71"
+    "personal.dob_mm": "E14",
+    "personal.dob_dd": "G14",
+    "personal.age": "I14",
+    "personal.gender": "K15",
+    "address.kana": "C16",
+    "address.postcode": "D19",
+    "address.full": "C21",
+    "contact.email": "M21"
   },
-
+  "appends": {
+    "contact.phone": { "cell": "M16", "format": "電話 : {val}" }
+  },
+  "blocks": {
+    "pr.self_pr": { "cell": "Q47", "wrap": true },
+    "preferences.hopes": { "cell": "Q71", "wrap": true }
+  },
+  "joins": {
+    "experience.company_title": "{company} {title}"
+  },
   "repeaters": {
     "education": {
       "start_row": 38,
       "row_step": 3,
       "max_rows": 12,
-      "columns": {
-        "year":   "B",
-        "month":  "C",
-        "school": "D"
-      }
+      "columns": { "year": "B", "month": "C", "school": "D" }
     },
     "experience": {
       "start_row": 5,
       "row_step": 3,
       "max_rows": 12,
-      "columns": {
-        "year":               "Q",
-        "month":              "R",
-        "company_with_title": "S"
-      }
+      "columns": { "year": "Q", "month": "R", "company_title": "S" }
     },
     "licenses": {
       "start_row": 25,
       "row_step": 3,
       "max_rows": 12,
-      "columns": {
-        "year":        "Q",
-        "month":       "R",
-        "certificate": "S"
-      }
+      "columns": { "year": "Q", "month": "R", "certificate": "S" }
     }
-  },
-
-  "blocks": {
-    "pr.self_pr":        { "cell": "Q47", "wrap": true, "max_lines": 6 },
-    "preferences.hopes": { "cell": "Q71", "wrap": true, "max_lines": 6 }
-  },
-
-  "joins": {
-    "experience.company_with_title": "{company}（{title}）"
   }
 }

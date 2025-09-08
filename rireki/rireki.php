@@ -1,7 +1,4 @@
 <?php
-// Rirekisho — Multi-step Form
-// Posts to php/submit_rireki.php with the exact keys used by buildCanonicalData().
-
 ?><!doctype html>
 <html lang="ja">
 <head>
@@ -32,29 +29,24 @@
           <label class="field">
             <span class="label">氏名（ふりがな）</span>
             <input type="text" name="personal_name_kana" id="personal_name_kana" placeholder="やまだ たろう" required>
-            <small class="hint">テンプレの C6 に対応</small>
           </label>
 
           <label class="field">
             <span class="label">氏名（漢字）</span>
             <input type="text" name="personal_name_kanji" id="personal_name_kanji" placeholder="山田 太郎" required>
-            <small class="hint">テンプレの C9 に対応</small>
           </label>
         </div>
 
-        <div class="grid four">
+        <div class="grid two">
           <label class="field">
-            <span class="label">生年 (YYYY)</span>
-            <input type="number" inputmode="numeric" name="dob_yyyy" id="dob_yyyy" placeholder="1998" required>
+            <span class="label">生年月日（YYYY/MM/DD）</span>
+            <input type="text" name="dob" id="dob" inputmode="numeric" placeholder="1998/04/01" maxlength="10" class="date-ymd" required>
+            <!-- hidden fields for backend -->
+            <input type="hidden" name="dob_yyyy" id="dob_yyyy">
+            <input type="hidden" name="dob_mm" id="dob_mm">
+            <input type="hidden" name="dob_dd" id="dob_dd">
           </label>
-          <label class="field">
-            <span class="label">月 (MM)</span>
-            <input type="number" inputmode="numeric" name="dob_mm" id="dob_mm" placeholder="04" required>
-          </label>
-          <label class="field">
-            <span class="label">日 (DD)</span>
-            <input type="number" inputmode="numeric" name="dob_dd" id="dob_dd" placeholder="01" required>
-          </label>
+
           <label class="field">
             <span class="label">年齢</span>
             <input type="number" inputmode="numeric" name="age" id="age" placeholder="自動計算" readonly>
@@ -118,12 +110,15 @@
         <h2>学歴</h2>
         <table class="grid-table" id="eduTable" data-min="1">
           <thead>
-            <tr><th style="width:8rem;">年 (YYYY)</th><th style="width:6rem;">月 (MM)</th><th>学校名 / 学部等</th><th style="width:6rem;"></th></tr>
+            <tr><th style="width:12rem;">年月 (YYYY/MM)</th><th>学校名 / 学部等</th><th style="width:6rem;"></th></tr>
           </thead>
           <tbody id="eduBody">
             <tr>
-              <td><input type="number" inputmode="numeric" name="edu_year[]" placeholder="2018"></td>
-              <td><input type="number" inputmode="numeric" name="edu_month[]" placeholder="04"></td>
+              <td>
+                <input type="text" class="date-ym" name="edu_date[]" placeholder="2018/04" inputmode="numeric" maxlength="7">
+                <input type="hidden" name="edu_year[]">
+                <input type="hidden" name="edu_month[]">
+              </td>
               <td><input type="text" name="edu_school[]" placeholder="〇〇高校 入学"></td>
               <td><button type="button" class="btn danger row-del" aria-label="行を削除">－</button></td>
             </tr>
@@ -143,12 +138,15 @@
         <h2>職歴</h2>
         <table class="grid-table" id="expTable" data-min="0">
           <thead>
-            <tr><th style="width:8rem;">年 (YYYY)</th><th style="width:6rem;">月 (MM)</th><th>会社名</th><th>役職 / 職種</th><th style="width:6rem;"></th></tr>
+            <tr><th style="width:12rem;">年月 (YYYY/MM)</th><th>会社名</th><th>役職 / 職種</th><th style="width:6rem;"></th></tr>
           </thead>
           <tbody id="expBody">
             <tr>
-              <td><input type="number" inputmode="numeric" name="exp_year[]" placeholder="2021"></td>
-              <td><input type="number" inputmode="numeric" name="exp_month[]" placeholder="04"></td>
+              <td>
+                <input type="text" class="date-ym" name="exp_date[]" placeholder="2021/04" inputmode="numeric" maxlength="7">
+                <input type="hidden" name="exp_year[]">
+                <input type="hidden" name="exp_month[]">
+              </td>
               <td><input type="text" name="exp_company[]" placeholder="ABC株式会社"></td>
               <td><input type="text" name="exp_title[]" placeholder="エンジニア"></td>
               <td><button type="button" class="btn danger row-del" aria-label="行を削除">－</button></td>
@@ -169,12 +167,15 @@
         <h2>資格・免許</h2>
         <table class="grid-table" id="licTable" data-min="0">
           <thead>
-            <tr><th style="width:8rem;">年 (YYYY)</th><th style="width:6rem;">月 (MM)</th><th>資格 / 免許名</th><th style="width:6rem;"></th></tr>
+            <tr><th style="width:12rem;">年月 (YYYY/MM)</th><th>資格 / 免許名</th><th style="width:6rem;"></th></tr>
           </thead>
           <tbody id="licBody">
             <tr>
-              <td><input type="number" inputmode="numeric" name="lic_year[]" placeholder="2020"></td>
-              <td><input type="number" inputmode="numeric" name="lic_month[]" placeholder="12"></td>
+              <td>
+                <input type="text" class="date-ym" name="lic_date[]" placeholder="2020/12" inputmode="numeric" maxlength="7">
+                <input type="hidden" name="lic_year[]">
+                <input type="hidden" name="lic_month[]">
+              </td>
               <td><input type="text" name="lic_name[]" placeholder="基本情報技術者"></td>
               <td><button type="button" class="btn danger row-del" aria-label="行を削除">－</button></td>
             </tr>
