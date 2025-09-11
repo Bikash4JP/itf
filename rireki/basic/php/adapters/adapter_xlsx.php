@@ -10,8 +10,9 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 
 /**
- * Render: XLS (BIFF8) + precise HTML previews (2 pages)
- * Page1: A1:O86, Page2: P1:X86
+ * Build XLS (BIFF8) and HTML previews (Page1: A1–O86, Page2: P1–X86).
+ * Returns:
+ *  ['ok'=>bool, 'pdf'=>null, 'xls'=>?string, 'html_left'=>string, 'html_right'=>string, 'err'=>?string]
  */
 function rireki_render_pdf(array $data, string $mappingFile, string $outDir, string $token): array {
   try {
@@ -20,21 +21,21 @@ function rireki_render_pdf(array $data, string $mappingFile, string $outDir, str
     }
     $map = json_decode(file_get_contents($mappingFile), true, 512, JSON_THROW_ON_ERROR);
 
-    // ---- inject today's JP date for header ----
+    // Ensure today string for J3
     if (!isset($data['meta'])) $data['meta'] = [];
     if (empty($data['meta']['today_jp'])) {
       $dt = new DateTime('now', new DateTimeZone('Asia/Tokyo'));
       $data['meta']['today_jp'] = sprintf('%s年　%s月　%s日現在', $dt->format('Y'), $dt->format('m'), $dt->format('d'));
     }
 
-    // Resolve template
+    // Resolve template path (relative to mappings/)
     $tplRel  = $map['template_file'] ?? '';
     $tplPath = realpath(dirname($mappingFile) . '/' . $tplRel);
     if (!$tplPath || !is_readable($tplPath)) {
       return ['ok'=>false, 'pdf'=>null, 'xls'=>null, 'html_left'=>'', 'html_right'=>'', 'err'=>"Template not readable: $tplRel"];
     }
 
-    // Load workbook / sheet
+    // Load template
     $spreadsheet = IOFactory::load($tplPath);
     $sheet = $spreadsheet->getActiveSheet();
     if (!empty($map['sheet_name']) && $spreadsheet->sheetNameExists($map['sheet_name'])) {
@@ -42,7 +43,7 @@ function rireki_render_pdf(array $data, string $mappingFile, string $outDir, str
       $spreadsheet->setActiveSheetIndexByName($map['sheet_name']);
     }
 
-    // ===== Singles =====
+    // ---- Singles
     if (!empty($map['singles'])) {
       foreach ($map['singles'] as $key => $cell) {
         $val = getValueByKeyPath($data, $key);
@@ -50,38 +51,31 @@ function rireki_render_pdf(array $data, string $mappingFile, string $outDir, str
         $sheet->setCellValue($cell, (string)$val);
       }
     }
-
-    // ---- HARD GUARANTEE: write J3 with current date (even if mapping missed it)
+    // Ensure J3 even if mapping forgot it
     try { $sheet->setCellValue('J3', (string)($data['meta']['today_jp'] ?? '')); } catch (\Throwable $e) {}
 
-    // ===== Appends (label + value) =====
+    // ---- Appends (e.g., M16 "電話 : {val}")
     if (!empty($map['appends'])) {
       foreach ($map['appends'] as $key => $conf) {
         $cell = $conf['cell'] ?? null;
         if (!$cell) continue;
         $val = getValueByKeyPath($data, $key);
         if ($val === null || $val === '') continue;
-
         $fmt  = $conf['format'] ?? '{orig}{val}';
         $orig = (string)$sheet->getCell($cell)->getValue();
-
-        // If format is static (e.g., "電話 : {val}"), don't rely on orig
         $out  = strtr($fmt, [
           '{orig}' => $orig,
           '{val}'  => (string)$val,
         ]);
-
         $sheet->setCellValue($cell, $out);
       }
     }
 
-    // ===== Blocks (multiline) =====
+    // ---- Blocks (multiline)
     if (!empty($map['blocks'])) {
       foreach ($map['blocks'] as $key => $conf) {
-        $cell = $conf['cell'] ?? null;
-        if (!$cell) continue;
-        $val = getValueByKeyPath($data, $key);
-        if ($val === null) continue;
+        $cell = $conf['cell'] ?? null; if (!$cell) continue;
+        $val = getValueByKeyPath($data, $key); if ($val === null) continue;
         $val = str_replace(["\r\n","\r"], "\n", (string)$val);
         $sheet->setCellValue($cell, $val);
         if (!empty($conf['wrap'])) {
@@ -91,34 +85,28 @@ function rireki_render_pdf(array $data, string $mappingFile, string $outDir, str
       }
     }
 
-    // ===== Joins + Repeaters =====
-    $joins = $map['joins'] ?? [];
-    $data  = applyJoinRules($data, $joins);
-
+    // ---- Repeaters (after join rules)
+    $data = applyJoinRules($data, $map['joins'] ?? []);
     if (!empty($map['repeaters'])) {
       foreach ($map['repeaters'] as $repKey => $repConf) {
-        $rows = $data[$repKey] ?? [];
-        if (!is_array($rows)) continue;
-
+        $rows = $data[$repKey] ?? []; if (!is_array($rows)) continue;
         $startRow = (int)($repConf['start_row'] ?? 0);
         $rowStep  = (int)($repConf['row_step'] ?? 1);
         $maxRows  = (int)($repConf['max_rows'] ?? count($rows));
         $cols     = $repConf['columns'] ?? [];
-
         $limit = min(count($rows), $maxRows);
         for ($i=0; $i<$limit; $i++) {
-          $row = $rows[$i];
-          $r   = $startRow + ($i * $rowStep);
+          $row = $rows[$i]; $r = $startRow + ($i * $rowStep);
           foreach ($cols as $field => $colLetter) {
             $coord = $colLetter . $r;
-            $val   = $row[$field] ?? '';
-            $sheet->setCellValue($coord, (string)$val);
+            $sheet->setCellValue($coord, (string)($row[$field] ?? ''));
           }
         }
       }
     }
 
-    // ===== Photo fit (contain inside merged box) =====
+    // ---- Photo fit (fit into merged box around anchor) + HTML overlay for preview
+    $photoOverlay = null; // for preview
     if (!empty($map['photo']) && !empty($data['photo_path'])) {
       $ph = $data['photo_path'];
       if (is_readable($ph)) {
@@ -127,46 +115,71 @@ function rireki_render_pdf(array $data, string $mappingFile, string $outDir, str
         [$boxW,$boxH]     = regionPixelSize($sheet, $c1,$c2,$r1,$r2);
         [$imgW,$imgH]     = @getimagesize($ph) ?: [600,800];
         $scale = min(max($boxW,1)/$imgW, max($boxH,1)/$imgH);
-        $newW  = (int)floor($imgW * $scale);
-        $newH  = (int)floor($imgH * $scale);
-        $offX  = max(0, (int)floor(($boxW - $newW)/2));
-        $offY  = max(0, (int)floor(($boxH - $newH)/2));
+        $newW = (int)floor($imgW * $scale);
+        $newH = (int)floor($imgH * $scale);
+        $offX = max(0, (int)floor(($boxW - $newW)/2));
+        $offY = max(0, (int)floor(($boxH - $newH)/2));
 
+        // Put into XLS (so downloaded file has image)
         $img = new Drawing();
-        $img->setName('Photo');
-        $img->setDescription('Applicant Photo');
-        $img->setPath($ph);
-        $img->setResizeProportional(true);
-        $img->setWidthAndHeight($newW, $newH);
-        $img->setCoordinates($anchor);
-        $img->setOffsetX($offX);
-        $img->setOffsetY($offY);
+        $img->setName('Photo'); $img->setDescription('Applicant Photo'); $img->setPath($ph);
+        $img->setResizeProportional(true); $img->setWidthAndHeight($newW, $newH);
+        $img->setCoordinates(Coordinate::stringFromColumnIndex($c1) . $r1); // top-left of merged
+        $img->setOffsetX($offX); $img->setOffsetY($offY);
         $img->setWorksheet($sheet);
+
+        // Build HTML overlay (preview)
+        $mime = 'image/jpeg';
+        if (is_array($imgW)) { /* ignore */ }
+        $gi = @getimagesize($ph);
+        if (is_array($gi) && !empty($gi['mime'])) $mime = $gi['mime'];
+        $bin = @file_get_contents($ph);
+        if ($bin !== false) {
+          $dataUri = 'data:' . $mime . ';base64,' . base64_encode($bin);
+          $anchorTopLeft = Coordinate::stringFromColumnIndex($c1) . $r1;
+          // +2px left padding adjustment (our TD has 0 2px padding)
+          $photoOverlay = [
+            'addr'   => $anchorTopLeft,
+            'src'    => $dataUri,
+            'width'  => $newW,
+            'height' => $newH,
+            'offX'   => $offX + 2,
+            'offY'   => $offY,
+          ];
+        }
       }
     }
 
-    // ===== Page Setup (2 pages only) =====
+    // ---- Page setup (B5, 2 pages)
     $ps = $sheet->getPageSetup();
     $ps->setPaperSize(PageSetup::PAPERSIZE_B5)
        ->setOrientation(PageSetup::ORIENTATION_PORTRAIT)
-       ->setFitToWidth(1)->setFitToHeight(1)->setHorizontalCentered(true);
+       ->setFitToWidth(1)->setFitToHeight(1)
+       ->setHorizontalCentered(true);
     $sheet->getPageMargins()->setTop(0.25)->setBottom(0.25)->setLeft(0.25)->setRight(0.25);
     $sheet->setShowGridlines(false);
     $sheet->setPrintGridlines(false);
     $ps->setPrintArea('A1:O86,P1:X86');
-    foreach ($sheet->getBreaks() as $coordinate => $type) {
-      $sheet->setBreak($coordinate, Worksheet::BREAK_NONE);
+
+    // ---- Save XLS (BIFF8)
+    if (!is_dir($outDir)) @mkdir($outDir, 0750, true);
+    $xlsPath = rtrim($outDir,'/') . '/' . $token . '.xls';
+    IOFactory::createWriter($spreadsheet, 'Xls')->save($xlsPath);
+
+    // ---- HTML previews (pass overlay to proper page)
+    $overlayLeft = null; $overlayRight = null;
+    if ($photoOverlay) {
+      [$colIdx] = Coordinate::coordinateFromString($photoOverlay['addr']);
+      $colNum = Coordinate::columnIndexFromString($colIdx);
+      if ($colNum >= Coordinate::columnIndexFromString('A') && $colNum <= Coordinate::columnIndexFromString('O')) {
+        $overlayLeft = $photoOverlay;
+      } elseif ($colNum >= Coordinate::columnIndexFromString('P') && $colNum <= Coordinate::columnIndexFromString('X')) {
+        $overlayRight = $photoOverlay;
+      }
     }
 
-    // ===== Save XLS =====
-    if (!is_dir($outDir)) { @mkdir($outDir, 0750, true); }
-    $xlsPath = rtrim($outDir,'/') . '/' . $token . '.xls';
-    $xlsWriter = IOFactory::createWriter($spreadsheet, 'Xls');
-    $xlsWriter->save($xlsPath);
-
-    // ===== HTML previews =====
-    $htmlLeft  = renderSheetRegionHtml($sheet, 'A', 'O', 1, 86);
-    $htmlRight = renderSheetRegionHtml($sheet, 'P', 'X', 1, 86);
+    $htmlLeft  = renderSheetRegionHtml($sheet, 'A', 'O', 1, 86, $overlayLeft);
+    $htmlRight = renderSheetRegionHtml($sheet, 'P', 'X', 1, 86, $overlayRight);
 
     return ['ok'=>true, 'pdf'=>null, 'xls'=>$xlsPath, 'html_left'=>$htmlLeft, 'html_right'=>$htmlRight, 'err'=>null];
 
@@ -175,12 +188,12 @@ function rireki_render_pdf(array $data, string $mappingFile, string $outDir, str
   }
 }
 
-/** ====== HTML render helpers (sizes/merges/borders preserved) ====== */
-function renderSheetRegionHtml(Worksheet $sheet, string $colStartLetter, string $colEndLetter, int $rowStart, int $rowEnd): string {
+/** ================= HTML render helpers ================= */
+function renderSheetRegionHtml(Worksheet $sheet, string $colStartLetter, string $colEndLetter, int $rowStart, int $rowEnd, ?array $overlay = null): string {
   $cStart = Coordinate::columnIndexFromString(strtoupper($colStartLetter));
   $cEnd   = Coordinate::columnIndexFromString(strtoupper($colEndLetter));
 
-  // Column widths
+  // Column widths (px)
   $colPx = [];
   $defaultColW = $sheet->getDefaultColumnDimension()->getWidth();
   if ($defaultColW === null || $defaultColW <= 0) $defaultColW = 8.43;
@@ -191,7 +204,7 @@ function renderSheetRegionHtml(Worksheet $sheet, string $colStartLetter, string 
     $colPx[$c] = excelColWidthToPx($w);
   }
 
-  // Row heights
+  // Row heights (px)
   $rowPx = [];
   $defaultRowPt = $sheet->getDefaultRowDimension()->getRowHeight();
   if ($defaultRowPt === -1 || $defaultRowPt === null) $defaultRowPt = 15;
@@ -201,65 +214,61 @@ function renderSheetRegionHtml(Worksheet $sheet, string $colStartLetter, string 
     $rowPx[$r] = pointsToPx($pt);
   }
 
-  // Merges map
+  // Merges
   [$mergeTop, $mergeCovered] = buildMergeMaps($sheet, $cStart, $cEnd, $rowStart, $rowEnd);
 
-  // Build table
   $html = [];
-  $html[] = '<div class="grid-container" style="display:inline-block;background:#fff;">';
-  $html[] = '<table class="xls-preview" style="border-collapse:collapse;table-layout:fixed;">';
-
-  // colgroup widths
+  $html[] = '<div style="display:inline-block;background:#fff;position:relative;">';
+  $html[] = '<table style="border-collapse:collapse;table-layout:fixed;">';
   $html[] = '<colgroup>';
-  for ($c = $cStart; $c <= $cEnd; $c++) {
-    $html[] = '<col style="width:' . (int)$colPx[$c] . 'px;">';
-  }
+  for ($c = $cStart; $c <= $cEnd; $c++) $html[] = '<col style="width:' . (int)$colPx[$c] . 'px;">';
   $html[] = '</colgroup>';
 
-  // rows/cells
   for ($r = $rowStart; $r <= $rowEnd; $r++) {
     $html[] = '<tr style="height:' . (int)$rowPx[$r] . 'px;">';
     for ($c = $cStart; $c <= $cEnd; $c++) {
       if (isset($mergeCovered[$r][$c])) continue;
-
       $rs = 1; $cs = 1;
       if (isset($mergeTop[$r][$c])) { [$rs, $cs] = $mergeTop[$r][$c]; }
 
-      // Borders per side (only visible ones)
+      // Borders: only if template has borders
       $stylePieces = [];
-      $bTop    = getCellBorderSideCss($sheet, $r,             $c,             'top');
-      $bLeft   = getCellBorderSideCss($sheet, $r,             $c,             'left');
-      $bRight  = getCellBorderSideCss($sheet, $r,             $c + $cs - 1,   'right');
-      $bBottom = getCellBorderSideCss($sheet, $r + $rs - 1,   $c,             'bottom');
+      $bTop    = getCellBorderSideCss($sheet, $r,           $c,           'top');
+      $bLeft   = getCellBorderSideCss($sheet, $r,           $c,           'left');
+      $bRight  = getCellBorderSideCss($sheet, $r,           $c+$cs-1,     'right');
+      $bBottom = getCellBorderSideCss($sheet, $r+$rs-1,     $c,           'bottom');
       if ($bTop)    $stylePieces[] = "border-top:{$bTop}";
       if ($bRight)  $stylePieces[] = "border-right:{$bRight}";
       if ($bBottom) $stylePieces[] = "border-bottom:{$bBottom}";
       if ($bLeft)   $stylePieces[] = "border-left:{$bLeft}";
 
       $attrs = ' style="padding:0 2px;vertical-align:top;overflow:hidden;white-space:pre-wrap;line-height:1.15;'
-             . implode(';', $stylePieces)
-             . (empty($stylePieces) ? '' : ';')
-             . '"';
+             . implode(';', $stylePieces) . (empty($stylePieces)?'':';') . '"';
 
       $extra = '';
       if ($rs > 1) $extra .= ' rowspan="'.$rs.'"';
       if ($cs > 1) $extra .= ' colspan="'.$cs.'"';
 
-      // value
-      $val = '';
       $addr = Coordinate::stringFromColumnIndex($c) . $r;
       $cell = $sheet->getCell($addr);
-      if ($cell) {
-        $v = $cell->getValue();
-        if ($v instanceof \PhpOffice\PhpSpreadsheet\RichText\RichText) $v = $v->getPlainText();
-        $val = htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
+      $v = $cell ? $cell->getValue() : '';
+      if ($v instanceof \PhpOffice\PhpSpreadsheet\RichText\RichText) $v = $v->getPlainText();
+      $val = htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
+
+      // Inject photo overlay if this is the anchor top-left cell
+      if ($overlay && $overlay['addr'] === $addr) {
+        $img = '<div style="position:relative;width:100%;height:100%;">'
+             . '<img alt="photo" src="'.htmlspecialchars($overlay['src'],ENT_QUOTES,'UTF-8').'" '
+             . 'style="position:absolute;left:'.$overlay['offX'].'px;top:'.$overlay['offY'].'px;'
+             . 'width:'.$overlay['width'].'px;height:'.$overlay['height'].'px;object-fit:cover;border:0;"/>'
+             . '</div>';
+        $val = $img . $val;
       }
 
       $html[] = '<td'.$extra.$attrs.'>'.$val.'</td>';
     }
     $html[] = '</tr>';
   }
-
   $html[] = '</table></div>';
   return implode('', $html);
 }
@@ -279,11 +288,9 @@ function buildMergeMaps(Worksheet $sheet, int $cStart, int $cEnd, int $rStart, i
     $rowspan = $ir2 - $ir1 + 1;
     $colspan = $ic2 - $ic1 + 1;
     $mergeTop[$ir1][$ic1] = [$rowspan, $colspan];
-
     for ($r = $ir1; $r <= $ir2; $r++) {
       for ($c = $ic1; $c <= $ic2; $c++) {
-        if ($r === $ir1 && $c === $ic1) continue;
-        $covered[$r][$c] = true;
+        if (!($r===$ir1 && $c===$ic1)) $covered[$r][$c] = true;
       }
     }
   }
@@ -306,7 +313,6 @@ function getCellBorderSideCss(Worksheet $sheet, int $row, int $col, string $side
   if (!$rgb || strlen($rgb) !== 6) $rgb = '000000';
   return "{$w} {$s} #" . strtolower($rgb);
 }
-
 function mapBorderType(string $type): array {
   switch ($type) {
     case Border::BORDER_THICK:   return ['3px', 'solid'];
@@ -326,7 +332,45 @@ function mapBorderType(string $type): array {
   }
 }
 
-// ========== common helpers ==========
+/** ============== Photo region helpers ============== */
+function findMergedBox(Worksheet $sheet, string $anchorCell): array {
+  $colLetters = preg_replace('/\d+$/','',$anchorCell);
+  $rowNumber  = (int)preg_replace('/^\D+/','',$anchorCell);
+  $ac = Coordinate::columnIndexFromString($colLetters);
+  $ar = $rowNumber;
+
+  foreach ($sheet->getMergeCells() as $range) {
+    [$start, $end] = Coordinate::rangeBoundaries($range);
+    [$c1, $r1] = $start; [$c2, $r2] = $end;
+    if ($ac >= $c1 && $ac <= $c2 && $ar >= $r1 && $ar <= $r2) {
+      return [$c1,$r1,$c2,$r2];
+    }
+  }
+  return [$ac,$ar,$ac,$ar];
+}
+
+function regionPixelSize(Worksheet $sheet, int $c1, int $c2, int $r1, int $r2): array {
+  $defaultColW = $sheet->getDefaultColumnDimension()->getWidth();
+  if ($defaultColW === null || $defaultColW <= 0) $defaultColW = 8.43;
+  $wPx = 0;
+  for ($c=$c1; $c<=$c2; $c++) {
+    $letter = Coordinate::stringFromColumnIndex($c);
+    $dim = $sheet->getColumnDimension($letter);
+    $w = $dim && $dim->getWidth() !== null ? (float)$dim->getWidth() : (float)$defaultColW;
+    $wPx += excelColWidthToPx($w);
+  }
+  $defaultRowPt = $sheet->getDefaultRowDimension()->getRowHeight();
+  if ($defaultRowPt === -1 || $defaultRowPt === null) $defaultRowPt = 15;
+  $hPx = 0;
+  for ($r=$r1; $r<=$r2; $r++) {
+    $dim = $sheet->getRowDimension($r);
+    $pt = $dim && $dim->getRowHeight() > 0 ? (float)$dim->getRowHeight() : (float)$defaultRowPt;
+    $hPx += pointsToPx($pt);
+  }
+  return [$wPx, $hPx];
+}
+
+/** ============== Units ============== */
 function excelColWidthToPx(float $widthChars): int {
   $pixels = (int)floor(((256 * $widthChars + (int)floor(128/7)) / 256) * 7);
   if ($pixels <= 0) $pixels = 1;
@@ -334,6 +378,7 @@ function excelColWidthToPx(float $widthChars): int {
 }
 function pointsToPx(float $pt): int { return (int)round($pt * 96 / 72); }
 
+/** ============== Data helpers ============== */
 function getValueByKeyPath(array $data, string $keyPath) {
   $parts = explode('.', $keyPath);
   $cur = $data;
@@ -343,6 +388,7 @@ function getValueByKeyPath(array $data, string $keyPath) {
   }
   return $cur;
 }
+
 function applyJoinRules(array $data, array $joins): array {
   if (empty($joins)) return $data;
   foreach ($joins as $fieldPath => $pattern) {
@@ -360,34 +406,34 @@ function applyJoinRules(array $data, array $joins): array {
   return $data;
 }
 
-/* ===== image-fit helpers ===== */
-function findMergedBox(Worksheet $sheet, string $anchor): array {
-  [$ac,$ar] = Coordinate::coordinateFromString($anchor);
-  $acIdx = Coordinate::columnIndexFromString($ac);
-  $r1=$ar; $r2=$ar; $c1=$acIdx; $c2=$acIdx;
-  foreach ($sheet->getMergeCells() as $range) {
-    [$s,$e] = Coordinate::rangeBoundaries($range); [$cS,$rS] = $s; [$cE,$rE] = $e;
-    if ($acIdx >= $cS && $acIdx <= $cE && $ar >= $rS && $ar <= $rE) { $c1=$cS; $c2=$cE; $r1=$rS; $r2=$rE; break; }
+/** ============== Upload helper ============== */
+function moveUploadedPhoto(array $file): string {
+  $dir = rireki_path('uploads/photos');
+  if (!is_dir($dir)) @mkdir($dir, 0750, true);
+  $ext = strtolower(pathinfo($file['name'] ?? '', PATHINFO_EXTENSION));
+  if (!in_array($ext, ['jpg','jpeg','png'], true)) $ext = 'jpg';
+  $name = bin2hex(random_bytes(8)) . '.' . $ext;
+  $dest = rtrim($dir,'/') . '/' . $name;
+
+  if (!empty($file['size']) && $file['size'] > 5 * 1024 * 1024) {
+    throw new RuntimeException('Photo too large');
   }
-  return [$c1,$r1,$c2,$r2];
-}
-function regionPixelSize(Worksheet $sheet, int $c1, int $c2, int $r1, int $r2): array {
-  $w=0; for ($c=$c1; $c<=$c2; $c++) {
-    $letter = Coordinate::stringFromColumnIndex($c);
-    $dim = $sheet->getColumnDimension($letter);
-    $cw = $dim && $dim->getWidth()!==null ? (float)$dim->getWidth() : (float)($sheet->getDefaultColumnDimension()->getWidth() ?? 8.43);
-    $w += excelColWidthToPx($cw);
+  if (class_exists('finfo')) {
+    $f = new finfo(FILEINFO_MIME_TYPE);
+    $mime = $f->file($file['tmp_name']);
+    if (!in_array($mime, ['image/jpeg','image/png'], true)) {
+      throw new RuntimeException('Photo type not allowed');
+    }
   }
-  $h=0; for ($r=$r1; $r<=$r2; $r++) {
-    $dim = $sheet->getRowDimension($r);
-    $pt = $dim && $dim->getRowHeight()>0 ? (float)$dim->getRowHeight() : (float)($sheet->getDefaultRowDimension()->getRowHeight() ?? 15);
-    $h += pointsToPx($pt);
+  if (!move_uploaded_file($file['tmp_name'], $dest)) {
+    throw new RuntimeException('Failed to move photo');
   }
-  return [$w,$h];
+  return $dest;
 }
 
-/** ====== helpers for submit_rireki.php ====== */
+/** ============== Canonical data builder (expanded) ============== */
 function buildCanonicalData(array $post, ?array $files): array {
+  // Personal / Address / Contact (phone as string)
   $personal = [
     'name_kana' => trim($post['personal_name_kana'] ?? ''),
     'name_kanji'=> trim($post['personal_name_kanji'] ?? ''),
@@ -407,43 +453,92 @@ function buildCanonicalData(array $post, ?array $files): array {
     'email' => trim($post['email'] ?? ''),
   ];
 
-  // Education
+  // EDUCATION (入学 + 卒業/退学 line)
+  $sy  = $post['edu_start_year']  ?? [];
+  $sm  = $post['edu_start_month'] ?? [];
+  $sn  = $post['edu_school_name'] ?? [];
+  $sf  = $post['edu_faculty']     ?? [];
+  $sl  = $post['edu_level']       ?? [];
+  $ss  = $post['edu_status']      ?? []; // 在学中 / 卒業 / 退学
+  $ey  = $post['edu_end_year']    ?? [];
+  $em  = $post['edu_end_month']   ?? [];
+
   $education = [];
-  $years  = $post['edu_year']  ?? [];
-  $months = $post['edu_month'] ?? [];
-  $schools= $post['edu_school']?? [];
-  $n = max(count($years), count($months), count($schools));
-  for ($i=0; $i<$n; $i++) {
-    $education[] = [
-      'year'   => trim($years[$i]   ?? ''),
-      'month'  => trim($months[$i]  ?? ''),
-      'school' => trim($schools[$i] ?? ''),
-    ];
+  $N = max(count($sy),count($sm),count($sn),count($sf),count($sl),count($ss),count($ey),count($em));
+  for ($i=0; $i<$N; $i++) {
+    $startY = trim($sy[$i] ?? ''); $startM = trim($sm[$i] ?? '');
+    $name   = trim($sn[$i] ?? '');
+    $fac    = trim($sf[$i] ?? '');
+    $level  = trim($sl[$i] ?? '');
+    $status = trim($ss[$i] ?? '在学中');
+    $endY   = trim($ey[$i] ?? ''); $endM   = trim($em[$i] ?? '');
+
+    if ($startY.$startM.$name.$fac.$level.$status.$endY.$endM === '') continue;
+
+    $suffix = '';
+    if ($fac !== '')   $suffix .= ' ' . $fac;
+    if ($level !== '') $suffix .= ' ' . $level;
+
+    if ($startY !== '' || $startM !== '' || $name !== '') {
+      $education[] = [
+        'year'   => $startY,
+        'month'  => $startM,
+        'school' => trim($name . $suffix . ' 入学'),
+      ];
+    }
+    $isEnd = (preg_match('/^(卒|修了|退)/u', $status) || preg_match('/^(grad|drop)/i', $status));
+    if ($isEnd && ($endY !== '' || $endM !== '')) {
+      $education[] = [
+        'year'   => $endY,
+        'month'  => $endM,
+        'school' => trim($name . $suffix . ' ' . ($status === '退学' ? '退学' : '卒業')),
+      ];
+    }
   }
 
-  // Experience
+  // EXPERIENCE (入社 + 退職 line)
+  $xsy = $post['exp_start_year']   ?? [];
+  $xsm = $post['exp_start_month']  ?? [];
+  $xco = $post['exp_company']      ?? [];
+  $xti = $post['exp_title']        ?? [];
+  $xst = $post['exp_status']       ?? []; // 在職中 / 退職
+  $xey = $post['exp_end_year']     ?? [];
+  $xem = $post['exp_end_month']    ?? [];
+
   $experience = [];
-  $ey = $post['exp_year']   ?? [];
-  $em = $post['exp_month']  ?? [];
-  $ec = $post['exp_company']?? [];
-  $et = $post['exp_title']  ?? [];
-  $n  = max(count($ey), count($em), count($ec), count($et));
-  for ($i=0; $i<$n; $i++) {
-    $experience[] = [
-      'year'    => trim($ey[$i] ?? ''),
-      'month'   => trim($em[$i] ?? ''),
-      'company' => trim($ec[$i] ?? ''),
-      'title'   => trim($et[$i] ?? ''),
-    ];
+  $E = max(count($xsy), count($xsm), count($xco), count($xti), count($xst), count($xey), count($xem));
+  for ($i=0; $i<$E; $i++) {
+    $syear = trim($xsy[$i] ?? ''); $smon = trim($xsm[$i] ?? '');
+    $comp  = trim($xco[$i] ?? ''); $title = trim($xti[$i] ?? '');
+    $stat  = trim($xst[$i] ?? '在職中');
+    $eyear = trim($xey[$i] ?? ''); $emon  = trim($xem[$i] ?? '');
+
+    if ($syear.$smon.$comp.$title.$stat.$eyear.$emon === '') continue;
+
+    $labelIn  = '入社';
+    $labelOut = '退職';
+
+    // 入社 line
+    $titleIn = trim($title . ' ' . $labelIn);
+    $txtIn   = trim($comp . ' ' . $titleIn);
+    $experience[] = ['year'=>$syear, 'month'=>$smon, 'company'=>$comp, 'title'=>$titleIn, 'text'=>$txtIn];
+
+    // 退職 line
+    $needEnd = (preg_match('/^(退)/u', $stat) || preg_match('/^(resign|quit|leave)/i', $stat));
+    if ($needEnd && ($eyear !== '' || $emon !== '')) {
+      $titleOut = trim($title . ' ' . $labelOut);
+      $txtOut   = trim($comp . ' ' . $titleOut);
+      $experience[] = ['year'=>$eyear, 'month'=>$emon, 'company'=>$comp, 'title'=>$titleOut, 'text'=>$txtOut];
+    }
   }
 
-  // Licenses
+  // LICENSES
   $licenses = [];
   $ly = $post['lic_year']  ?? [];
   $lm = $post['lic_month'] ?? [];
   $ln = $post['lic_name']  ?? [];
-  $n  = max(count($ly), count($lm), count($ln));
-  for ($i=0; $i<$n; $i++) {
+  $nL  = max(count($ly), count($lm), count($ln));
+  for ($i=0; $i<$nL; $i++) {
     $licenses[] = [
       'year'        => trim($ly[$i] ?? ''),
       'month'       => trim($lm[$i] ?? ''),
@@ -451,6 +546,7 @@ function buildCanonicalData(array $post, ?array $files): array {
     ];
   }
 
+  // PR / Preferences
   $pr = ['self_pr' => trim($post['self_pr'] ?? '')];
   $preferences = ['hopes' => trim($post['hopes'] ?? '')];
 
@@ -465,28 +561,10 @@ function buildCanonicalData(array $post, ?array $files): array {
     'address'    => $address,
     'contact'    => $contact,
     'education'  => array_values(array_filter($education,  fn($r)=>trim(($r['year']??'').($r['month']??'').($r['school']??'')) !== '')),
-    'experience' => array_values(array_filter($experience, fn($r)=>trim(($r['year']??'').($r['month']??'').($r['company']??'').($r['title']??'')) !== '')),
+    'experience' => array_values(array_filter($experience, fn($r)=>trim(($r['year']??'').($r['month']??'').(($r['text']??'') . ($r['company']??'') . ($r['title']??''))) !== '')),
     'licenses'   => array_values(array_filter($licenses,   fn($r)=>trim(($r['year']??'').($r['month']??'').($r['certificate']??'')) !== '')),
     'pr'         => $pr,
     'preferences'=> $preferences,
     'photo_path' => $photoPath,
   ];
-}
-
-function moveUploadedPhoto(array $file): string {
-  $dir = rireki_path('uploads/photos');
-  if (!is_dir($dir)) @mkdir($dir, 0750, true);
-  $ext = strtolower(pathinfo($file['name'] ?? '', PATHINFO_EXTENSION));
-  if (!in_array($ext, ['jpg','jpeg','png'], true)) $ext = 'jpg';
-  $name = bin2hex(random_bytes(8)) . '.' . $ext;
-  $dest = rtrim($dir,'/') . '/' . $name;
-
-  if (!empty($file['size']) && $file['size'] > 5 * 1024 * 1024) throw new RuntimeException('Photo too large');
-  if (class_exists('finfo')) {
-    $f = new finfo(FILEINFO_MIME_TYPE);
-    $mime = $f->file($file['tmp_name']);
-    if (!in_array($mime, ['image/jpeg','image/png'], true)) throw new RuntimeException('Photo type not allowed');
-  }
-  if (!move_uploaded_file($file['tmp_name'], $dest)) throw new RuntimeException('Failed to move photo');
-  return $dest;
 }
