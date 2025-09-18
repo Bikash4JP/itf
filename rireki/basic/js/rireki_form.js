@@ -1,321 +1,240 @@
+// Rirekisho Basic — Form Behaviors
+// - Step slider (absolute, no flicker)
+// - DOB single input (auto-slash) + hidden Y/M/D + age calc
+// - Photo preview with height auto-fit
+// - Repeaters (education / experience / licenses)
+// - Status-based end-date enable/disable
+// - Global guards to prevent double-binding
+
 (function () {
-  const $ = (sel, root = document) => root.querySelector(sel);
-  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
-
-  const form = $('#rireki-form');
-
-  // step nav
-  const panes = $$('.step-pane');
-  function showStep(n) {
-    panes.forEach(p => p.classList.toggle('is-active', p.dataset.step === String(n)));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  // ===== Global guard to avoid double-binding (in case inline <script> exists) =====
+  if (window.__RIREKI_FORM_BOUND__) {
+    console.debug('[rireki_form] already bound; skipping');
+    return;
   }
-  $$('.btn.next').forEach(btn => btn.addEventListener('click', () => {
-    const pane = btn.closest('.step-pane'); const n = Number(pane.dataset.step);
-    if (n < panes.length) showStep(n + 1);
-  }));
-  $$('.btn.prev').forEach(btn => btn.addEventListener('click', () => {
-    const pane = btn.closest('.step-pane'); const n = Number(pane.dataset.step);
-    if (n > 1) showStep(n - 1);
-  }));
+  window.__RIREKI_FORM_BOUND__ = true;
 
-  // date helpers
-  function autoSlashYMD(input) {
-    let v = input.value.replace(/\D/g, '').slice(0, 8);
-    if (v.length >= 5) v = v.slice(0,4) + '/' + v.slice(4);
-    if (v.length >= 8) v = v.slice(0,7) + '/' + v.slice(7);
-    input.value = v;
-  }
-  function autoSlashYM(input) {
-    let v = input.value.replace(/\D/g, '').slice(0, 6);
-    if (v.length >= 5) v = v.slice(0,4) + '/' + v.slice(4);
-    input.value = v;
-  }
-  function splitYMD(v) {
-    const m = v.match(/^(\d{4})\/(0[1-9]|1[0-2])\/(0[1-9]|[12]\d|3[01])$/);
-    return m ? { y: m[1], m: m[2], d: m[3] } : { y:'', m:'', d:'' };
-  }
-  function splitYM(v) {
-    const m = v.match(/^(\d{4})\/(0[1-9]|1[0-2])$/);
-    return m ? { y: m[1], m: m[2] } : { y:'', m:'' };
-  }
+  // ===== Step slider (absolute) =====
+  const stepsEl = document.querySelector('.steps');
+  const panes   = Array.from(document.querySelectorAll('.step-pane'));
+  let idx = -1;
 
-  // DOB single field
-  const dob = $('#dob');
-  if (dob) {
-    dob.addEventListener('input', () => {
-      autoSlashYMD(dob);
-      const { y, m, d } = splitYMD(dob.value);
-      $('#dob_yyyy').value = y; $('#dob_mm').value = m; $('#dob_dd').value = d;
-      updateAge();
-    });
-  }
-  function updateAge() {
-    const y = parseInt($('#dob_yyyy')?.value || '', 10);
-    const m = parseInt($('#dob_mm')?.value || '', 10);
-    const d = parseInt($('#dob_dd')?.value || '', 10);
-    if (!y || !m || !d) return;
-    const today = new Date();
-    let age = today.getFullYear() - y;
-    const mm = today.getMonth() + 1, dd = today.getDate();
-    if (m > mm || (m === mm && d > dd)) age--;
-    const out = $('#age'); if (out) out.value = String(age);
-  }
+  function measure(el){ return el ? el.scrollHeight : 0; }
+  function fitContainerTo(i){ if (!stepsEl || i < 0) return; stepsEl.style.height = measure(panes[i]) + 'px'; }
+  function exposeFit(){ window.rirekiFitSteps = function(){ fitContainerTo(idx); }; }
 
-  // helpers
-  const needsEndEdu = (val) => /^(卒|修了|退|grad|drop)/i.test(String(val || '').trim());
-  const needsEndExp = (val) => /^(退|resign|quit|leave)/i.test(String(val || '').trim());
+  if (stepsEl && panes.length) {
+    idx = panes.findIndex(p => p.classList.contains('is-active'));
+    if (idx < 0) { idx = 0; panes[0].classList.add('is-active'); }
+    exposeFit();
 
-  // 学歴 rows
-  function bindEduRow(row) {
-    const start = row.querySelector('input.edu-start');
-    const end   = row.querySelector('input.edu-end');
-    const stSel = row.querySelector('select.edu-status');
+    window.addEventListener('load',  () => fitContainerTo(idx));
+    window.addEventListener('resize',() => fitContainerTo(idx));
 
-    if (start) {
-      start.addEventListener('input', () => {
-        autoSlashYM(start);
-        const { y, m } = splitYM(start.value);
-        row.querySelector('input[name="edu_start_year[]"]').value  = y;
-        row.querySelector('input[name="edu_start_month[]"]').value = m;
-      });
-    }
-    if (end) {
-      end.addEventListener('input', () => {
-        autoSlashYM(end);
-        const { y, m } = splitYM(end.value);
-        row.querySelector('input[name="edu_end_year[]"]').value  = y;
-        row.querySelector('input[name="edu_end_month[]"]').value = m;
-      });
-    }
-    if (stSel) {
-      const toggle = () => {
-        const need = needsEndEdu(stSel.value);
-        end.disabled = !need;
-        if (!need) {
-          end.value = '';
-          row.querySelector('input[name="edu_end_year[]"]').value = '';
-          row.querySelector('input[name="edu_end_month[]"]').value = '';
-        }
+    function goStep(next, dir) {
+      if (next === idx || next < 0 || next >= panes.length) return;
+
+      const from = panes[idx];
+      const to   = panes[next];
+
+      // Prepare entering pane
+      to.classList.add('is-active');
+
+      // Direction classes
+      const enter = dir === 'back' ? 'slide-in-left'  : 'slide-in-right';
+      const exit  = dir === 'back' ? 'slide-out-right': 'slide-out-left';
+
+      to.classList.add(enter);
+      from.classList.add(exit);
+
+      // Animate container to new height
+      fitContainerTo(next);
+
+      const cleanup = () => {
+        from.classList.remove('is-active', 'slide-out-left', 'slide-out-right');
+        to.classList.remove('slide-in-left', 'slide-in-right');
+        idx = next;
       };
-      stSel.addEventListener('change', toggle);
-      toggle();
-    }
-  }
-  function initEduRows() { $$('#eduBody tr').forEach(bindEduRow); }
-  initEduRows();
-
-  // 職歴 rows
-  function bindExpRow(row) {
-    const start = row.querySelector('input.exp-start');
-    const end   = row.querySelector('input.exp-end');
-    const stSel = row.querySelector('select.exp-status');
-
-    if (start) {
-      start.addEventListener('input', () => {
-        autoSlashYM(start);
-        const { y, m } = splitYM(start.value);
-        row.querySelector('input[name="exp_start_year[]"]').value  = y;
-        row.querySelector('input[name="exp_start_month[]"]').value = m;
-      });
-    }
-    if (end) {
-      end.addEventListener('input', () => {
-        autoSlashYM(end);
-        const { y, m } = splitYM(end.value);
-        row.querySelector('input[name="exp_end_year[]"]').value  = y;
-        row.querySelector('input[name="exp_end_month[]"]').value = m;
-      });
-    }
-    if (stSel) {
-      const toggle = () => {
-        const need = needsEndExp(stSel.value);
-        end.disabled = !need;
-        if (!need) {
-          end.value = '';
-          row.querySelector('input[name="exp_end_year[]"]').value = '';
-          row.querySelector('input[name="exp_end_month[]"]').value = '';
-        }
+      const onEnd = (e) => {
+        if (e.target !== to) return;
+        to.removeEventListener('animationend', onEnd);
+        cleanup();
       };
-      stSel.addEventListener('change', toggle);
-      toggle();
+      to.addEventListener('animationend', onEnd, { once: true });
+      setTimeout(cleanup, 500); // safety
+
+      // start from top each time
+      try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (_) { window.scrollTo(0, 0); }
     }
-  }
-  function initExpRows() { $$('#expBody tr').forEach(bindExpRow); }
-  initExpRows();
 
-  // generic YYYY/MM rows (licenses etc.)
-  function bindRowDateYM(row) {
-    const input = row.querySelector('input.date-ym');
-    const yHidden = row.querySelector('input[name$="_year[]"]');
-    const mHidden = row.querySelector('input[name$="_month[]"]');
-    if (!input || !yHidden || !mHidden) return;
-    input.addEventListener('input', () => {
-      autoSlashYM(input);
-      const { y, m } = splitYM(input.value);
-      yHidden.value = y; mHidden.value = m;
+    // Hook buttons
+    document.addEventListener('click', (e) => {
+      const nextBtn = e.target.closest('.js-next-step');
+      const prevBtn = e.target.closest('.js-prev-step');
+      if (nextBtn) { e.preventDefault(); goStep(idx + 1, 'forward'); }
+      if (prevBtn) { e.preventDefault(); goStep(idx - 1, 'back'); }
     });
-  }
-  $$('#licBody tr').forEach(bindRowDateYM);
 
-  // photo preview
-  const photo = $('#photo'), pv = $('#photoPreviewImg');
-  if (photo && pv) {
-    photo.addEventListener('change', () => {
-      const f = photo.files && photo.files[0];
-      if (!f) { pv.hidden = true; pv.src=''; return; }
-      if (!/^image\/(jpeg|png)$/.test(f.type)) { alert('JPEG または PNG を選択してください'); photo.value = ''; return; }
-      if (f.size > 5 * 1024 * 1024) { alert('5MB以下の画像を選択してください'); photo.value=''; return; }
-      pv.src = URL.createObjectURL(f); pv.hidden = false;
-    });
-  }
-
-  // dynamic rows add/remove
-  $$('.row-add').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const tbody = document.querySelector(btn.dataset.target);
-      if (!tbody) return;
-      const last = tbody.lastElementChild;
-      if (!last) return;
-      const tr = last.cloneNode(true);
-
-      // reset inputs
-      tr.querySelectorAll('input,select').forEach(el => {
-        if (el.tagName === 'SELECT') el.selectedIndex = 0;
-        else el.value = '';
-        if (el.classList.contains('edu-end') || el.classList.contains('exp-end')) el.disabled = true;
+    // Optional direct jump
+    document.querySelectorAll('[data-goto-step]').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = parseInt(el.getAttribute('data-goto-step'), 10);
+        if (!isNaN(target)) goStep(target, target > idx ? 'forward' : 'back');
       });
-
-      tbody.appendChild(tr);
-      // binders
-      if (tbody.id === 'eduBody') bindEduRow(tr);
-      else if (tbody.id === 'expBody') bindExpRow(tr);
-      else bindRowDateYM(tr);
-      bindDelete(tr);
     });
+  } else {
+    // still expose fit so other modules can call safely
+    exposeFit();
+  }
+
+  // ===== DOB single input + hidden fields + age calc =====
+  (function(){
+    const dob = document.getElementById('dob');
+    const y = document.getElementById('dob_yyyy');
+    const m = document.getElementById('dob_mm');
+    const d = document.getElementById('dob_dd');
+    const age = document.getElementById('age');
+
+    if (!dob || !y || !m || !d || !age) return;
+
+    function formatDOB(v){
+      v = (v || '').replace(/\D/g, '').slice(0, 8);
+      if (v.length >= 5) v = v.slice(0,4) + '/' + v.slice(4);
+      if (v.length >= 9) v = v.slice(0,7) + '/' + v.slice(7);
+      return v;
+    }
+    function updateHidden(){
+      const raw = (dob.value || '').replace(/\D/g, '');
+      y.value = raw.slice(0,4) || '';
+      m.value = raw.slice(4,6) || '';
+      d.value = raw.slice(6,8) || '';
+
+      // Age (JST)
+      if (y.value && m.value && d.value){
+        try{
+          const now = new Date(new Date().toLocaleString('en-US', { timeZone:'Asia/Tokyo' }));
+          const by = parseInt(y.value,10), bm = parseInt(m.value,10)-1, bd = parseInt(d.value,10);
+          const bdate = new Date(Date.UTC(by, bm, bd));
+          let a = now.getUTCFullYear() - bdate.getUTCFullYear();
+          const mdiff = (now.getUTCMonth() - bdate.getUTCMonth());
+          if (mdiff < 0 || (mdiff===0 && now.getUTCDate() < bdate.getUTCDate())) a--;
+          age.value = (a>=0 && a<150) ? a : '';
+        }catch(e){ age.value = ''; }
+      }else{
+        age.value = '';
+      }
+      // Height may change if hints appear/disappear
+      if (window.rirekiFitSteps) window.rirekiFitSteps();
+    }
+    dob.addEventListener('input', () => { dob.value = formatDOB(dob.value); updateHidden(); });
+    dob.addEventListener('blur', updateHidden);
+  })();
+
+  // ===== Photo preview (recalc height on image load) =====
+  (function(){
+    const input = document.getElementById('photo');
+    const box = document.getElementById('photoPreview');
+    const img = document.getElementById('photoPreviewImg');
+    if (!input || !box || !img) return;
+
+    function fitSoon(){ setTimeout(() => { if (window.rirekiFitSteps) window.rirekiFitSteps(); }, 0); }
+
+    input.addEventListener('change', () => {
+      const f = input.files && input.files[0];
+      if (!f) {
+        box.style.display='none';
+        img.removeAttribute('src');
+        fitSoon();
+        return;
+      }
+      const url = URL.createObjectURL(f);
+      img.onload = () => {
+        box.style.display = 'block';
+        fitSoon();
+        // Do not revoke immediately to keep preview alive
+      };
+      img.onerror = () => { box.style.display='none'; fitSoon(); };
+      img.src = url;
+      box.style.display = 'block'; // show container so height can grow before load completes
+      fitSoon();
+    });
+  })();
+
+  // ===== Status-based end-date toggles =====
+  function toggleEduEnd(tr){
+    const st = tr.querySelector('.js-status-edu');
+    const y  = tr.querySelector('.js-edu-end-y');
+    const m  = tr.querySelector('.js-edu-end-m');
+    const need = st && /卒業|退学/.test(st.value);
+    [y,m].forEach(el => { if(!el) return; el.disabled = !need; if(!need){ el.value=''; } });
+    if (window.rirekiFitSteps) window.rirekiFitSteps();
+  }
+  function toggleExpEnd(tr){
+    const st = tr.querySelector('.js-status-exp');
+    const y  = tr.querySelector('.js-exp-end-y');
+    const m  = tr.querySelector('.js-exp-end-m');
+    const need = st && /退職/.test(st.value);
+    [y,m].forEach(el => { if(!el) return; el.disabled = !need; if(!need){ el.value=''; } });
+    if (window.rirekiFitSteps) window.rirekiFitSteps();
+  }
+  document.addEventListener('change', (e) => {
+    const tr = e.target.closest('tr');
+    if (!tr) return;
+    if (e.target.matches('.js-status-edu')) toggleEduEnd(tr);
+    if (e.target.matches('.js-status-exp')) toggleExpEnd(tr);
   });
+  document.querySelectorAll('#eduTable tbody tr').forEach(toggleEduEnd);
+  document.querySelectorAll('#expTable tbody tr').forEach(toggleExpEnd);
 
-  function bindDelete(scope) {
-    $$('.row-del', scope || document).forEach(del => {
-      del.onclick = () => {
-        const tbody = del.closest('tbody');
-        const table = del.closest('table');
-        const min = parseInt(table?.getAttribute('data-min') || '0', 10);
-        const rows = Array.from(tbody.querySelectorAll('tr'));
-        if (rows.length <= min) return;
-        del.closest('tr').remove();
-      };
+  // ===== Repeaters =====
+  function addRow(tableId, rowClass){
+    const tbody = document.querySelector(`#${tableId} tbody`);
+    const first = tbody ? tbody.querySelector(`.${rowClass}`) : null;
+    if (!tbody || !first) return;
+
+    const clone = first.cloneNode(true);
+
+    // clear inputs & selects; maintain disabled state for end-date fields
+    clone.querySelectorAll('input').forEach(i => {
+      i.value='';
+      if (i.classList.contains('js-edu-end-y') || i.classList.contains('js-edu-end-m') ||
+          i.classList.contains('js-exp-end-y') || i.classList.contains('js-exp-end-m')) {
+        i.disabled = true;
+      }
     });
+    clone.querySelectorAll('select').forEach(s => { s.selectedIndex = 0; });
+
+    tbody.appendChild(clone);
+
+    // re-init toggles
+    if (tableId==='eduTable') toggleEduEnd(clone);
+    if (tableId==='expTable') toggleExpEnd(clone);
+
+    try { clone.scrollIntoView({behavior:'smooth', block:'nearest'}); } catch(_) {}
+    if (window.rirekiFitSteps) window.rirekiFitSteps();
   }
-  bindDelete(document);
-
-  // validation
-  form.addEventListener('submit', (e) => {
-    // DOB required
-    if ($('#dob')) {
-      autoSlashYMD($('#dob'));
-      const { y, m, d } = splitYMD($('#dob').value);
-      $('#dob_yyyy').value = y || '';
-      $('#dob_mm').value   = m || '';
-      $('#dob_dd').value   = d || '';
-      if (!y || !m || !d) {
-        e.preventDefault(); alert('生年月日（YYYY/MM/DD）を入力してください');
-        showStep(1); $('#dob').focus(); return;
-      }
-    }
-
-    // 学歴: end date required when 卒/退 selected
-    let okEdu = true;
-    $$('#eduBody tr').forEach(tr => {
-      const stSel = tr.querySelector('select.edu-status');
-      const end   = tr.querySelector('input.edu-end');
-      if (stSel && needsEndEdu(stSel.value)) {
-        const { y, m } = splitYM(end.value);
-        if (!y || !m) okEdu = false;
-      }
-    });
-    if (!okEdu) {
-      e.preventDefault(); alert('学歴で「卒業／退学」を選んだ行には 終了年月(YYYY/MM) を入力してください。');
-      showStep(2); return;
-    }
-
-    // 職歴: end date required when 退 selected
-    let okExp = true;
-    $$('#expBody tr').forEach(tr => {
-      const stSel = tr.querySelector('select.exp-status');
-      const end   = tr.querySelector('input.exp-end');
-      if (stSel && needsEndExp(stSel.value)) {
-        const { y, m } = splitYM(end.value);
-        if (!y || !m) okExp = false;
-      }
-    });
-    if (!okExp) {
-      e.preventDefault(); alert('職歴で「退職」を選んだ行には 退職年月(YYYY/MM) を入力してください。');
-      showStep(3); return;
-    }
-  });
-})();
-// --- Step router with slide animations ---
-(function () {
-  const panes = Array.from(document.querySelectorAll('.step-pane'));
-  if (!panes.length) return;
-
-  // ensure one active
-  let idx = panes.findIndex(p => p.classList.contains('is-active'));
-  if (idx < 0) { idx = 0; panes[0].classList.add('is-active'); }
-
-  function goStep(next, dir) {
-    if (next === idx || next < 0 || next >= panes.length) return;
-
-    const from = panes[idx];
-    const to   = panes[next];
-
-    // temporarily show both panels during animation
-    from.classList.add('is-transitioning');
-    to.classList.add('is-transitioning', 'is-active');
-
-    // choose classes
-    const enter = dir === 'back' ? 'step-enter-left'  : 'step-enter-right';
-    const exit  = dir === 'back' ? 'step-exit-right'  : 'step-exit-left';
-
-    // apply
-    to.classList.add(enter);
-    from.classList.add(exit);
-
-    // scroll to top so new step starts at top
-    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (_) { window.scrollTo(0,0); }
-
-    const cleanup = () => {
-      from.classList.remove('is-active', 'is-transitioning', 'step-exit-left', 'step-exit-right');
-      to.classList.remove('is-transitioning', 'step-enter-left', 'step-enter-right');
-      idx = next;
-    };
-
-    const onEnd = (e) => {
-      if (e.target !== to) return; // wait for 'to' animation end
-      to.removeEventListener('animationend', onEnd);
-      cleanup();
-    };
-
-    // in case animationend is missed, cleanup anyway
-    to.addEventListener('animationend', onEnd, { once: true });
-    setTimeout(cleanup, 500);
+  function delRow(btn){
+    const tr = btn.closest('tr');
+    if (!tr) return;
+    const tbody = tr.parentNode;
+    if (tbody.children.length <= 1) return;
+    tbody.removeChild(tr);
+    if (window.rirekiFitSteps) window.rirekiFitSteps();
   }
-
-  // Next / Back buttons
   document.addEventListener('click', (e) => {
-    const nextBtn = e.target.closest('.js-next-step');
-    const prevBtn = e.target.closest('.js-prev-step');
-    if (nextBtn) { e.preventDefault(); goStep(idx + 1, 'forward'); }
-    if (prevBtn) { e.preventDefault(); goStep(idx - 1, 'back');    }
-  });
-
-  // Optional: direct navigation via data-goto-step
-  document.querySelectorAll('[data-goto-step]').forEach(el => {
-    el.addEventListener('click', (e) => {
+    const add = e.target.closest('.row-add');
+    const del = e.target.closest('.row-del');
+    if (add){
       e.preventDefault();
-      const target = parseInt(el.getAttribute('data-goto-step'), 10);
-      if (!isNaN(target)) goStep(target, target > idx ? 'forward' : 'back');
-    });
+      const target = add.getAttribute('data-for');
+      if (target === 'edu') addRow('eduTable','edu-row');
+      if (target === 'exp') addRow('expTable','exp-row');
+      if (target === 'lic') addRow('licTable','lic-row');
+    }
+    if (del){
+      e.preventDefault();
+      delRow(del);
+    }
   });
 })();

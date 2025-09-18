@@ -45,17 +45,7 @@ body{
   padding:22px; border:1px solid rgba(0,0,0,.06);
 }
 
-/* ---- Step panes (animated in/out) ---- */
-.step-pane{
-  transform:translateY(8px); opacity:0; pointer-events:none;
-  transition:opacity .25s ease, transform .25s ease;
-}
-.step-pane.is-active{
-  transform:none; opacity:1; pointer-events:auto;
-  animation:pop .28s ease;
-}
-@keyframes pop{ from{transform:translateY(8px);opacity:0} to{transform:none;opacity:1} }
-
+/* ---- Headings ---- */
 h2{
   margin:0 0 14px; font-size:18px; font-weight:800;
   display:flex; align-items:center; gap:10px;
@@ -161,36 +151,34 @@ input.date-ym,#dob{
 /* ---- Compatibility nits (legacy classes safe) ---- */
 .container.my-5{ padding-top:80px } /* if any old layout used this */
 .form-actions{ display:flex; gap:10px; justify-content:flex-end }
-/* --- Step flow fixes + slide animations --- */
-.steps { position: relative; }
 
-.step-pane{ 
-  display: none;           /* inactive tabs do not take space */
+/* === Step slider (absolute, no flicker) === */
+.steps{
+  position: relative;
+  overflow: hidden;
+  transition: height .28s ease; /* container height tweens to next step */
 }
-.step-pane.is-active,
-.step-pane.is-transitioning{
-  display: block;
+.step-pane{
+  position: absolute; inset: 0; width: 100%;
+  display: block;           /* keep block so we can measure height */
+  opacity: 0;               /* hidden by default */
+  pointer-events: none;
+  transform: translateX(24px);
+  will-change: transform, opacity;
 }
+.step-pane.is-active{
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+  z-index: 1;
+}
+/* slide directions */
+.slide-in-right { animation: slideInFromRight .28s ease forwards; z-index: 2; }
+.slide-out-left { animation: slideOutToLeft   .22s ease forwards; z-index: 1; }
+.slide-in-left  { animation: slideInFromLeft  .28s ease forwards; z-index: 2; }
+.slide-out-right{ animation: slideOutToRight  .22s ease forwards; z-index: 1; }
 
-/* enter/exit animations */
-.step-enter-right { animation: enterFromRight .28s ease both; }
-.step-exit-left   { animation: exitToLeft   .22s ease both; }
-.step-enter-left  { animation: enterFromLeft .28s ease both; }
-.step-exit-right  { animation: exitToRight   .22s ease both; }
-
-@keyframes enterFromRight {
-  from { transform: translateX(24px); opacity: 0; }
-  to   { transform: none;              opacity: 1; }
-}
-@keyframes exitToLeft {
-  from { transform: none;              opacity: 1; }
-  to   { transform: translateX(-24px); opacity: 0; }
-}
-@keyframes enterFromLeft {
-  from { transform: translateX(-24px); opacity: 0; }
-  to   { transform: none;              opacity: 1; }
-}
-@keyframes exitToRight {
-  from { transform: none;              opacity: 1; }
-  to   { transform: translateX(24px);  opacity: 0; }
-}
+@keyframes slideInFromRight { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes slideOutToLeft   { from { transform: none;             opacity: 1; } to { transform: translateX(-24px); opacity: 0; } }
+@keyframes slideInFromLeft  { from { transform: translateX(-24px);opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes slideOutToRight  { from { transform: none;             opacity: 1; } to { transform: translateX(24px);  opacity: 0; } }
