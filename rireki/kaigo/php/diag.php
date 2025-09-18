@@ -7,7 +7,6 @@ require_once __DIR__ . '/bootstrap.php';
 
 header('Content-Type: text/plain; charset=UTF-8');
 
-// Autoload check (mirror bootstrap search order)
 $autoloadPaths = [
   __DIR__ . '/../vendor/autoload.php',
   __DIR__ . '/../../vendor/autoload.php',
@@ -18,7 +17,7 @@ $autoloadOk = false;
 foreach ($autoloadPaths as $p) {
   if (is_readable($p)) { require_once $p; $autoloadOk = true; break; }
 }
-echo "autoload: " . ($autoloadOk ? "OK\n" : "NG (composer install in /home/it-future/www/itf/rireki)\n");
+echo "autoload: " . ($autoloadOk ? "OK\n" : "NG\n");
 
 $map = realpath(__DIR__ . '/../mappings/Kaigo_Template_XLS.json');
 echo "mapping : " . ($map && is_readable($map) ? "OK ($map)\n" : "NG\n");
