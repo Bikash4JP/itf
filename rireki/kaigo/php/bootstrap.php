@@ -1,43 +1,37 @@
 <?php
-// kaigo/php/bootstrap.php
-declare(strict_types=1);
+// /rireki/kaigo/php/bootstrap.php
 
-// Errors (enable via ?debug=1)
-if (isset($_GET['debug'])) { @ini_set('display_errors','1'); error_reporting(E_ALL); }
-
-// Try to relax limits for FPM
-@ini_set('memory_limit', '512M');
-@ini_set('max_execution_time', '120');
-if (function_exists('set_time_limit')) @set_time_limit(120);
-
-// Timezone
+// PHP runtime
+error_reporting(E_ALL);
+mb_internal_encoding('UTF-8');
 date_default_timezone_set('Asia/Tokyo');
 
-// Paths
-if (!defined('RIREKI_KAIGO_ROOT')) {
-  define('RIREKI_KAIGO_ROOT', realpath(__DIR__ . '/..') ?: (__DIR__ . '/..'));
-}
-if (!defined('RIREKI_KAIGO_URL')) {
-  define('RIREKI_KAIGO_URL', '/rireki/kaigo');
-}
+define('RIREKI_ROOT', realpath(dirname(__DIR__))); // .../rireki/kaigo
 
-// Composer autoload (check all plausible locations)
-$__autoloadCandidates = [
-  // Most likely: you ran composer in /home/it-future/www/itf/rireki
-  __DIR__ . '/../vendor/autoload.php',       // /rireki/vendor/autoload.php
-  __DIR__ . '/../../vendor/autoload.php',    // /rireki/kaigo/vendor/autoload.php (if ever)
-  __DIR__ . '/../../../vendor/autoload.php', // /itf/vendor/autoload.php (if moved up)
-  __DIR__ . '/vendor/autoload.php',          // /rireki/kaigo/php/vendor/autoload.php (rare)
+// autoload (prefer shared parent vendor, then local)
+$autoloadCandidates = [
+  dirname(RIREKI_ROOT) . '/vendor/autoload.php', // /rireki/vendor (shared)
+  RIREKI_ROOT . '/vendor/autoload.php',          // /rireki/kaigo/vendor (if used)
 ];
-$__autoloadLoaded = false;
-foreach ($__autoloadCandidates as $__a) {
-  if (is_readable($__a)) { require_once $__a; $__autoloadLoaded = true; break; }
+$autoloadOk = false;
+foreach ($autoloadCandidates as $a) {
+  if (is_readable($a)) { require_once $a; $autoloadOk = true; break; }
+}
+if (!$autoloadOk) {
+  header('Content-Type: text/plain; charset=UTF-8', true, 500);
+  echo "Composer Autoload not found.\nTried:\n - " . implode("\n - ", $autoloadCandidates);
+  exit;
 }
 
-// Optional: throw a clear error in debug mode
-if (!$__autoloadLoaded && isset($_GET['debug'])) {
-  header('Content-Type: text/plain; charset=UTF-8');
-  echo "Composer autoload not found near:\n";
-  foreach ($__autoloadCandidates as $__a) echo " - $__a\n";
-  exit;
+// util: path builder inside /kaigo
+function rireki_path(string $rel): string {
+  return rtrim(RIREKI_ROOT, '/') . '/' . ltrim($rel, '/');
+}
+
+// logging
+function rireki_log(string $level, string $msg): void {
+  $dir = rireki_path('logs');
+  if (!is_dir($dir)) @mkdir($dir, 0755, true);
+  $line = sprintf("[%s] [%s] %s\n", date('Y-m-d H:i:s'), $level, $msg);
+  @file_put_contents($dir . '/app.log', $line, FILE_APPEND);
 }
