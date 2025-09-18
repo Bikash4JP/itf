@@ -276,6 +276,16 @@
             <textarea name="reason_for_resignation" rows="3" placeholder="退職済みの場合のみ入力"></textarea>
           </label>
 
+          <label class="col-2" style="margin-top:10px;">退職日予定（対象者のみ）
+  <div class="grid-3" style="max-width:420px">
+    <input class="in-yy" type="text" name="planned_resign_year"  placeholder="YYYY" inputmode="numeric">
+    <input class="in-mm" type="text" name="planned_resign_month" placeholder="MM"   inputmode="numeric">
+    <div></div>
+  </div>
+  <small style="color:#64748b;">※ 該当者のみ入力してください。テンプレートでは AE12=年, AH12=月 として出力します。</small>
+</label>
+
+
           <div class="nav">
             <button class="btn js-prev-step" type="button">戻る</button>
             <button class="btn primary js-next-step" type="button">次へ</button>

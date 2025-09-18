@@ -12,6 +12,25 @@ $mappingFile = rireki_path('mappings/templateB.json');
 $outDir      = rireki_path('resumes');
 @mkdir($outDir, 0750, true);
 
+// --- helper: reshape field-wise arrays into row-wise ---
+function _reshape_rows(array $group, array $fields): array {
+  $rows = [];
+  $len = 0;
+  foreach ($fields as $f) {
+    $len = max($len, isset($group[$f]) ? count((array)$group[$f]) : 0);
+  }
+  for ($i=0; $i<$len; $i++) {
+    $row = [];
+    foreach ($fields as $f) {
+      $row[$f] = trim($group[$f][$i] ?? '');
+    }
+    // skip completely empty rows
+    $flat = implode('', $row);
+    if ($flat !== '') $rows[] = $row;
+  }
+  return $rows;
+}
+
 // Demo or build data
 if (isset($_GET['demo'])) {
   $data = [
@@ -32,6 +51,10 @@ if (isset($_GET['demo'])) {
     'self_pr'     => '責任感が強く、学習意欲が高いです。',
     'motivation'  => '介護の現場で働きたい。',
     'preferences' => '東京23区で勤務希望',
+    // AE12/AH12 mapping targets (planned resignation date)
+    'planned_resign_year'  => '2026',
+    'planned_resign_month' => '03',
+    // Repeaters
     'education'   => [
       ['from_year'=>'2015','from_month'=>'04','to_year'=>'2018','to_month'=>'03','institution'=>'ABC高校','faculty'=>'普通科'],
       ['from_year'=>'2018','from_month'=>'04','to_year'=>'2022','to_month'=>'03','institution'=>'XYZ大学','faculty'=>'福祉学部'],
@@ -44,7 +67,48 @@ if (isset($_GET['demo'])) {
     ]
   ];
 } else {
-  $data = $_POST; // TODO: hook with canonical builder if needed
+  $data = $_POST;
+
+  // normalize planned resignation date to top-level singles (AE12/AH12 via mapping)
+  $data['planned_resign_year']  = isset($data['planned_resign_year'])  ? trim($data['planned_resign_year'])  : '';
+  $data['planned_resign_month'] = isset($data['planned_resign_month']) ? trim($data['planned_resign_month']) : '';
+
+  // reshape education
+  if (!empty($data['education']) && is_array($data['education']) && isset($data['education']['from_year'])) {
+    $fieldsEdu = ['from_year','from_month','to_year','to_month','institution','faculty'];
+    $data['education'] = _reshape_rows($data['education'], $fieldsEdu);
+  }
+
+  // reshape work_blocks
+  if (!empty($data['work_blocks']) && is_array($data['work_blocks']) && isset($data['work_blocks']['from_year'])) {
+    $fieldsWork = ['from_year','from_month','to_year','to_month','org','job_title','work_time_start','work_time_end','work_days_per_week'];
+    $data['work_blocks'] = _reshape_rows($data['work_blocks'], $fieldsWork);
+  }
+
+  // reshape licenses
+  if (!empty($data['licenses']) && is_array($data['licenses']) && isset($data['licenses']['cert_year'])) {
+    $fieldsLic = ['cert_year','cert_month','cert_name'];
+    $data['licenses'] = _reshape_rows($data['licenses'], $fieldsLic);
+  }
+
+  // photo upload -> set photo_path (adapter will auto-fit inside AD3 merged region)
+  if (isset($_FILES['photo']) && ($_FILES['photo']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
+    $dir = rireki_path('uploads/photos');
+    if (!is_dir($dir)) @mkdir($dir, 0750, true);
+    $ext = strtolower(pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION));
+    if (!in_array($ext, ['jpg','jpeg','png'], true)) $ext = 'jpg';
+    $dest = $dir . '/' . bin2hex(random_bytes(8)) . '.' . $ext;
+    if (move_uploaded_file($_FILES['photo']['tmp_name'], $dest)) {
+      $data['photo_path'] = $dest;
+    }
+  }
+
+  // consolidate custom travel fields into mapping key if not provided
+  if (empty($data['past_travel_history'])) {
+    $cnt = trim($data['past_travel_count'] ?? '');
+    $det = trim($data['past_travel_details'] ?? '');
+    $data['past_travel_history'] = ($cnt !== '' || $det !== '') ? ("回数: ".$cnt." / ".$det) : '';
+  }
 }
 
 $token = bin2hex(random_bytes(16));

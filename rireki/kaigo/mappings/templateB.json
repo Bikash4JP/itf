@@ -1,69 +1,299 @@
-{  "template_file": "../templates/kaigo.xlsx",
+{
+  "template_file": "../templates/kaigo.xlsx",
   "sheet_name": "①履歴書",
-  "date_now_split": { "year_cell": "AC2", "month_cell": "AF2", "day_cell": "AH2" },
-  "photo": { "anchor_cell": "AD3", "merge_range": "AD3:AH10", "fit": "cover", "max_width_px": 280, "max_height_px": 360 },
+  "date_now_split": {
+    "year_cell": "AC2",
+    "month_cell": "AF2",
+    "day_cell": "AH2"
+  },
+  "photo": {
+    "anchor_cell": "AD3",
+    "merge_range": "AD3:AH10",
+    "fit": "cover",
+    "max_width_px": 274,
+  "max_height_px": 354,
+  "padding_px": 3
+},
   "singles": {
-    "name_romaji": "H3","name_kana": "H4",
-    "dob_year": "H5","dob_month": "K5","dob_day": "N5","age_autofill": "Q5",
+    "name_romaji": "H3",
+    "name_kana": "H4",
+    "dob_year": "H5",
+    "dob_month": "K5",
+    "dob_day": "N5",
+    "age_autofill": "Q5",
     "birthplace": "H6",
-    "postal": "E7","address": "B8",
-    "nationality": "X3","gender": "X4","religion": "X5","marital_status": "X6","contact_phone": "X7","email": "X8",
-    "height_cm": "H9","weight_kg": "R9",
-    "passport_has": "H10","passport_exp_year": "P10","passport_exp_month": "S10","passport_exp_day": "U10","passport_no": "AB10",
+    "postal": "E7",
+    "address": "B8",
+    "nationality": "X3",
+    "gender": "X4",
+    "religion": "X5",
+    "marital_status": "X6",
+    "contact_phone": "X7",
+    "email": "X8",
+    "height_cm": "H9",
+    "weight_kg": "R9",
+    "passport_has": "H10",
+    "passport_exp_year": "P10",
+    "passport_exp_month": "S10",
+    "passport_exp_day": "U10",
+    "passport_no": "AB10",
     "past_travel_history": "H11",
-    "recent_entry_year": "T11","recent_entry_month": "W11","recent_entry_day": "Y11",
-    "recent_exit_year": "AC11","recent_exit_month": "AF11","recent_exit_day": "AH11",
-    "current_status": "H12","status_from_year": "T12","status_from_month": "W12","status_from_day": "Y12",
-    "status_to_year": "AC12","status_to_month": "AF12","status_to_day": "AH12",
+    "recent_entry_year": "T11",
+    "recent_entry_month": "W11",
+    "recent_entry_day": "Y11",
+    "recent_exit_year": "AC11",
+    "recent_exit_month": "AF11",
+    "recent_exit_day": "AH11",
+    "current_status": "H12",
+    "status_from_year": "T12",
+    "status_from_month": "W12",
+    "status_from_day": "Y12",
+    "status_to_year": "AC12",
+    "status_to_month": "AF12",
+    "status_to_day": "AH12",
     "reason_for_resignation": "B14",
-    "self_pr": "B42","motivation": "B48","preferences": "B54",
-    "jp_comm_level": "L58","kanji_rw": "L59","blood_type": "L60","english_level": "L61",
-    "acquaintances_in_japan": "L62","jp_friends_count": "L63","home_country_friends_in_japan": "L64",
-    "smoking": "L65","alcohol": "L66","tattoo": "L67",
-    "clothes_size": "Z58","shoe_size": "Z59","prayer": "Z60","fasting": "Z61","food_rules": "Z62","hijab": "Z63",
-    "work_duration_intent": "Z64","studying_japanese_now": "Z65","studying_specialty_now": "Z66","other_agency_or_facility_interview": "Z67"
+    "planned_resign_year": "AE12",
+    "planned_resign_month": "AH12",
+    "self_pr": "B42",
+    "motivation": "B48",
+    "preferences": "B54",
+    "jp_comm_level": "L58",
+    "kanji_rw": "L59",
+    "blood_type": "L60",
+    "english_level": "L61",
+    "acquaintances_in_japan": "L62",
+    "jp_friends_count": "L63",
+    "home_country_friends_in_japan": "L64",
+    "smoking": "L65",
+    "alcohol": "L66",
+    "tattoo": "L67",
+    "clothes_size": "Z58",
+    "shoe_size": "Z59",
+    "prayer": "Z60",
+    "fasting": "Z61",
+    "food_rules": "Z62",
+    "hijab": "Z63",
+    "work_duration_intent": "Z64",
+    "studying_japanese_now": "Z65",
+    "studying_specialty_now": "Z66",
+    "other_agency_or_facility_interview": "Z67"
   },
   "dropdowns": {
-    "nationality": ["バングラデシュ","インドネシア国籍","ベトナム国籍","ネパール国籍","ミャンマー国籍","ペルー国籍","中国国籍","韓国国籍"],
-    "gender": ["男性","女性"],
-    "religion": ["イスラム教","仏教","キリスト教","ヒンドゥー教","無宗教"],
-    "marital_status": ["有り（子供あり）","有り（子供なし）","無し"],
-    "passport_has": ["有り","無し"],
-    "current_status": ["無し","特定技能","技能実習","その他"],
-    "jp_comm_level": ["N1相当","N2相当","N3相当","N4相当"],
-    "kanji_rw": ["できる","漢字が苦手","ひらがなならOK","まだまだ勉強"],
-    "blood_type": ["A","B","O","AB","わからない"],
-    "english_level": ["可能","日常会話OK","不可"],
-    "acquaintances_in_japan": ["あり","なし"],
-    "jp_friends_count": ["0名","1名","2名","3名","4名","5名"],
-    "home_country_friends_in_japan": ["0名","1名","2名","3名","4名","5名","6名","7名","8名","9名","10名"],
-    "smoking": ["吸う","吸わない"], "alcohol": ["飲む","飲まない"], "tattoo": ["あり","なし"],
-    "clothes_size": ["SS","S","M","L","LL","XL"],
-    "shoe_size": ["21.0cm(EUR32)","21.5cm(EUR33)","22.0cm(EUR34)","22.5cm(EUR35)","23.0cm(EUR36)","23.5cm(EUR37)","24.0cm(EUR38)","24.5cm(EUR39)","25.0cm(EUR40)","25.5cm(EUR41)","26.0cm(EUR42)","26.5cm(EUR43)","27.0cm(EUR44)","27.5cm(EUR45)","28.0cm(EUR46)","28.5cm(EUR47)","29.0cm(EUR48)"],
-    "prayer": ["なし","あり（仕事中はしない)","あり（休憩中にはしたい)"],
-    "fasting": ["なし","あり（仕事中はしない)","あり（休憩中にはしたい)"],
-    "food_rules": ["特にありません","全肉は食べません","豚は食べません","牛肉は食べません","豚は食べません/お酒は飲みません"],
-    "hijab": ["仕事中はしません","仕事中もしたいです。","必要なし"],
-    "work_duration_intent": ["できるだけ長く","5年は滞在したい","その他"],
-    "studying_japanese_now": ["あり","なし"],
-    "studying_specialty_now": ["あり","なし"],
-    "other_agency_or_facility_interview": ["あり","なし"]
+    "nationality": [
+      "バングラデシュ",
+      "インドネシア国籍",
+      "ベトナム国籍",
+      "ネパール国籍",
+      "ミャンマー国籍",
+      "ペルー国籍",
+      "中国国籍",
+      "韓国国籍"
+    ],
+    "gender": [
+      "男性",
+      "女性"
+    ],
+    "religion": [
+      "イスラム教",
+      "仏教",
+      "キリスト教",
+      "ヒンドゥー教",
+      "無宗教"
+    ],
+    "marital_status": [
+      "有り（子供あり）",
+      "有り（子供なし）",
+      "無し"
+    ],
+    "passport_has": [
+      "有り",
+      "無し"
+    ],
+    "current_status": [
+      "無し",
+      "特定技能",
+      "技能実習",
+      "その他"
+    ],
+    "jp_comm_level": [
+      "N1相当",
+      "N2相当",
+      "N3相当",
+      "N4相当"
+    ],
+    "kanji_rw": [
+      "できる",
+      "漢字が苦手",
+      "ひらがなならOK",
+      "まだまだ勉強"
+    ],
+    "blood_type": [
+      "A",
+      "B",
+      "O",
+      "AB",
+      "わからない"
+    ],
+    "english_level": [
+      "可能",
+      "日常会話OK",
+      "不可"
+    ],
+    "acquaintances_in_japan": [
+      "あり",
+      "なし"
+    ],
+    "jp_friends_count": [
+      "0名",
+      "1名",
+      "2名",
+      "3名",
+      "4名",
+      "5名"
+    ],
+    "home_country_friends_in_japan": [
+      "0名",
+      "1名",
+      "2名",
+      "3名",
+      "4名",
+      "5名",
+      "6名",
+      "7名",
+      "8名",
+      "9名",
+      "10名"
+    ],
+    "smoking": [
+      "吸う",
+      "吸わない"
+    ],
+    "alcohol": [
+      "飲む",
+      "飲まない"
+    ],
+    "tattoo": [
+      "あり",
+      "なし"
+    ],
+    "clothes_size": [
+      "SS",
+      "S",
+      "M",
+      "L",
+      "LL",
+      "XL"
+    ],
+    "shoe_size": [
+      "21.0cm(EUR32)",
+      "21.5cm(EUR33)",
+      "22.0cm(EUR34)",
+      "22.5cm(EUR35)",
+      "23.0cm(EUR36)",
+      "23.5cm(EUR37)",
+      "24.0cm(EUR38)",
+      "24.5cm(EUR39)",
+      "25.0cm(EUR40)",
+      "25.5cm(EUR41)",
+      "26.0cm(EUR42)",
+      "26.5cm(EUR43)",
+      "27.0cm(EUR44)",
+      "27.5cm(EUR45)",
+      "28.0cm(EUR46)",
+      "28.5cm(EUR47)",
+      "29.0cm(EUR48)"
+    ],
+    "prayer": [
+      "なし",
+      "あり（仕事中はしない)",
+      "あり（休憩中にはしたい)"
+    ],
+    "fasting": [
+      "なし",
+      "あり（仕事中はしない)",
+      "あり（休憩中にはしたい)"
+    ],
+    "food_rules": [
+      "特にありません",
+      "全肉は食べません",
+      "豚は食べません",
+      "牛肉は食べません",
+      "豚は食べません/お酒は飲みません"
+    ],
+    "hijab": [
+      "仕事中はしません",
+      "仕事中もしたいです。",
+      "必要なし"
+    ],
+    "work_duration_intent": [
+      "できるだけ長く",
+      "5年は滞在したい",
+      "その他"
+    ],
+    "studying_japanese_now": [
+      "あり",
+      "なし"
+    ],
+    "studying_specialty_now": [
+      "あり",
+      "なし"
+    ],
+    "other_agency_or_facility_interview": [
+      "あり",
+      "なし"
+    ]
   },
   "repeaters": {
     "education": {
-      "start_row": 17, "row_step": 1, "max_rows": 4,
-      "columns": { "from_year": "B{row}", "from_month": "E{row}", "to_year": "H{row}", "to_month": "K{row}", "institution": "M{row}", "faculty": "AE{row}" }
+      "start_row": 17,
+      "row_step": 1,
+      "max_rows": 4,
+      "columns": {
+        "from_year": "B{row}",
+        "from_month": "E{row}",
+        "to_year": "H{row}",
+        "to_month": "K{row}",
+        "institution": "M{row}",
+        "faculty": "AE{row}"
+      }
     },
     "work_blocks": {
-      "start_row": 22, "row_step": 3, "max_rows": 4,
-      "columns": { "from_year": "B{row}", "from_month": "E{row}", "to_year": "H{row}", "to_month": "K{row}", "org": "M{row}", "job_title": "AE{row}", "work_time_start": "AD{row}", "work_time_end": "AD{row_plus_1}", "work_days_per_week": "AD{row_plus_2}" }
+      "start_row": 22,
+      "row_step": 3,
+      "max_rows": 4,
+      "columns": {
+        "from_year": "B{row}",
+        "from_month": "E{row}",
+        "to_year": "H{row}",
+        "to_month": "K{row}",
+        "org": "M{row}",
+        "job_title": "AG{row}",
+        "work_time_start": "AD{row}",
+        "work_time_end": "AD{row_plus_1}",
+        "work_days_per_week": "AD{row_plus_2}"
+      }
     },
     "licenses": {
-      "start_row": 36, "row_step": 2, "max_rows": 3,
-      "columns": { "cert_year": "B{row}", "cert_month": "E{row}", "cert_name": "G{row}" }
+      "start_row": 36,
+      "row_step": 1,
+      "max_rows": 5,
+      "columns": {
+        "cert_year": "B{row}",
+        "cert_month": "E{row}",
+        "cert_name": "G{row}"
+      }
     }
   },
   "composed_rules": [
-    { "name": "age_from_dob", "source": { "year": "H5", "month": "K5", "day": "N5" }, "target": "Q5", "calc": "age_from_date" }
+    {
+      "name": "age_from_dob",
+      "source": {
+        "year": "H5",
+        "month": "K5",
+        "day": "N5"
+      },
+      "target": "Q5",
+      "calc": "age_from_date"
+    }
   ]
 }
