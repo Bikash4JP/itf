@@ -7,94 +7,16 @@ require_once __DIR__ . '/bootstrap.php';
 require_once __DIR__ . '/adapters/adapter_xlsx.php';
 require_once __DIR__ . '/validators.php';
 
+// Directories
 $mappingFile = rireki_path('mappings/templateB.json');
 $outDir      = rireki_path('resumes');
+$tmpDir      = rireki_path('tmp');
 @mkdir($outDir, 0755, true);
+@mkdir($tmpDir, 0755, true);
 
-/* ============================================================
- * PDF endpoint (HTML -> mPDF) — NO PhpSpreadsheet PdfWriter used
- *   /rireki/kaigo/php/submit_rireki.php?download=pdf&token=<hex|latest>[&diag=1]
- * ============================================================ */
-if (isset($_GET['download'], $_GET['token']) && $_GET['download'] === 'pdf') {
-  $rawToken = (string)$_GET['token'];
-  $diag     = isset($_GET['diag']);
-
-  // resolve token -> json
-  if ($rawToken === 'latest') {
-    $files = glob(rtrim($outDir,'/').'/*.json');
-    if (!$files) {
-      http_response_code(404);
-      header('Content-Type: text/plain; charset=UTF-8');
-      echo "PDF build failed: No snapshots found. Submit the form first.";
-      exit;
-    }
-    usort($files, fn($a,$b)=>filemtime($b)<=>filemtime($a));
-    $json  = $files[0];
-    $token = basename($json, '.json');
-  } else {
-    $token = preg_replace('/[^a-f0-9]/i', '', $rawToken);
-    $json  = rtrim($outDir,'/').'/'.$token.'.json';
-  }
-
-  // diagnostics
-  if ($diag) {
-    header('Content-Type: text/plain; charset=UTF-8');
-    echo "== PDF Diagnostic (HTML->mPDF) ==\n";
-    echo "token: $token\n";
-    echo "json: $json (exists=".((int)file_exists($json)).", readable=".((int)is_readable($json)).", size=".(@filesize($json)?:0)." bytes)\n";
-    $vendorA = rireki_path('vendor/autoload.php');
-    $vendorB = dirname(__DIR__, 2).'/vendor/autoload.php';
-    echo "vendorA: $vendorA (".(is_readable($vendorA)?'yes':'NO').")\n";
-    echo "vendorB: $vendorB (".(is_readable($vendorB)?'yes':'NO').")\n";
-    if (is_readable($vendorA)) require_once $vendorA; elseif (is_readable($vendorB)) require_once $vendorB;
-    echo "class_exists mPDF: ".(class_exists('\\Mpdf\\Mpdf')?'yes':'NO')."\n";
-    $tmpDir = rireki_path('tmp');
-    echo "tmpDir: $tmpDir (exists=".((int)is_dir($tmpDir)).", writable=".((int)is_writable($tmpDir)).")\n";
-    exit;
-  }
-
-  // normal stream
-  try {
-    if (!is_readable($json)) {
-      throw new RuntimeException('Snapshot JSON not found. Re-generate from the form.');
-    }
-    $raw  = file_get_contents($json);
-    $data = json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
-
-    $tmpDir = rireki_path('tmp');
-    if (!is_dir($tmpDir)) @mkdir($tmpDir, 0755, true);
-
-    $resPdf = rireki_make_pdf_via_html($data, $mappingFile, $outDir, $token, $tmpDir);
-    if (!$resPdf['ok']) throw new RuntimeException($resPdf['err'] ?? 'Unknown PDF error');
-    $pdfPath = $resPdf['pdf'];
-
-    if (function_exists('ob_get_length') && ob_get_length()) @ob_end_clean();
-    header('Content-Type: application/pdf');
-    header('Content-Disposition: attachment; filename="rireki_'.$token.'.pdf"');
-    header('Content-Length: '.filesize($pdfPath));
-    readfile($pdfPath);
-    exit;
-
-  } catch (Throwable $e) {
-    $logDir = rireki_path('logs');
-    if (!is_dir($logDir)) @mkdir($logDir, 0755, true);
-    @file_put_contents($logDir.'/pdf_error.log',
-      '['.date('Y-m-d H:i:s')."] ".$e->getMessage()."\n".$e->getTraceAsString()."\n", FILE_APPEND);
-    http_response_code(500);
-    header('Content-Type: text/plain; charset=UTF-8');
-    echo 'PDF build failed: '.$e->getMessage();
-    exit;
-  }
-}
-
-/* ============================================================
- * Normal submit flow: POST (or demo) -> build XLS + save JSON
- * ============================================================ */
-
-// helper: reshape field-wise arrays into row-wise
+// ============ Utilities ============
 function _reshape_rows(array $group, array $fields): array {
-  $rows = [];
-  $len = 0;
+  $rows = []; $len = 0;
   foreach ($fields as $f) $len = max($len, isset($group[$f]) ? count((array)$group[$f]) : 0);
   for ($i=0; $i<$len; $i++) {
     $row = [];
@@ -103,30 +25,83 @@ function _reshape_rows(array $group, array $fields): array {
   }
   return $rows;
 }
+function _plain_fail(string $msg, int $code = 500): void {
+  http_response_code($code);
+  header('Content-Type: text/plain; charset=UTF-8');
+  echo $msg;
+  exit;
+}
 
-// Build input data
+// ============ PDF DOWNLOAD (by token) ============
+if (isset($_GET['download']) && $_GET['download'] === 'pdf') {
+  // Give mPDF room; avoid hidden 500s
+  @ini_set('memory_limit', '512M');
+  @set_time_limit(120);
+  @ini_set('pcre.backtrack_limit', '5000000');
+  @ini_set('pcre.recursion_limit', '5000000');
+
+  // Always show text output on error
+  set_exception_handler(function($e){
+    _plain_fail("PDF build failed: " . $e->getMessage(), 500);
+  });
+
+  $token = preg_replace('/[^a-f0-9]/', '', $_GET['token'] ?? '');
+  if ($token === '') _plain_fail("PDF build failed: Missing token.", 400);
+
+  $jsonPath = rtrim($outDir,'/') . '/' . $token . '.json';
+  if (!is_file($jsonPath)) _plain_fail("PDF build failed: Snapshot JSON not found at $jsonPath", 404);
+
+  $json = @file_get_contents($jsonPath);
+  if ($json === false) _plain_fail("PDF build failed: Snapshot JSON unreadable at $jsonPath", 500);
+
+  $data = json_decode($json, true);
+  if (!is_array($data)) _plain_fail("PDF build failed: JSON parse error at $jsonPath", 500);
+
+  // Quick environment diagnostics before building
+  $diag = [];
+  $diag[] = "token: $token";
+  $diag[] = "json: ok (" . strlen($json) . " bytes)";
+  $diag[] = "mapping readable: " . (is_readable($mappingFile) ? 'yes' : 'no');
+  $diag[] = "template resolved: " . (function() use ($mappingFile){
+    $map = @json_decode(@file_get_contents($mappingFile), true);
+    if (!is_array($map)) return 'no-map';
+    $tplRel = $map['template_file'] ?? '';
+    $tplAbs = realpath(dirname($mappingFile) . '/' . $tplRel);
+    return ($tplAbs && is_readable($tplAbs)) ? "yes ($tplAbs)" : 'no';
+  })();
+  $diag[] = "tmpDir writable: " . (is_dir($tmpDir) && is_writable($tmpDir) ? 'yes' : 'no');
+  $diag[] = "mPDF exists: " . (class_exists('\\Mpdf\\Mpdf') ? 'yes' : 'no');
+
+  // Try to build
+  $resPdf = rireki_make_pdf_via_html($data, $mappingFile, $outDir, $token, $tmpDir);
+  if (!$resPdf['ok']) {
+    _plain_fail("PDF build failed: " . ($resPdf['err'] ?? 'unknown') . "\n\n== DIAG ==\n" . implode("\n", $diag), 500);
+  }
+
+  $pdfPath = $resPdf['pdf'] ?? null;
+  if (!$pdfPath || !is_readable($pdfPath)) {
+    _plain_fail("PDF build failed: File missing after build.\n\n== DIAG ==\n" . implode("\n", $diag), 500);
+  }
+
+  header('Content-Type: application/pdf');
+  header('Content-Disposition: attachment; filename="rirekisho_kaigo.pdf"');
+  header('Content-Length: ' . filesize($pdfPath));
+  readfile($pdfPath);
+  exit;
+}
+
+// ============ FORM SUBMIT (build XLS only; keep lightweight) ============
 if (isset($_GET['demo'])) {
   $data = [
-    'name_romaji' => 'TARO YAMADA',
-    'name_kana'   => 'やまだ たろう',
-    'dob_year'    => '1998','dob_month'=>'04','dob_day'=>'01',
-    'birthplace'  => '東京',
-    'postal'      => '123-4567',
-    'address'     => '東京都千代田区1-2-3',
-    'nationality' => 'ネパール国籍',
-    'gender'      => '男性',
-    'religion'    => '仏教',
-    'marital_status'=>'無し',
-    'contact_phone'=>'090-1111-2222',
-    'email'       => 'taro@example.com',
-    'height_cm'   => '170','weight_kg'=>'60',
-    'passport_has'=>'有り','passport_no'=>'AB123456',
-    'self_pr'     => '責任感が強く、学習意欲が高いです。',
-    'motivation'  => '介護の現場で働きたい。',
-    'preferences' => '東京23区で勤務希望',
-    'planned_resign_year'  => '2026',
-    'planned_resign_month' => '03',
-    'education'   => [
+    'name_romaji'=>'TARO YAMADA','name_kana'=>'やまだ たろう',
+    'dob_year'=>'1998','dob_month'=>'04','dob_day'=>'01',
+    'birthplace'=>'東京','postal'=>'123-4567','address'=>'東京都千代田区1-2-3',
+    'nationality'=>'ネパール国籍','gender'=>'男性','religion'=>'仏教','marital_status'=>'無し',
+    'contact_phone'=>'090-1111-2222','email'=>'taro@example.com',
+    'height_cm'=>'170','weight_kg'=>'60','passport_has'=>'有り','passport_no'=>'AB123456',
+    'self_pr'=>'責任感が強く、学習意欲が高いです。','motivation'=>'介護の現場で働きたい。','preferences'=>'東京23区で勤務希望',
+    'planned_resign_year'=>'2026','planned_resign_month'=>'03',
+    'education'=>[
       ['from_year'=>'2015','from_month'=>'04','to_year'=>'2018','to_month'=>'03','institution'=>'ABC高校','faculty'=>'普通科'],
       ['from_year'=>'2018','from_month'=>'04','to_year'=>'2022','to_month'=>'03','institution'=>'XYZ大学','faculty'=>'福祉学部'],
     ],
@@ -134,15 +109,18 @@ if (isset($_GET['demo'])) {
       ['from_year'=>'2022','from_month'=>'04','to_year'=>'2024','to_month'=>'03','org'=>'介護施設ABC','job_title'=>'介護職','work_time_start'=>'09:00','work_time_end'=>'18:00','work_days_per_week'=>'5']
     ],
     'licenses'=>[
-      ['cert_year'=>'2021','cert_month'=>'12','cert_name'=>'日本語能力試験N2']
-    ]
+      ['cert_year'=>'2021','cert_month'=>'12','cert_name'=>'日本語能力試験N2'],
+      ['cert_year'=>'2022','cert_month'=>'07','cert_name'=>'介護職員初任者研修'],
+    ],
   ];
 } else {
   $data = $_POST;
 
-  $data['planned_resign_year']  = isset($data['planned_resign_year'])  ? trim($data['planned_resign_year'])  : '';
-  $data['planned_resign_month'] = isset($data['planned_resign_month']) ? trim($data['planned_resign_month']) : '';
+  // normalize planned resignation date
+  $data['planned_resign_year']  = trim($data['planned_resign_year']  ?? '');
+  $data['planned_resign_month'] = trim($data['planned_resign_month'] ?? '');
 
+  // reshape repeater groups if sent field-wise
   if (!empty($data['education']) && is_array($data['education']) && isset($data['education']['from_year'])) {
     $data['education'] = _reshape_rows($data['education'], ['from_year','from_month','to_year','to_month','institution','faculty']);
   }
@@ -153,7 +131,14 @@ if (isset($_GET['demo'])) {
     $data['licenses'] = _reshape_rows($data['licenses'], ['cert_year','cert_month','cert_name']);
   }
 
-  // Photo -> photo_path
+  // consolidate travel notes
+  if (empty($data['past_travel_history'])) {
+    $cnt = trim($data['past_travel_count'] ?? '');
+    $det = trim($data['past_travel_details'] ?? '');
+    $data['past_travel_history'] = ($cnt !== '' || $det !== '') ? ("回数: ".$cnt." / ".$det) : '';
+  }
+
+  // photo upload -> photo_path
   if (isset($_FILES['photo']) && ($_FILES['photo']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
     $dir = rireki_path('uploads/photos');
     if (!is_dir($dir)) @mkdir($dir, 0755, true);
@@ -162,29 +147,18 @@ if (isset($_GET['demo'])) {
     $dest = $dir . '/' . bin2hex(random_bytes(8)) . '.' . $ext;
     if (move_uploaded_file($_FILES['photo']['tmp_name'], $dest)) $data['photo_path'] = $dest;
   }
-
-  if (empty($data['past_travel_history'])) {
-    $cnt = trim($data['past_travel_count'] ?? '');
-    $det = trim($data['past_travel_details'] ?? '');
-    $data['past_travel_history'] = ($cnt !== '' || $det !== '') ? ("回数: ".$cnt." / ".$det) : '';
-  }
 }
 
-// Build XLS and snapshot
+// Build XLS (light)
 $token = bin2hex(random_bytes(16));
-$res = rireki_render_pdf($data, $mappingFile, $outDir, $token);
-if (!$res['ok']) {
-  http_response_code(500);
-  header('Content-Type: text/plain; charset=UTF-8');
-  echo "Kaigo Rirekisho build failed: " . ($res['err'] ?? 'unknown');
-  exit;
-}
-file_put_contents(rtrim($outDir,'/').'/'.$token.'.json', json_encode($data, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
+$resX = rireki_render_xls_only($data, $mappingFile, $outDir, $token);
+if (!$resX['ok']) _plain_fail("Kaigo Rirekisho build failed: " . ($resX['err'] ?? 'unknown'), 500);
 
-// Links
-$xlsName = basename($res['xls']);
-$xlsUrl  = '/rireki/kaigo/resumes/' . $xlsName;
-$pdfUrl  = '/rireki/kaigo/php/submit_rireki.php?download=pdf&token=' . urlencode($token);
+// Save JSON snapshot for later PDF download
+@file_put_contents($outDir . '/' . $token . '.json', json_encode($data, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
+
+$xlsUrl = '/rireki/kaigo/resumes/' . basename($resX['xls']);
+$pdfUrl = '/rireki/kaigo/php/submit_rireki.php?download=pdf&token=' . $token;
 ?>
 <!doctype html>
 <html lang="ja">
@@ -198,6 +172,7 @@ $pdfUrl  = '/rireki/kaigo/php/submit_rireki.php?download=pdf&token=' . urlencode
     h1 { margin: 0 0 8px; font-size: 20px; }
     .links a { display:inline-block; margin-right: 12px; padding: 10px 14px; border-radius: 8px; text-decoration: none; border: 1px solid #dbe7f5; background: #f3f9ff; color:#0c4a7a; }
     .links a:hover{ background:#e9f5ff; }
+    .note { color:#667085; font-size:12px; margin-top:6px; }
   </style>
 </head>
 <body>
@@ -208,6 +183,7 @@ $pdfUrl  = '/rireki/kaigo/php/submit_rireki.php?download=pdf&token=' . urlencode
       <a href="<?=$pdfUrl?>">PDF でダウンロード</a>
       <a href="/rireki/index.php">別のフォーマットを選ぶ</a>
     </div>
+    <p class="note">※ PDFはクリック時に生成します。失敗時はテキストで原因を表示します。</p>
   </div>
 </body>
 </html>

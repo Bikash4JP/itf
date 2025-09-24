@@ -1,7 +1,6 @@
 <?php
 require_once __DIR__ . '/../bootstrap.php';
 
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -11,197 +10,246 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 
 /**
- * Build and return a Spreadsheet object filled from $data and $mappingFile.
- * DOES NOT write any files. Consumers can save as XLS/PDF/etc.
+ * Build and save only the XLS (BIFF8). Keeps template fidelity.
+ * Returns: ['ok'=>bool, 'xls'=>?string, 'err'=>?string]
  */
-function rireki_build_spreadsheet(array $data, string $mappingFile): Spreadsheet {
-  if (!is_readable($mappingFile)) {
-    throw new RuntimeException("Mapping not readable: $mappingFile");
-  }
-  $map = json_decode(file_get_contents($mappingFile), true, 512, JSON_THROW_ON_ERROR);
+function rireki_render_xls_only(array $data, string $mappingFile, string $outDir, string $token): array {
+  try {
+    if (!is_readable($mappingFile)) {
+      return ['ok'=>false, 'xls'=>null, 'err'=>"Mapping not readable: $mappingFile"];
+    }
+    $map = json_decode(file_get_contents($mappingFile), true, 512, JSON_THROW_ON_ERROR);
 
-  // Resolve template path (relative to mappings/)
-  $tplRel  = $map['template_file'] ?? '';
-  $tplPath = realpath(dirname($mappingFile) . '/' . $tplRel);
-  if (!$tplPath || !is_readable($tplPath)) {
-    throw new RuntimeException("Template not readable: $tplRel");
-  }
+    // Resolve template
+    $tplRel  = $map['template_file'] ?? '';
+    $tplPath = realpath(dirname($mappingFile) . '/' . $tplRel);
+    if (!$tplPath || !is_readable($tplPath)) {
+      return ['ok'=>false, 'xls'=>null, 'err'=>"Template not readable: $tplRel"];
+    }
 
-  // Load template + pick sheet
-  $spreadsheet = IOFactory::load($tplPath);
-  $sheet = $spreadsheet->getActiveSheet();
-  if (!empty($map['sheet_name']) && $spreadsheet->sheetNameExists($map['sheet_name'])) {
-    $sheet = $spreadsheet->getSheetByName($map['sheet_name']);
-    $spreadsheet->setActiveSheetIndexByName($map['sheet_name']);
-  }
+    $spreadsheet = IOFactory::load($tplPath);
+    $sheet = $spreadsheet->getActiveSheet();
+    if (!empty($map['sheet_name']) && $spreadsheet->sheetNameExists($map['sheet_name'])) {
+      $sheet = $spreadsheet->getSheetByName($map['sheet_name']);
+      $spreadsheet->setActiveSheetIndexByName($map['sheet_name']);
+    }
 
-  // Split "today" into cells (year, month, day)
-  if (!empty($map['date_now_split'])) {
-    $dt = new DateTime('now', new DateTimeZone('Asia/Tokyo'));
-    $sheet->setCellValue($map['date_now_split']['year_cell']  ?? 'AC2', (int)$dt->format('Y'));
-    $sheet->setCellValue($map['date_now_split']['month_cell'] ?? 'AF2', (int)$dt->format('n'));
-    $sheet->setCellValue($map['date_now_split']['day_cell']   ?? 'AH2', (int)$dt->format('j'));
-  }
+    // Date split to AC2/AF2/AH2 (from mapping)
+    if (!empty($map['date_now_split'])) {
+      $dt = new DateTime('now', new DateTimeZone('Asia/Tokyo'));
+      $sheet->setCellValue($map['date_now_split']['year_cell'],  (int)$dt->format('Y'));
+      $sheet->setCellValue($map['date_now_split']['month_cell'], (int)$dt->format('n'));
+      $sheet->setCellValue($map['date_now_split']['day_cell'],   (int)$dt->format('j'));
+    }
 
-  // Singles
-  if (!empty($map['singles'])) {
-    foreach ($map['singles'] as $key => $cell) {
-      if (array_key_exists($key, $data)) {
+    // Singles
+    if (!empty($map['singles'])) {
+      foreach ($map['singles'] as $key => $cell) {
+        if (!array_key_exists($key,$data)) continue;
         $sheet->setCellValue($cell, (string)$data[$key]);
       }
     }
-  }
 
-  // Repeaters (with {row}, {row_plus_1}, {row_plus_2})
-  if (!empty($map['repeaters'])) {
-    foreach ($map['repeaters'] as $repKey => $repConf) {
-      $rows = $data[$repKey] ?? [];
-      if (!is_array($rows)) continue;
-      $startRow = (int)($repConf['start_row'] ?? 0);
-      $rowStep  = (int)($repConf['row_step'] ?? 1);
-      $maxRows  = (int)($repConf['max_rows'] ?? count($rows));
-      $cols     = $repConf['columns'] ?? [];
-      $limit    = min(count($rows), $maxRows);
+    // Repeaters with {row}
+    if (!empty($map['repeaters'])) {
+      foreach ($map['repeaters'] as $repKey => $repConf) {
+        $rows = $data[$repKey] ?? [];
+        if (!is_array($rows)) continue;
+        $startRow = (int)($repConf['start_row'] ?? 0);
+        $rowStep  = (int)($repConf['row_step'] ?? 1);
+        $maxRows  = (int)($repConf['max_rows'] ?? count($rows));
+        $cols     = $repConf['columns'] ?? [];
+        $limit    = min(count($rows), $maxRows);
 
-      for ($i=0; $i<$limit; $i++) {
-        $row = $rows[$i] ?? [];
-        $r = $startRow + ($i * $rowStep);
-        foreach ($cols as $field => $tpl) {
-          $coord = str_replace(['{row}','{row_plus_1}','{row_plus_2}'], [$r, $r+1, $r+2], $tpl);
-          $sheet->setCellValue($coord, (string)($row[$field] ?? ''));
+        for ($i=0; $i<$limit; $i++) {
+          $row = $rows[$i];
+          $r = $startRow + ($i * $rowStep);
+          foreach ($cols as $field => $tpl) {
+            $coord = str_replace(['{row}','{row_plus_1}','{row_plus_2}'], [$r, $r+1, $r+2], $tpl);
+            $sheet->setCellValue($coord, (string)($row[$field] ?? ''));
+          }
         }
       }
     }
-  }
 
-  // Composed rules (e.g., age from DOB)
-  if (!empty($map['composed_rules'])) {
-    foreach ($map['composed_rules'] as $rule) {
-      if (($rule['calc'] ?? '') === 'age_from_date') {
-        $yAddr = $rule['source']['year']  ?? null;
-        $mAddr = $rule['source']['month'] ?? null;
-        $dAddr = $rule['source']['day']   ?? null;
-        $target= $rule['target']          ?? null;
-        if ($yAddr && $mAddr && $dAddr && $target) {
-          $sy = trim((string)$sheet->getCell($yAddr)->getValue());
-          $sm = trim((string)$sheet->getCell($mAddr)->getValue());
-          $sd = trim((string)$sheet->getCell($dAddr)->getValue());
-          if ($sy !== '' && $sm !== '' && $sd !== '') {
-            $dob = DateTime::createFromFormat('Y-n-j', "$sy-$sm-$sd");
-            if ($dob) {
-              $age = $dob->diff(new DateTime('now', new DateTimeZone('Asia/Tokyo')))->y;
-              $sheet->setCellValue($target, $age);
+    // Composed rules (e.g., age_from_dob)
+    if (!empty($map['composed_rules'])) {
+      foreach ($map['composed_rules'] as $rule) {
+        if (($rule['calc'] ?? '') === 'age_from_date') {
+          $yAddr = $rule['source']['year']  ?? null;
+          $mAddr = $rule['source']['month'] ?? null;
+          $dAddr = $rule['source']['day']   ?? null;
+          $target= $rule['target']          ?? null;
+          if ($yAddr && $mAddr && $dAddr && $target) {
+            $sy = (string)$sheet->getCell($yAddr)->getValue();
+            $sm = (string)$sheet->getCell($mAddr)->getValue();
+            $sd = (string)$sheet->getCell($dAddr)->getValue();
+            if ($sy!=='' && $sm!=='' && $sd!=='') {
+              $dob = DateTime::createFromFormat('Y-n-j', "$sy-$sm-$sd");
+              if ($dob) {
+                $age = $dob->diff(new DateTime('now', new DateTimeZone('Asia/Tokyo')))->y;
+                $sheet->setCellValue($target, $age);
+              }
             }
           }
         }
       }
     }
-  }
 
-  // Photo fit (anchor AD3; merged range auto-detected, e.g., AD3:AI8) with 3px padding
-  if (!empty($map['photo']) && !empty($data['photo_path'])) {
-    $ph = $data['photo_path'];
-    if (is_readable($ph)) {
-      $anchor = $map['photo']['anchor_cell'] ?? 'AD3';
-      [$c1,$r1,$c2,$r2] = findMergedBox($sheet, $anchor);
-      [$boxW,$boxH]     = regionPixelSize($sheet, $c1,$c2,$r1,$r2);
-      [$imgW,$imgH]     = @getimagesize($ph) ?: [600,800];
-
-      $maxW = isset($map['photo']['max_width_px'])  ? (int)$map['photo']['max_width_px']  : $boxW;
-      $maxH = isset($map['photo']['max_height_px']) ? (int)$map['photo']['max_height_px'] : $boxH;
-      $boxW = min($boxW, $maxW);
-      $boxH = min($boxH, $maxH);
-
-      // 3px padding all around to keep cell border visible
-      $pad = 3;
-      $boxW = max(1, $boxW - 2*$pad);
-      $boxH = max(1, $boxH - 2*$pad);
-
-      $scale = min(max($boxW,1)/$imgW, max($boxH,1)/$imgH);
-      $newW = (int)floor($imgW * $scale);
-      $newH = (int)floor($imgH * $scale);
-      $offX = max(0, (int)floor(($boxW - $newW)/2)) + $pad;
-      $offY = max(0, (int)floor(($boxH - $newH)/2)) + $pad;
-
-      $img = new Drawing();
-      $img->setName('Photo'); $img->setDescription('Applicant Photo'); $img->setPath($ph);
-      $img->setResizeProportional(true);
-      $img->setWidthAndHeight($newW, $newH);
-      $img->setCoordinates(Coordinate::stringFromColumnIndex($c1) . $r1);
-      $img->setOffsetX($offX); $img->setOffsetY($offY);
-      $img->setWorksheet($sheet);
-    }
-  }
-
-  // Page setup
-  $ps = $sheet->getPageSetup();
-  $ps->setPaperSize(PageSetup::PAPERSIZE_B5)
-     ->setOrientation(PageSetup::ORIENTATION_PORTRAIT)
-     ->setFitToWidth(1)->setFitToHeight(1)
-     ->setHorizontalCentered(true);
-  $sheet->getPageMargins()->setTop(0.25)->setBottom(0.25)->setLeft(0.25)->setRight(0.25);
-  $sheet->setShowGridlines(false);
-  $sheet->setPrintGridlines(false);
-
-  return $spreadsheet;
-}
-
-/**
- * Quick XLS writer (kept for your existing flow).
- * Returns: ['ok'=>bool,'xls'=>?string,'html_left'=>'','html_right'=>'','err'=>?string]
- */
-function rireki_render_pdf(array $data, string $mappingFile, string $outDir, string $token): array {
-  try {
-    $spreadsheet = rireki_build_spreadsheet($data, $mappingFile);
-
-    if (!is_dir($outDir)) @mkdir($outDir, 0755, true);
-    $xlsPath = rtrim($outDir,'/') . '/' . $token . '.xls';
-    IOFactory::createWriter($spreadsheet, 'Xls')->save($xlsPath);
-
-    return ['ok'=>true, 'xls'=>$xlsPath, 'html_left'=>'', 'html_right'=>'', 'err'=>null];
-  } catch (\Throwable $e) {
-    return ['ok'=>false, 'xls'=>null, 'html_left'=>'', 'html_right'=>'', 'err'=>$e->getMessage()];
-  }
-}
-
-/**
- * Build PDF by rendering the sheet region to HTML and using mPDF (no PdfWriter).
- * Returns ['ok'=>bool,'pdf'=>?string,'err'=>?string]
- */
-function rireki_make_pdf_via_html(array $data, string $mappingFile, string $outDir, string $token, string $tmpDir): array {
-  try {
-    if (!class_exists('\\Mpdf\\Mpdf')) {
-      throw new RuntimeException('mPDF library not available (composer require mpdf/mpdf).');
-    }
-
-    $spreadsheet = rireki_build_spreadsheet($data, $mappingFile);
-    $sheet = $spreadsheet->getActiveSheet();
-
-    // Build photo overlay for HTML preview (data URI)
-    $overlay = null;
-    $map = json_decode(file_get_contents($mappingFile), true, 512, JSON_THROW_ON_ERROR);
+    // Photo: anchor at AD3, auto-detect merged range (e.g., AD3:AI8) and fit inside with 3px padding to show border
     if (!empty($map['photo']) && !empty($data['photo_path']) && is_readable($data['photo_path'])) {
       $anchor = $map['photo']['anchor_cell'] ?? 'AD3';
       [$c1,$r1,$c2,$r2] = findMergedBox($sheet, $anchor);
       [$boxW,$boxH]     = regionPixelSize($sheet, $c1,$c2,$r1,$r2);
       [$imgW,$imgH]     = @getimagesize($data['photo_path']) ?: [600,800];
 
-      $pad = 3;
+      $pad  = 3;
+      $maxW = isset($map['photo']['max_width_px'])  ? min((int)$map['photo']['max_width_px'],  max(1,$boxW-2*$pad)) : max(1,$boxW-2*$pad);
+      $maxH = isset($map['photo']['max_height_px']) ? min((int)$map['photo']['max_height_px'], max(1,$boxH-2*$pad)) : max(1,$boxH-2*$pad);
+
+      $scale = min($maxW / max($imgW,1), $maxH / max($imgH,1));
+      $newW = (int)floor($imgW * $scale);
+      $newH = (int)floor($imgH * $scale);
+      $offX = max(0, (int)floor(($maxW - $newW)/2)) + $pad;
+      $offY = max(0, (int)floor(($maxH - $newH)/2)) + $pad;
+
+      $img = new Drawing();
+      $img->setName('Photo'); $img->setDescription('Applicant Photo'); $img->setPath($data['photo_path']);
+      $img->setResizeProportional(true);
+      $img->setWidthAndHeight($newW, $newH);
+      $img->setCoordinates(Coordinate::stringFromColumnIndex($c1) . $r1);
+      $img->setOffsetX($offX); $img->setOffsetY($offY);
+      $img->setWorksheet($sheet);
+    }
+
+    // Page setup (keep B5 or switch to A4 if your template is A4; we keep the template’s layout)
+    $ps = $sheet->getPageSetup();
+    $ps->setPaperSize(PageSetup::PAPERSIZE_A4) // A4 output better matches mPDF single page
+       ->setOrientation(PageSetup::ORIENTATION_PORTRAIT)
+       ->setFitToWidth(1)->setFitToHeight(0)
+       ->setHorizontalCentered(true);
+    $sheet->getPageMargins()->setTop(0.25)->setBottom(0.25)->setLeft(0.25)->setRight(0.25);
+    $sheet->setShowGridlines(false);
+    $sheet->setPrintGridlines(false);
+
+    // Save .xls
+    if (!is_dir($outDir)) @mkdir($outDir, 0755, true);
+    $xlsPath = rtrim($outDir,'/') . '/' . $token . '.xls';
+    IOFactory::createWriter($spreadsheet, 'Xls')->save($xlsPath);
+
+    return ['ok'=>true, 'xls'=>$xlsPath, 'err'=>null];
+
+  } catch (Throwable $e) {
+    return ['ok'=>false, 'xls'=>null, 'err'=>$e->getMessage()];
+  }
+}
+
+/**
+ * Make a PDF via HTML streaming (single A4 page, avoids PCRE backtrack limit).
+ * Returns: ['ok'=>bool, 'pdf'=>?string, 'err'=>?string]
+ */
+function rireki_make_pdf_via_html(array $data, string $mappingFile, string $outDir, string $token, string $tmpDir): array {
+  try {
+    if (!class_exists('\\Mpdf\\Mpdf')) throw new RuntimeException('mPDF not available');
+
+    // Give PCRE more headroom
+    @ini_set('pcre.backtrack_limit', '5000000');
+    @ini_set('pcre.recursion_limit', '5000000');
+
+    if (!is_readable($mappingFile)) throw new RuntimeException("Mapping not readable");
+    $map = json_decode(file_get_contents($mappingFile), true, 512, JSON_THROW_ON_ERROR);
+    $tplRel  = $map['template_file'] ?? '';
+    $tplPath = realpath(dirname($mappingFile) . '/' . $tplRel);
+    if (!$tplPath || !is_readable($tplPath)) throw new RuntimeException("Template not readable");
+
+    $spreadsheet = IOFactory::load($tplPath);
+    $sheet = $spreadsheet->getActiveSheet();
+    if (!empty($map['sheet_name']) && $spreadsheet->sheetNameExists($map['sheet_name'])) {
+      $sheet = $spreadsheet->getSheetByName($map['sheet_name']);
+      $spreadsheet->setActiveSheetIndexByName($map['sheet_name']);
+    }
+
+    // date split
+    if (!empty($map['date_now_split'])) {
+      $dt = new DateTime('now', new DateTimeZone('Asia/Tokyo'));
+      $sheet->setCellValue($map['date_now_split']['year_cell'],  (int)$dt->format('Y'));
+      $sheet->setCellValue($map['date_now_split']['month_cell'], (int)$dt->format('n'));
+      $sheet->setCellValue($map['date_now_split']['day_cell'],   (int)$dt->format('j'));
+    }
+    // singles
+    if (!empty($map['singles'])) {
+      foreach ($map['singles'] as $key => $cell) {
+        if (array_key_exists($key,$data)) $sheet->setCellValue($cell, (string)$data[$key]);
+      }
+    }
+    // repeaters
+    if (!empty($map['repeaters'])) {
+      foreach ($map['repeaters'] as $repKey => $repConf) {
+        $rows = $data[$repKey] ?? [];
+        if (!is_array($rows)) continue;
+        $startRow = (int)($repConf['start_row'] ?? 0);
+        $rowStep  = (int)($repConf['row_step'] ?? 1);
+        $maxRows  = (int)($repConf['max_rows'] ?? count($rows));
+        $cols     = $repConf['columns'] ?? [];
+        $limit    = min(count($rows), $maxRows);
+        for ($i=0; $i<$limit; $i++) {
+          $row = $rows[$i] ?? [];
+          $r = $startRow + ($i * $rowStep);
+          foreach ($cols as $field => $tpl) {
+            $coord = str_replace(['{row}','{row_plus_1}','{row_plus_2}'], [$r, $r+1, $r+2], $tpl);
+            $sheet->setCellValue($coord, (string)($row[$field] ?? ''));
+          }
+        }
+      }
+    }
+    // composed (age)
+    if (!empty($map['composed_rules'])) {
+      foreach ($map['composed_rules'] as $rule) {
+        if (($rule['calc'] ?? '') === 'age_from_date') {
+          $yAddr = $rule['source']['year']  ?? null;
+          $mAddr = $rule['source']['month'] ?? null;
+          $dAddr = $rule['source']['day']   ?? null;
+          $target= $rule['target']          ?? null;
+          if ($yAddr && $mAddr && $dAddr && $target) {
+            $sy = (string)$sheet->getCell($yAddr)->getValue();
+            $sm = (string)$sheet->getCell($mAddr)->getValue();
+            $sd = (string)$sheet->getCell($dAddr)->getValue();
+            if ($sy!=='' && $sm!=='' && $sd!=='') {
+              $dob = DateTime::createFromFormat('Y-n-j', "$sy-$sm-$sd");
+              if ($dob) $sheet->setCellValue($target, $dob->diff(new DateTime('now', new DateTimeZone('Asia/Tokyo')))->y);
+            }
+          }
+        }
+      }
+    }
+
+    // photo overlay (AD3 merged region) with 3px padding so border is visible
+    $overlay = null;
+    if (!empty($map['photo']) && !empty($data['photo_path']) && is_readable($data['photo_path'])) {
+      $anchor = $map['photo']['anchor_cell'] ?? 'AD3';
+      [$c1,$r1,$c2,$r2] = findMergedBox($sheet, $anchor);
+      [$boxW,$boxH]     = regionPixelSize($sheet, $c1,$c2,$r1,$r2);
+      [$imgW,$imgH]     = @getimagesize($data['photo_path']) ?: [600,800];
+
+      $pad  = 3;
       $boxW = max(1, $boxW - 2*$pad);
       $boxH = max(1, $boxH - 2*$pad);
 
-      $scale = min(max($boxW,1)/$imgW, max($boxH,1)/$imgH);
-      $newW = (int)floor($imgW * $scale);
-      $newH = (int)floor($imgH * $scale);
-      $offX = max(0, (int)floor(($boxW - $newW)/2)) + $pad + 2; // +2 for TD padding
-      $offY = max(0, (int)floor(($boxH - $newH)/2)) + $pad;
+      $scale = min($boxW / max($imgW,1), $boxH / max($imgH,1));
+      $newW  = (int)floor($imgW * $scale);
+      $newH  = (int)floor($imgH * $scale);
+      $offX  = max(0, (int)floor(($boxW - $newW)/2)) + $pad + 2; // +2px for TD padding
+      $offY  = max(0, (int)floor(($boxH - $newH)/2)) + $pad;
 
-      $gi = @getimagesize($data['photo_path']); $mime = ($gi && !empty($gi['mime'])) ? $gi['mime'] : 'image/jpeg';
       $bin = @file_get_contents($data['photo_path']);
-      if ($bin !== false) {
+      $mime = 'image/jpeg'; $gi = @getimagesize($data['photo_path']);
+      if (is_array($gi) && !empty($gi['mime'])) $mime = $gi['mime'];
+      $dataUri = $bin!==false ? ('data:'.$mime.';base64,'.base64_encode($bin)) : null;
+
+      if ($dataUri) {
         $overlay = [
           'addr'   => Coordinate::stringFromColumnIndex($c1) . $r1,
-          'src'    => 'data:' . $mime . ';base64,' . base64_encode($bin),
+          'src'    => $dataUri,
           'width'  => $newW,
           'height' => $newH,
           'offX'   => $offX,
@@ -210,51 +258,51 @@ function rireki_make_pdf_via_html(array $data, string $mappingFile, string $outD
       }
     }
 
-    // Render two pages: A1–O86 and P1–X86 (same as your previews)
-    $htmlLeft  = renderSheetRegionHtml($sheet, 'A','O', 1,86, $overlay);
-    $htmlRight = renderSheetRegionHtml($sheet, 'P','X', 1,86, $overlay);
+    // Stream full sheet (A … last column) to mPDF in chunks to avoid PCRE limits
+    $lastCol = $sheet->getHighestColumn();     // e.g., "AI"
+    $lastRow = max(86, (int)$sheet->getHighestRow());
+    [$headHtml, $rowHtmlList, $tailHtml] = renderSheetRegionHtmlStream($sheet, 'A', $lastCol, 1, $lastRow, $overlay);
 
     if (!is_dir($outDir)) @mkdir($outDir, 0755, true);
     if (!is_dir($tmpDir)) @mkdir($tmpDir, 0755, true);
 
     $mpdf = new \Mpdf\Mpdf([
       'tempDir' => $tmpDir,
-      'format'  => 'B5',
+      'format'  => 'A4',
       'orientation' => 'P',
       'autoScriptToLang' => true,
       'autoLangToFont'   => true,
-      'margin_top'    => 8,
-      'margin_bottom' => 8,
-      'margin_left'   => 8,
-      'margin_right'  => 8,
+      'margin_top'    => 5,
+      'margin_bottom' => 5,
+      'margin_left'   => 5,
+      'margin_right'  => 5,
     ]);
+    // shrink table to page width
+    $mpdf->shrink_tables_to_fit = 1;
 
-    $css = <<<CSS
-      body { font-family: DejaVu Sans, ipag, "Noto Sans CJK JP", sans-serif; }
-      .pagewrap { width: 100%; }
-CSS;
-
+    $css = 'table{border-collapse:collapse;table-layout:fixed;width:100%} td{vertical-align:top;white-space:pre-wrap;line-height:1.15}';
     $mpdf->WriteHTML('<style>'.$css.'</style>', \Mpdf\HTMLParserMode::HEADER_CSS);
-    $mpdf->WriteHTML('<div class="pagewrap">'.$htmlLeft.'</div>', \Mpdf\HTMLParserMode::HTML_BODY);
-    $mpdf->AddPage();
-    $mpdf->WriteHTML('<div class="pagewrap">'.$htmlRight.'</div>', \Mpdf\HTMLParserMode::HTML_BODY);
+
+    // stream: header, each row, then tail
+    $mpdf->WriteHTML($headHtml, \Mpdf\HTMLParserMode::HTML_BODY);
+    foreach ($rowHtmlList as $rowHtml) {
+      $mpdf->WriteHTML($rowHtml, \Mpdf\HTMLParserMode::HTML_BODY);
+    }
+    $mpdf->WriteHTML($tailHtml, \Mpdf\HTMLParserMode::HTML_BODY);
 
     $pdfPath = rtrim($outDir,'/') . '/' . $token . '.pdf';
     $mpdf->Output($pdfPath, \Mpdf\Output\Destination::FILE);
 
-    if (!is_readable($pdfPath) || filesize($pdfPath) === 0) {
-      throw new RuntimeException('Failed to produce PDF file.');
-    }
+    if (!is_readable($pdfPath) || filesize($pdfPath) === 0) throw new RuntimeException('Failed to produce PDF file.');
     return ['ok'=>true, 'pdf'=>$pdfPath, 'err'=>null];
 
-  } catch (\Throwable $e) {
-    // optional: write a log here if you want
+  } catch (Throwable $e) {
     return ['ok'=>false, 'pdf'=>null, 'err'=>$e->getMessage()];
   }
 }
 
-/** ================= HTML render helpers ================= */
-function renderSheetRegionHtml(Worksheet $sheet, string $colStartLetter, string $colEndLetter, int $rowStart, int $rowEnd, ?array $overlay = null): string {
+/* ===================== HTML render helpers (streaming) ===================== */
+function renderSheetRegionHtmlStream(Worksheet $sheet, string $colStartLetter, string $colEndLetter, int $rowStart, int $rowEnd, ?array $overlay = null): array {
   $cStart = Coordinate::columnIndexFromString(strtoupper($colStartLetter));
   $cEnd   = Coordinate::columnIndexFromString(strtoupper($colEndLetter));
 
@@ -282,21 +330,26 @@ function renderSheetRegionHtml(Worksheet $sheet, string $colStartLetter, string 
   // Merges
   [$mergeTop, $mergeCovered] = buildMergeMaps($sheet, $cStart, $cEnd, $rowStart, $rowEnd);
 
-  $html = [];
-  $html[] = '<div style="display:inline-block;background:#fff;position:relative;">';
-  $html[] = '<table style="border-collapse:collapse;table-layout:fixed;">';
-  $html[] = '<colgroup>';
-  for ($c = $cStart; $c <= $cEnd; $c++) $html[] = '<col style="width:' . (int)$colPx[$c] . 'px;">';
-  $html[] = '</colgroup>';
+  // HEAD
+  $head = [];
+  $head[] = '<div style="display:block;background:#fff;position:relative;">';
+  $head[] = '<table style="border-collapse:collapse;table-layout:fixed;">';
+  $head[] = '<colgroup>';
+  for ($c = $cStart; $c <= $cEnd; $c++) $head[] = '<col style="width:' . (int)$colPx[$c] . 'px;">';
+  $head[] = '</colgroup>';
+  $headHtml = implode('', $head);
 
+  // ROWS
+  $rows = [];
   for ($r = $rowStart; $r <= $rowEnd; $r++) {
-    $html[] = '<tr style="height:' . (int)$rowPx[$r] . 'px;">';
+    $rowParts = [];
+    $rowParts[] = '<tr style="height:' . (int)$rowPx[$r] . 'px;">';
     for ($c = $cStart; $c <= $cEnd; $c++) {
       if (isset($mergeCovered[$r][$c])) continue;
       $rs = 1; $cs = 1;
       if (isset($mergeTop[$r][$c])) { [$rs, $cs] = $mergeTop[$r][$c]; }
 
-      // Borders: only if template has borders
+      // Borders from template
       $stylePieces = [];
       $bTop    = getCellBorderSideCss($sheet, $r,           $c,           'top');
       $bLeft   = getCellBorderSideCss($sheet, $r,           $c,           'left');
@@ -320,22 +373,26 @@ function renderSheetRegionHtml(Worksheet $sheet, string $colStartLetter, string 
       if ($v instanceof \PhpOffice\PhpSpreadsheet\RichText\RichText) $v = $v->getPlainText();
       $val = htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
 
-      // Inject photo overlay if this is the anchor top-left cell
+      // photo overlay if this is anchor
       if ($overlay && $overlay['addr'] === $addr) {
         $img = '<div style="position:relative;width:100%;height:100%;">'
              . '<img alt="photo" src="'.htmlspecialchars($overlay['src'],ENT_QUOTES,'UTF-8').'" '
              . 'style="position:absolute;left:'.$overlay['offX'].'px;top:'.$overlay['offY'].'px;'
-             . 'width:'.$overlay['width'].'px;height:'.$overlay['height'].'px;object-fit:cover;border:0;"/>'  // 3px padding handled in offsets
+             . 'width:'.$overlay['width'].'px;height:'.$overlay['height'].'px;object-fit:cover;border:0;"/>'
              . '</div>';
         $val = $img . $val;
       }
 
-      $html[] = '<td'.$extra.$attrs.'>'.$val.'</td>';
+      $rowParts[] = '<td'.$extra.$attrs.'>'.$val.'</td>';
     }
-    $html[] = '</tr>';
+    $rowParts[] = '</tr>';
+    $rows[] = implode('', $rowParts);
   }
-  $html[] = '</table></div>';
-  return implode('', $html);
+
+  // TAIL
+  $tail = '</table></div>';
+
+  return [$headHtml, $rows, $tail];
 }
 
 function buildMergeMaps(Worksheet $sheet, int $cStart, int $cEnd, int $rStart, int $rEnd): array {
@@ -397,7 +454,7 @@ function mapBorderType(string $type): array {
   }
 }
 
-/** ===== Photo region helpers ===== */
+/* ===================== Photo/size helpers ===================== */
 function findMergedBox(Worksheet $sheet, string $anchorCell): array {
   $colLetters = preg_replace('/\d+$/','',$anchorCell);
   $rowNumber  = (int)preg_replace('/^\D+/','',$anchorCell);
@@ -411,9 +468,9 @@ function findMergedBox(Worksheet $sheet, string $anchorCell): array {
       return [$c1,$r1,$c2,$r2];
     }
   }
-  // not merged: use the single cell as box
   return [$ac,$ar,$ac,$ar];
 }
+
 function regionPixelSize(Worksheet $sheet, int $c1, int $c2, int $r1, int $r2): array {
   $defaultColW = $sheet->getDefaultColumnDimension()->getWidth();
   if ($defaultColW === null || $defaultColW <= 0) $defaultColW = 8.43;
@@ -435,7 +492,6 @@ function regionPixelSize(Worksheet $sheet, int $c1, int $c2, int $r1, int $r2): 
   return [$wPx, $hPx];
 }
 
-/** ===== Units ===== */
 function excelColWidthToPx(float $widthChars): int {
   $pixels = (int)floor(((256 * $widthChars + (int)floor(128/7)) / 256) * 7);
   if ($pixels <= 0) $pixels = 1;
