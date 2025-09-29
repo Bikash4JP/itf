@@ -45,7 +45,7 @@ require_once 'db_connect.php';
                 <li><a href="t.html" class="menu-btn">人材を編集</a></li>
                 <li><a href="t.html" class="menu-btn">請求書リクエスト</a></li>
                 <li><a href="t.html" class="menu-btn">今月の入社</a></li>
-                <li><a href="t.html" class="menu-btn">未定1</a></li>
+                <li><a href="rireki_list.php" class="menu-btn">履歴書一覧</a></li>
                 <li><a href="t.html" class="menu-btn">未定2</a></li>
             </ul>
         </div>
