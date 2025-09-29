@@ -38,6 +38,24 @@ function renderTableHeaders() {
     tableHead.appendChild(row);
 }
 
+function loadFrequentKeywords() {
+    return JSON.parse(localStorage.getItem('frequentKeywords') || '[]');
+}
+
+function saveKeyword(keyword) {
+    let keywords = loadFrequentKeywords();
+    keyword = keyword.trim().toLowerCase();
+    if (!keyword) return;
+    const index = keywords.findIndex(k => k.text === keyword);
+    if (index >= 0) {
+        keywords[index].count += 1;
+    } else {
+        keywords.push({ text: keyword, count: 1, timestamp: Date.now() });
+    }
+    keywords.sort((a, b) => b.count - a.count || b.timestamp - a.timestamp);
+    keywords = keywords.slice(0, 10);
+    localStorage.setItem('frequentKeywords', JSON.stringify(keywords));
+}
 function handleEnter(event) {
     if (event.key === 'Enter') {
         searchWorkers();
@@ -47,12 +65,7 @@ function handleEnter(event) {
 
 function searchWorkers() {
     const input = document.getElementById('searchInput').value.toLowerCase().trim();
-    const facilityFilter = document.getElementById('filterFacility').value.toLowerCase();
-    const referrerFilter = document.getElementById('filterReferrer').value.toLowerCase();
-    const nationalityFilter = document.getElementById('filterNationality').value.toLowerCase();
-    const jlptFilter = document.getElementById('filterJLPT').value.toLowerCase();
-    const genderFilter = document.getElementById('filterGender').value.toLowerCase();
-
+    if (input) saveKeyword(input);
     const resultsBody = document.getElementById('resultsBody');
     const resultsContainer = document.getElementById('resultsContainer');
     const fullDetails = document.getElementById('fullDetails');
@@ -61,23 +74,21 @@ function searchWorkers() {
     fullDetails.style.display = 'none';
     resultsContainer.style.display = 'none';
     infoText.style.display = 'none';
-    if (!input && !facilityFilter && !referrerFilter && !nationalityFilter && !jlptFilter && !genderFilter) {
+    if (!input) {
         infoText.style.display = 'block';
         return;
     }
     const keywords = input.split(/\s+/).filter(keyword => keyword.length > 0);
+    if (keywords.length === 0) {
+        infoText.style.display = 'block';
+        return;
+    }
     const filteredWorkers = workers.filter(worker => {
-        let matches = keywords.length === 0 || keywords.every(keyword => {
+        return keywords.every(keyword => {
             return Object.values(worker).some(value =>
                 value && value.toString().toLowerCase().includes(keyword)
             );
         });
-        if (facilityFilter && (worker['施設名（勤務先）'] || '').toLowerCase() !== facilityFilter) matches = false;
-        if (referrerFilter && (worker['紹介元'] || '').toLowerCase() !== referrerFilter) matches = false;
-        if (nationalityFilter && (worker['雇用者情報（国籍）'] || '').toLowerCase() !== nationalityFilter) matches = false;
-        if (jlptFilter && (worker['JLPT状況'] || '').toLowerCase() !== jlptFilter) matches = false;
-        if (genderFilter && (worker['雇用者情報（性別）'] || '').toLowerCase() !== genderFilter) matches = false;
-        return matches;
     });
     if (filteredWorkers.length === 0) {
         resultsBody.innerHTML = '<tr><td colspan="5">一致する労働者が見つかりませんでした</td></tr>';
@@ -136,7 +147,7 @@ function showFullDetails(name) {
                 <li>退職日: ${worker['支援退職日'] || ''}</li>
                 <li>状態: ${worker['状態'] || ''}</li>
                 <li>エリア: ${worker['エリア'] || ''}</li>
-                <li>受け入れ期間: ${worker['受け入れ期間'] || ''}</li>
+                <li>受け入れ機関: ${worker['受け入れ機関'] || ''}</li>
                 <li>受入機関（郵便番号）: ${worker['受入機関（郵便番号）'] || ''}</li>
                 <li>受入機関（電話番号）: ${worker['受入機関（電話番号）'] || ''}</li>
             </ul>
@@ -186,13 +197,9 @@ function printDetails() {
     printWindow.document.write('<style>@page { size: A4; margin: 1cm; } body { font-family: Arial, sans-serif; font-size: 12pt; } .box { border: 1px solid #ddd; padding: 10px; margin: 5px 0; page-break-inside: avoid; } .title { font-size: 16pt; font-weight: bold; border-bottom: 2px solid #000; margin-bottom: 5px; color: #0bb4e7; padding: 5px; } ul { list-style: none; padding: 0; } li { margin-bottom: 5px; font-size: 10pt; } .details-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; page-break-inside: avoid; } @media print { body { margin: 0; } }</style>');
     printWindow.document.write('</head><body>');
     printWindow.document.write('<div class="details-grid">' + fullDetails + '</div>');
+    printWindow.document.write('</body></html>');
     printWindow.document.close();
     printWindow.print();
 }
 
 fetchData();
-
-// Add event listeners to filters
-document.querySelectorAll('.filter-container select').forEach(select => {
-    select.addEventListener('change', searchWorkers);
-});

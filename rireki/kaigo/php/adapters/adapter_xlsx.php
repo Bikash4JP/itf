@@ -96,7 +96,7 @@ function rireki_render_xls_only(array $data, string $mappingFile, string $outDir
       }
     }
 
-    // Photo: anchor at AD3, auto-detect merged range (e.g., AD3:AI8) and fit inside with 3px padding to show border
+    // Photo: anchor at AD3 (e.g., merged AD3:AI8) and fit inside with 3px padding to show border
     if (!empty($map['photo']) && !empty($data['photo_path']) && is_readable($data['photo_path'])) {
       $anchor = $map['photo']['anchor_cell'] ?? 'AD3';
       [$c1,$r1,$c2,$r2] = findMergedBox($sheet, $anchor);
@@ -122,9 +122,9 @@ function rireki_render_xls_only(array $data, string $mappingFile, string $outDir
       $img->setWorksheet($sheet);
     }
 
-    // Page setup (keep B5 or switch to A4 if your template is A4; we keep the template’s layout)
+    // Page setup for XLS (just to keep a sane default)
     $ps = $sheet->getPageSetup();
-    $ps->setPaperSize(PageSetup::PAPERSIZE_A4) // A4 output better matches mPDF single page
+    $ps->setPaperSize(PageSetup::PAPERSIZE_A4)
        ->setOrientation(PageSetup::ORIENTATION_PORTRAIT)
        ->setFitToWidth(1)->setFitToHeight(0)
        ->setHorizontalCentered(true);
@@ -145,14 +145,13 @@ function rireki_render_xls_only(array $data, string $mappingFile, string $outDir
 }
 
 /**
- * Make a PDF via HTML streaming (single A4 page, avoids PCRE backtrack limit).
+ * Make a PDF via HTML streaming (single A4 page) with proportional width scaling.
  * Returns: ['ok'=>bool, 'pdf'=>?string, 'err'=>?string]
  */
 function rireki_make_pdf_via_html(array $data, string $mappingFile, string $outDir, string $token, string $tmpDir): array {
   try {
     if (!class_exists('\\Mpdf\\Mpdf')) throw new RuntimeException('mPDF not available');
 
-    // Give PCRE more headroom
     @ini_set('pcre.backtrack_limit', '5000000');
     @ini_set('pcre.recursion_limit', '5000000');
 
@@ -258,32 +257,70 @@ function rireki_make_pdf_via_html(array $data, string $mappingFile, string $outD
       }
     }
 
-    // Stream full sheet (A … last column) to mPDF in chunks to avoid PCRE limits
-    $lastCol = $sheet->getHighestColumn();     // e.g., "AI"
-    $lastRow = max(86, (int)$sheet->getHighestRow());
-    [$headHtml, $rowHtmlList, $tailHtml] = renderSheetRegionHtmlStream($sheet, 'A', $lastCol, 1, $lastRow, $overlay);
+    // ===== mPDF config + font (ＭＳ 明朝) =====
+    $fontDir  = rireki_path('fonts');
+    $msMincho = $fontDir . '/msmincho001.ttf';
+
+    $defaultConfig       = (new \Mpdf\Config\ConfigVariables())->getDefaults();
+    $defaultFontConfig   = (new \Mpdf\Config\FontVariables())->getDefaults();
+    $fontDirsDefault     = $defaultConfig['fontDir'];
+    $fontDataDefault     = $defaultFontConfig['fontdata'];
+
+    $extraFontData = [];
+    if (is_readable($msMincho)) {
+      $extraFontData = [
+        'msmincho001' => [
+          'R'         => 'msmincho001.ttf',
+          'useOTL'    => 0xFF,
+          'useKashida'=> 0,
+        ],
+      ];
+    }
 
     if (!is_dir($outDir)) @mkdir($outDir, 0755, true);
     if (!is_dir($tmpDir)) @mkdir($tmpDir, 0755, true);
 
+    // Margins in mm (tight)
+    $marginL = 5; $marginR = 5; $marginT = 5; $marginB = 5;
+
     $mpdf = new \Mpdf\Mpdf([
-      'tempDir' => $tmpDir,
-      'format'  => 'A4',
-      'orientation' => 'P',
+      'tempDir'          => $tmpDir,
+      'format'           => 'A4',
+      'orientation'      => 'P',
+      'margin_top'       => $marginT,
+      'margin_bottom'    => $marginB,
+      'margin_left'      => $marginL,
+      'margin_right'     => $marginR,
       'autoScriptToLang' => true,
       'autoLangToFont'   => true,
-      'margin_top'    => 5,
-      'margin_bottom' => 5,
-      'margin_left'   => 5,
-      'margin_right'  => 5,
+      'fontDir'          => array_merge($fontDirsDefault, [$fontDir]),
+      'fontdata'         => $extraFontData + $fontDataDefault,
+      'default_font'     => is_readable($msMincho) ? 'msmincho001' : 'sans',
     ]);
-    // shrink table to page width
-    $mpdf->shrink_tables_to_fit = 1;
 
-    $css = 'table{border-collapse:collapse;table-layout:fixed;width:100%} td{vertical-align:top;white-space:pre-wrap;line-height:1.15}';
+    // Do NOT let mPDF auto-shrink our table; we’ll fit widths ourselves.
+    $mpdf->shrink_tables_to_fit = 0;
+
+    // Compute available content width in *CSS px* (mPDF uses 96dpi for px)
+    $mm_to_px = 96 / 25.4;
+    $contentWidthPx = (210 - ($marginL + $marginR)) * $mm_to_px; // A4 width minus margins
+    if ($contentWidthPx < 720) $contentWidthPx = 720; // guardrail
+
+    // Render the whole sheet and scale to fit content width
+    $lastCol = $sheet->getHighestColumn();
+    $lastRow = max(86, (int)$sheet->getHighestRow());
+
+    [$headHtml, $rowHtmlList, $tailHtml] = renderSheetRegionHtmlStreamScaled(
+      $sheet, 'A', $lastCol, 1, $lastRow, $overlay, (int)$contentWidthPx
+    );
+
+    // Basic CSS; keep dotted borders by mapping from template
+    $css = 'table{border-collapse:collapse;table-layout:fixed;margin:0;padding:0}'
+         . 'td{vertical-align:top;white-space:pre-wrap;line-height:1.15}'
+         . 'tr{page-break-inside:avoid}';
     $mpdf->WriteHTML('<style>'.$css.'</style>', \Mpdf\HTMLParserMode::HEADER_CSS);
 
-    // stream: header, each row, then tail
+    // Stream in chunks (avoid PCRE limits)
     $mpdf->WriteHTML($headHtml, \Mpdf\HTMLParserMode::HTML_BODY);
     foreach ($rowHtmlList as $rowHtml) {
       $mpdf->WriteHTML($rowHtml, \Mpdf\HTMLParserMode::HTML_BODY);
@@ -292,7 +329,6 @@ function rireki_make_pdf_via_html(array $data, string $mappingFile, string $outD
 
     $pdfPath = rtrim($outDir,'/') . '/' . $token . '.pdf';
     $mpdf->Output($pdfPath, \Mpdf\Output\Destination::FILE);
-
     if (!is_readable($pdfPath) || filesize($pdfPath) === 0) throw new RuntimeException('Failed to produce PDF file.');
     return ['ok'=>true, 'pdf'=>$pdfPath, 'err'=>null];
 
@@ -301,12 +337,15 @@ function rireki_make_pdf_via_html(array $data, string $mappingFile, string $outD
   }
 }
 
-/* ===================== HTML render helpers (streaming) ===================== */
-function renderSheetRegionHtmlStream(Worksheet $sheet, string $colStartLetter, string $colEndLetter, int $rowStart, int $rowEnd, ?array $overlay = null): array {
+/* ===================== HTML render helpers (scaled) ===================== */
+function renderSheetRegionHtmlStreamScaled(
+  Worksheet $sheet, string $colStartLetter, string $colEndLetter,
+  int $rowStart, int $rowEnd, ?array $overlay, int $targetTotalPx
+): array {
   $cStart = Coordinate::columnIndexFromString(strtoupper($colStartLetter));
   $cEnd   = Coordinate::columnIndexFromString(strtoupper($colEndLetter));
 
-  // Column widths (px)
+  // Column widths (px) from Excel
   $colPx = [];
   $defaultColW = $sheet->getDefaultColumnDimension()->getWidth();
   if ($defaultColW === null || $defaultColW <= 0) $defaultColW = 8.43;
@@ -317,6 +356,12 @@ function renderSheetRegionHtmlStream(Worksheet $sheet, string $colStartLetter, s
     $colPx[$c] = excelColWidthToPx($w);
   }
 
+  // Scale all columns to fit exactly into targetTotalPx
+  $sum = 0; foreach ($colPx as $v) $sum += $v;
+  $scale = $sum > 0 ? ($targetTotalPx / $sum) : 1.0;
+  if ($scale <= 0) $scale = 1.0;
+  foreach ($colPx as $k => $v) $colPx[$k] = max(1, (int)round($v * $scale));
+
   // Row heights (px)
   $rowPx = [];
   $defaultRowPt = $sheet->getDefaultRowDimension()->getRowHeight();
@@ -324,16 +369,17 @@ function renderSheetRegionHtmlStream(Worksheet $sheet, string $colStartLetter, s
   for ($r = $rowStart; $r <= $rowEnd; $r++) {
     $dim = $sheet->getRowDimension($r);
     $pt = $dim && $dim->getRowHeight() > 0 ? (float)$dim->getRowHeight() : (float)$defaultRowPt;
-    $rowPx[$r] = pointsToPx($pt);
+    $rowPx[$r] = pointsToPx($pt); // keep template heights; no scale (height in px is stable)
   }
 
   // Merges
   [$mergeTop, $mergeCovered] = buildMergeMaps($sheet, $cStart, $cEnd, $rowStart, $rowEnd);
 
-  // HEAD
+  // HEAD with fixed table pixel width
+  $tableWidth = array_sum($colPx);
   $head = [];
   $head[] = '<div style="display:block;background:#fff;position:relative;">';
-  $head[] = '<table style="border-collapse:collapse;table-layout:fixed;">';
+  $head[] = '<table style="border-collapse:collapse;table-layout:fixed;width:'.$tableWidth.'px;margin:0;padding:0">';
   $head[] = '<colgroup>';
   for ($c = $cStart; $c <= $cEnd; $c++) $head[] = '<col style="width:' . (int)$colPx[$c] . 'px;">';
   $head[] = '</colgroup>';
@@ -349,7 +395,7 @@ function renderSheetRegionHtmlStream(Worksheet $sheet, string $colStartLetter, s
       $rs = 1; $cs = 1;
       if (isset($mergeTop[$r][$c])) { [$rs, $cs] = $mergeTop[$r][$c]; }
 
-      // Borders from template
+      // Borders from template (dotted/dashed preserved)
       $stylePieces = [];
       $bTop    = getCellBorderSideCss($sheet, $r,           $c,           'top');
       $bLeft   = getCellBorderSideCss($sheet, $r,           $c,           'left');
