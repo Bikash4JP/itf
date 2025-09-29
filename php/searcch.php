@@ -9,6 +9,18 @@ if (!isset($_SESSION['id']) || !isset($_SESSION['username'])) {
 
 // Database connection
 require_once 'db_connect.php';
+
+function getUniqueValues($pdo, $column) {
+    $stmt = $pdo->prepare("SELECT DISTINCT $column FROM talents WHERE $column IS NOT NULL AND $column != ''");
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_COLUMN);
+}
+
+$facilityOptions = getUniqueValues($pdo, '施設名（勤務先）');
+$referrerOptions = getUniqueValues($pdo, '紹介元');
+$nationalityOptions = getUniqueValues($pdo, '雇用者情報（国籍）');
+$jlptOptions = getUniqueValues($pdo, 'JLPT状況');
+$genderOptions = getUniqueValues($pdo, '雇用者情報（性別）');
 ?>
 
 <!DOCTYPE html>
@@ -42,8 +54,8 @@ require_once 'db_connect.php';
             <div class="menu-title">Menus</div>
             <ul>
                 <li><a href="addstaff.php" class="menu-btn">人材を追加</a></li>
-                <li><a href="t.html" class="menu-btn">人材を編集</a></li>
-                <li><a href="t.html" class="menu-btn">請求書リクエスト</a></li>
+                <li><a href="t.html" class="menu-btn">今月の入社</a></li>
+                <li><a href="t.html" class="menu-btn">請求書送付先</a></li>
                 <li><a href="t.html" class="menu-btn">今月の入社</a></li>
                 <li><a href="rireki_list.php" class="menu-btn">履歴書一覧</a></li>
                 <li><a href="t.html" class="menu-btn">未定2</a></li>
@@ -54,9 +66,43 @@ require_once 'db_connect.php';
         <div class="content-area">
             <!-- Search box -->
             <div class="search-container">
-                <input type="text" id="searchInput" placeholder="氏名、施設、住所、担当者、電話番号など何でもキーワード　スペースで区切って検索できます..." onkeyup="searchWorkers()" onfocus="showSuggestions()" onblur="hideSuggestions()" onkeypress="handleEnter(event)">
+                <input type="text" id="searchInput" placeholder="スペースで区切って検索できます..." onkeyup="searchWorkers()" onfocus="showSuggestions()" onblur="hideSuggestions()" onkeypress="handleEnter(event)">
             </div>
             <div id="suggestions" class="suggestions"></div>
+
+            <!-- Filters -->
+            <div class="filter-container">
+                <select id="filterFacility">
+                    <option value="">施設名（勤務先）</option>
+                    <?php foreach ($facilityOptions as $option): ?>
+                        <option value="<?php echo htmlspecialchars($option); ?>"><?php echo htmlspecialchars($option); ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <select id="filterReferrer">
+                    <option value="">紹介元</option>
+                    <?php foreach ($referrerOptions as $option): ?>
+                        <option value="<?php echo htmlspecialchars($option); ?>"><?php echo htmlspecialchars($option); ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <select id="filterNationality">
+                    <option value="">雇用者情報（国籍）</option>
+                    <?php foreach ($nationalityOptions as $option): ?>
+                        <option value="<?php echo htmlspecialchars($option); ?>"><?php echo htmlspecialchars($option); ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <select id="filterJLPT">
+                    <option value="">JLPT状況</option>
+                    <?php foreach ($jlptOptions as $option): ?>
+                        <option value="<?php echo htmlspecialchars($option); ?>"><?php echo htmlspecialchars($option); ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <select id="filterGender">
+                    <option value="">雇用者情報（性別）</option>
+                    <?php foreach ($genderOptions as $option): ?>
+                        <option value="<?php echo htmlspecialchars($option); ?>"><?php echo htmlspecialchars($option); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
 
             <!-- Info text -->
             <div class="info-text">
@@ -72,7 +118,7 @@ require_once 'db_connect.php';
                 </table>
                 <div id="fullDetails" class="details-grid" style="display:none;"></div>
                 <div class="details-border"></div>
-                <div class="button-group" style="display:none; text-align: center;">
+                <div class="button-group" style="display:flex; justify-content: center; gap: 10px; margin-top: 20px;">
                     <button id="editDetailsBtn" class="edit-btn" onclick="editWorker()">編集</button>
                     <button id="printDetailsBtn" class="print-btn" onclick="printDetails()">情報印刷</button>
                 </div>

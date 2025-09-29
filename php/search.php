@@ -6,8 +6,9 @@ error_reporting(E_ALL);
 ini_set('session.cookie_path', '/itf');
 session_start();
 
+header('Content-Type: application/json');
+
 if (!isset($_SESSION['id']) || !isset($_SESSION['username'])) {
-    header('Content-Type: application/json');
     echo json_encode(['error' => 'Session expired, please login']);
     exit;
 }
@@ -21,12 +22,42 @@ try {
     error_log("Database connection successful");
 } catch (PDOException $e) {
     error_log("Database connection failed: " . $e->getMessage());
-    header('Content-Type: application/json');
     echo json_encode(['error' => 'Database connection failed: ' . $e->getMessage()]);
     exit;
 }
 
-// Fetch staff name
+// Whitelist map for dropdown fields (prevents SQL injection)
+$fieldWhitelist = [
+    'facility'    => '施設名（勤務先）',
+    'shokaimoto'  => '紹介元',
+    'nationality' => '雇用者情報（国籍）',
+    'jlpt'        => 'JLPT状況',
+    'gender'      => '雇用者情報（性別）',
+];
+
+// --- NEW: options endpoint for distinct dropdown values ---
+// Usage: GET /php/search.php?options=1&field=facility  (or shokaimoto|nationality|jlpt|gender)
+if (isset($_GET['options']) && $_GET['options'] == '1') {
+    $key = $_GET['field'] ?? '';
+    if (!isset($fieldWhitelist[$key])) {
+        echo json_encode(['error' => 'Invalid field']);
+        exit;
+    }
+    $col = $fieldWhitelist[$key];
+    try {
+        $sql = "SELECT DISTINCT `$col` AS val FROM talents WHERE `$col` IS NOT NULL AND `$col` <> '' ORDER BY `$col`";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+        $rows = $stmt->fetchAll(PDO::FETCH_COLUMN, 0);
+        echo json_encode($rows ?: []);
+    } catch (PDOException $e) {
+        error_log("Options query error: " . $e->getMessage());
+        echo json_encode(['error' => 'Options query failed: ' . $e->getMessage()]);
+    }
+    exit;
+}
+
+// Fetch staff name (kept for logging or future use)
 $staff_id = $_SESSION['id'];
 try {
     $stmt = $pdo->prepare("SELECT name FROM staff WHERE id = ?");
@@ -37,8 +68,6 @@ try {
     $staff_name = htmlspecialchars($_SESSION['username']);
     error_log("Database error (staff name): " . $e->getMessage());
 }
-
-header('Content-Type: application/json');
 
 $results = [];
 if (isset($_GET['query'])) {
@@ -51,7 +80,9 @@ if (isset($_GET['query'])) {
         $i = 0;
         foreach ($keywords as $keyword) {
             $param = ":keyword$i";
-            $conditions[] = "CONCAT_WS('', 採用日時, 施設名（勤務先）, 管理番号, 担当者（企業）, 基本契約書, 委託契約書, 紹介元, 受入機関（郵便番号）, 受入機関（住所）, 請求書送付先, 受入機関（電話番号）, 担当責任者, 区分, 受入機関名（所属機関）, 雇用者情報（アルファベット）, 雇用者情報（カタカナ）, 雇用者情報（性別）, 雇用者情報（国籍）, 雇用者情報（生年月日）, 年齢, 雇用者在留番号, 雇用者在留期限, 更新回数, X, 入社日, 在留カード最初発行日, 支援退職日, 状態, 管理費, 紹介料, 住居タイプ, 不動産会社, 不動産連絡先, 支援者住所, 連絡先①, AJ, AK, AL, AM, 支援者の家賃, 共益費, AP, 満了時期, 備考欄, 正担当者, JLPT状況, エリア, 受け入れ期間, 紹介手数料, 四半期, 介護福祉士合格し卒業の方) LIKE $param";
+            // NOTE: The CONCAT_WS list mirrors your columns. If your schema differs (e.g., 受け入れ期間 vs 受け入れ機関),
+            // adjust the column name below accordingly.
+            $conditions[] = "LOWER(CONCAT_WS('', 採用日時, `施設名（勤務先）`, 管理番号, `担当者（企業）`, 基本契約書, 委託契約書, 紹介元, `受入機関（郵便番号）`, `受入機関（住所）`, 請求書送付先, `受入機関（電話番号）`, 担当責任者, 区分, `受入機関名（所属機関）`, `雇用者情報（アルファベット）`, `雇用者情報（カタカナ）`, `雇用者情報（性別）`, `雇用者情報（国籍）`, `雇用者情報（生年月日）`, 年齢, `雇用者在留番号`, `雇用者在留期限`, 更新回数, X, 入社日, `在留カード最初発行日`, 支援退職日, 状態, 管理費, 紹介料, `住居タイプ`, 不動産会社, 不動産連絡先, 支援者住所, `連絡先①`, AJ, AK, AL, AM, `支援者の家賃`, 共益費, AP, 満了時期, 備考欄, 正担当者, `JLPT状況`, エリア, `受け入れ機関`, 紹介手数料, 四半期, `介護福祉士合格し卒業の方`)) LIKE $param";
             $params[$param] = "%" . strtolower($keyword) . "%";
             $i++;
         }
@@ -75,7 +106,7 @@ if (isset($_GET['query'])) {
     $values = json_decode($_POST['values'] ?? '[]', true);
 
     if (isset($_POST['add']) && !empty($name) && !empty($values)) {
-        $columns = ['採用日時', '施設名（勤務先）', '管理番号', '担当者（企業）', '基本契約書', '委託契約書', '紹介元', '受入機関（郵便番号）', '受入機関（住所）', '請求書送付先', '受入機関（電話番号）', '担当責任者', '区分', '受入機関名（所属機関）', '雇用者情報（アルファベット）', '雇用者情報（カタカナ）', '雇用者情報（性別）', '雇用者情報（国籍）', '雇用者情報（生年月日）', '年齢', '雇用者在留番号', '雇用者在留期限', '更新回数', 'X', '入社日', '在留カード最初発行日', '支援退職日', '状態', '管理費', '紹介料', '住居タイプ', '不動産会社', '不動産連絡先', '支援者住所', '連絡先①', 'AJ', 'AK', 'AL', 'AM', '支援者の家賃', '共益費', 'AP', '満了時期', '備考欄', '正担当者', 'JLPT状況', 'エリア', '受け入れ期間', '紹介手数料', '四半期', '介護福祉士合格し卒業の方'];
+        $columns = ['採用日時', '施設名（勤務先）', '管理番号', '担当者（企業）', '基本契約書', '委託契約書', '紹介元', '受入機関（郵便番号）', '受入機関（住所）', '請求書送付先', '受入機関（電話番号）', '担当責任者', '区分', '受入機関名（所属機関）', '雇用者情報（アルファベット）', '雇用者情報（カタカナ）', '雇用者情報（性別）', '雇用者情報（国籍）', '雇用者情報（生年月日）', '年齢', '雇用者在留番号', '雇用者在留期限', '更新回数', 'X', '入社日', '在留カード最初発行日', '支援退職日', '状態', '管理費', '紹介料', '住居タイプ', '不動産会社', '不動産連絡先', '支援者住所', '連絡先①', 'AJ', 'AK', 'AL', 'AM', '支援者の家賃', '共益費', 'AP', '満了時期', '備考欄', '正担当者', 'JLPT状況', 'エリア', '受け入れ機関', '紹介手数料', '四半期', '介護福祉士合格し卒業の方'];
         $placeholders = implode(',', array_fill(0, count($columns), '?'));
         $sql = "INSERT INTO talents (" . implode(',', $columns) . ") VALUES ($placeholders)";
         try {
@@ -89,7 +120,7 @@ if (isset($_GET['query'])) {
     } elseif (isset($_POST['update']) && !empty($name) && !empty($values)) {
         $columns = ['採用日時', '施設名（勤務先）', '管理番号', '担当者（企業）', '基本契約書', '委託契約書', '紹介元', '受入機関（郵便番号）', '受入機関（住所）', '請求書送付先', '受入機関（電話番号）', '担当責任者', '区分', '受入機関名（所属機関）', '雇用者情報（アルファベット）', '雇用者情報（カタカナ）', '雇用者情報（性別）', '雇用者情報（国籍）', '雇用者情報（生年月日）', '年齢', '雇用者在留番号', '雇用者在留期限', '更新回数', 'X', '入社日', '在留カード最初発行日', '支援退職日', '状態', '管理費', '紹介料', '住居タイプ', '不動産会社', '不動産連絡先', '支援者住所', '連絡先①', 'AJ', 'AK', 'AL', 'AM', '支援者の家賃', '共益費', 'AP', '満了時期', '備考欄', '正担当者', 'JLPT状況', 'エリア', '受け入れ機関', '紹介手数料', '四半期', '介護福祉士合格し卒業の方'];
         $setClause = implode(' = ?, ', $columns) . ' = ?';
-        $sql = "UPDATE talents SET $setClause WHERE 雇用者情報（アルファベット） = ?";
+        $sql = "UPDATE talents SET $setClause WHERE `雇用者情報（アルファベット）` = ?";
         try {
             $stmt = $pdo->prepare($sql);
             $stmt->execute(array_merge($values, [$name]));
@@ -104,4 +135,3 @@ if (isset($_GET['query'])) {
 }
 
 echo json_encode($results);
-?>
