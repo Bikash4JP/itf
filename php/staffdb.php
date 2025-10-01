@@ -1,5 +1,10 @@
 <?php
-ini_set('session.cookie_path', '/itf');
+ini_set('session.cookie_path', '/');
+ini_set('session.cookie_domain', '.it-future.jp');
+ini_set('session.cookie_lifetime', 86400);
+ini_set('session.cookie_secure', true);
+ini_set('session.cookie_httponly', true);
+ini_set('session.cookie_samesite', 'Lax');
 session_start();
 
 if (!isset($_SESSION['id']) || !isset($_SESSION['username'])) {
@@ -37,11 +42,8 @@ $genderOptions = getUniqueValues($pdo, '雇用者情報（性別）');
         <div class="logo"><a href="https://it-future.jp/"><img src="../images/logo.png" alt="ITF Logo"></a></div>
         <nav>
             <ul>
-                <li><a href="../staffdb.php">ホーム</a></li>
-                <li><a href="#" onclick="showForm('posts')">投稿を追加</a></li>
-                <li><a href="#" onclick="showForm('jobs')">求人を追加</a></li>
-                <li><a href="manage_posts.php">投稿を管理</a></li>
-                <li><a href="searcch.php" class="active">検索</a></li>
+                <li><a href="staffdb.php">ホーム</a></li>
+                <li><a href="profile.php">プロフィール</a></li>
                 <li><a href="logout.php">ログアウト</a></li>
             </ul>
         </nav>
@@ -53,12 +55,13 @@ $genderOptions = getUniqueValues($pdo, '雇用者情報（性別）');
             <div class="menu-icon"><img src="../images/searcch.png" alt="Search Icon"></div>
             <div class="menu-title">Menus</div>
             <ul>
-                <li><a href="addstaff.php" class="menu-btn">人材を追加</a></li>
-                <li><a href="t.html" class="menu-btn">今月の入社</a></li>
+                <li><a href="addstaff.php" class="menu-btn">✙雇用者情報</a></li>
+                <li><a href="addjobs.php" class="menu-btn">✙求人情報</a></li✙>
+                <li><a href="addnews.php" class="menu-btn">✙お知らせ</a></li>
                 <li><a href="t.html" class="menu-btn">請求書発行</a></li>
                 <li><a href="t.html" class="menu-btn">今月の入社</a></li>
                 <li><a href="rireki_list.php" class="menu-btn">履歴書一覧</a></li>
-                <li><a href="t.html" class="menu-btn">未定2</a></li>
+                <li><a href="manage_posts.php" class="menu-btn">投稿を管理</a></li>
             </ul>
         </div>
 
