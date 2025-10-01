@@ -388,3 +388,45 @@ td {
         margin: 5px 0;
     }
 }
+/* Existing CSS remains the same, add this for multi-select filters */
+.multi-select {
+    position: relative;
+    flex: 1;
+    margin: 5px;
+}
+
+.multi-select-btn {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #1e90ff;
+    border-radius: 5px;
+    background: white;
+    cursor: pointer;
+    font-size: 14px;
+    text-align: left;
+}
+
+.multi-select-content {
+    position: absolute;
+    background: white;
+    border: 1px solid #ddd;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    width: 100%;
+}
+
+.multi-select-content label {
+    display: block;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.multi-select-content label:hover {
+    background-color: #f0f0f0;
+}
+
+.multi-select.open .multi-select-content {
+    display: block;
+}

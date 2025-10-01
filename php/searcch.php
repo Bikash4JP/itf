@@ -55,7 +55,7 @@ $genderOptions = getUniqueValues($pdo, '雇用者情報（性別）');
             <ul>
                 <li><a href="addstaff.php" class="menu-btn">人材を追加</a></li>
                 <li><a href="t.html" class="menu-btn">今月の入社</a></li>
-                <li><a href="t.html" class="menu-btn">請求書送付先</a></li>
+                <li><a href="t.html" class="menu-btn">請求書発行</a></li>
                 <li><a href="t.html" class="menu-btn">今月の入社</a></li>
                 <li><a href="rireki_list.php" class="menu-btn">履歴書一覧</a></li>
                 <li><a href="t.html" class="menu-btn">未定2</a></li>
