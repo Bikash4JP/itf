@@ -27,10 +27,7 @@
   <link rel="manifest" href="images/site.webmanifest">
   <meta name="theme-color" content="#000000">
 </head>
-
 <body class="home blog">
-  <div id="overlay" class="md-overlay"></div>
-
   <header id="header" class="l-header header" itemscope itemtype="https://schema.org/WPHeader">
     <div class="header-frame">
       <div class="header-top">
@@ -52,26 +49,6 @@
                 <li class="contents-item"><a href="news.html">新着情報</a></li>
               </ul>
               <ul class="cta pc-flex max str">
-                <li class="cta-item tel sp">
-                  <a href="tel:06-6644-1800" class="sp-flex hcenter vcenter">
-                    <i class="icon icon-phone"></i>
-                    <span class="text">電話でのお問い合わせ<br><span class="note">09:00～19:00(土日祝除く)</span></span>
-                  </a>
-                </li>
-                <li class="cta-item document flex vcenter">
-                  <select id="language-selector">
-                    <option value="ja">日本語</option>
-                    <option value="en">English</option>
-                    <option value="id">Indonesian</option>
-                    <option value="vi">Vietnamese</option>
-                    <option value="zh">Chinese</option>
-                    <option value="ne">Nepali</option>
-                    <option value="tl">Filipino</option>
-                    <option value="ko">Korean</option>
-                    <option value="hi">Hindi</option>
-                    <option value="bn">Bengali</option>
-                  </select>
-                </li>
                 <li class="cta-item inquiry flex vcenter">
                   <a href="inquiry.html" class="cta-item-link flex hcenter vcenter">お問い合わせ</a>
                 </li>
@@ -83,163 +60,143 @@
     </div>
   </header><br>
 
-  <!-- Hero -->
+  <!-- Search band -->
   <section class="bg">
     <div class="overlay">
       <form class="search-form" action="saiyou.php" method="GET">
-        <input type="text" name="q" placeholder="場所、カテゴリ、キーワード（#タグ可）で検索"
-          value="<?php echo isset($_GET['q']) ? htmlspecialchars($_GET['q']) : ''; ?>">
-        <button type="submit"><i class="icon-search"><img src="images/icons8-search-30.png" alt=""></i></button>
+        <input type="text" name="q" placeholder="場所、会社、カテゴリ、キーワードで検索" value="<?=$_GET['q']??''?>">
+        <button type="submit"><img src="images/icons8-search-30.png" alt="" width="22" height="22"></button>
       </form>
     </div>
   </section>
 
-  <!-- Jobs -->
   <section class="saiyou-section">
-    <h2 class="section-title"><?php echo (isset($_GET['q']) && $_GET['q']!=='') ? 'マッチング求人' : '最近追加された求人'; ?></h2>
+    <h2 class="section-title"><?= (isset($_GET['q']) && $_GET['q']!=='') ? 'マッチング求人' : '最近追加された求人' ?></h2>
     <div class="content-wrapper">
       <div class="results">
         <?php
-          require_once 'php/db_connect.php';
+        require_once 'php/db_connect.php';
 
-          $query = "SELECT * FROM posts WHERE post_type = 'job'";
-          $params = [];
+        $query = "SELECT * FROM posts WHERE post_type = 'job'";
+        $params = [];
 
-          if (!empty($_GET['q'])) {
-            $search = "%" . $_GET['q'] . "%";
-            // 検索対象（会社名は表示しないが検索には含めるか → ここでは含めない）
-            $query .= " AND (title LIKE :search OR summary LIKE :search OR job_location LIKE :search OR job_category LIKE :search)";
-            $params[':search'] = $search;
-          }
-          if (!empty($_GET['location'])) {
-            $query .= " AND job_location = :location";
-            $params[':location'] = $_GET['location'];
-          }
-          if (!empty($_GET['job_type'])) {
-            $query .= " AND job_type = :job_type";
-            $params[':job_type'] = $_GET['job_type'];
-          }
-          if (!empty($_GET['japanese_level'])) {
-            $query .= " AND japanese_level = :japanese_level";
-            $params[':japanese_level'] = $_GET['japanese_level'];
-          }
-          if (!empty($_GET['job_category'])) {
-            $query .= " AND job_category = :job_category";
-            $params[':job_category'] = $_GET['job_category'];
-          }
+        if (!empty($_GET['q'])) {
+          $search = "%".$_GET['q']."%";
+          $query .= " AND (title LIKE :s OR summary LIKE :s OR company_name LIKE :s OR job_location LIKE :s OR job_category LIKE :s)";
+          $params[':s']=$search;
+        }
+        if (!empty($_GET['location'])) {
+          $query .= " AND job_location = :loc";
+          $params[':loc']=$_GET['location'];
+        }
+        if (!empty($_GET['job_type'])) {
+          $query .= " AND job_type = :jt";
+          $params[':jt']=$_GET['job_type'];
+        }
+        if (!empty($_GET['japanese_level'])) {
+          $query .= " AND japanese_level = :jl";
+          $params[':jl']=$_GET['japanese_level'];
+        }
+        if (!empty($_GET['job_category'])) {
+          $query .= " AND job_category = :jc";
+          $params[':jc']=$_GET['job_category'];
+        }
+        $query .= " ORDER BY date DESC";
+        $stmt = $pdo->prepare($query);
+        $stmt->execute($params);
+        $jobs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-          $query .= " ORDER BY date DESC";
-          $stmt = $pdo->prepare($query);
-          $stmt->execute($params);
-          $jobs = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-          if (count($jobs) > 0) {
-            foreach ($jobs as $i => $job) {
-
-              // ハッシュタグ抽出（summary から #タグのみ抽出）
-              $hashtags = [];
-              if (!empty($job['summary'])) {
-                if (preg_match_all('/#[^\s#]+/u', $job['summary'], $m)) {
-                  $hashtags = $m[0];
-                }
+        if ($jobs) {
+          foreach ($jobs as $i=>$job) {
+            // Extract hashtag chips from summary (words starting with #)
+            $summary = (string)($job['summary'] ?? '');
+            preg_match_all('/#\S+/u', $summary, $m);
+            $tags = $m[0] ?? [];
+            echo '<div class="job-item">';
+            echo '  <div class="job-title"><a href="php/job_details.php?job_id='.htmlspecialchars($job['id']).'">'.htmlspecialchars($job['title']).'</a></div>';
+            if ($tags) {
+              echo '<div class="tag-row">';
+              foreach ($tags as $t) {
+                echo '<span class="tag">'.htmlspecialchars($t).'</span>';
               }
-
-              echo '<article class="job-card">';
-              echo '  <div class="job-card__badge">おすすめ</div>';
-              echo '  <h3 class="job-card__title"><a href="php/job_details.php?job_id=' . (int)$job['id'] . '">' . htmlspecialchars($job['title']) . '</a></h3>';
-
-              // ハッシュタグ行（ある場合のみ）
-              if (!empty($hashtags)) {
-                echo '  <div class="job-card__hashtags">' . htmlspecialchars(implode(' ', $hashtags)) . '</div>';
-              }
-
-              echo '  <ul class="job-card__meta">';
-              // 給与（自由入力の文字列）
-              if (!empty($job['salary'])) {
-                echo '    <li class="meta salary">年収' . htmlspecialchars($job['salary']) . '</li>';
-              }
-              if (!empty($job['job_location'])) {
-                echo '    <li class="meta place">' . htmlspecialchars($job['job_location']) . '</li>';
-              }
-              echo '  </ul>';
-
-              echo '</article>';
-              if ($i < count($jobs) - 1) {
-                echo '<hr class="job-divider">';
-              }
+              echo '</div>';
             }
-          } else {
-            echo '<p>求人が見つかりませんでした。</p>';
+            echo '  <div class="row line">';
+            echo '    <img class="ico" src="/images/yen.png" alt="">';
+            $salary = trim((string)$job['salary']);
+            echo '    <span>'.($salary!=='' ? htmlspecialchars($salary) : '給与情報なし').'</span>';
+            echo '  </div>';
+            echo '  <div class="row">';
+            echo '    <img class="ico" src="/images/pin.png" alt="">';
+            echo '    <span>'.htmlspecialchars($job['job_location']).'</span>';
+            echo '  </div>';
+            echo '  <div class="view-link"><a href="php/job_details.php?job_id='.htmlspecialchars($job['id']).'">View full details</a></div>';
+            // Divider except last
+            if ($i < count($jobs)-1) echo '<hr class="job-divider">';
+            echo '</div>';
           }
+        } else {
+          echo '<p>求人が見つかりませんでした。</p>';
+        }
         ?>
       </div>
 
       <aside class="filters">
         <h2>フィルターを設定</h2>
         <form action="saiyou.php" method="GET">
-          <label>
-            勤務地:
+          <label>勤務地:
             <select name="location">
               <option value="">全て</option>
               <?php
-              $locations = $pdo->query("SELECT DISTINCT job_location FROM posts WHERE post_type = 'job' ORDER BY job_location")->fetchAll(PDO::FETCH_COLUMN);
-              foreach ($locations as $location) {
-                $selected = (isset($_GET['location']) && $_GET['location'] === $location) ? 'selected' : '';
-                echo '<option value="'.htmlspecialchars($location).'" '.$selected.'>'.htmlspecialchars($location).'</option>';
+              $locations = $pdo->query("SELECT DISTINCT job_location FROM posts WHERE post_type='job' ORDER BY job_location")->fetchAll(PDO::FETCH_COLUMN);
+              foreach ($locations as $loc) {
+                $sel = (isset($_GET['location']) && $_GET['location']===$loc) ? 'selected':'';
+                echo '<option value="'.htmlspecialchars($loc).'" '.$sel.'>'.htmlspecialchars($loc).'</option>';
               }
               ?>
             </select>
           </label>
-
-          <label>
-            職種:
+          <label>職種:
             <select name="job_type">
               <option value="">全て</option>
               <?php
-              $job_types = $pdo->query("SELECT DISTINCT job_type FROM posts WHERE post_type = 'job' ORDER BY job_type")->fetchAll(PDO::FETCH_COLUMN);
-              foreach ($job_types as $job_type) {
-                $selected = (isset($_GET['job_type']) && $_GET['job_type'] === $job_type) ? 'selected' : '';
-                echo '<option value="'.htmlspecialchars($job_type).'" '.$selected.'>'.htmlspecialchars($job_type).'</option>';
+              $types = $pdo->query("SELECT DISTINCT job_type FROM posts WHERE post_type='job' ORDER BY job_type")->fetchAll(PDO::FETCH_COLUMN);
+              foreach ($types as $t) {
+                $sel = (isset($_GET['job_type']) && $_GET['job_type']===$t) ? 'selected':'';
+                echo '<option value="'.htmlspecialchars($t).'" '.$sel.'>'.htmlspecialchars($t).'</option>';
               }
               ?>
             </select>
           </label>
-
-          <label>
-            日本語レベル:
+          <label>日本語レベル:
             <select name="japanese_level">
               <option value="">全て</option>
               <?php
-              $levels = $pdo->query("SELECT DISTINCT japanese_level FROM posts WHERE post_type = 'job' ORDER BY japanese_level")->fetchAll(PDO::FETCH_COLUMN);
-              foreach ($levels as $level) {
-                $selected = (isset($_GET['japanese_level']) && $_GET['japanese_level'] === $level) ? 'selected' : '';
-                echo '<option value="'.htmlspecialchars($level).'" '.$selected.'>'.htmlspecialchars($level).'</option>';
+              $lvls = $pdo->query("SELECT DISTINCT japanese_level FROM posts WHERE post_type='job' ORDER BY japanese_level")->fetchAll(PDO::FETCH_COLUMN);
+              foreach ($lvls as $lvl) {
+                $sel = (isset($_GET['japanese_level']) && $_GET['japanese_level']===$lvl) ? 'selected':'';
+                echo '<option value="'.htmlspecialchars($lvl).'" '.$sel.'>'.htmlspecialchars($lvl).'</option>';
               }
               ?>
             </select>
           </label>
-
-          <label>
-            カテゴリ:
+          <label>カテゴリ:
             <select name="job_category">
               <option value="">全て</option>
               <?php
-              $cats = $pdo->query("SELECT DISTINCT job_category FROM posts WHERE post_type = 'job' ORDER BY job_category")->fetchAll(PDO::FETCH_COLUMN);
-              foreach ($cats as $cat) {
-                $selected = (isset($_GET['job_category']) && $_GET['job_category'] === $cat) ? 'selected' : '';
-                echo '<option value="'.htmlspecialchars($cat).'" '.$selected.'>'.htmlspecialchars($cat).'</option>';
+              $cats = $pdo->query("SELECT DISTINCT job_category FROM posts WHERE post_type='job' ORDER BY job_category")->fetchAll(PDO::FETCH_COLUMN);
+              foreach ($cats as $c) {
+                $sel = (isset($_GET['job_category']) && $_GET['job_category']===$c) ? 'selected':'';
+                echo '<option value="'.htmlspecialchars($c).'" '.$sel.'>'.htmlspecialchars($c).'</option>';
               }
               ?>
             </select>
           </label>
-
           <button type="submit">適用</button>
         </form>
       </aside>
     </div>
   </section>
-
-  <aside class="l-side"></aside>
 
   <footer class="footer">
     <div class="footer-container">

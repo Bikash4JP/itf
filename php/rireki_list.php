@@ -208,7 +208,7 @@ $csrfToken = $_SESSION['csrf_rireki'];
         <a href="?src=kaigo" class="<?= $source==='kaigo'?'active':'' ?>">介護フォーマット</a>
         <a href="?src=basic" class="<?= $source==='basic'?'active':'' ?>">ベーシック</a>
       </div>
-      <a class="btn" href="/staffdb.php" style="margin-left:auto">← スタッフDBへ戻る</a>
+      <a class="btn" href="staffdb.php" style="margin-left:auto">← スタッフDBへ戻る</a>
     </header>
 
     <!-- Search box -->
