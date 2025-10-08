@@ -69,7 +69,7 @@ $genderOptions = getUniqueValues($pdo, '雇用者情報（性別）');
         <div class="content-area">
             <!-- Search box -->
             <div class="search-container">
-                <input type="text" id="searchInput" placeholder="スペースで区切って検索できます..." onkeyup="searchWorkers()" onfocus="showSuggestions()" onblur="hideSuggestions()" onkeypress="handleEnter(event)">
+                <input type="text" id="searchInput" placeholder="スペースで区切って検索できます..." onkeyup="searchWorkers()" onkeypress="handleEnter(event)">
             </div>
             <div id="suggestions" class="suggestions"></div>
 

@@ -69,9 +69,14 @@
     .rule-box li{margin:3px 0}
     .rule-box .ban{color:#b91c1c;font-weight:700}
 
-    /* footer */
-    .site-footer{position:relative;left:0;right:0;bottom:0;background:#000;color:#fff;text-align:center;padding:10px 12px;font-size:13px;line-height:1;min-height:var(--footer-h);display:flex;align-items:center;justify-content:center}
-
+    /* fixed footer — always visible */
+    .site-footer{
+      position:relative;left:0;right:0;bottom:0;z-index:5;
+      background:#000;color:#fff;text-align:center;
+      padding:10px 12px;font-size:13px;line-height:1;
+      min-height:var(--footer-h);
+      display:flex;align-items:center;justify-content:center;height: 50px;
+    }
     @media (max-width:900px){
       .grid-2{grid-template-columns:1fr}
     }
