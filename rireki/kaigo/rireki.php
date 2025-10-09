@@ -1,4 +1,6 @@
-<?php // /home/it-future/www/itf/rireki/kaigo/rireki.php ?>
+<?php // /home/it-future/www/itf/rireki/kaigo/rireki.php
+$job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
+?>
 <!doctype html>
 <html lang="ja">
 <head>
@@ -7,39 +9,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="/rireki/basic/css/recruit.css?v=5">
   <style>
-    /* :root{ --footer-h:48px } */
-
     /* layout */
     .wrap{max-width:1200px;margin:0 auto;padding:0 14px}
     .appbar{padding:16px 0;border-bottom:1px solid #eef2f7;background:#fff;position:sticky;top:0;z-index:10}
     .appbar .wrap{display:flex;align-items:center;gap:12px}
     .appbar h1{font-size:18px;margin:0}
     .appbar .home{margin-left:auto;text-decoration:none;color:#0b6b4a}
-
-    /* card should size to content (no 100vh from other css) */
     .card{background:#fff;border:1px solid #e6edf6;border-radius:12px;padding:18px;margin-top:16px}
     .card,.steps,.step-pane{min-height:auto!important}
     .step-pane{margin-bottom:10px}
-    .nav{display:flex;gap:12px;justify-content:flex-end;margin-top:12px;margin-bottom:5px} /* 5px finish */
-
-    /* grids */
+    .nav{display:flex;gap:12px;justify-content:flex-end;margin-top:12px;margin-bottom:5px}
     .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
     .col-2{grid-column:1/-1}
     .section-title{font-weight:700;margin:4px 0}
-
-    /* compact inputs for dates; roomy text fields elsewhere */
     input.in-yy{max-width:110px}
     input.in-mm{max-width:80px}
     input.in-hhmm{max-width:96px}
-
-    /* table look */
     .table{width:100%;border-collapse:separate;border-spacing:0 8px}
     .table th{font-size:12px;color:#475467;text-align:left;white-space:nowrap}
     .table td input,.table td select,.table td textarea{width:100%}
     .row-add,.row-del{padding:6px 10px;border-radius:6px;border:1px solid #dbe7f5;background:#f3f9ff;cursor:pointer}
-
-    /* EDU widths: make school & faculty wider */
     .table.edu col.yy{width:110px}
     .table.edu col.mm{width:80px}
     .table.edu col.yy2{width:110px}
@@ -47,43 +37,32 @@
     .table.edu col.status{width:140px}
     .table.edu col.inst{width:40%}
     .table.edu col.fac{width:140px}
-
-    /* WORK widths: make org / title / description roomy */
     .table.work col.yy{width:80px}
     .table.work col.mm{width:60px}
     .table.work col.status{width:110px}
     .table.work col.yy2{width:80px}
     .table.work col.mm2{width:60px}
-    .table.work col.org{width:280px}     /* ~30 words */
-    .table.work col.title{width:110px}   /* ~30 words */
-    .table.work col.desc{width:320px}   /* ~100 words */
-    .table.work textarea{min-height:88px} /* bigger box for 仕事内容 */
-
-    /* photo preview */
+    .table.work col.org{width:280px}
+    .table.work col.title{width:110px}
+    .table.work col.desc{width:320px}
+    .table.work textarea{min-height:88px}
     .photo-preview{border:1px dashed #cbd5e1;border-radius:8px;padding:8px;display:none;align-items:center;justify-content:center;min-height:120px}
     .photo-preview img{max-width:160px;height:auto;display:block}
-
-    /* rule box */
     .rule-box{margin-top:14px;border:1px solid #e5e7eb;background:#fafafa;border-radius:8px;padding:12px 14px;color:#64748b;font-size:12.5px;line-height:1.5}
     .rule-box ol{margin:0 0 0 1.2em;padding:0}
     .rule-box li{margin:3px 0}
     .rule-box .ban{color:#b91c1c;font-weight:700}
-
-    /* fixed footer — always visible */
     .site-footer{
       position:relative;left:0;right:0;bottom:0;z-index:5;
       background:#000;color:#fff;text-align:center;
       padding:10px 12px;font-size:13px;line-height:1;
-      min-height:var(--footer-h);
       display:flex;align-items:center;justify-content:center;height: 50px;
     }
-    @media (max-width:900px){
-      .grid-2{grid-template-columns:1fr}
-    }
+    @media (max-width:900px){ .grid-2{grid-template-columns:1fr} }
     @media (max-width:600px){
-      :root{--footer-h:56px}
       input.in-yy,input.in-mm{max-width:100%}
     }
+    .banner{margin:10px 0 0 0;font-size:.9rem;color:#0b3772}
   </style>
 </head>
 <body>
@@ -96,6 +75,12 @@
 
   <div class="wrap">
     <form class="card" action="/rireki/kaigo/php/submit_rireki.php" method="post" enctype="multipart/form-data" id="rirekiForm" novalidate>
+      <!-- keep job context when coming via job flow -->
+      <input type="hidden" name="job_id" value="<?php echo $job_id; ?>">
+      <?php if ($job_id > 0): ?>
+        <div class="banner">この履歴書は求人応募フローから作成されます（Job ID: <?php echo (int)$job_id; ?>）。</div>
+      <?php endif; ?>
+
       <div class="steps">
 
         <!-- STEP 1 -->

@@ -34,13 +34,11 @@ function _plain_fail(string $msg, int $code = 500): void {
 
 // ============ PDF DOWNLOAD (by token) ============
 if (isset($_GET['download']) && $_GET['download'] === 'pdf') {
-  // Give mPDF room; avoid hidden 500s
   @ini_set('memory_limit', '512M');
   @set_time_limit(120);
   @ini_set('pcre.backtrack_limit', '5000000');
   @ini_set('pcre.recursion_limit', '5000000');
 
-  // Always show text output on error
   set_exception_handler(function($e){
     _plain_fail("PDF build failed: " . $e->getMessage(), 500);
   });
@@ -57,30 +55,14 @@ if (isset($_GET['download']) && $_GET['download'] === 'pdf') {
   $data = json_decode($json, true);
   if (!is_array($data)) _plain_fail("PDF build failed: JSON parse error at $jsonPath", 500);
 
-  // Quick environment diagnostics before building
-  $diag = [];
-  $diag[] = "token: $token";
-  $diag[] = "json: ok (" . strlen($json) . " bytes)";
-  $diag[] = "mapping readable: " . (is_readable($mappingFile) ? 'yes' : 'no');
-  $diag[] = "template resolved: " . (function() use ($mappingFile){
-    $map = @json_decode(@file_get_contents($mappingFile), true);
-    if (!is_array($map)) return 'no-map';
-    $tplRel = $map['template_file'] ?? '';
-    $tplAbs = realpath(dirname($mappingFile) . '/' . $tplRel);
-    return ($tplAbs && is_readable($tplAbs)) ? "yes ($tplAbs)" : 'no';
-  })();
-  $diag[] = "tmpDir writable: " . (is_dir($tmpDir) && is_writable($tmpDir) ? 'yes' : 'no');
-  $diag[] = "mPDF exists: " . (class_exists('\\Mpdf\\Mpdf') ? 'yes' : 'no');
-
-  // Try to build
   $resPdf = rireki_make_pdf_via_html($data, $mappingFile, $outDir, $token, $tmpDir);
-  if (!$resPdf['ok']) {
-    _plain_fail("PDF build failed: " . ($resPdf['err'] ?? 'unknown') . "\n\n== DIAG ==\n" . implode("\n", $diag), 500);
+  if (empty($resPdf['ok'])) {
+    _plain_fail("PDF build failed: " . ($resPdf['err'] ?? 'unknown'), 500);
   }
 
   $pdfPath = $resPdf['pdf'] ?? null;
   if (!$pdfPath || !is_readable($pdfPath)) {
-    _plain_fail("PDF build failed: File missing after build.\n\n== DIAG ==\n" . implode("\n", $diag), 500);
+    _plain_fail("PDF build failed: File missing after build.", 500);
   }
 
   header('Content-Type: application/pdf');
@@ -90,7 +72,7 @@ if (isset($_GET['download']) && $_GET['download'] === 'pdf') {
   exit;
 }
 
-// ============ FORM SUBMIT (build XLS only; keep lightweight) ============
+// ============ FORM SUBMIT (build XLS only) ============
 if (isset($_GET['demo'])) {
   $data = [
     'name_romaji'=>'TARO YAMADA','name_kana'=>'やまだ たろう',
@@ -106,26 +88,30 @@ if (isset($_GET['demo'])) {
       ['from_year'=>'2018','from_month'=>'04','to_year'=>'2022','to_month'=>'03','institution'=>'XYZ大学','faculty'=>'福祉学部'],
     ],
     'work_blocks'=>[
-      ['from_year'=>'2022','from_month'=>'04','to_year'=>'2024','to_month'=>'03','org'=>'介護施設ABC','job_title'=>'介護職','work_time_start'=>'09:00','work_time_end'=>'18:00','work_days_per_week'=>'5']
+      ['from_year'=>'2022','from_month'=>'04','to_year'=>'2024','to_month'=>'03','org'=>'介護施設ABC','job_title'=>'介護職','work_time_start'=>'09:00','work_time_end'=>'18:00','work_days_per_week'=>'5','description'=>'入浴介助、排泄介助、記録業務など']
     ],
     'licenses'=>[
       ['cert_year'=>'2021','cert_month'=>'12','cert_name'=>'日本語能力試験N2'],
       ['cert_year'=>'2022','cert_month'=>'07','cert_name'=>'介護職員初任者研修'],
     ],
   ];
+  $jobId = 0;
 } else {
   $data = $_POST;
+
+  // capture job context from form
+  $jobId = isset($data['job_id']) ? (int)$data['job_id'] : 0;
 
   // normalize planned resignation date
   $data['planned_resign_year']  = trim($data['planned_resign_year']  ?? '');
   $data['planned_resign_month'] = trim($data['planned_resign_month'] ?? '');
 
-  // reshape repeater groups if sent field-wise
+  // reshape repeater groups (include description too)
   if (!empty($data['education']) && is_array($data['education']) && isset($data['education']['from_year'])) {
-    $data['education'] = _reshape_rows($data['education'], ['from_year','from_month','to_year','to_month','institution','faculty']);
+    $data['education'] = _reshape_rows($data['education'], ['from_year','from_month','to_year','to_month','institution','faculty','status']);
   }
   if (!empty($data['work_blocks']) && is_array($data['work_blocks']) && isset($data['work_blocks']['from_year'])) {
-    $data['work_blocks'] = _reshape_rows($data['work_blocks'], ['from_year','from_month','to_year','to_month','org','job_title','work_time_start','work_time_end','work_days_per_week']);
+    $data['work_blocks'] = _reshape_rows($data['work_blocks'], ['from_year','from_month','to_year','to_month','org','job_title','work_time_start','work_time_end','work_days_per_week','status','description']);
   }
   if (!empty($data['licenses']) && is_array($data['licenses']) && isset($data['licenses']['cert_year'])) {
     $data['licenses'] = _reshape_rows($data['licenses'], ['cert_year','cert_month','cert_name']);
@@ -149,16 +135,37 @@ if (isset($_GET['demo'])) {
   }
 }
 
-// Build XLS (light)
+// ----- persist source metadata for rireki_list.php -----
+$data['_source'] = ($jobId > 0) ? 'job' : 'open';
+$data['_job_id'] = $jobId;
+$data['_job_title'] = '';
+
+// if we have a job id, try to fetch the title now (so list can show it without DB)
+if ($jobId > 0) {
+  $dbPath = __DIR__ . '/../../../php/db_connect.php';
+  if (is_readable($dbPath)) {
+    require_once $dbPath;
+    if (isset($pdo) && $pdo instanceof PDO) {
+      $stmt = $pdo->prepare("SELECT title FROM posts WHERE id = ? AND post_type = 'job' LIMIT 1");
+      $stmt->execute([$jobId]);
+      $t = $stmt->fetchColumn();
+      if (is_string($t) && $t !== '') $data['_job_title'] = $t;
+    }
+  }
+}
+
+// Build XLS
 $token = bin2hex(random_bytes(16));
 $resX = rireki_render_xls_only($data, $mappingFile, $outDir, $token);
-if (!$resX['ok']) _plain_fail("Kaigo Rirekisho build failed: " . ($resX['err'] ?? 'unknown'), 500);
+if (empty($resX['ok'])) _plain_fail("Kaigo Rirekisho build failed: " . ($resX['err'] ?? 'unknown'), 500);
 
-// Save JSON snapshot for later PDF download
+// Save JSON snapshot
 @file_put_contents($outDir . '/' . $token . '.json', json_encode($data, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
 
 $xlsUrl = '/rireki/kaigo/resumes/' . basename($resX['xls']);
 $pdfUrl = '/rireki/kaigo/php/submit_rireki.php?download=pdf&token=' . $token;
+
+// Success page
 ?>
 <!doctype html>
 <html lang="ja">
@@ -170,6 +177,7 @@ $pdfUrl = '/rireki/kaigo/php/submit_rireki.php?download=pdf&token=' . $token;
     body { font-family: ui-sans-serif, system-ui, "Segoe UI", Roboto, "Noto Sans JP","Hiragino Kaku Gothic ProN",Meiryo, Arial, sans-serif; margin: 20px; }
     .card { max-width: 900px; margin: 0 auto; background:#fff; border:1px solid #e8eef6; border-radius: 12px; padding: 18px; }
     h1 { margin: 0 0 8px; font-size: 20px; }
+    .msg { background:#f0fcfd; border:1px solid #cfe2ff; padding:12px 14px; border-radius:10px; color:#0b3772; margin-bottom:12px; }
     .links a { display:inline-block; margin-right: 12px; padding: 10px 14px; border-radius: 8px; text-decoration: none; border: 1px solid #dbe7f5; background: #f3f9ff; color:#0c4a7a; }
     .links a:hover{ background:#e9f5ff; }
     .note { color:#667085; font-size:12px; margin-top:6px; }
@@ -178,9 +186,17 @@ $pdfUrl = '/rireki/kaigo/php/submit_rireki.php?download=pdf&token=' . $token;
 <body>
   <div class="card">
     <h1>介護用 履歴書を生成しました</h1>
+
+    <?php if ($jobId > 0): ?>
+      <div class="msg">ご応募ありがとうございます。担当チームにて内容を確認のうえ、<strong>2営業日以内</strong>にご連絡いたします。</div>
+    <?php endif; ?>
+
     <div class="links">
       <a href="<?=$xlsUrl?>" download>Excel（.xls）をダウンロード</a>
       <a href="<?=$pdfUrl?>">PDF でダウンロード</a>
+      <?php if ($jobId > 0): ?>
+        <a href="/php/job_details.php?job_id=<?=$jobId?>">求人詳細へ戻る</a>
+      <?php endif; ?>
       <a href="/rireki/index.php">別のフォーマットを選ぶ</a>
     </div>
     <p class="note">※ PDFはクリック時に生成します。失敗時はテキストで原因を表示します。</p>

@@ -2,14 +2,7 @@
   "template_file": "../templates/kaigo.xlsx",
   "sheet_name": "①履歴書",
   "date_now_split": { "year_cell": "AC2", "month_cell": "AF2", "day_cell": "AH2" },
-  "photo": {
-    "anchor_cell": "AD3",
-    "merge_range": "AD3:AH10",
-    "fit": "cover",
-    "max_width_px": 274,
-    "max_height_px": 354,
-    "padding_px": 3
-  },
+  "photo": { "anchor_cell": "AD3", "merge_range": "AD3:AH10", "fit": "cover", "max_width_px": 274, "max_height_px": 354, "padding_px": 3 },
   "singles": {
     "name_romaji": "H3",
     "name_kana": "H4",
@@ -28,18 +21,22 @@
     "email": "X8",
     "height_cm": "H9",
     "weight_kg": "R9",
+
     "passport_has": "H10",
     "passport_exp_year": "P10",
     "passport_exp_month": "S10",
     "passport_exp_day": "U10",
     "passport_no": "AB10",
-    "past_travel_history": "H11",
+
+    "past_travel_count": "H11",
+
     "recent_entry_year": "T11",
     "recent_entry_month": "W11",
     "recent_entry_day": "Y11",
     "recent_exit_year": "AC11",
     "recent_exit_month": "AF11",
     "recent_exit_day": "AH11",
+
     "current_status": "H12",
     "status_from_year": "T12",
     "status_from_month": "W12",
@@ -47,12 +44,15 @@
     "status_to_year": "AC12",
     "status_to_month": "AF12",
     "status_to_day": "AH12",
+
     "reason_for_resignation": "B14",
     "planned_resign_year": "AE12",
     "planned_resign_month": "AH12",
+
     "self_pr": "B42",
     "motivation": "B48",
     "preferences": "B54",
+
     "jp_comm_level": "L58",
     "kanji_rw": "L59",
     "blood_type": "L60",
@@ -63,6 +63,7 @@
     "smoking": "L65",
     "alcohol": "L66",
     "tattoo": "L67",
+
     "clothes_size": "Z58",
     "shoe_size": "Z59",
     "prayer": "Z60",
