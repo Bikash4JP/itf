@@ -1,130 +1,167 @@
 <?php
+// /home/it-future/www/itf/php/manage_posts.php
 ini_set('session.cookie_path', '/itf');
 session_start();
 
 if (!isset($_SESSION['id']) || !isset($_SESSION['username'])) {
-    header("Location: login.php");
-    exit;
+  header("Location: login.php");
+  exit;
 }
 
-// Database connection
-require_once 'db_connect.php';
+require_once __DIR__ . '/db_connect.php';
 
-// Fetch all posts
-$stmt = $pdo->query("SELECT * FROM posts ORDER BY date DESC");
+// Fetch posts (jobs first, newest first)
+$stmt = $pdo->query("
+  SELECT *
+  FROM posts
+  ORDER BY (post_type='job') DESC, date DESC, id DESC
+");
 $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
-?>
 
+// Simple search by title or summary
+$q = trim($_GET['q'] ?? '');
+if ($q !== '') {
+  $needle = mb_strtolower($q);
+  $posts = array_values(array_filter($posts, function($p) use ($needle){
+    $hay = mb_strtolower(($p['title'] ?? '') . ' ' . ($p['summary'] ?? '') . ' ' . ($p['company_name'] ?? ''));
+    return strpos($hay, $needle) !== false;
+  }));
+}
+?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>投稿管理 - スタッフダッシュボード</title>
-    <link rel="stylesheet" href="../css/staffdb.css">
-    <link rel="stylesheet" href="../css/news.css">
-    <style>
-        .manage-posts {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .manage-posts h2 {
-            font-size: 24px;
-            color: #333;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 10px;
-        }
-        .post-item {
-            background-color: #f9f9f9;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            padding: 20px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .post-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-        }
-        .post-item h3 {
-            font-size: 20px;
-            color: #007bff;
-            margin: 0 0 10px 0;
-        }
-        .post-item p {
-            margin: 5px 0;
-            color: #555;
-            font-size: 16px;
-        }
-        .post-actions {
-            margin-top: 15px;
-            display: flex;
-            gap: 15px;
-        }
-        .post-actions a {
-            padding: 8px 15px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: background-color 0.2s ease;
-        }
-        .post-actions a.edit {
-            background-color: #28a745;
-            color: white;
-        }
-        .post-actions a.edit:hover {
-            background-color: #218838;
-        }
-        .post-actions a.delete {
-            background-color: #dc3545;
-            color: white;
-        }
-        .post-actions a.delete:hover {
-            background-color: #c82333;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>投稿管理 - スタッフダッシュボード</title>
+  <link rel="stylesheet" href="../css/staffdb.css">
+  <link rel="stylesheet" href="../css/news.css">
+  <style>
+    :root{
+      --ink:#0b2243; --muted:#667085; --border:#e6edf6; --bg:#f7fbff; --card:#ffffff;
+      --primary:#1e90ff; --primary-d:#1677d3; --ok:#16a34a; --bad:#dc2626; --amber:#f59e0b;
+    }
+    body{font-family:ui-sans-serif,system-ui,"Segoe UI",Roboto,"Noto Sans JP","Hiragino Kaku Gothic ProN",Meiryo,Arial,sans-serif;background:#fff;margin:0}
+    header{border-bottom:1px solid var(--border);background:#fff}
+    header .wrap{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:10px 16px}
+    header .logo img{height:40px}
+
+    nav ul{list-style:none;margin:0;padding:0;display:flex;gap:12px}
+    nav a{display:inline-block;padding:8px 12px;border-radius:8px;text-decoration:none;color:#0b3772;border:1px solid #dbe7f5;background:#f3f9ff}
+    nav a:hover{background:#e9f5ff}
+
+    .hero{background:var(--bg);border-bottom:1px solid var(--border)}
+    .hero .wrap{max-width:1200px;margin:0 auto;padding:20px 16px}
+    .hero h1{margin:0;color:var(--ink)}
+
+    .wrap{max-width:1200px;margin:0 auto;padding:18px 16px}
+
+    /* toolbar */
+    .toolbar{display:flex;gap:12px;align-items:center;margin:6px 0 16px 0;flex-wrap:wrap}
+    .search{flex:1;min-width:260px;display:flex;align-items:center;border:2px solid #1d96db;border-radius:999px;height:50px;overflow:hidden}
+    .search input{border:none;outline:none;width:100%;padding:0 14px;font-size:16px}
+    .filter{display:flex;gap:8px}
+    .chip{padding:8px 10px;border:1px solid var(--border);border-radius:999px;background:#fff;color:#0b3772;cursor:pointer}
+    .chip.active{background:#eafff3;border-color:#bbf7d0;color:#065f46}
+
+    /* grid */
+    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    @media (max-width:1000px){ .cards{grid-template-columns:repeat(2,1fr)} }
+    @media (max-width:680px){ .cards{grid-template-columns:1fr} }
+
+    .card{
+      background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;
+      box-shadow:0 3px 12px rgba(10,60,150,.06);display:flex;flex-direction:column;gap:8px
+    }
+    .card .type{font-size:12px;color:#1e40af;background:#eff6ff;border:1px solid #dbeafe;border-radius:999px;padding:2px 8px;display:inline-block}
+    .card h3{margin:4px 0 0 0;font-size:18px;color:var(--ink);line-height:1.35}
+    .meta{font-size:12.5px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap}
+    .sum{color:#374151;font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+    .btn{display:inline-block;padding:8px 12px;border-radius:10px;border:1px solid #dbe7f5;background:#f3f9ff;color:#0b3772;text-decoration:none}
+    .btn:hover{background:#e9f5ff}
+    .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+    .btn.primary:hover{background:var(--primary-d)}
+    .btn.ok{background:#e8fff2;border-color:#bbf7d0;color:#166534}
+    .btn.bad{background:#fee2e2;border-color:#fecaca;color:#991b1b}
+
+    .empty{padding:32px;border:1px dashed var(--border);border-radius:12px;background:#fff;color:var(--muted)}
+  </style>
 </head>
 <body>
-    <header>
-        <div class="logo"><a href="../index.html"><img src="../images/logo.png" alt="ITF Logo"></a></div>
-        <nav>
-    <ul>
-        <li><a href="../staffdb.php">ホーム</a></li>
-        <!-- <li><a href="#" onclick="showForm('posts')">投稿を追加</a></li>
-        <li><a href="#" onclick="showForm('jobs')">求人を追加</a></li> -->
-        <li><a href="manage_posts.php">投稿を管理</a></li>
-        <li><a href="profile.php">プロフィール</a></li>
-        <li><a href="dashboard.php">ダッシュボード</a></li>
-        <li><a href="logout.php">ログアウト</a></li>
-    </ul>
-</nav>
+  <header>
+    <div class="wrap">
+      <div class="logo"><a href="../index.html"><img src="../images/logo.png" alt="ITF"></a></div>
+      <nav>
+        <ul>
+          <li><a href="../staffdb.php">ホーム</a></li>
+          <li><a href="manage_posts.php">投稿を管理</a></li>
+          <li><a href="profile.php">プロフィール</a></li>
+          <li><a href="dashboard.php">ダッシュボード</a></li>
+          <li><a href="logout.php">ログアウト</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
 
-    </header>
+  <section class="hero">
+    <div class="wrap">
+      <h1>投稿管理</h1>
+    </div>
+  </section>
 
-    <section class="hero">
-        <h1>投稿管理</h1>
-    </section>
+  <div class="wrap">
+    <form class="toolbar" method="get" action="manage_posts.php">
+      <div class="search">
+        <input type="text" name="q" value="<?=htmlspecialchars($q,ENT_QUOTES,'UTF-8')?>" placeholder="タイトル / 概要 / 会社名 を検索">
+      </div>
+      <div class="filter">
+        <a class="chip <?= $q===''?'active':'' ?>" href="manage_posts.php">すべて</a>
+        <a class="chip" href="manage_posts.php?q=%23%E4%BB%8B%E8%AD%B7">#介護</a>
+        <a class="chip" href="manage_posts.php?q=%23%E6%9D%B1%E4%BA%AC">#東京</a>
+        <a class="chip" href="manage_posts.php?q=%23%E7%89%B9%E5%AE%9A%E6%8A%80%E8%83%BD">#特定技能</a>
+      </div>
+      <div style="margin-left:auto">
+        <a class="btn" href="addjobs.php">✙ 求人を追加</a>
+        <a class="btn" href="submit_post.php?form=news">✙ ニュースを追加</a>
+      </div>
+    </form>
 
-    <section class="manage-posts">
-        <h2>投稿リスト</h2>
-        <?php if (count($posts) > 0): ?>
-            <?php foreach ($posts as $post): ?>
-                <div class="post-item">
-                    <h3><?php echo htmlspecialchars($post['title']); ?></h3>
-                    <p>タイプ: <?php echo htmlspecialchars($post['post_type'] === 'job' ? '求人' : 'ニュース'); ?></p>
-                    <p>投稿日: <?php echo htmlspecialchars($post['date']); ?></p>
-                    <p>投稿者: <?php echo htmlspecialchars($post['posted_by']); ?></p>
-                    <div class="post-actions">
-                        <a href="edit_post.php?id=<?php echo $post['id']; ?>" class="edit">編集</a>
-                        <a href="delete_post.php?id=<?php echo $post['id']; ?>" class="delete" onclick="return confirm('この投稿を削除しますか？')">削除</a>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <p>投稿が見つかりませんでした。</p>
-        <?php endif; ?>
-    </section>
+    <?php if (count($posts) === 0): ?>
+      <div class="empty">投稿が見つかりませんでした。</div>
+    <?php else: ?>
+      <div class="cards">
+        <?php foreach ($posts as $p): ?>
+          <div class="card">
+            <span class="type"><?= $p['post_type']==='job' ? '求人' : 'ニュース' ?></span>
+            <h3><?= htmlspecialchars($p['title'] ?? '') ?></h3>
+            <div class="meta">
+              <span>投稿日: <?= htmlspecialchars($p['date'] ?? '') ?></span>
+              <span>投稿者: <?= htmlspecialchars($p['posted_by'] ?? '') ?></span>
+              <?php if ($p['post_type']==='job'): ?>
+                <span>勤務地: <?= htmlspecialchars($p['job_location'] ?? '-') ?></span>
+                <span>カテゴリ: <?= htmlspecialchars($p['job_category'] ?? '-') ?></span>
+              <?php endif; ?>
+            </div>
+            <?php if (!empty($p['summary'])): ?>
+              <div class="sum"><?= nl2br(htmlspecialchars($p['summary'])) ?></div>
+            <?php endif; ?>
+
+            <div class="actions">
+              <?php if ($p['post_type']==='job'): ?>
+                <a class="btn primary" href="edit_job.php?id=<?= (int)$p['id'] ?>">求人を編集</a>
+                <a class="btn" href="job_details.php?job_id=<?= (int)$p['id'] ?>" target="_blank">公開ページを見る</a>
+              <?php else: ?>
+                <a class="btn primary" href="edit_post.php?id=<?= (int)$p['id'] ?>">編集</a>
+                <a class="btn" href="../news.html" target="_blank">公開ページを見る</a>
+              <?php endif; ?>
+              <a class="btn bad" href="delete_post.php?id=<?= (int)$p['id'] ?>" onclick="return confirm('この投稿を削除しますか？')">削除</a>
+            </div>
+          </div>
+        <?php endforeach; ?>
+      </div>
+    <?php endif; ?>
+  </div>
 </body>
 </html>
