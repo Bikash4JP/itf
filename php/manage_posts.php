@@ -34,22 +34,13 @@ if ($q !== '') {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>投稿管理 - スタッフダッシュボード</title>
-  <link rel="stylesheet" href="../css/staffdb.css">
-  <link rel="stylesheet" href="../css/news.css">
+  <link rel="stylesheet" href="https://it-future.jp/css/staffdb.css">
+  <link rel="stylesheet" href="https://it-future.jp/css/search.css">
   <style>
     :root{
       --ink:#0b2243; --muted:#667085; --border:#e6edf6; --bg:#f7fbff; --card:#ffffff;
       --primary:#1e90ff; --primary-d:#1677d3; --ok:#16a34a; --bad:#dc2626; --amber:#f59e0b;
     }
-    body{font-family:ui-sans-serif,system-ui,"Segoe UI",Roboto,"Noto Sans JP","Hiragino Kaku Gothic ProN",Meiryo,Arial,sans-serif;background:#fff;margin:0}
-    header{border-bottom:1px solid var(--border);background:#fff}
-    header .wrap{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:10px 16px}
-    header .logo img{height:40px}
-
-    nav ul{list-style:none;margin:0;padding:0;display:flex;gap:12px}
-    nav a{display:inline-block;padding:8px 12px;border-radius:8px;text-decoration:none;color:#0b3772;border:1px solid #dbe7f5;background:#f3f9ff}
-    nav a:hover{background:#e9f5ff}
-
     .hero{background:var(--bg);border-bottom:1px solid var(--border)}
     .hero .wrap{max-width:1200px;margin:0 auto;padding:20px 16px}
     .hero h1{margin:0;color:var(--ink)}
@@ -91,19 +82,15 @@ if ($q !== '') {
 </head>
 <body>
   <header>
-    <div class="wrap">
-      <div class="logo"><a href="../index.html"><img src="../images/logo.png" alt="ITF"></a></div>
-      <nav>
-        <ul>
-          <li><a href="../staffdb.php">ホーム</a></li>
-          <li><a href="manage_posts.php">投稿を管理</a></li>
-          <li><a href="profile.php">プロフィール</a></li>
-          <li><a href="dashboard.php">ダッシュボード</a></li>
-          <li><a href="logout.php">ログアウト</a></li>
-        </ul>
-      </nav>
-    </div>
-  </header>
+        <div class="logo"><a href="https://it-future.jp/"><img src="https://it-future.jp/images/logo.png" alt="ITF Logo"></a></div>
+        <nav>
+            <ul>
+                <li><a href="staffdb.php">ホーム</a></li>
+                <li><a href="profile.php">プロフィール</a></li>
+                <li><a href="logout.php">ログアウト</a></li>
+            </ul>
+        </nav>
+    </header>
 
   <section class="hero">
     <div class="wrap">
@@ -115,16 +102,6 @@ if ($q !== '') {
     <form class="toolbar" method="get" action="manage_posts.php">
       <div class="search">
         <input type="text" name="q" value="<?=htmlspecialchars($q,ENT_QUOTES,'UTF-8')?>" placeholder="タイトル / 概要 / 会社名 を検索">
-      </div>
-      <div class="filter">
-        <a class="chip <?= $q===''?'active':'' ?>" href="manage_posts.php">すべて</a>
-        <a class="chip" href="manage_posts.php?q=%23%E4%BB%8B%E8%AD%B7">#介護</a>
-        <a class="chip" href="manage_posts.php?q=%23%E6%9D%B1%E4%BA%AC">#東京</a>
-        <a class="chip" href="manage_posts.php?q=%23%E7%89%B9%E5%AE%9A%E6%8A%80%E8%83%BD">#特定技能</a>
-      </div>
-      <div style="margin-left:auto">
-        <a class="btn" href="addjobs.php">✙ 求人を追加</a>
-        <a class="btn" href="submit_post.php?form=news">✙ ニュースを追加</a>
       </div>
     </form>
 

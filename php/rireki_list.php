@@ -107,7 +107,7 @@ function _detect_source(array $meta, PDO $pdo): array {
   $jobId  = (int)($meta['job_id'] ?? ($meta['_job_id'] ?? 0));
   $jTitle = trim((string)($meta['job_title'] ?? ($meta['_job_title'] ?? '')));
 
-  // original upload file rel path (for download)
+  // original upload file rel path (for print/download if needed)
   $origRel = '';
   if (!empty($meta['_upload']) && is_array($meta['_upload'])) {
     $origRel = (string)($meta['_upload']['rel_path'] ?? '');
@@ -157,8 +157,7 @@ if (is_dir($resumeDir)) {
     $meta = @json_decode(@file_get_contents($jsonPath), true) ?: [];
     $createdAt = @filemtime($jsonPath) ?: 0;
 
-    // Required fields for uploads (resume.php should save them)
-    // We still read and show whatever exists.
+    // display fields
     $name = $meta['name_romaji'] ?? $meta['name_kana']
          ?? ($meta['personal']['name_kanji'] ?? ($meta['personal']['name_kana'] ?? '（名称未設定）'));
     $nat  = (string)($meta['nationality'] ?? ($meta['personal']['nationality'] ?? ''));
@@ -304,10 +303,10 @@ $base   = $scheme . '://' . $host;
           $token   = $r['token'];
           $xlsUrl  = "/rireki/{$source}/resumes/{$token}.xls";
           $absXls  = $base . $xlsUrl; // for Office viewer (print)
-          $viewer  = 'https://view.officeapps.live.com/op/view.aspx?src=' . rawurlencode($absXls);
+          $viewerX = 'https://view.officeapps.live.com/op/view.aspx?src=' . rawurlencode($absXls);
           $date    = $r['created'] ? date('Y-m-d H:i', $r['created']) : '-';
 
-          // source cell: show job title link whenever job_id present (even if came via upload)
+          // source cell: show job title link whenever job_id present
           $srcCellText = 'open';
           $srcCellHtml = 'open';
           if ($r['job_id'] > 0) {
@@ -318,6 +317,23 @@ $base   = $scheme . '://' . $host;
           } elseif ($r['src_type'] === 'upload') {
             $srcCellText = 'アップロード';
             $srcCellHtml = 'アップロード';
+          }
+
+          // Build print behavior:
+          // - upload rows: print the ORIGINAL uploaded file
+          // - others: print the generated Excel via Office viewer
+          $printHref = '';
+          if ($r['src_type'] === 'upload' && !empty($r['orig_rel'])) {
+            $absOrig = $base . $r['orig_rel'];
+            $ext = strtolower(pathinfo($r['orig_rel'], PATHINFO_EXTENSION));
+            if (in_array($ext, ['xls','xlsx'], true)) {
+              $printHref = 'https://view.officeapps.live.com/op/view.aspx?src=' . rawurlencode($absOrig);
+            } else {
+              // pdf / jpg / jpeg / png → open directly (browser print)
+              $printHref = $r['orig_rel'];
+            }
+          } else {
+            $printHref = $viewerX;
           }
 
           $rowText = strtolower(
@@ -335,16 +351,21 @@ $base   = $scheme . '://' . $host;
           <td><?=htmlspecialchars($date)?></td>
           <td>
             <div class="badges">
-              <?php if ($r['has_xls']): ?>
-                <a class="btn" href="<?=$xlsUrl?>" download>Excel</a>
-              <?php else: ?><span class="badge">Excelなし</span><?php endif; ?>
-
-              <?php if (!empty($r['orig_rel'])): ?>
-                <a class="btn" href="<?=htmlspecialchars($r['orig_rel'])?>" download>原本</a>
-              <?php endif; ?>
-
-              <?php if ($r['has_xls']): ?>
-                <a class="btn" href="<?=htmlspecialchars($viewer)?>" target="_blank" rel="noopener">印刷</a>
+              <?php if ($r['src_type'] === 'upload'): ?>
+                <!-- アップロード行：Excel/原本リンクは出さず、印刷のみ（原本を印刷） -->
+                <?php if (!empty($printHref)): ?>
+                  <a class="btn" href="<?=htmlspecialchars($printHref)?>" target="_blank" rel="noopener">印刷</a>
+                <?php else: ?>
+                  <span class="badge">印刷不可（原本なし）</span>
+                <?php endif; ?>
+              <?php else: ?>
+                <!-- 通常行：Excel & 印刷（Office Viewer） -->
+                <?php if ($r['has_xls']): ?>
+                  <a class="btn" href="<?=$xlsUrl?>" download>Excel</a>
+                  <a class="btn" href="<?=htmlspecialchars($printHref)?>" target="_blank" rel="noopener">印刷</a>
+                <?php else: ?>
+                  <span class="badge">Excelなし</span>
+                <?php endif; ?>
               <?php endif; ?>
             </div>
           </td>

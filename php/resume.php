@@ -34,14 +34,14 @@ if ($isKaigo && isset($_GET['go']) && $_GET['go'] === 'new') {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>応募 - 株式会社アイティーエフ</title>
-  <link rel="stylesheet" href="../css/common.css">
-  <link rel="stylesheet" href="../css/style.min.css">
-  <link rel="stylesheet" href="../css/screen.min.css">
-  <link rel="stylesheet" href="../css/pagenavi-css.css">
-  <link rel="stylesheet" href="../css/footer.css">
-  <link rel="stylesheet" href="../css/main_intro.css">
-  <link rel="stylesheet" href="../css/saiyou.css">
-  <link rel="stylesheet" href="../css/login.css">
+  <link rel="stylesheet" href="https://it-future.jp/css/common.css">
+  <link rel="stylesheet" href="https://it-future.jp/css/style.min.css">
+  <link rel="stylesheet" href="https://it-future.jp/css/screen.min.css">
+  <link rel="stylesheet" href="https://it-future.jp/css/pagenavi-css.css">
+  <link rel="stylesheet" href="https://it-future.jp/css/footer.css">
+  <link rel="stylesheet" href="https://it-future.jp/css/main_intro.css">
+  <link rel="stylesheet" href="https://it-future.jp/css/saiyou.css">
+  <link rel="stylesheet" href="https://it-future.jp/css/login.css">
   <style>
     :root{ --accent:#2a7de1; --muted:#6b7280; --bg:#f0fcfd }
     body{ background:#fff }
@@ -107,7 +107,7 @@ if ($isKaigo && isset($_GET['go']) && $_GET['go'] === 'new') {
       <div class="header-top">
         <div class="wrap pc-flex bet">
           <div class="header-top-in flex bet vcenter">
-            <h1 class="sp-2 logo"><a href="../index.html" class="logo-link flex vcenter"><img src="../images/logo.png" alt=""></a></h1>
+            <h1 class="sp-2 logo"><a href="https://it-future.jp/" class="logo-link flex vcenter"><img src="https://it-future.jp/images/logo.png" alt=""></a></h1>
             <div id="sp-menu-open" class="sp l-animebtn sp-3">
               <a onclick="document.getElementById('sp-menu-acc').classList.toggle('active')">
                 <div class="bar"><span></span><span></span><span></span></div>
@@ -117,10 +117,10 @@ if ($isKaigo && isset($_GET['go']) && $_GET['go'] === 'new') {
           <div class="header-menu sp-md-acc">
             <div id="sp-menu-acc" class="pc-flex hend acc-body">
               <ul class="contents pc-flex str hend max">
-                <li class="contents-item"><a href="../about.html">事業紹介</a></li>
-                <li class="contents-item"><a href="../company_info.html">企業情報</a></li>
-                <li class="contents-item"><a href="../saiyou.php">新着採用</a></li>
-                <li class="contents-item"><a href="../news.html">新着情報</a></li>
+                <li class="contents-item"><a href="https://it-future.jp/about.html">事業紹介</a></li>
+                <li class="contents-item"><a href="https://it-future.jp/company_info.html">企業情報</a></li>
+                <li class="contents-item"><a href="https://it-future.jp/saiyou.php">新着採用</a></li>
+                <li class="contents-item"><a href="https://it-future.jp/news.html">新着情報</a></li>
               </ul>
               <ul class="cta pc-flex max str">
                 <li class="cta-item tel sp">
@@ -133,7 +133,7 @@ if ($isKaigo && isset($_GET['go']) && $_GET['go'] === 'new') {
                   <a href="/itf/Recruitment" class="cta-item-link flex hcenter vcenter">資料請求</a>
                 </li>
                 <li class="cta-item inquiry flex vcenter">
-                  <a href="../inquiry.html" class="cta-item-link flex hcenter vcenter">お問い合わせ</a>
+                  <a href="https://it-future.jp/inquiry.html" class="cta-item-link flex hcenter vcenter">お問い合わせ</a>
                 </li>
               </ul>
             </div>
