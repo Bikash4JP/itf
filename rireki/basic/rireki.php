@@ -15,6 +15,12 @@
     .section-title { margin: 8px 0 12px; font-weight: 800; }
     .help { color:#6b7280; font-size:12px; }
     .photo-inline { display:flex; align-items:flex-start; gap:16px; }
+    .site-footer{
+      position:relative;left:0;right:0;bottom:0;z-index:5;
+      background:#000;color:#fff;text-align:center;
+      padding:10px 12px;font-size:13px;line-height:1;
+      display:flex;align-items:center;justify-content:center;height: 50px;
+    }
   </style>
 </head>
 <body>
@@ -273,6 +279,7 @@
       </div>
     </form>
   </div>
+  <div class="site-footer">© ITF co. Ltd. ALL Rights Reserved</div>
 
   <!-- Behavior JS -->
   <script src="/rireki/basic/js/rireki_form.js?v=2"></script>
