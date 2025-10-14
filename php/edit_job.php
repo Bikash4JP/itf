@@ -50,31 +50,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $salary       = trim($_POST['salary'] ?? '');
     $japanese_level = trim($_POST['japanese_level'] ?? '');
     $experience   = trim($_POST['experience'] ?? '');
-    $minimum_leave_per_year = (int)($_POST['minimum_leave_per_year'] ?? 0);
-    $employee_size = (int)($_POST['employee_size'] ?? 0);
-    $required_vacancy = (int)($_POST['required_vacancy'] ?? 0);
+    $minimum_leave_per_year = (string)($_POST['minimum_leave_per_year'] ?? '');
+    $required_vacancy = (string)($_POST['required_vacancy'] ?? '');
 
     $bonuses      = isset($_POST['bonuses']) ? (int)$_POST['bonuses'] : 0;
     $bonus_amount = trim($_POST['bonus_amount'] ?? '');
     $living_support = isset($_POST['living_support']) ? (int)$_POST['living_support'] : 0;
-    $rent_support_amount = trim($_POST['rent_support_amount'] ?? '');
+    // naming normalized
+    $rent_support = trim($_POST['rent_support'] ?? '');
     $insurance    = isset($_POST['insurance']) ? (int)$_POST['insurance'] : 0;
     $transportation_charges = isset($_POST['transportation_charges']) ? (int)$_POST['transportation_charges'] : 0;
-    $transport_amount = trim($_POST['transport_amount'] ?? '');
+    // naming normalized
+    $transport_amount_limit = trim($_POST['transport_amount_limit'] ?? '');
     $salary_increment = isset($_POST['salary_increment']) ? (int)$_POST['salary_increment'] : 0;
     $increment_condition = trim($_POST['increment_condition'] ?? '');
 
-    if ($title==='' || $summary==='' || $content==='' || $company_name==='' || $job_location==='' || $job_category==='' || $job_type==='' || $salary==='' || $japanese_level==='' || $experience==='' || !$minimum_leave_per_year || !$employee_size || !$required_vacancy) {
+    // NEW preference fields
+    $preferred_nationalities    = trim($_POST['preferred_nationalities'] ?? '');
+    $preferred_candidate_status = trim($_POST['preferred_candidate_status'] ?? '');
+    $job_memo = trim($_POST['job_memo'] ?? '');
+
+    // Required validation (employee_size removed)
+    if (
+      $title === '' || $summary === '' || $content === '' ||
+      $company_name === '' || $job_location === '' || $job_category === '' ||
+      $job_type === '' || $salary === '' || $japanese_level === '' ||
+      $experience === '' || $minimum_leave_per_year === '' || $required_vacancy === ''
+    ) {
       $errMsg = '必須項目が未入力です。';
     } else {
       $sql = "UPDATE posts SET
                 title=?, summary=?, content=?, company_name=?,
                 job_location=?, job_category=?, job_type=?, salary=?,
                 japanese_level=?, experience=?, minimum_leave_per_year=?,
-                employee_size=?, required_vacancy=?,
+                required_vacancy=?,
                 bonuses=?, bonus_amount=?, living_support=?, rent_support=?,
                 insurance=?, transportation_charges=?, transport_amount_limit=?,
                 salary_increment=?, increment_condition=?,
+                preferred_nationalities=?, preferred_candidate_status=?, job_memo=?,
                 posted_by=?,
                 date=date
               WHERE id=? AND post_type='job'";
@@ -83,10 +96,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $title, $summary, $content, $company_name,
         $job_location, $job_category, $job_type, $salary,
         $japanese_level, $experience, $minimum_leave_per_year,
-        $employee_size, $required_vacancy,
-        $bonuses, $bonus_amount, $living_support, $rent_support_amount,
-        $insurance, $transportation_charges, $transport_amount,
+        $required_vacancy,
+        $bonuses, $bonus_amount, $living_support, $rent_support,
+        $insurance, $transportation_charges, $transport_amount_limit,
         $salary_increment, $increment_condition,
+        $preferred_nationalities, $preferred_candidate_status, $job_memo,
         $_SESSION['username'],
         $id
       ]);
@@ -125,7 +139,6 @@ function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
     input[type=text],input[type=number],select,textarea{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;background:#fff}
     textarea{min-height:120px}
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
     .col-2{grid-column:1/-1}
     .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
     .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid #dbe7f5;background:#f3f9ff;color:#0b3772;text-decoration:none;cursor:pointer}
@@ -234,15 +247,11 @@ function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
         </div>
         <div>
           <label>年間最低休暇日数 *</label>
-          <input type="number" name="minimum_leave_per_year" value="<?= (int)$job['minimum_leave_per_year'] ?>" required>
-        </div>
-        <div>
-          <label>現在の従業員数 *</label>
-          <input type="number" name="employee_size" value="<?= (int)$job['employee_size'] ?>" required>
+          <input type="number" name="minimum_leave_per_year" value="<?= h($job['minimum_leave_per_year']) ?>" required>
         </div>
         <div>
           <label>募集人数 *</label>
-          <input type="number" name="required_vacancy" value="<?= (int)$job['required_vacancy'] ?>" required>
+          <input type="number" name="required_vacancy" value="<?= h($job['required_vacancy']) ?>" required>
         </div>
       </div>
 
@@ -267,7 +276,7 @@ function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
         </div>
         <div>
           <label>住宅手当額（任意）</label>
-          <input type="text" name="rent_support_amount" value="<?= h($job['rent_support']) ?>">
+          <input type="text" name="rent_support" value="<?= h($job['rent_support']) ?>">
         </div>
         <div>
           <label>保険</label>
@@ -285,7 +294,7 @@ function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
         </div>
         <div>
           <label>月額上限（交通費・任意）</label>
-          <input type="text" name="transport_amount" value="<?= h($job['transport_amount_limit']) ?>">
+          <input type="text" name="transport_amount_limit" value="<?= h($job['transport_amount_limit']) ?>">
         </div>
         <div>
           <label>昇給</label>
@@ -297,6 +306,37 @@ function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
         <div class="col-2">
           <label>昇給条件（任意）</label>
           <textarea name="increment_condition"><?= h($job['increment_condition']) ?></textarea>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <h3 style="margin:0 0 8px;font-size:16px;color:#0b2243;">募集の希望条件 / メモ</h3>
+        <div class="grid">
+          <div class="col-2">
+            <label>希望国籍（カンマ区切り可）</label>
+            <textarea name="preferred_nationalities" placeholder="例：ベトナム、ネパール、インドネシア"><?= h($job['preferred_nationalities']) ?></textarea>
+          </div>
+          <div>
+            <label>候補者の現在地</label>
+            <?php
+              $pcsVal = (string)($job['preferred_candidate_status'] ?? '');
+              $pcsOpts = [
+                '' => '指定なし',
+                '日本在住' => '日本在住',
+                '海外在住' => '海外在住',
+                'どちらでも' => 'どちらでも',
+              ];
+            ?>
+            <select name="preferred_candidate_status">
+              <?php foreach($pcsOpts as $v=>$label): ?>
+                <option value="<?= h($v) ?>" <?= ($v===$pcsVal?'selected':'') ?>><?= h($label) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="col-2">
+            <label>メモ（社内向け）</label>
+            <textarea name="job_memo" placeholder="例：面接は2回、夜勤可能者歓迎など"><?= h($job['job_memo']) ?></textarea>
+          </div>
         </div>
       </div>
 

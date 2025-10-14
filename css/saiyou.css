@@ -1,58 +1,198 @@
-/* /home/it-future/www/itf/css/saiyou.css  (rev 2.0) */
+/* /home/it-future/www/itf/css/saiyou.css  (rev 2.2) */
 
-/* Search band */
+:root{
+  /* Adjust this if your fixed header height changes */
+  --header-h: 58px;
+  --gap-under-header: 10px;                 /* 10px below header as requested */
+  --sticky-top: calc(var(--header-h) + var(--gap-under-header));
+}
+
+/* ===== Hero (Search band) ===== */
 section.bg{
   background-image:url('../images/inquiry_main.jpg');
-  background-size:cover;background-position:center;
-  height:280px;position:relative;display:flex;align-items:center;justify-content:center;margin-top:58px
+  background-size:cover;
+  background-position:center;
+  height:280px;
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-top: var(--header-h);              /* leave room for fixed header */
 }
 section.bg .overlay{padding:40px 20px}
-section.bg .search-form{display:flex;width:100%;max-width:640px;background:#fff;border:1px solid #386e44;border-radius:30px;overflow:hidden}
-section.bg .search-form input[type="text"]{flex:1;padding:12px 20px;border:none;font-size:16px;outline:none}
-section.bg .search-form button{background:transparent;border:none;padding:0 16px;display:flex;align-items:center;cursor:pointer}
-
-/* Layout */
-.saiyou-section{max-width:1100px;margin:36px auto;padding:0 20px}
-.section-title{font-size:3rem;font-weight: bolder; color:#0577c5;margin-bottom:18px;text-align:center;text-decoration: underline;}
-.content-wrapper{display:flex;gap:18px;align-items:flex-start}
-.results{flex:1}
-.filters{width:280px;padding:20px;border:1px solid #386e44;border-radius:20px;background:#fff}
-.filters h2{font-size:2.2rem;margin-bottom:12px;color:#0577c5}
-.filters label{display:block;margin:15px 0;position:relative;font-style:italic;font-size:1.5rem}
-.filters select{width:100%;padding:6px;border:1px solid #ccc;border-radius:4px;font-size:.9rem}
-.filters button{margin-top:10px;padding:8px 16px;background:#2a7de1;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:.9rem}
-.filters button:hover{background:#1a5cb8}
-
-/* Job card (no images) */
-.job-item{
-  background:#fff;border-radius:14px;padding:16px 18px;margin-bottom:22px;
-  box-shadow:0 1px 3px rgba(0,0,0,.06);border:1px solid #eef2f7
+section.bg .search-form{
+  display:flex;
+  width:100%;
+  max-width:640px;
+  background:#fff;
+  border:1px solid #386e44;
+  border-radius:30px;
+  overflow:hidden
 }
-.job-title a{color:#0b63b6;text-decoration:none;font-size:18px;font-weight:800}
-.job-title a:hover{text-decoration:underline}
+section.bg .search-form input[type="text"]{
+  flex:1;
+  padding:12px 20px;
+  border:none;
+  font-size:16px;
+  outline:none
+}
+section.bg .search-form button{
+  background:transparent;
+  border:none;
+  padding:0 16px;
+  display:flex;
+  align-items:center;
+  cursor:pointer
+}
+
+/* ===== Page layout ===== */
+.saiyou-section{
+  max-width:1100px;
+  margin:0 auto;
+  padding:0 20px 24px;
+}
+
+/* ===== Sticky section title =====
+   Sticks 10px below the fixed header and never overlaps it.
+*/
+.section-title{
+  font-size:2.4rem;
+  font-weight:800;
+  color:#0577c5;
+  margin:18px 0;
+  text-align:center;
+  text-decoration: underline;
+
+  position: sticky;
+  top: var(--sticky-top);
+  z-index: 5;
+  background: #ffffffcc;                     /* subtle backdrop to keep readable */
+  backdrop-filter: blur(3px);
+  padding: 12px 8px;
+}
+
+/* ===== Content & Filters ===== */
+.content-wrapper{
+  display:flex;
+  gap:18px;
+  align-items:flex-start;
+}
+
+.results{
+  flex:1;
+}
+
+/* Filters stick at the same offset as the title */
+.filters{
+  width:280px;
+  padding:20px;
+  border:1px solid #386e44;
+  border-radius:20px;
+  background:#fff;
+
+  position: sticky;
+  top: var(--sticky-top);
+  z-index: 4;                                /* under the title, above results */
+}
+.filters h2{
+  font-size:1.4rem;
+  margin-bottom:12px;
+  color:#0577c5
+}
+.filters label{
+  display:block;
+  margin:15px 0;
+  position:relative;
+  font-style:italic;
+  font-size:1.05rem
+}
+.filters select{
+  width:100%;
+  padding:6px;
+  border:1px solid #ccc;
+  border-radius:4px;
+  font-size:.95rem
+}
+.filters button{
+  margin-top:10px;
+  padding:8px 16px;
+  background:#2a7de1;
+  color:#fff;
+  border:none;
+  border-radius:4px;
+  cursor:pointer;
+  font-size:.95rem
+}
+.filters button:hover{ background:#1a5cb8 }
+
+/* ===== Job card ===== */
+.job-item{
+  background:#fff;
+  border-radius:14px;
+  padding:16px 18px;
+  margin-bottom:22px;
+  box-shadow:0 1px 3px rgba(0,0,0,.06);
+  border:1px solid #eef2f7
+}
+.job-title a{
+  color:#0b63b6;
+  text-decoration:none;
+  font-size:18px;
+  font-weight:800
+}
+.job-title a:hover{ text-decoration:underline }
 
 /* Hashtag chips */
-.tag-row{margin:8px 0 10px;display:flex;gap:8px;flex-wrap:wrap}
+.tag-row{
+  margin:8px 0 10px;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap
+}
 .tag{
-  font-style: italic; display:inline-block;font-size:12px;background:#f3f4f6;color:#070707;border:1px solid #d1d5db;
-  padding:2px 8px;border: 1px solid rgb(10, 153, 209); border-radius:10px
+  font-style: italic;
+  display:inline-block;
+  font-size:12px;
+  background:#f3f4f6;
+  color:#070707;
+  border:1px solid #d1d5db;
+  padding:2px 8px;
+  border: 1px solid rgb(10, 153, 209);
+  border-radius:10px
 }
 
 /* Lines */
-.row{display:flex;align-items:center;gap:8px;margin:6px 0}
-.row .ico{width:16px;height:16px;object-fit:contain}
-.line{margin-top:4px}
+.row{ display:flex; align-items:center; gap:8px; margin:6px 0 }
+.row .ico{ width:16px; height:16px; object-fit:contain }
+.line{ margin-top:4px }
 
-/* Divider between jobs */
-.job-divider{border:0;border-top:1px solid #e5e7eb;margin:16px 0 0}
+/* Divider */
+.job-divider{
+  border:0;
+  border-top:1px solid #e5e7eb;
+  margin:16px 0 0
+}
 
 /* “View full details” link */
-.view-link{margin-top:6px}
-.view-link a{font-size:12px;color:#0b63b6;text-decoration:none}
-.view-link a:hover{text-decoration:underline}
+.view-link{ margin-top:6px }
+.view-link a{
+  font-size:12px;
+  color:#0b63b6;
+  text-decoration:none
+}
+.view-link a:hover{ text-decoration:underline }
 
-/* Responsive */
+/* ===== Responsive ===== */
 @media (max-width: 900px){
-  .content-wrapper{flex-direction:column}
-  .filters{width:100%}
+  .content-wrapper{ flex-direction:column }
+  .filters{
+    width:100%;
+    position: static;          /* normal flow on small screens */
+    top:auto
+  }
+  .section-title{
+    position: static;          /* avoid sticky on small screens */
+    backdrop-filter:none;
+    background:transparent
+  }
 }
