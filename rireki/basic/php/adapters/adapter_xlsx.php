@@ -90,54 +90,65 @@ function rireki_render_pdf(array $data, string $mappingFile, string $outDir, str
     if (!empty($map['repeaters'])) {
       foreach ($map['repeaters'] as $repKey => $repConf) {
         $rows = $data[$repKey] ?? []; if (!is_array($rows)) continue;
+
         $startRow = (int)($repConf['start_row'] ?? 0);
         $rowStep  = (int)($repConf['row_step'] ?? 1);
         $maxRows  = (int)($repConf['max_rows'] ?? count($rows));
         $cols     = $repConf['columns'] ?? [];
-        $limit = min(count($rows), $maxRows);
+        $limit    = min(count($rows), $maxRows);
+
         for ($i=0; $i<$limit; $i++) {
-          $row = $rows[$i]; $r = $startRow + ($i * $rowStep);
-          foreach ($cols as $field => $colLetter) {
-            $coord = $colLetter . $r;
-            $sheet->setCellValue($coord, (string)($row[$field] ?? ''));
+          $rowData = $rows[$i] ?? [];
+          $r       = $startRow + ($i * $rowStep);
+
+          foreach ($cols as $field => $tpl) {
+            $val = (string)($rowData[$field] ?? '');
+            if ($val === '' && $val !== '0') continue;
+            // Accept "B", "B{row}", "B{ROW}", "Q{row_plus_2}", etc.
+            $coord = resolveCellCoord($tpl, $r);
+            $sheet->setCellValue($coord, $val);
           }
         }
       }
     }
 
-    // ---- Photo fit (fit into merged box around anchor) + HTML overlay for preview
-    $photoOverlay = null; // for preview
+    // ---- Photo fit (stretch to box with 2px padding)
+    $photoOverlay = null; // for preview overlay
     if (!empty($map['photo']) && !empty($data['photo_path'])) {
       $ph = $data['photo_path'];
       if (is_readable($ph)) {
         $anchor = $map['photo']['anchor_cell'] ?? 'M3';
         [$c1,$r1,$c2,$r2] = findMergedBox($sheet, $anchor);
         [$boxW,$boxH]     = regionPixelSize($sheet, $c1,$c2,$r1,$r2);
-        [$imgW,$imgH]     = @getimagesize($ph) ?: [600,800];
-        $scale = min(max($boxW,1)/$imgW, max($boxH,1)/$imgH);
-        $newW = (int)floor($imgW * $scale);
-        $newH = (int)floor($imgH * $scale);
-        $offX = max(0, (int)floor(($boxW - $newW)/2));
-        $offY = max(0, (int)floor(($boxH - $newH)/2));
 
-        // Put into XLS (so downloaded file has image)
+        // padding 2px each side
+        $pad  = 2;
+        $newW = max(1, $boxW - 2*$pad);
+        $newH = max(1, $boxH - 2*$pad);
+        $offX = $pad;
+        $offY = $pad;
+
+        // Put into XLS (stretched, not proportional)
         $img = new Drawing();
-        $img->setName('Photo'); $img->setDescription('Applicant Photo'); $img->setPath($ph);
-        $img->setResizeProportional(true); $img->setWidthAndHeight($newW, $newH);
+        $img->setName('Photo');
+        $img->setDescription('Applicant Photo');
+        $img->setPath($ph);
+        $img->setResizeProportional(false); // stretch to fit
+        $img->setWidthAndHeight($newW, $newH);
         $img->setCoordinates(Coordinate::stringFromColumnIndex($c1) . $r1); // top-left of merged
-        $img->setOffsetX($offX); $img->setOffsetY($offY);
+        $img->setOffsetX($offX);
+        $img->setOffsetY($offY);
         $img->setWorksheet($sheet);
 
-        // Build HTML overlay (preview)
+        // HTML overlay (preview) — stretch as well
         $mime = 'image/jpeg';
-        if (is_array($imgW)) { /* ignore */ }
-        $gi = @getimagesize($ph);
+        $gi   = @getimagesize($ph);
         if (is_array($gi) && !empty($gi['mime'])) $mime = $gi['mime'];
         $bin = @file_get_contents($ph);
         if ($bin !== false) {
           $dataUri = 'data:' . $mime . ';base64,' . base64_encode($bin);
           $anchorTopLeft = Coordinate::stringFromColumnIndex($c1) . $r1;
-          // +2px left padding adjustment (our TD has 0 2px padding)
+          // +2px for our TD left padding in HTML renderer
           $photoOverlay = [
             'addr'   => $anchorTopLeft,
             'src'    => $dataUri,
@@ -260,7 +271,7 @@ function renderSheetRegionHtml(Worksheet $sheet, string $colStartLetter, string 
         $img = '<div style="position:relative;width:100%;height:100%;">'
              . '<img alt="photo" src="'.htmlspecialchars($overlay['src'],ENT_QUOTES,'UTF-8').'" '
              . 'style="position:absolute;left:'.$overlay['offX'].'px;top:'.$overlay['offY'].'px;'
-             . 'width:'.$overlay['width'].'px;height:'.$overlay['height'].'px;object-fit:cover;border:0;"/>'
+             . 'width:'.$overlay['width'].'px;height:'.$overlay['height'].'px;object-fit:fill;border:0;"/>'
              . '</div>';
         $val = $img . $val;
       }
@@ -404,6 +415,45 @@ function applyJoinRules(array $data, array $joins): array {
     }
   }
   return $data;
+}
+
+/**
+ * Resolve coordinates in mapping templates:
+ *  - "B" + row -> "B38"
+ *  - "B{row}" / "B{ROW}" -> "B38"
+ *  - "Q{row_plus_2}" (any case) -> "Q40" (if row=38)
+ */
+function resolveCellCoord(string $tpl, int $row): string {
+  $t = trim($tpl);
+
+  // Pure column letters? ("B", "AC", etc.) -> append row
+  if (preg_match('/^[A-Za-z]{1,3}$/', $t)) {
+    return strtoupper($t) . $row;
+  }
+
+  // Replace case-insensitive {row} / {row_plus_n}
+  $repls = [
+    '{row}'         => $row,
+    '{row_plus_1}'  => $row + 1,
+    '{row_plus_2}'  => $row + 2,
+    '{row_plus_3}'  => $row + 3,
+    '{ROW}'         => $row,
+    '{ROW_PLUS_1}'  => $row + 1,
+    '{ROW_PLUS_2}'  => $row + 2,
+    '{ROW_PLUS_3}'  => $row + 3,
+  ];
+  $coord = strtr($t, $repls);
+
+  // If something unknown remained in braces, strip it and append row (fail-safe)
+  if (preg_match('/\{[^}]+\}/', $coord)) {
+    $coord = preg_replace('/\{[^}]+\}/', '', $coord) . $row;
+  }
+
+  // Final sanity
+  if (!preg_match('/^[A-Za-z]{1,3}\d+$/', $coord)) {
+    throw new RuntimeException("Invalid mapping coordinate after resolve: {$tpl} -> {$coord}");
+  }
+  return strtoupper($coord);
 }
 
 /** ============== Upload helper ============== */

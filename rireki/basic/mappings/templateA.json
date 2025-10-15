@@ -3,151 +3,67 @@
   "sheet_name": "",
 
   "singles": {
-    "personal.name_romaji": "H3",
-    "personal.name_kana": "H4",
+    "personal.name_kana": "C6",
+    "personal.name_kanji": "C9",
 
-    "personal.dob_yyyy": "H5",
-    "personal.dob_mm": "K5",
-    "personal.dob_dd": "N5",
-    "personal.age": "Q5",
+    "personal.dob_yyyy": "C14",
+    "personal.dob_mm":   "E14",
+    "personal.dob_dd":   "G14",
+    "personal.age":      "I14",
 
-    "personal.birth_place": "H6",
+    "gender":            "K15",
 
-    "address.postcode": "E7",
-    "address.full": "B8",
+    "address.kana":      "C16",
+    "address.postcode":  "D19",
+    "address.full":      "C21",
 
-    "personal.nationality": "X3",
-    "personal.gender": "X4",
-    "personal.religion": "X5",
-    "personal.marital": "X6",
-    "contact.phone": "X7",
-    "contact.email": "X8",
-
-    "body.height_cm": "H9",
-    "body.weight_kg": "R9",
-
-    "passport.has": "H10",
-    "passport.expiry_y": "P10",
-    "passport.expiry_m": "S10",
-    "passport.expiry_d": "U10",
-    "passport.number": "AB10",
-
-    "immigration.history": "H11",
-
-    "immigration.recent.in_y":  "T11",
-    "immigration.recent.in_m":  "W11",
-    "immigration.recent.in_d":  "Y11",
-    "immigration.recent.out_y": "AC11",
-    "immigration.recent.out_m": "AF11",
-    "immigration.recent.out_d": "AH11",
-
-    "visa.status": "H12",
-    "visa.until.in_y":  "T12",
-    "visa.until.in_m":  "W12",
-    "visa.until.in_d":  "Y12",
-    "visa.until.out_y": "AC12",
-    "visa.until.out_m": "AF12",
-    "visa.until.out_d": "AH12",
-
-    "retirement.reason": "B14",
-
-    "meta.today_y": "AC2",
-    "meta.today_m": "AF2",
-    "meta.today_d": "AH2"
+    "contact.phone":     "M16",
+    "contact.email":     "M21"
   },
 
   "blocks": {
-    "pr.self":       { "cell": "B42", "wrap": true },
-    "pr.motivation": { "cell": "B48", "wrap": true },
-    "pr.hopes":      { "cell": "B54", "wrap": true }
+    "pr.self_pr": { "cell": "Q47", "wrap": true },
+    "preferences.hopes": { "cell": "Q71", "wrap": true }
   },
 
   "repeaters": {
     "education": {
-      "start_row": 17,
-      "row_step": 1,
-      "max_rows": 4,
-      "columns": {
-        "from_y": "B",
-        "from_m": "E",
-        "to_y":   "H",
-        "to_m":   "K",
-        "school": "M",
-        "faculty": "AE"
-      }
-    },
-    "experience": {
-      "start_row": 22,
+      "start_row": 38,
       "row_step": 3,
-      "max_rows": 4,
+      "max_rows": 6,
       "columns": {
-        "from_y": "B",
-        "from_m": "E",
-        "to_y":   "H",
-        "to_m":   "K",
-        "company": "M",
-        "job_type": "AE",
-        "start_time": "AD",
-        "end_time":   "AD",
-        "days":       "AD"
-      },
-      "row_offsets": {
-        "start_time": 0,
-        "end_time": 1,
-        "days": 2
+        "year":   "B{row}",
+        "month":  "C{row}",
+        "school": "D{row}"
       }
     },
+
+    "experience": {
+      "start_row": 5,
+      "row_step": 3,
+      "max_rows": 6,
+      "columns": {
+        "year":   "Q{row}",
+        "month":  "R{row}",
+        "text":   "S{row}"
+      }
+    },
+
     "licenses": {
-      "start_row": 36,
-      "row_step": 1,
-      "max_rows": 5,
+      "start_row": 25,
+      "row_step": 3,
+      "max_rows": 8,
       "columns": {
-        "year": "B",
-        "month": "E",
-        "name": "G"
+        "year":        "Q{row}",
+        "month":       "R{row}",
+        "certificate": "S{row}"
       }
-    },
-    "extra": {
-      "start_row": 58,
-      "row_step": 1,
-      "max_rows": 10,
-      "columns": { }
     }
   },
 
   "photo": {
-    "anchor_cell": "AD3",
-    "height_px": 420,
-    "fit_merged": true
-  },
-
-  "validations": {
-    "X3": ["バングラデシュ","インドネシア国籍","ベトナム国籍","ネパール国籍","ミャンマー国籍","ペルー国籍","中国国籍","韓国国籍"],
-    "X4": ["男性","女性"],
-    "X5": ["イスラム教","仏教","キリスト教","ヒンドゥー教","無宗教"],
-    "X6": ["有り（子供あり）","有り（子供なし）","無し"],
-    "H12": ["無し","特定技能","技能実習","その他"],
-
-    "L58": ["N1相当","N2相当","N3相当","N4相当"],
-    "L59": ["できる","漢字が苦手","ひらがなならOK","まだまだ勉強"],
-    "L60": ["A","B","O","AB","わからない"],
-    "L61": ["可能","日常会話OK","不可"],
-    "L62": ["あり","なし"],
-    "L63": ["0名","1名","2名","3名","4名","5名"],
-    "L64": ["0名","1名","2名","3名","4名","5名","6名","7名","8名","9名","10名"],
-    "L65": ["吸う","吸わない"],
-    "L66": ["飲む","飲まない"],
-    "L67": ["あり","なし"],
-
-    "Z58": ["SS","S","M","L","LL","XL"],
-    "Z59": ["21.0cm(EUR32)","21.5cm(EUR33)","22.0cm(EUR34)","22.5cm(EUR35)","23.0cm(EUR36)","23.5cm(EUR37)","24.0cm(EUR38)","24.5cm(EUR39)","25.0cm(EUR40)","25.5cm(EUR41)","26.0cm(EUR42)","26.5cm(EUR43)","27.0cm(EUR44)","27.5cm(EUR45)","28.0cm(EUR46)","28.5cm(EUR47)","29.0cm(EUR48)"],
-    "Z60": ["なし","あり（仕事中はしない)","あり（休憩中にはしたい)"],
-    "Z61": ["なし","あり（仕事中はしない)","あり（休憩中にはしたい)"],
-    "Z62": ["特にありません","全肉は食べません","豚は食べません","牛肉は食べません","豚は食べません/お酒は飲みません"],
-    "Z63": ["仕事中はしません","仕事中もしたいです。","必要なし"],
-    "Z64": ["できるだけ長く","5年は滞在したい","その他"],
-    "Z65": ["あり","なし"],
-    "Z66": ["あり","なし"],
-    "Z67": ["あり","なし"]
+    "anchor_cell": "M3",
+    "fit_merged": true,
+    "padding_px": 3
   }
 }

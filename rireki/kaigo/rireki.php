@@ -63,6 +63,38 @@ $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
       input.in-yy,input.in-mm{max-width:100%}
     }
     .banner{margin:10px 0 0 0;font-size:.9rem;color:#0b3772}
+
+    /* --- Progress Bar (labels + thin bar) --- */
+    #progressWrap{
+      max-width:1100px;
+      margin:16px auto 0;
+      padding:0 20px; /* visually 20px margins L/R */
+    }
+    #progressWrap .progress-labels{
+      list-style:none; margin:0 0 6px 0; padding:0;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    #progressWrap .progress-labels li{
+      font-weight:800; font-size:14px; letter-spacing:.5px;
+      color:#111; opacity:.75; user-select:none;
+    }
+    #progressWrap .progress-labels li.is-active{ opacity:1 }
+    #progressWrap .progress-labels li.is-dim   { opacity:.45 }
+
+    #progressWrap .progress-track{
+      height:10px;
+      border:2px solid #000;      /* black border like sample */
+      border-radius:5px;
+      overflow:hidden;
+      background:#fff;
+      box-shadow:inset 0 1px 0 rgba(0,0,0,.15);
+    }
+    #progressWrap .progress-fill{
+      height:100%;
+      width:0%;
+      background:#1e90ff;         /* sky */
+      transition:width .35s ease; /* smooth raise */
+    }
   </style>
 </head>
 <body>
@@ -70,6 +102,22 @@ $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
     <div class="wrap">
       <h1>介護向け 履歴書フォーム</h1>
       <a class="home" href="/rireki/index.php">← フォーマット選択へ</a>
+    </div>
+  </div>
+
+  <!-- Progress Bar -->
+  <div id="progressWrap">
+    <ul class="progress-labels">
+      <li data-step="1">個人情報</li>
+      <li data-step="2">在留・写真</li>
+      <li data-step="3">学歴・免許</li>
+      <li data-step="4">職歴</li>
+      <li data-step="5">自己PR・志望希望</li>
+      <li data-step="6">別途情報</li>
+      <li data-step="7" id="labelDone">作成終了</li>
+    </ul>
+    <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="入力進捗">
+      <div id="progressFill" class="progress-fill" aria-valuenow="0"></div>
     </div>
   </div>
 
@@ -223,9 +271,8 @@ $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
               <li>旅券番号・在留カード番号の公開は控えてください（社内管理用途のみ記入）。</li>
               <li>証明写真の要件：
                 <ol>
-                  <li>両耳・腕（肩まで）が見えるように撮影してください。</li>
+                  <li>両耳・肩が見えるように撮影してください。</li>
                   <li>目を開け、正面を向いたもの（サングラス・帽子不可）。</li>
-                  <li>サイズ：<strong>縦3cm × 横2cm</strong>（比率同等可）。</li>
                   <li><strong>3か月以内</strong>に撮影した鮮明な写真。</li>
                   <li>背景は無地・明るめ（白/薄色推奨）。</li>
                 </ol>
@@ -450,7 +497,9 @@ $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
             <label>日本での仕事の希望期間<select name="work_duration_intent"><option value=""></option><option>できるだけ長く</option><option>5年は滞在したい</option><option>その他</option></select></label>
             <label>現在の日本語勉強<select name="studying_japanese_now"><option value=""></option><option>あり</option><option>なし</option></select></label>
             <label>現在の専門職の勉強<select name="studying_specialty_now"><option value=""></option><option>あり</option><option>なし</option></select></label>
-            <label>別の送り出し/別施設の面接<select name="other_agency_or_facility_interview"><option value=""></option><option>あり</option><option>なし</option></select></label>
+            <label>別の送り出し/別施設の面接
+              <select name="other_agency_or_facility_interview" id="finalSelect"><option value=""></option><option>あり</option><option>なし</option></select>
+            </label>
           </div>
 
           <div class="rule-box">
@@ -474,5 +523,115 @@ $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
   <div class="site-footer">© ITF co. Ltd. ALL Rights Reserved</div>
 
   <script src="/rireki/kaigo/js/kaigo.js?v=5"></script>
+ <script>
+(function () {
+  const SEGMENTS = 6;                 // 6 parts: step2..step6 + final completion
+  const INC = 100 / SEGMENTS;         // 16.6667%
+  const stepsRoot = document.querySelector('.steps');
+  const panes = Array.from(document.querySelectorAll('.steps .step-pane'));
+  const progressFill = document.getElementById('progressFill');
+  const labels = Array.from(document.querySelectorAll('#progressWrap .progress-labels li'));
+  const lastPane = panes[panes.length - 1]; // 別途情報 pane (step 6)
+  const submitBtn = lastPane ? lastPane.querySelector('button[type="submit"]') : null;
+
+  function getActiveIdx() {
+    const i = panes.findIndex(p => p.classList.contains('is-active'));
+    return i >= 0 ? i : 0;
+  }
+
+  function allLastPaneFieldsFilled() {
+    if (!lastPane) return false;
+    const fields = Array.from(lastPane.querySelectorAll('input:not([type="hidden"]), select, textarea'));
+    if (!fields.length) return false;
+    return fields.every(el => {
+      if (el.disabled) return true;
+      return (el.value || '').trim() !== '';
+    });
+  }
+
+  function setSubmitState(done) {
+    if (!submitBtn) return;
+    submitBtn.disabled = !done;
+    submitBtn.style.opacity = done ? '' : '0.7';
+    submitBtn.style.pointerEvents = done ? '' : 'none';
+  }
+
+  function setLabelStates(activeSegments, isDone) {
+    // Labels are optional; this just dims/focuses them nicely
+    if (!labels.length) return;
+    labels.forEach((li, i) => {
+      li.classList.remove('is-active', 'is-dim', 'is-done');
+    });
+
+    // Map: step1..step6 → segments 0..5 (0%..83%), segment 6 (100%) only when last pane done
+    const activeStepIdx = getActiveIdx(); // 0..5
+    const currentLabelIdx = Math.min(activeStepIdx, labels.length - 2); // before 完了 label
+    labels.forEach((li, i) => {
+      if (i < currentLabelIdx) li.classList.add('is-done');
+      if (i === currentLabelIdx) li.classList.add('is-active');
+      if (i > currentLabelIdx) li.classList.add('is-dim');
+    });
+
+    // When fully done, highlight the last label
+    if (isDone && labels.length) {
+      labels.forEach(li => li.classList.add('is-dim'));
+      labels[labels.length - 1].classList.remove('is-dim');
+      labels[labels.length - 1].classList.add('is-active');
+    }
+  }
+
+  function updateProgress() {
+    const idx = getActiveIdx(); // 0..5
+    const atLastPane = (idx === panes.length - 1);
+
+    // Base segments: step1=0, step2=1, step3=2, step4=3, step5=4, step6=5
+    let segments = Math.min(idx, SEGMENTS - 1);
+
+    let finalDone = false;
+    if (atLastPane && allLastPaneFieldsFilled()) {
+      // final +1 segment to reach 100%
+      segments = SEGMENTS;
+      finalDone = true;
+    }
+
+    const pct = Math.min(100, Math.max(0, segments * INC));
+    if (progressFill) {
+      progressFill.style.width = pct + '%';
+      progressFill.setAttribute('aria-valuenow', String(Math.round(pct)));
+    }
+
+    setLabelStates(segments, finalDone);
+    setSubmitState(finalDone);
+  }
+
+  function deferUpdate() {
+    requestAnimationFrame(() => requestAnimationFrame(updateProgress));
+  }
+
+  // React on step navigation
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.js-next-step') || e.target.closest('.js-prev-step')) {
+      deferUpdate();
+    }
+  });
+
+  // Watch class swaps on panes (your step slider toggles .is-active)
+  if (stepsRoot && 'MutationObserver' in window) {
+    new MutationObserver(deferUpdate)
+      .observe(stepsRoot, { attributes: true, subtree: true, attributeFilter: ['class'] });
+  }
+
+  // Validate live on the last pane
+  if (lastPane) {
+    lastPane.addEventListener('input', updateProgress, true);
+    lastPane.addEventListener('change', updateProgress, true);
+  }
+
+  window.addEventListener('load', updateProgress);
+  updateProgress();
+})();
+</script>
+
+
 </body>
 </html>

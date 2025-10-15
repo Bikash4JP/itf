@@ -6,135 +6,112 @@
   <meta charset="utf-8" />
   <title>履歴書フォーム（Basic）</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <!-- Theme CSS (merged) -->
-  <link rel="stylesheet" href="/rireki/basic/css/recruit.css?v=2">
-
-  <style>
-    /* Small page-local tweaks */
-    .section-title { margin: 8px 0 12px; font-weight: 800; }
-    .help { color:#6b7280; font-size:12px; }
-    .photo-inline { display:flex; align-items:flex-start; gap:16px; }
-    .site-footer{
-      position:relative;left:0;right:0;bottom:0;z-index:5;
-      background:#000;color:#fff;text-align:center;
-      padding:10px 12px;font-size:13px;line-height:1;
-      display:flex;align-items:center;justify-content:center;height: 50px;
-    }
-  </style>
+  <link rel="stylesheet" href="/rireki/basic/css/recruit.css?v=3">
 </head>
 <body>
-  <!-- Optional Appbar -->
+  <!-- Appbar -->
   <div class="appbar">
     <div class="wrap">
       <h1>履歴書フォーム（Basic）</h1>
       <a class="home" href="/rireki/index.php">← フォーマット選択へ</a>
     </div>
   </div>
+  <!-- Progress Bar -->
+<!-- Progress Bar -->
+<div id="progressWrap">
+  <ul class="progress-labels">
+    <li data-step="0">個人情報</li>
+    <li data-step="1">学歴</li>
+    <li data-step="2">職歴</li>
+    <li data-step="3">資格・免許</li>
+    <li data-step="4">自己PR</li>
+    <li data-step="5" id="labelDone">作成終了</li>
+  </ul>
+  <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="入力進捗">
+    <div id="progressFill" class="progress-fill" aria-valuenow="0"></div>
+  </div>
+</div>
+
+
 
   <div class="wrap">
     <form class="card" action="/rireki/basic/php/submit_rireki.php" method="post" enctype="multipart/form-data" id="rirekiForm" novalidate>
       <div class="steps">
 
-        <!-- STEP 1: Personal / Contact -->
+        <!-- STEP 1 -->
         <section class="step-pane is-active" data-step="1">
           <h2>基本情報</h2>
           <div class="grid-2">
-            <label>
-              フリガナ
-              <input type="text" name="personal_name_kana" placeholder="やまだ たろう" autocomplete="name" />
-            </label>
-            <label>
-              氏名
-              <input type="text" name="personal_name_kanji" placeholder="山田 太郎" />
-            </label>
-
-            <div class="col-2"></div>
+            <label>フリガナ<input type="text" name="personal_name_kana" placeholder="やまだ たろう" autocomplete="name"></label>
+            <label>氏名<input type="text" name="personal_name_kanji" placeholder="山田 太郎"></label>
 
             <label>
               生年月日（YYYY/MM/DD）
-              <input type="text" id="dob" placeholder="1998/04/01" inputmode="numeric" autocomplete="bday" />
-              <input type="hidden" name="dob_yyyy" id="dob_yyyy" />
-              <input type="hidden" name="dob_mm"   id="dob_mm" />
-              <input type="hidden" name="dob_dd"   id="dob_dd" />
-              <div class="help">数字だけ入力で自動的にスラッシュが入ります（例：19980401）</div>
+              <input type="text" id="dob" placeholder="1998/04/01" inputmode="numeric" autocomplete="bday">
+              <input type="hidden" name="dob_yyyy" id="dob_yyyy">
+              <input type="hidden" name="dob_mm"   id="dob_mm">
+              <input type="hidden" name="dob_dd"   id="dob_dd">
+              <div class="banner">数字だけ入力で自動的にスラッシュ（/）が入ります（例：19980401）。年齢はJSTで自動算出。</div>
             </label>
-            <label>
-              年齢（自動）
-              <input type="number" name="age" id="age" placeholder="自動算出" readonly />
-            </label>
+            <label>年齢（自動）<input type="number" name="age" id="age" placeholder="自動算出" readonly></label>
 
-            <label>
-              性別
-              <select name="gender">
-                <option value="">未選択</option>
-                <option value="男">男</option>
-                <option value="女">女</option>
-                <option value="その他">その他</option>
-              </select>
+            <label>性別
+              <select name="gender"><option value="">未選択</option><option>男</option><option>女</option><option>その他</option></select>
             </label>
             <div></div>
 
-            <label>
-              住所（フリガナ）
-              <input type="text" name="address_kana" placeholder="トウキョウト〇〇シ〜" />
-            </label>
-            <label>
-              郵便番号
-              <input type="text" name="postcode" placeholder="123-4567" inputmode="numeric" />
-            </label>
+            <label>住所（フリガナ）<input type="text" name="address_kana" placeholder="トウキョウト〇〇シ〜"></label>
+            <label>郵便番号<input type="text" name="postcode" placeholder="123-4567" inputmode="numeric"></label>
+            <label class="col-2">住所<input type="text" name="address_full" placeholder="東京都千代田区1-2-3"></label>
 
-            <label class="col-2">
-              住所
-              <input type="text" name="address_full" placeholder="東京都千代田区1-2-3" />
-            </label>
-
-            <label>
-              電話番号
-              <input type="tel" name="phone" id="phone" placeholder="090-0000-0000" />
-            </label>
-            <label>
-              Eメール
-              <input type="email" name="email" placeholder="taro@example.com" />
-            </label>
+            <label>電話番号<input type="tel" name="phone" id="phone" placeholder="090-0000-0000"></label>
+            <label>Eメール<input type="email" name="email" placeholder="taro@example.com"></label>
 
             <div class="col-2">
               <div class="section-title">写真</div>
-              <div class="photo-inline">
-                <label style="min-width:260px">
-                  パスポートサイズ写真（jpg/png）
-                  <input type="file" name="photo" id="photo" accept="image/jpeg,image/png" />
+              <div style="display:flex;gap:16px;align-items:flex-start;">
+                <label style="min-width:260px">パスポートサイズ写真（jpg/png）
+                  <input type="file" name="photo" id="photo" accept="image/jpeg,image/png">
                   <div class="photo-preview" id="photoPreview" style="display:none;">
                     <img id="photoPreviewImg" alt="preview">
                   </div>
                 </label>
-                <div class="help">アップロードした写真はプレビューにも反映され、Excel側ではM3の結合セル内に縦横比を保ってフィットします。</div>
+                <div class="help" style="color:#64748b;font-size:12.5px">アップロードした写真はプレビューにも反映され、Excel側では写真枠に縦横比を保ってフィットします。</div>
               </div>
             </div>
-          </div>
 
-          <div class="nav">
-            <button class="btn primary js-next-step">次へ</button>
+            <!-- ルール/メモ（STEP1用：写真の基準含む） -->
+            <div class="col-2 rule-box">
+              <strong>入力ルール & メモ（基本情報・写真）</strong>
+              <ol>
+                <li>氏名・フリガナは公的書類と同じ表記で。全角スペース/記号の位置も確認。</li>
+                <li>住所は建物名・部屋番号まで正確に。電話/Eメールは連絡が取れるもの。</li>
+                <li>日付は半角数字（YYYY/MM/DD）。</li>
+                <li><u>写真は以下の基準を満たしてください</u>：
+                  <ul>
+                    <li>撮影から<strong>3か月以内</strong>、カラー</li>
+                    <li><strong>耳・肩が見える</strong>正面上半身、背景は無地</li>
+                    <li>目を閉じない／髪で目が隠れない、<strong>ブレ・影・逆光なし</strong></li>
+                    <li>フィルター・過度な加工は不可、帽子・サングラス不可</li>
+                  </ul>
+                </li>
+                <li class="ban">虚偽入力は禁止です。提出前に誤字脱字の最終チェックを。</li>
+                <li>Excel出力後に印字崩れがあれば、Excel上で微調整してください（PDFは完全一致しない場合があります）。</li>
+              </ol>
+            </div>
           </div>
+          <div class="nav"><button class="btn primary js-next-step">次へ</button></div>
         </section>
 
         <!-- STEP 2: Education -->
         <section class="step-pane" data-step="2">
           <h2>学歴</h2>
-
-          <table class="table" id="eduTable">
+          <table class="table edu" id="eduTable">
+            <colgroup>
+              <col class="yy"><col class="mm"><col class="inst"><col class="fac"><col class="level"><col class="status"><col class="yy2"><col class="mm2"><col>
+            </colgroup>
             <thead>
-              <tr>
-                <th>開始年</th>
-                <th>開始月</th>
-                <th>学校名</th>
-                <th>学部・学科</th>
-                <th>区分</th>
-                <th>在学状況</th>
-                <th>終了年</th>
-                <th>終了月</th>
-                <th>操作</th>
-              </tr>
+              <tr><th>開始年</th><th>開始月</th><th>学校名</th><th>学部・学科</th><th>区分</th><th>在学状況</th><th>終了年</th><th>終了月</th><th>操作</th></tr>
             </thead>
             <tbody>
               <tr class="edu-row">
@@ -143,293 +120,139 @@
                 <td><input type="text" name="edu_school_name[]" placeholder="△△大学 / ○○高校 等"></td>
                 <td>
                   <select name="edu_faculty[]">
-                    <option value="">—</option>
-                    <option>理工学部</option><option>経営学部</option><option>情報学部</option>
-                    <option>教育学部</option><option>人文学部</option><option>商学部</option>
-                    <option>専門課程</option>
+                    <option value="">—</option><option>理工学部</option><option>経営学部</option><option>情報学部</option>
+                    <option>教育学部</option><option>人文学部</option><option>商学部</option><option>専門課程</option>
                   </select>
                 </td>
                 <td>
                   <select name="edu_level[]">
-                    <option value="">—</option>
-                    <option>小学</option><option>中学</option><option>高校</option>
-                    <option>専門学校</option><option>大学</option>
+                    <option value="">—</option><option>小学</option><option>中学</option><option>高校</option><option>専門学校</option><option>大学</option>
                   </select>
                 </td>
                 <td>
-                  <select name="edu_status[]" class="js-status-edu">
-                    <option>在学中</option>
-                    <option>卒業</option>
-                    <option>退学</option>
-                  </select>
+                  <select name="edu_status[]" class="js-status-edu"><option>在学中</option><option>卒業</option><option>退学</option></select>
                 </td>
                 <td><input class="date-ym js-edu-end-y" type="text" name="edu_end_year[]"  placeholder="YYYY" inputmode="numeric" disabled></td>
                 <td><input class="date-ym js-edu-end-m" type="text" name="edu_end_month[]" placeholder="MM"   inputmode="numeric" disabled></td>
-                <td>
-                  <button type="button" class="row-add" data-for="edu">＋</button>
-                  <button type="button" class="row-del">−</button>
-                </td>
+                <td><button type="button" class="row-add" data-for="edu">＋</button> <button type="button" class="row-del">−</button></td>
               </tr>
             </tbody>
           </table>
 
-          <div class="nav">
-            <button class="btn js-prev-step">戻る</button>
-            <button class="btn primary js-next-step">次へ</button>
+          <!-- ルール/メモ（STEP2） -->
+          <div class="rule-box">
+            <strong>入力ルール & メモ（学歴）</strong>
+            <ol>
+              <li>学校名は正式名称で（例：×○○大 → 〇〇大学）。学部・学科があれば記入。</li>
+              <li>入学・卒業の別は行ごとに分けず、<u>システム側で「入学」「卒業」を自動生成</u>します。終了予定なら「卒業」を選び年月を入力。</li>
+              <li>編入・留学・休学など特記事項があれば学歴の下に追記可（自己PR欄でも可）。</li>
+              <li>古い順（時系列）で入力してください。</li>
+            </ol>
           </div>
+
+          <div class="nav"><button class="btn js-prev-step">戻る</button><button class="btn primary js-next-step">次へ</button></div>
         </section>
 
-        <!-- STEP 3: Work -->
+        <!-- STEP 3: Experience -->
         <section class="step-pane" data-step="3">
           <h2>職歴</h2>
-
-          <table class="table" id="expTable">
+          <table class="table exp" id="expTable">
+            <colgroup>
+              <col class="yy"><col class="mm"><col class="org"><col class="title"><col class="status"><col class="yy2"><col class="mm2"><col>
+            </colgroup>
             <thead>
-              <tr>
-                <th>開始年</th>
-                <th>開始月</th>
-                <th>会社名</th>
-                <th>役職 / 職種</th>
-                <th>在職状況</th>
-                <th>終了年</th>
-                <th>終了月</th>
-                <th>操作</th>
-              </tr>
+              <tr><th>開始年</th><th>開始月</th><th>会社名</th><th>役職 / 職種</th><th>在職状況</th><th>終了年</th><th>終了月</th><th>操作</th></tr>
             </thead>
             <tbody>
               <tr class="exp-row">
                 <td><input class="date-ym" type="text" name="exp_start_year[]"  placeholder="YYYY" inputmode="numeric"></td>
                 <td><input class="date-ym" type="text" name="exp_start_month[]" placeholder="MM"   inputmode="numeric"></td>
                 <td><input type="text" name="exp_company[]" placeholder="ABC株式会社"></td>
-                <td><input type="text" name="exp_title[]" placeholder="エンジニア / 販売 / 介護 等"></td>
+                <td><input type="text" name="exp_title[]"   placeholder="エンジニア / 販売 / 介護 等"></td>
                 <td>
-                  <select name="exp_status[]" class="js-status-exp">
-                    <option>在職中</option>
-                    <option>退職</option>
-                  </select>
+                  <select name="exp_status[]" class="js-status-exp"><option>在職中</option><option>退職</option></select>
                 </td>
                 <td><input class="date-ym js-exp-end-y" type="text" name="exp_end_year[]"  placeholder="YYYY" inputmode="numeric" disabled></td>
                 <td><input class="date-ym js-exp-end-m" type="text" name="exp_end_month[]" placeholder="MM"   inputmode="numeric" disabled></td>
-                <td>
-                  <button type="button" class="row-add" data-for="exp">＋</button>
-                  <button type="button" class="row-del">−</button>
-                </td>
+                <td><button type="button" class="row-add" data-for="exp">＋</button> <button type="button" class="row-del">−</button></td>
               </tr>
             </tbody>
           </table>
 
-          <div class="nav">
-            <button class="btn js-prev-step">戻る</button>
-            <button class="btn primary js-next-step">次へ</button>
+          <!-- ルール/メモ（STEP3） -->
+          <div class="rule-box">
+            <strong>入力ルール & メモ（職歴）</strong>
+            <ol>
+              <li>会社名は正式名称で。部署名は任意、<u>職種/役職は簡潔に</u>（例：販売職 → 「家電量販店 販売職」）。</li>
+              <li>在職中は終了年月を空欄のまま。退職済みの場合のみ終了年月を入力。</li>
+              <li>業務内容は自己PR欄で補足可。契約・派遣・アルバイトはその旨を明記。</li>
+              <li>時系列（古い→新しい）で入力してください。</li>
+            </ol>
           </div>
+
+          <div class="nav"><button class="btn js-prev-step">戻る</button><button class="btn primary js-next-step">次へ</button></div>
         </section>
 
         <!-- STEP 4: Licenses -->
         <section class="step-pane" data-step="4">
           <h2>資格・免許</h2>
-
-          <table class="table" id="licTable">
-            <thead>
-              <tr>
-                <th>年</th>
-                <th>月</th>
-                <th>資格名 / 免許名</th>
-                <th>操作</th>
-              </tr>
-            </thead>
+          <table class="table lic" id="licTable">
+            <colgroup><col class="yy"><col class="mm"><col class="name"><col></colgroup>
+            <thead><tr><th>年</th><th>月</th><th>資格名 / 免許名</th><th>操作</th></tr></thead>
             <tbody>
               <tr class="lic-row">
                 <td><input class="date-ym" type="text" name="lic_year[]"  placeholder="YYYY" inputmode="numeric"></td>
                 <td><input class="date-ym" type="text" name="lic_month[]" placeholder="MM"   inputmode="numeric"></td>
-                <td><input type="text" name="lic_name[]"  placeholder="基本情報技術者 / 介護職員初任者研修 等"></td>
-                <td>
-                  <button type="button" class="row-add" data-for="lic">＋</button>
-                  <button type="button" class="row-del">−</button>
-                </td>
+                <td><input type="text" name="lic_name[]"  placeholder="基本情報技術者 / 普通自動車第一種 など"></td>
+                <td><button type="button" class="row-add" data-for="lic">＋</button> <button type="button" class="row-del">−</button></td>
               </tr>
             </tbody>
           </table>
 
-          <div class="nav">
-            <button class="btn js-prev-step">戻る</button>
-            <button class="btn primary js-next-step">次へ</button>
+          <!-- ルール/メモ（STEP4） -->
+          <div class="rule-box">
+            <strong>入力ルール & メモ（資格・免許）</strong>
+            <ol>
+              <li>正式名称で記入（例：× 普通免許 → 〇 普通自動車第一種運転免許）。</li>
+              <li>取得予定は「取得予定」と追記し、予定年月を入力。</li>
+              <li>関連性が薄い趣味の検定等は控えめに。応募職種に関係するものを優先。</li>
+            </ol>
           </div>
+
+          <div class="nav"><button class="btn js-prev-step">戻る</button><button class="btn primary js-next-step">次へ</button></div>
         </section>
 
-        <!-- STEP 5: PR / Hopes -->
+        <!-- STEP 5 -->
         <section class="step-pane" data-step="5">
           <h2>自己PR・希望</h2>
           <div class="grid-2">
-            <label class="col-2">
-              志望動機・自己PRなど
-              <textarea name="self_pr" rows="5" placeholder="自己PRを入力してください。"></textarea>
-            </label>
-            <label class="col-2">
-              本人希望記入欄
-              <textarea name="hopes" rows="5" placeholder="給料・職種・勤務時間・勤務地など希望があれば記入してください。"></textarea>
-            </label>
+            <label class="col-2">志望動機・自己PRなど<textarea name="self_pr" rows="5" placeholder="自己PRを入力してください。"></textarea></label>
+            <label class="col-2">本人希望記入欄<textarea name="hopes" rows="5" placeholder="給料・職種・勤務時間・勤務地など希望があれば記入してください。"></textarea></label>
           </div>
 
-          <div class="nav">
-            <button class="btn js-prev-step">戻る</button>
-            <button class="btn primary" type="submit">この内容でプレビューへ</button>
+          <!-- ルール/メモ（STEP5：自己PR/志望動機の作り方） -->
+          <div class="rule-box">
+            <strong>入力ルール & メモ（自己PR / 志望動機）</strong>
+            <ol>
+              <li><u>結論→根拠→成果→活かし方</u>の順で簡潔に：<br>
+                例）「接客での傾聴力に強みがあります。前職でアンケート満足度4.7/5を継続。御社では高齢者の方にも安心いただける対応で貢献します。」</li>
+              <li>避けるべき表現：抽象的な一般論（「コミュ力があります」だけ等）、転職理由のネガティブ連発、長すぎる文章。</li>
+              <li>志望動機は<strong>会社理解</strong>（事業/理念/募集背景）と<strong>自分の経験</strong>を接続して書く。</li>
+              <li>本人希望は「必須条件」と「相談可」を分け、優先度を明確に。</li>
+              <li class="ban">機密・個人情報の過度な開示は避ける（他社の売上データなど）。</li>
+            </ol>
+            <p style="margin:8px 0 0">提出前チェック：氏名・日付・連絡先・学歴/職歴の年月、誤字脱字、写真の基準、希望条件の矛盾がないか最終確認してください。</p>
           </div>
+
+          <div class="nav"><button class="btn js-prev-step">戻る</button><button class="btn primary" type="submit">この内容で作成する</button></div>
         </section>
 
       </div>
     </form>
   </div>
+
   <div class="site-footer">© ITF co. Ltd. ALL Rights Reserved</div>
 
-  <!-- Behavior JS -->
-  <script src="/rireki/basic/js/rireki_form.js?v=2"></script>
-  <script>
-    // ---- Auto-slash DOB + hidden Y/M/D + age calc ----
-    (function(){
-      const dob = document.getElementById('dob');
-      const y = document.getElementById('dob_yyyy');
-      const m = document.getElementById('dob_mm');
-      const d = document.getElementById('dob_dd');
-      const age = document.getElementById('age');
-
-      function formatDOB(v){
-        // keep digits
-        v = (v||'').replace(/\D/g,'').slice(0,8);
-        if (v.length >= 5) v = v.slice(0,4) + '/' + v.slice(4);
-        if (v.length >= 8+1) v = v.slice(0,7) + '/' + v.slice(7);
-        return v;
-      }
-      function updateHidden(){
-        const raw = (dob.value||'').replace(/\D/g,'');
-        y.value = raw.slice(0,4) || '';
-        m.value = raw.slice(4,6) || '';
-        d.value = raw.slice(6,8) || '';
-        // age (JST)
-        if (y.value && m.value && d.value){
-          try{
-            const now = new Date(new Date().toLocaleString('en-US', { timeZone:'Asia/Tokyo' }));
-            const by = parseInt(y.value,10), bm = parseInt(m.value,10)-1, bd = parseInt(d.value,10);
-            const bdate = new Date(Date.UTC(by, bm, bd));
-            let a = now.getUTCFullYear() - bdate.getUTCFullYear();
-            const mdiff = (now.getUTCMonth() - bdate.getUTCMonth());
-            if (mdiff < 0 || (mdiff===0 && now.getUTCDate() < bdate.getUTCDate())) a--;
-            age.value = (a>=0 && a<150) ? a : '';
-          }catch(e){ age.value = ''; }
-        }else{
-          age.value = '';
-        }
-      }
-      if (dob){
-        dob.addEventListener('input', () => { dob.value = formatDOB(dob.value); updateHidden(); });
-        dob.addEventListener('blur', updateHidden);
-      }
-    })();
-
-    // ---- Photo preview ----
-    (function(){
-      const input = document.getElementById('photo');
-      const box = document.getElementById('photoPreview');
-      const img = document.getElementById('photoPreviewImg');
-      if (!input || !box || !img) return;
-      input.addEventListener('change', () => {
-        const f = input.files && input.files[0];
-        if (!f) { box.style.display='none'; return; }
-        const url = URL.createObjectURL(f);
-        img.src = url;
-        box.style.display = 'block';
-      });
-    })();
-
-    // ---- Enable/disable end date by status (Education) ----
-    function toggleEduEnd(tr){
-      const st = tr.querySelector('.js-status-edu');
-      const y  = tr.querySelector('.js-edu-end-y');
-      const m  = tr.querySelector('.js-edu-end-m');
-      const need = st && /卒業|退学/.test(st.value);
-      [y,m].forEach(el => { if(!el) return; el.disabled = !need; if(!need){ el.value=''; } });
-    }
-    // ---- Enable/disable end date by status (Experience) ----
-    function toggleExpEnd(tr){
-      const st = tr.querySelector('.js-status-exp');
-      const y  = tr.querySelector('.js-exp-end-y');
-      const m  = tr.querySelector('.js-exp-end-m');
-      const need = st && /退職/.test(st.value);
-      [y,m].forEach(el => { if(!el) return; el.disabled = !need; if(!need){ el.value=''; } });
-    }
-
-    // Bind change on status selects
-    document.addEventListener('change', (e) => {
-      const tr = e.target.closest('tr');
-      if (!tr) return;
-      if (e.target.matches('.js-status-edu')) toggleEduEnd(tr);
-      if (e.target.matches('.js-status-exp')) toggleExpEnd(tr);
-    });
-    // Initialize first rows
-    document.querySelectorAll('#eduTable tbody tr').forEach(toggleEduEnd);
-    document.querySelectorAll('#expTable tbody tr').forEach(toggleExpEnd);
-
-    // ---- Repeaters (add/remove rows) ----
-    function addRow(tableId, rowClass){
-      const tbody = document.querySelector(`#${tableId} tbody`);
-      const first = tbody.querySelector(`.${rowClass}`);
-      const clone = first.cloneNode(true);
-      // clear inputs
-      clone.querySelectorAll('input').forEach(i => i.value='');
-      clone.querySelectorAll('select').forEach(s => { s.selectedIndex = 0; });
-      tbody.appendChild(clone);
-      // re-init end-date toggles
-      if (tableId==='eduTable') toggleEduEnd(clone);
-      if (tableId==='expTable') toggleExpEnd(clone);
-      // scroll into view smoothly
-      try { clone.scrollIntoView({behavior:'smooth', block:'nearest'}); } catch(_) {}
-    }
-    function delRow(btn){
-      const tr = btn.closest('tr');
-      const tbody = tr.parentNode;
-      if (tbody.children.length <= 1) return;
-      tbody.removeChild(tr);
-    }
-
-    document.addEventListener('click', (e) => {
-      const add = e.target.closest('.row-add');
-      const del = e.target.closest('.row-del');
-      if (add){
-        e.preventDefault();
-        const target = add.getAttribute('data-for');
-        if (target === 'edu') addRow('eduTable','edu-row');
-        if (target === 'exp') addRow('expTable','exp-row');
-        if (target === 'lic') addRow('licTable','lic-row');
-      }
-      if (del){
-        e.preventDefault();
-        delRow(del);
-      }
-    });
-
-    // ---- Step slide animations (from patched rireki_form.js; this is a light fallback if file missing) ----
-    (function(){
-      if (window.__RIREKI_STEPS_READY__) return; // if external JS already initialized
-      const panes = Array.from(document.querySelectorAll('.step-pane'));
-      if (!panes.length) return;
-      let idx = panes.findIndex(p => p.classList.contains('is-active')); if (idx<0){ idx=0; panes[0].classList.add('is-active'); }
-      function goStep(next, dir){
-        if (next===idx || next<0 || next>=panes.length) return;
-        const from = panes[idx], to = panes[next];
-        from.classList.add('is-transitioning'); to.classList.add('is-transitioning','is-active');
-        const enter = dir==='back' ? 'step-enter-left':'step-enter-right';
-        const exit  = dir==='back' ? 'step-exit-right':'step-exit-left';
-        to.classList.add(enter); from.classList.add(exit);
-        try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(_){ window.scrollTo(0,0); }
-        const cleanup=()=>{ from.classList.remove('is-active','is-transitioning','step-exit-left','step-exit-right'); to.classList.remove('is-transitioning','step-enter-left','step-enter-right'); idx=next; };
-        const onEnd=(e)=>{ if(e.target!==to) return; to.removeEventListener('animationend',onEnd); cleanup(); };
-        to.addEventListener('animationend', onEnd, {once:true}); setTimeout(cleanup,500);
-      }
-      document.addEventListener('click', (e)=>{
-        const next=e.target.closest('.js-next-step'); const prev=e.target.closest('.js-prev-step');
-        if (next){ e.preventDefault(); goStep(idx+1,'forward'); }
-        if (prev){ e.preventDefault(); goStep(idx-1,'back'); }
-      });
-    })();
-  </script>
+  <script src="/rireki/basic/js/rireki_form.js?v=3" defer></script>
 </body>
 </html>
