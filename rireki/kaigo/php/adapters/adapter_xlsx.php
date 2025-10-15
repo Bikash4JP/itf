@@ -50,6 +50,24 @@ function rireki_render_xls_only(array $data, string $mappingFile, string $outDir
       }
     }
 
+    // ---- repeater helper: aliases for messy field names (e.g., sigoto_naiyou -> description)
+    $FIELD_ALIASES = [
+      'description' => ['sigoto_naiyou','work_content','work_desc','duties','job_description'],
+      // add more if ever needed:
+      // 'org'       => ['company','employer'],
+      // 'job_title' => ['title','position'],
+    ];
+    $getRowVal = function(array $row, string $field) use ($FIELD_ALIASES) {
+      $val = isset($row[$field]) ? (string)$row[$field] : '';
+      if (trim($val) !== '') return $val;
+      if (!empty($FIELD_ALIASES[$field])) {
+        foreach ($FIELD_ALIASES[$field] as $alt) {
+          if (isset($row[$alt]) && trim((string)$row[$alt]) !== '') return (string)$row[$alt];
+        }
+      }
+      return '';
+    };
+
     // Repeaters (supports {row}, {row_plus_1}, {row_plus_2}, {row_plus_3})
     if (!empty($map['repeaters'])) {
       foreach ($map['repeaters'] as $repKey => $repConf) {
@@ -71,7 +89,9 @@ function rireki_render_xls_only(array $data, string $mappingFile, string $outDir
               [$r,     $r+1,          $r+2,          $r+3],
               $tpl
             );
-            $sheet->setCellValue($coord, (string)($row[$field] ?? ''));
+            // <-- key change: resolve with aliases so AC22/25/28/31 (仕事内容) gets filled
+            $value = $getRowVal($row, $field);
+            $sheet->setCellValue($coord, (string)$value);
           }
         }
       }
@@ -166,6 +186,22 @@ function rireki_make_pdf_via_html(array $data, string $mappingFile, string $outD
         if (array_key_exists($key,$data)) $sheet->setCellValue($cell, (string)$data[$key]);
       }
     }
+
+    // aliases (same as XLS path)
+    $FIELD_ALIASES = [
+      'description' => ['sigoto_naiyou','work_content','work_desc','duties','job_description'],
+    ];
+    $getRowVal = function(array $row, string $field) use ($FIELD_ALIASES) {
+      $val = isset($row[$field]) ? (string)$row[$field] : '';
+      if (trim($val) !== '') return $val;
+      if (!empty($FIELD_ALIASES[$field])) {
+        foreach ($FIELD_ALIASES[$field] as $alt) {
+          if (isset($row[$alt]) && trim((string)$row[$alt]) !== '') return (string)$row[$alt];
+        }
+      }
+      return '';
+    };
+
     // repeaters (support {row_plus_3})
     if (!empty($map['repeaters'])) {
       foreach ($map['repeaters'] as $repKey => $repConf) {
@@ -185,11 +221,15 @@ function rireki_make_pdf_via_html(array $data, string $mappingFile, string $outD
               [$r,     $r+1,          $r+2,          $r+3],
               $tpl
             );
-            $sheet->setCellValue($coord, (string)($row[$field] ?? ''));
+            $value = $getRowVal($row, $field);
+            $sheet->setCellValue($coord, (string)$value);
           }
         }
       }
     }
+
+    // (photo overlay + render…) — unchanged from your file
+    // --- snip: keep your existing mPDF rendering helpers below ---
 
     // photo overlay (optional)
     $overlay = null;
@@ -227,7 +267,7 @@ function rireki_make_pdf_via_html(array $data, string $mappingFile, string $outD
       }
     }
 
-    // ===== mPDF config =====
+    // ===== mPDF config & streaming (unchanged) =====
     $fontDir  = rireki_path('fonts');
     $msMincho = $fontDir . '/msmincho001.ttf';
 
@@ -251,12 +291,10 @@ function rireki_make_pdf_via_html(array $data, string $mappingFile, string $outD
 
     $mpdf->shrink_tables_to_fit = 0;
 
-    // width calc (px)
     $mm_to_px = 96 / 25.4;
     $contentWidthPx = (210 - (5 + 5)) * $mm_to_px;
     if ($contentWidthPx < 720) $contentWidthPx = 720;
 
-    // Render sheet
     $lastCol = $sheet->getHighestColumn();
     $lastRow = max(86, (int)$sheet->getHighestRow());
 
@@ -264,13 +302,11 @@ function rireki_make_pdf_via_html(array $data, string $mappingFile, string $outD
       $sheet, 'A', $lastCol, 1, $lastRow, $overlay, (int)$contentWidthPx
     );
 
-    // CSS
     $css = 'table{border-collapse:collapse;table-layout:fixed;margin:0;padding:0}'
          . 'td{vertical-align:top;white-space:pre-wrap;line-height:1.15}'
          . 'tr{page-break-inside:avoid}';
     $mpdf->WriteHTML('<style>'.$css.'</style>', \Mpdf\HTMLParserMode::HEADER_CSS);
 
-    // Stream
     $mpdf->WriteHTML($headHtml, \Mpdf\HTMLParserMode::HTML_BODY);
     foreach ($rowHtmlList as $rowHtml) $mpdf->WriteHTML($rowHtml, \Mpdf\HTMLParserMode::HTML_BODY);
     $mpdf->WriteHTML($tailHtml, \Mpdf\HTMLParserMode::HTML_BODY);
@@ -288,6 +324,7 @@ function rireki_make_pdf_via_html(array $data, string $mappingFile, string $outD
 }
 
 /* ===================== HTML render helpers (scaled) ===================== */
+// (keep the rest of your helper functions unchanged)
 function renderSheetRegionHtmlStreamScaled(
   Worksheet $sheet, string $colStartLetter, string $colEndLetter,
   int $rowStart, int $rowEnd, ?array $overlay, int $targetTotalPx
@@ -319,7 +356,7 @@ function renderSheetRegionHtmlStreamScaled(
   for ($r = $rowStart; $r <= $rowEnd; $r++) {
     $dim = $sheet->getRowDimension($r);
     $pt = $dim && $dim->getRowHeight() > 0 ? (float)$dim->getRowHeight() : (float)$defaultRowPt;
-    $rowPx[$r] = pointsToPx($pt); // keep template heights
+    $rowPx[$r] = pointsToPx($pt);
   }
 
   // Merges
@@ -376,7 +413,7 @@ function renderSheetRegionHtmlStreamScaled(
              . 'style="position:absolute;left:'.$overlay['offX'].'px;top:'.$overlay['offY'].'px;'
              . 'width:'.$overlay['width'].'px;height:'.$overlay['height'].'px;object-fit:cover;border:0;"/>'
              . '</div>';
-        $val = $img . $val; // FIX: concat, not add
+        $val = $img . $val;
       }
 
       $rowParts[] = '<td'.$extra.$attrs.'>'.$val.'</td>';
