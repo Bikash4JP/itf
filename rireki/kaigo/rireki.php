@@ -83,7 +83,7 @@ $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
 
     #progressWrap .progress-track{
       height:10px;
-      border:2px solid #000;      /* black border like sample */
+      border:1px solid #000;      /* black border like sample */
       border-radius:5px;
       overflow:hidden;
       background:#fff;
@@ -122,9 +122,9 @@ $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
   </div>
 
   <div class="wrap">
-    <form class="card" action="/rireki/kaigo/php/submit_rireki.php" method="post" enctype="multipart/form-data" id="rirekiForm" novalidate>
+    <form class="card" action="/rireki/kaigo/php/rireki_preview.php" method="post" enctype="multipart/form-data" id="rirekiForm" novalidate>
       <!-- keep job context when coming via job flow -->
-      <input type="hidden" name="job_id" value="<?php echo $job_id; ?>">
+        <input type="hidden" name="__fmt" value="basic">
       <?php if ($job_id > 0): ?>
         <div class="banner">この履歴書は求人応募フローから作成されます（Job ID: <?php echo (int)$job_id; ?>）。</div>
       <?php endif; ?>
@@ -132,7 +132,7 @@ $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
       <div class="steps">
 
         <!-- STEP 1 -->
-        <section class="step-pane is-active">
+        <section class="step-pane is-active" d="step-1">
           <h2>基本情報</h2>
           <div class="grid-2">
             <label>氏名（ローマ字）<input type="text" name="name_romaji" placeholder="Taro Yamada"></label>
@@ -198,7 +198,7 @@ $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
         </section>
 
         <!-- STEP 2 -->
-        <section class="step-pane">
+        <section class="step-pane" d="step-2">
           <h2>パスポート・出入国・在留 / 写真</h2>
           <div class="grid-2">
             <label>パスポート
@@ -288,7 +288,7 @@ $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
         </section>
 
         <!-- STEP 3 -->
-        <section class="step-pane">
+        <section class="step-pane" d="step-3">
           <h2>学歴</h2>
           <table class="table edu" id="eduTable">
             <colgroup>
@@ -352,7 +352,7 @@ $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
         </section>
 
         <!-- STEP 4 -->
-        <section class="step-pane">
+        <section class="step-pane" d="step-4">
           <h2>職歴</h2>
           <table class="table work" id="expTable">
             <colgroup>
@@ -415,7 +415,7 @@ $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
         </section>
 
         <!-- STEP 5 -->
-        <section class="step-pane">
+        <section class="step-pane" d="step-5">
           <h2>自己PR・志望・希望</h2>
           <div class="grid-2">
             <label class="col-2">自己PR<textarea name="self_pr" rows="4"></textarea></label>
@@ -438,7 +438,7 @@ $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
         </section>
 
         <!-- STEP 6 -->
-        <section class="step-pane">
+        <section class="step-pane" d="step-6">
           <h2>別途情報</h2>
           <div class="grid-2">
             <label>日本語コミュニケーション
@@ -629,6 +629,138 @@ $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
 
   window.addEventListener('load', updateProgress);
   updateProgress();
+})();
+// === KAIGO: open-by-hash + autosave/restore (sessionStorage) ===
+// Safe to include multiple times
+(function(){
+  if (window.__KAIGO_FORM_PERSIST_BOUND__) return;
+  window.__KAIGO_FORM_PERSIST_BOUND__ = true;
+
+  const STORAGE_KEY = 'itf_rireki_kaigo_v1';
+  const form = document.getElementById('rirekiForm');
+  const panes = Array.from(document.querySelectorAll('.steps .step-pane'));
+  const stepsRoot = document.querySelector('.steps');
+
+  // -------- Step switcher (class toggle; works even if slider JS absent) --------
+  function activateStep(idx){
+    if (!panes.length) return;
+    if (idx < 0) idx = 0;
+    if (idx >= panes.length) idx = panes.length - 1;
+    panes.forEach(p => p.classList.remove('is-active','slide-in-left','slide-in-right','slide-out-left','slide-out-right'));
+    panes[idx].classList.add('is-active');
+    // try to scroll top nicely
+    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(_) { window.scrollTo(0,0); }
+  }
+
+  function stepIndexFromHash(){
+    const m = location.hash.match(/#step-(\d+)/i);
+    if (!m) return null;
+    const n = parseInt(m[1], 10);
+    if (isNaN(n)) return null;
+    return n - 1; // 1-based → 0-based
+  }
+
+  function openFromHash(){
+    const idx = stepIndexFromHash();
+    if (idx !== null) activateStep(idx);
+  }
+
+  window.addEventListener('hashchange', openFromHash);
+  window.addEventListener('load', openFromHash);
+  // If no hash, keep default .is-active
+
+  // -------- Autosave: serialize/restore by exact input names --------
+  if (!form) return;
+
+  function shouldStore(el){
+    if (!el.name) return false;
+    if (el.disabled) return false;
+    if (el.type === 'file' || el.type === 'submit' || el.type === 'button' || el.type === 'reset') return false;
+    return true;
+  }
+
+  function serializeForm(){
+    const data = {};
+    // Use form.elements to keep correct order for [] arrays
+    Array.from(form.elements).forEach(el => {
+      if (!shouldStore(el)) return;
+      const name = el.name;
+      let val = el.value;
+
+      // Normalize: trim only simple textareas/inputs (optional)
+      // if (el.tagName === 'TEXTAREA' || el.type === 'text' || el.type === 'email' || el.type === 'tel') {
+      //   val = val;
+      // }
+
+      // Group arrays and duplicate names
+      if (name.endsWith('[]')) {
+        if (!Array.isArray(data[name])) data[name] = [];
+        data[name].push(val);
+      } else if (name.includes(']')) {
+        // Handles nested names like education[from_year][]
+        if (!data[name]) data[name] = [];
+        // Still store as array because there are multiple controls with same name
+        data[name].push(val);
+      } else {
+        if (data.hasOwnProperty(name)) {
+          // multiple elements (e.g., radios) — normalize to array
+          if (!Array.isArray(data[name])) data[name] = [data[name]];
+          data[name].push(val);
+        } else {
+          data[name] = val;
+        }
+      }
+    });
+    return data;
+  }
+
+  function restoreForm(data){
+    if (!data || typeof data !== 'object') return;
+    // Clear current rows in repeaters? We won't delete rows; we just fill in order.
+    Array.from(form.elements).forEach(el => {
+      if (!shouldStore(el)) return;
+      const name = el.name;
+      const saved = data[name];
+      if (typeof saved === 'undefined') return;
+
+      if (Array.isArray(saved)) {
+        // find all controls with same name in DOM order
+        const group = Array.from(form.querySelectorAll(`[name="${CSS.escape(name)}"]`));
+        group.forEach((ctrl, i) => { if (typeof saved[i] !== 'undefined') ctrl.value = saved[i]; });
+      } else {
+        el.value = saved;
+      }
+    });
+
+    // trigger any change-dependent UI (like enabling end-date fields)
+    try { form.dispatchEvent(new Event('change', { bubbles:true })); } catch(_){}
+  }
+
+  function save(){
+    try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(serializeForm())); } catch(e){}
+  }
+  function loadSaved(){
+    try {
+      const raw = sessionStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch(e){ return null; }
+  }
+
+  // Throttle
+  let t=null;
+  function scheduleSave(){ clearTimeout(t); t = setTimeout(save, 300); }
+
+  form.addEventListener('input', scheduleSave, true);
+  form.addEventListener('change', scheduleSave, true);
+  window.addEventListener('beforeunload', save);
+
+  // Restore once on load
+  const saved = loadSaved();
+  if (saved) restoreForm(saved);
+
+  // After successful submit to preview, we keep storage so user can return & edit.
+  // If you ever want to clear on final submit to submit_rireki.php, do it there.
+
 })();
 </script>
 
