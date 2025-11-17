@@ -1,9 +1,10 @@
 // Rirekisho Basic — Form Behaviors
-// - Step slider (absolute, no flicker)
+// - Step slider (absolute, no flicker) + open on #step-N / ?step=N
 // - DOB single input (auto-slash) + hidden Y/M/D + age calc (JST)
 // - Photo preview (keeps height responsive)
 // - Repeaters (education / experience / licenses)
 // - Status-based end-date enable/disable
+// - Auto-save / auto-restore (localStorage) so "Edit" from preview doesn't wipe values
 // - Global guard to prevent double-binding
 
 (function () {
@@ -14,7 +15,7 @@
   }
   window.__RIREKI_FORM_BOUND__ = true;
 
-  // ===== Step slider =====
+  const form   = document.getElementById('rirekiForm');
   const stepsEl = document.querySelector('.steps');
   const panes   = Array.from(document.querySelectorAll('.step-pane'));
   let idx = -1;
@@ -23,11 +24,34 @@
   function fitContainerTo(i){ if (!stepsEl || i < 0) return; stepsEl.style.height = measure(panes[i]) + 'px'; }
   function exposeFit(){ window.rirekiFitSteps = function(){ fitContainerTo(idx); }; }
 
+  // ===== Step slider =====
+  function getStepFromURL(){
+    const h = (location.hash || '').toLowerCase();
+    const m = h.match(/#step-(\d{1,2})/);
+    if (m) return parseInt(m[1], 10);
+    const qs = new URLSearchParams(location.search);
+    if (qs.has('step')) return parseInt(qs.get('step'), 10);
+    return null;
+  }
+
   if (stepsEl && panes.length) {
-    idx = panes.findIndex(p => p.classList.contains('is-active'));
-    if (idx < 0) { idx = 0; panes[0].classList.add('is-active'); }
     exposeFit();
-    window.addEventListener('load',  () => fitContainerTo(idx));
+
+    // Initial activation — prefer URL target if valid
+    const desired = getStepFromURL(); // 1..N
+    if (desired && panes.some(p => String(p.dataset.step) === String(desired))) {
+      panes.forEach(p => p.classList.remove('is-active'));
+      idx = panes.findIndex(p => String(p.dataset.step) === String(desired));
+      panes[idx].classList.add('is-active');
+    } else {
+      idx = panes.findIndex(p => p.classList.contains('is-active'));
+      if (idx < 0) { idx = 0; panes[0].classList.add('is-active'); }
+    }
+
+    window.addEventListener('load',  () => {
+      fitContainerTo(idx);
+      if (window.rirekiUpdateProgress) window.rirekiUpdateProgress();
+    });
     window.addEventListener('resize',() => fitContainerTo(idx));
 
     function goStep(next, dir) {
@@ -42,6 +66,7 @@
         from.classList.remove('is-active', 'slide-out-left', 'slide-out-right');
         to.classList.remove('slide-in-left', 'slide-in-right');
         idx = next;
+        if (window.rirekiUpdateProgress) window.rirekiUpdateProgress();
       };
       const onEnd = (e) => { if (e.target !== to) return; to.removeEventListener('animationend', onEnd); cleanup(); };
       to.addEventListener('animationend', onEnd, { once: true });
@@ -62,6 +87,16 @@
         const target = parseInt(el.getAttribute('data-goto-step'), 10);
         if (!isNaN(target)) goStep(target, target > idx ? 'forward' : 'back');
       });
+    });
+
+    // react to hash changes (when clicking "編集" from preview)
+    window.addEventListener('hashchange', () => {
+      const s = getStepFromURL();
+      if (!s) return;
+      const targetIndex = panes.findIndex(p => String(p.dataset.step) === String(s));
+      if (targetIndex >= 0 && targetIndex !== idx) {
+        goStep(targetIndex, targetIndex > idx ? 'forward' : 'back');
+      }
     });
   } else {
     exposeFit();
@@ -103,6 +138,9 @@
       }
       if (window.rirekiFitSteps) window.rirekiFitSteps();
     }
+    // expose for restore
+    window.rirekiUpdateDOBHidden = updateHidden;
+
     dob.addEventListener('input', () => { dob.value = formatDOB(dob.value); updateHidden(); });
     dob.addEventListener('blur', updateHidden);
   })();
@@ -159,7 +197,7 @@
   document.querySelectorAll('#eduTable tbody tr').forEach(toggleEduEnd);
   document.querySelectorAll('#expTable tbody tr').forEach(toggleExpEnd);
 
-  // ===== Repeaters =====
+  // ===== Repeaters (helpers for save/restore) =====
   function addRow(tableId, rowClass){
     const tbody = document.querySelector(`#${tableId} tbody`);
     const first = tbody ? tbody.querySelector(`.${rowClass}`) : null;
@@ -208,6 +246,154 @@
       delRow(del);
     }
   });
+
+  // ===== Auto-save / Auto-restore =====
+  (function(){
+    if (!form) return;
+    const STORAGE_KEY = 'rireki:basic:draft:v1';
+
+    function formToObject(){
+      const fd = new FormData(form);
+      const obj = {};
+      for (const [k, v] of fd.entries()){
+        // collect multiple values per name
+        if (k.endsWith('[]')) {
+          const key = k.slice(0,-2);
+          (obj[key] ||= []).push(v);
+        } else {
+          if (obj[k] !== undefined) {
+            // convert to array if repeated name (e.g., radios)
+            if (!Array.isArray(obj[k])) obj[k] = [obj[k]];
+            obj[k].push(v);
+          } else {
+            obj[k] = v;
+          }
+        }
+      }
+      // Also persist which pane is active
+      const activePane = panes.find(p => p.classList.contains('is-active'));
+      if (activePane) obj.__active_step = String(activePane.dataset.step || '');
+      obj.__ts = Date.now();
+      return obj;
+    }
+
+    function saveDraft(){
+      try {
+        const obj = formToObject();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+      } catch(e){ console.warn('saveDraft failed', e); }
+    }
+
+    function needRows(tableId, rowClass, targetCount){
+      const tbody = document.querySelector(`#${tableId} tbody`);
+      if (!tbody) return;
+      const current = tbody.querySelectorAll(`.${rowClass}`).length;
+      for (let i=current; i<targetCount; i++) addRow(tableId, rowClass);
+    }
+
+    function restoreDraft(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const obj = JSON.parse(raw);
+
+        // Calculate repeater row counts from arrays
+        const eduCount = Math.max(
+          (obj.edu_start_year||[]).length, (obj.edu_start_month||[]).length,
+          (obj.edu_school_name||[]).length, (obj.edu_faculty||[]).length,
+          (obj.edu_level||[]).length, (obj.edu_status||[]).length,
+          (obj.edu_end_year||[]).length, (obj.edu_end_month||[]).length, 1
+        );
+        const expCount = Math.max(
+          (obj.exp_start_year||[]).length, (obj.exp_start_month||[]).length,
+          (obj.exp_company||[]).length, (obj.exp_title||[]).length,
+          (obj.exp_status||[]).length, (obj.exp_end_year||[]).length,
+          (obj.exp_end_month||[]).length, 1
+        );
+        const licCount = Math.max(
+          (obj.lic_year||[]).length, (obj.lic_month||[]).length,
+          (obj.lic_name||[]).length, 1
+        );
+
+        // Ensure enough rows exist
+        needRows('eduTable','edu-row', eduCount);
+        needRows('expTable','exp-row', expCount);
+        needRows('licTable','lic-row', licCount);
+
+        // Fill simple (non [] names) & [] names by order
+        Object.keys(obj).forEach((name)=>{
+          if (name.startsWith('__')) return; // meta
+          const val = obj[name];
+          if (Array.isArray(val)){
+            // fill fields named `${name}[]` in order
+            const nodes = form.querySelectorAll(`[name="${name}[]"]`);
+            nodes.forEach((el, i) => { if (val[i] !== undefined) setField(el, val[i]); });
+          } else {
+            const nodes = form.querySelectorAll(`[name="${name}"]`);
+            if (nodes.length){
+              nodes.forEach((el, i)=>{
+                // for radios, choose matching
+                if (el.type === 'radio' || el.type === 'checkbox'){
+                  el.checked = (el.value == val || (Array.isArray(val) && val.includes(el.value)));
+                } else {
+                  setField(el, val);
+                }
+              });
+            }
+          }
+        });
+
+        // Re-run DOB hidden/age calc after restore
+        if (window.rirekiUpdateDOBHidden) window.rirekiUpdateDOBHidden();
+
+        // Fix end-date toggles after restore
+        document.querySelectorAll('#eduTable tbody tr').forEach(toggleEduEnd);
+        document.querySelectorAll('#expTable tbody tr').forEach(toggleExpEnd);
+
+        // Restore active step if hash not forcing one
+        const hashStep = (location.hash||'').match(/#step-(\d+)/);
+        if (!hashStep && obj.__active_step){
+          const targetPane = panes.findIndex(p => String(p.dataset.step) === String(obj.__active_step));
+          if (targetPane >= 0){
+            panes.forEach(p => p.classList.remove('is-active'));
+            panes[targetPane].classList.add('is-active');
+          }
+        }
+
+        // ensure progress recalculated
+        if (window.rirekiUpdateProgress) window.rirekiUpdateProgress();
+      }catch(e){ console.warn('restoreDraft failed', e); }
+    }
+
+    function setField(el, v){
+      if (!el) return;
+      if (el.tagName === 'SELECT'){
+        el.value = v;
+      } else if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT'){
+        if (el.type === 'radio' || el.type === 'checkbox'){
+          el.checked = (el.value == v);
+        } else {
+          el.value = v;
+          // trigger input for DOB formatter if needed
+          if (el.id === 'dob' && typeof window.rirekiUpdateDOBHidden === 'function'){
+            window.rirekiUpdateDOBHidden();
+          }
+        }
+      }
+    }
+
+    // Save often
+    form.addEventListener('input', saveDraft, {capture:true});
+    form.addEventListener('change', saveDraft, {capture:true});
+    form.addEventListener('blur', saveDraft, true);
+
+    // Save right before leaving to preview
+    form.addEventListener('submit', saveDraft);
+
+    // Restore on load
+    window.addEventListener('DOMContentLoaded', restoreDraft);
+  })();
+
 })();
 
 
@@ -218,8 +404,8 @@
   const panes  = Array.from(document.querySelectorAll('.step-pane'));
   if (!fill || !labels.length || !panes.length) return;
 
-  const SEGMENT = 20;          // 20% increments
-  const LAST_IDX = panes.length - 1; // Step5 pane index
+  const SEGMENT = 20;                 // 20% increments
+  const LAST_IDX = panes.length - 1;  // Step5 pane index
 
   // Step5 fields (自己PR・希望)
   const step5Pane = panes[LAST_IDX];
@@ -247,10 +433,8 @@
   }
 
   function paintLabels(currentIdx, fullyDone){
-    // simple visual cues
     labels.forEach(li => li.classList.remove('is-active','is-dim','is-done'));
     if (fullyDone){
-      // everything dim except last, which is active
       labels.forEach(li => li.classList.add('is-dim'));
       labels[labels.length - 1].classList.remove('is-dim');
       labels[labels.length - 1].classList.add('is-active');
@@ -276,7 +460,7 @@
     fill.style.width = pct + '%';
     fill.setAttribute('aria-valuenow', String(Math.round(pct)));
 
-    // labels: map pane index (0..4) to label index (0..4); last label is 作成終了
+    // labels: current pane (0..4); last label is 作成終了
     paintLabels(Math.min(idx, labels.length - 2), fullyDone);
     setSubmitState(fullyDone);
   }
@@ -300,6 +484,9 @@
     step5Pane.addEventListener('input', updateProgress, true);
     step5Pane.addEventListener('change', updateProgress, true);
   }
+
+  // also update when hash-based navigation is used
+  window.addEventListener('hashchange', deferUpdate);
 
   window.addEventListener('load', updateProgress);
   updateProgress();

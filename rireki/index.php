@@ -112,6 +112,11 @@
     summary{ cursor:pointer; font-weight:700 }
     .crumb{ font-size:12px; color:#6b7280; margin:6px 0 0 }
     footer{ padding:20px; border-top:1px solid #eef2f7; color:#667085; font-size:12px; background:#fff; }
+
+    /* Back to top */
+    #back-to-top{ text-decoration:none; color:#0c4a7a; box-shadow:0 2px 6px rgba(0,0,0,.12); transition:background .2s,transform .2s,box-shadow .2s }
+    #back-to-top:hover{ background:#f3f9ff; transform: translateY(-1px); box-shadow:0 6px 18px rgba(30,144,255,.16) }
+    #back-to-top:focus{ outline:none; box-shadow:0 0 0 4px rgba(59,130,246,.5),0 6px 18px rgba(30,144,255,.16) }
   </style>
 
   <!-- JSON-LD: WebSite + SearchAction -->
@@ -174,7 +179,8 @@
           <span class="chip">日本語＆外国籍対応</span>
         </div>
         <div class="cta-row">
-          <a class="btn primary" href="/rireki/basic/rireki.php">5分で無料作成をはじめる</a>
+          <!-- Quick start -> Terms -> Basic form -->
+          <a class="btn primary" href="/rireki/rireki_terms.php?next=/rireki/basic/rireki.php&fmt=basic">5分で無料作成をはじめる</a>
           <a class="btn" href="/saiyou.php">求人を見ながら作成</a>
         </div>
       </div>
@@ -206,7 +212,8 @@
           <p class="desc">一般応募向けの標準フォーマット。氏名・住所・学歴・職歴・資格・自己PRなど。最短5分で完了。</p>
         </div>
         <div class="cta">
-          <a class="btn primary" href="/rireki/basic/rireki.php">このフォーマットで作成</a>
+          <!-- Basic -> Terms -> Basic form -->
+          <a class="btn primary" href="/rireki/rireki_terms.php?next=/rireki/basic/rireki.php&fmt=basic">このフォーマットで作成</a>
         </div>
       </article>
 
@@ -218,7 +225,8 @@
           <p class="desc">介護資格・夜勤可否・経験年数・シフト希望など、介護業界に特化した入力ステップ。現場で求められる情報を漏れなく整理。</p>
         </div>
         <div class="cta">
-          <a class="btn primary" href="/rireki/kaigo/rireki.php">このフォーマットで作成</a>
+          <!-- Kaigo -> Terms -> Kaigo form -->
+          <a class="btn primary" href="/rireki/rireki_terms.php?next=/rireki/kaigo/rireki.php&fmt=kaigo">このフォーマットで作成</a>
         </div>
       </article>
 

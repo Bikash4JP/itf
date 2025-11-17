@@ -35,11 +35,18 @@
 
 
   <div class="wrap">
-    <form class="card" action="/rireki/basic/php/submit_rireki.php" method="post" enctype="multipart/form-data" id="rirekiForm" novalidate>
+    <form class="card"
+      action="/rireki/basic/php/rireki_preview.php"
+      method="post"
+      enctype="multipart/form-data"
+      id="rirekiForm"
+      novalidate>
+  <input type="hidden" name="__fmt" value="basic">
+
       <div class="steps">
 
         <!-- STEP 1 -->
-        <section class="step-pane is-active" data-step="1">
+        <section class="step-pane is-active" data-step="1" id="step-1">
           <h2>基本情報</h2>
           <div class="grid-2">
             <label>フリガナ<input type="text" name="personal_name_kana" placeholder="やまだ たろう" autocomplete="name"></label>
@@ -104,7 +111,7 @@
         </section>
 
         <!-- STEP 2: Education -->
-        <section class="step-pane" data-step="2">
+        <section class="step-pane" data-step="2" id="step-2">
           <h2>学歴</h2>
           <table class="table edu" id="eduTable">
             <colgroup>
@@ -154,7 +161,7 @@
         </section>
 
         <!-- STEP 3: Experience -->
-        <section class="step-pane" data-step="3">
+        <section class="step-pane" data-step="3" id="step-3">
           <h2>職歴</h2>
           <table class="table exp" id="expTable">
             <colgroup>
@@ -194,7 +201,7 @@
         </section>
 
         <!-- STEP 4: Licenses -->
-        <section class="step-pane" data-step="4">
+        <section class="step-pane" data-step="4" id="step-4">
           <h2>資格・免許</h2>
           <table class="table lic" id="licTable">
             <colgroup><col class="yy"><col class="mm"><col class="name"><col></colgroup>
@@ -223,7 +230,7 @@
         </section>
 
         <!-- STEP 5 -->
-        <section class="step-pane" data-step="5">
+        <section class="step-pane" data-step="5" id="step-5">
           <h2>自己PR・希望</h2>
           <div class="grid-2">
             <label class="col-2">志望動機・自己PRなど<textarea name="self_pr" rows="5" placeholder="自己PRを入力してください。"></textarea></label>
