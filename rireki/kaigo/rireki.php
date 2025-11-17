@@ -68,7 +68,7 @@ $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
     #progressWrap{
       max-width:1100px;
       margin:16px auto 0;
-      padding:0 20px; /* visually 20px margins L/R */
+      padding:0 20px;
     }
     #progressWrap .progress-labels{
       list-style:none; margin:0 0 6px 0; padding:0;
@@ -83,7 +83,7 @@ $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
 
     #progressWrap .progress-track{
       height:10px;
-      border:1px solid #000;      /* black border like sample */
+      border:1px solid #000;
       border-radius:5px;
       overflow:hidden;
       background:#fff;
@@ -92,9 +92,13 @@ $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
     #progressWrap .progress-fill{
       height:100%;
       width:0%;
-      background:#1e90ff;         /* sky */
-      transition:width .35s ease; /* smooth raise */
+      background:#1e90ff;
+      transition:width .35s ease;
     }
+
+    /* Small tweak for AI buttons next to textareas */
+    .ai-row{ display:flex; gap:8px; align-items:center; margin-top:6px }
+    .btn[disabled]{ opacity:.7; cursor:not-allowed }
   </style>
 </head>
 <body>
@@ -124,7 +128,7 @@ $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
   <div class="wrap">
     <form class="card" action="/rireki/kaigo/php/rireki_preview.php" method="post" enctype="multipart/form-data" id="rirekiForm" novalidate>
       <!-- keep job context when coming via job flow -->
-        <input type="hidden" name="__fmt" value="basic">
+      <input type="hidden" name="__fmt" value="basic">
       <?php if ($job_id > 0): ?>
         <div class="banner">この履歴書は求人応募フローから作成されます（Job ID: <?php echo (int)$job_id; ?>）。</div>
       <?php endif; ?>
@@ -414,13 +418,32 @@ $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
           </div>
         </section>
 
-        <!-- STEP 5 -->
+        <!-- STEP 5 (AI wired) -->
         <section class="step-pane" d="step-5">
           <h2>自己PR・志望・希望</h2>
+
           <div class="grid-2">
-            <label class="col-2">自己PR<textarea name="self_pr" rows="4"></textarea></label>
-            <label class="col-2">志望の動機<textarea name="motivation" rows="4"></textarea></label>
-            <label class="col-2">本人希望欄（職種、給与、勤務地など）<textarea name="preferences" rows="4"></textarea></label>
+            <label class="col-2">自己PR
+              <textarea name="self_pr" rows="4" id="prText"></textarea>
+              <div class="ai-row">
+                <button type="button" class="btn" data-ai-target="#prText">AIで整える</button>
+                <small style="color:#64748b">※ 自由な言語で書いてOK。やさしい日本語に整形します。</small>
+              </div>
+            </label>
+
+            <label class="col-2">志望の動機
+              <textarea name="motivation" rows="4" id="motivationText"></textarea>
+              <div class="ai-row">
+                <button type="button" class="btn" data-ai-target="#motivationText">AIで整える</button>
+              </div>
+            </label>
+
+            <label class="col-2">本人希望欄（職種、給与、勤務地など）
+              <textarea name="preferences" rows="4" id="prefText"></textarea>
+              <div class="ai-row">
+                <button type="button" class="btn" data-ai-target="#prefText">AIで整える</button>
+              </div>
+            </label>
           </div>
 
           <div class="rule-box">
@@ -523,115 +546,80 @@ $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
   <div class="site-footer">© ITF co. Ltd. ALL Rights Reserved</div>
 
   <script src="/rireki/kaigo/js/kaigo.js?v=5"></script>
- <script>
+  <script>
+/* ===== Progress bar logic (unchanged) ===== */
 (function () {
-  const SEGMENTS = 6;                 // 6 parts: step2..step6 + final completion
-  const INC = 100 / SEGMENTS;         // 16.6667%
+  const SEGMENTS = 6;
+  const INC = 100 / SEGMENTS;
   const stepsRoot = document.querySelector('.steps');
   const panes = Array.from(document.querySelectorAll('.steps .step-pane'));
   const progressFill = document.getElementById('progressFill');
   const labels = Array.from(document.querySelectorAll('#progressWrap .progress-labels li'));
-  const lastPane = panes[panes.length - 1]; // 別途情報 pane (step 6)
+  const lastPane = panes[panes.length - 1];
   const submitBtn = lastPane ? lastPane.querySelector('button[type="submit"]') : null;
 
   function getActiveIdx() {
     const i = panes.findIndex(p => p.classList.contains('is-active'));
     return i >= 0 ? i : 0;
   }
-
   function allLastPaneFieldsFilled() {
     if (!lastPane) return false;
     const fields = Array.from(lastPane.querySelectorAll('input:not([type="hidden"]), select, textarea'));
     if (!fields.length) return false;
-    return fields.every(el => {
-      if (el.disabled) return true;
-      return (el.value || '').trim() !== '';
-    });
+    return fields.every(el => el.disabled || (el.value || '').trim() !== '');
   }
-
   function setSubmitState(done) {
     if (!submitBtn) return;
     submitBtn.disabled = !done;
     submitBtn.style.opacity = done ? '' : '0.7';
     submitBtn.style.pointerEvents = done ? '' : 'none';
   }
-
   function setLabelStates(activeSegments, isDone) {
-    // Labels are optional; this just dims/focuses them nicely
     if (!labels.length) return;
-    labels.forEach((li, i) => {
-      li.classList.remove('is-active', 'is-dim', 'is-done');
-    });
-
-    // Map: step1..step6 → segments 0..5 (0%..83%), segment 6 (100%) only when last pane done
-    const activeStepIdx = getActiveIdx(); // 0..5
-    const currentLabelIdx = Math.min(activeStepIdx, labels.length - 2); // before 完了 label
-    labels.forEach((li, i) => {
+    labels.forEach(li => li.classList.remove('is-active','is-dim','is-done'));
+    const activeStepIdx = getActiveIdx();
+    const currentLabelIdx = Math.min(activeStepIdx, labels.length - 2);
+    labels.forEach((li,i) => {
       if (i < currentLabelIdx) li.classList.add('is-done');
       if (i === currentLabelIdx) li.classList.add('is-active');
       if (i > currentLabelIdx) li.classList.add('is-dim');
     });
-
-    // When fully done, highlight the last label
     if (isDone && labels.length) {
       labels.forEach(li => li.classList.add('is-dim'));
       labels[labels.length - 1].classList.remove('is-dim');
       labels[labels.length - 1].classList.add('is-active');
     }
   }
-
   function updateProgress() {
-    const idx = getActiveIdx(); // 0..5
+    const idx = getActiveIdx();
     const atLastPane = (idx === panes.length - 1);
-
-    // Base segments: step1=0, step2=1, step3=2, step4=3, step5=4, step6=5
     let segments = Math.min(idx, SEGMENTS - 1);
-
     let finalDone = false;
-    if (atLastPane && allLastPaneFieldsFilled()) {
-      // final +1 segment to reach 100%
-      segments = SEGMENTS;
-      finalDone = true;
-    }
-
+    if (atLastPane && allLastPaneFieldsFilled()) { segments = SEGMENTS; finalDone = true; }
     const pct = Math.min(100, Math.max(0, segments * INC));
     if (progressFill) {
       progressFill.style.width = pct + '%';
       progressFill.setAttribute('aria-valuenow', String(Math.round(pct)));
     }
-
     setLabelStates(segments, finalDone);
     setSubmitState(finalDone);
   }
-
-  function deferUpdate() {
-    requestAnimationFrame(() => requestAnimationFrame(updateProgress));
-  }
-
-  // React on step navigation
+  function deferUpdate(){ requestAnimationFrame(() => requestAnimationFrame(updateProgress)); }
   document.addEventListener('click', (e) => {
-    if (e.target.closest('.js-next-step') || e.target.closest('.js-prev-step')) {
-      deferUpdate();
-    }
+    if (e.target.closest('.js-next-step') || e.target.closest('.js-prev-step')) deferUpdate();
   });
-
-  // Watch class swaps on panes (your step slider toggles .is-active)
   if (stepsRoot && 'MutationObserver' in window) {
-    new MutationObserver(deferUpdate)
-      .observe(stepsRoot, { attributes: true, subtree: true, attributeFilter: ['class'] });
+    new MutationObserver(deferUpdate).observe(stepsRoot, { attributes:true, subtree:true, attributeFilter:['class'] });
   }
-
-  // Validate live on the last pane
-  if (lastPane) {
+  if (lastPane){
     lastPane.addEventListener('input', updateProgress, true);
     lastPane.addEventListener('change', updateProgress, true);
   }
-
   window.addEventListener('load', updateProgress);
   updateProgress();
 })();
-// === KAIGO: open-by-hash + autosave/restore (sessionStorage) ===
-// Safe to include multiple times
+
+/* ===== KAIGO: hash-open + autosave/restore ===== */
 (function(){
   if (window.__KAIGO_FORM_PERSIST_BOUND__) return;
   window.__KAIGO_FORM_PERSIST_BOUND__ = true;
@@ -639,71 +627,48 @@ $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
   const STORAGE_KEY = 'itf_rireki_kaigo_v1';
   const form = document.getElementById('rirekiForm');
   const panes = Array.from(document.querySelectorAll('.steps .step-pane'));
-  const stepsRoot = document.querySelector('.steps');
 
-  // -------- Step switcher (class toggle; works even if slider JS absent) --------
   function activateStep(idx){
     if (!panes.length) return;
-    if (idx < 0) idx = 0;
-    if (idx >= panes.length) idx = panes.length - 1;
+    idx = Math.max(0, Math.min(idx, panes.length - 1));
     panes.forEach(p => p.classList.remove('is-active','slide-in-left','slide-in-right','slide-out-left','slide-out-right'));
     panes[idx].classList.add('is-active');
-    // try to scroll top nicely
     try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(_) { window.scrollTo(0,0); }
   }
-
   function stepIndexFromHash(){
     const m = location.hash.match(/#step-(\d+)/i);
     if (!m) return null;
     const n = parseInt(m[1], 10);
-    if (isNaN(n)) return null;
-    return n - 1; // 1-based → 0-based
+    return isNaN(n) ? null : (n - 1);
   }
-
   function openFromHash(){
     const idx = stepIndexFromHash();
     if (idx !== null) activateStep(idx);
   }
-
   window.addEventListener('hashchange', openFromHash);
   window.addEventListener('load', openFromHash);
-  // If no hash, keep default .is-active
 
-  // -------- Autosave: serialize/restore by exact input names --------
   if (!form) return;
 
   function shouldStore(el){
-    if (!el.name) return false;
-    if (el.disabled) return false;
-    if (el.type === 'file' || el.type === 'submit' || el.type === 'button' || el.type === 'reset') return false;
+    if (!el.name || el.disabled) return false;
+    if (['file','submit','button','reset'].includes(el.type)) return false;
     return true;
   }
-
   function serializeForm(){
     const data = {};
-    // Use form.elements to keep correct order for [] arrays
     Array.from(form.elements).forEach(el => {
       if (!shouldStore(el)) return;
       const name = el.name;
-      let val = el.value;
-
-      // Normalize: trim only simple textareas/inputs (optional)
-      // if (el.tagName === 'TEXTAREA' || el.type === 'text' || el.type === 'email' || el.type === 'tel') {
-      //   val = val;
-      // }
-
-      // Group arrays and duplicate names
+      const val = el.value;
       if (name.endsWith('[]')) {
         if (!Array.isArray(data[name])) data[name] = [];
         data[name].push(val);
       } else if (name.includes(']')) {
-        // Handles nested names like education[from_year][]
         if (!data[name]) data[name] = [];
-        // Still store as array because there are multiple controls with same name
         data[name].push(val);
       } else {
         if (data.hasOwnProperty(name)) {
-          // multiple elements (e.g., radios) — normalize to array
           if (!Array.isArray(data[name])) data[name] = [data[name]];
           data[name].push(val);
         } else {
@@ -713,40 +678,28 @@ $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
     });
     return data;
   }
-
   function restoreForm(data){
     if (!data || typeof data !== 'object') return;
-    // Clear current rows in repeaters? We won't delete rows; we just fill in order.
     Array.from(form.elements).forEach(el => {
       if (!shouldStore(el)) return;
       const name = el.name;
       const saved = data[name];
       if (typeof saved === 'undefined') return;
-
       if (Array.isArray(saved)) {
-        // find all controls with same name in DOM order
         const group = Array.from(form.querySelectorAll(`[name="${CSS.escape(name)}"]`));
         group.forEach((ctrl, i) => { if (typeof saved[i] !== 'undefined') ctrl.value = saved[i]; });
       } else {
         el.value = saved;
       }
     });
-
-    // trigger any change-dependent UI (like enabling end-date fields)
     try { form.dispatchEvent(new Event('change', { bubbles:true })); } catch(_){}
   }
-
   function save(){
     try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(serializeForm())); } catch(e){}
   }
   function loadSaved(){
-    try {
-      const raw = sessionStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : null;
-    } catch(e){ return null; }
+    try { const raw = sessionStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : null; } catch(e){ return null; }
   }
-
-  // Throttle
   let t=null;
   function scheduleSave(){ clearTimeout(t); t = setTimeout(save, 300); }
 
@@ -754,16 +707,58 @@ $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
   form.addEventListener('change', scheduleSave, true);
   window.addEventListener('beforeunload', save);
 
-  // Restore once on load
   const saved = loadSaved();
   if (saved) restoreForm(saved);
-
-  // After successful submit to preview, we keep storage so user can return & edit.
-  // If you ever want to clear on final submit to submit_rireki.php, do it there.
-
 })();
-</script>
 
+/* ===== AI: simple-Japanese rewrite via your Worker ===== */
+(function(){
+  const WORKER_URL = 'https://rireki-ai.bikash4jp.workers.dev';
 
+  async function rewriteToSimpleJa(text){
+    const res = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json' },
+      body: JSON.stringify({
+        task: 'rewrite_to_simple_japanese',
+        text
+      })
+    });
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok || !data || !data.ok) throw new Error('AI request failed');
+    return (data.output || '').trim();
+  }
+
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('button[data-ai-target]');
+    if(!btn) return;
+
+    const sel = btn.getAttribute('data-ai-target');
+    const ta = document.querySelector(sel);
+    if(!ta) return;
+
+    const original = (ta.value || '').trim();
+    if(!original){
+      alert('まずテキストを入力してください。');
+      return;
+    }
+
+    btn.disabled = true;
+    const old = btn.textContent;
+    btn.textContent = '整え中…';
+
+    try{
+      const rewritten = await rewriteToSimpleJa(original);
+      if (rewritten) ta.value = rewritten;
+    }catch(err){
+      console.error(err);
+      alert('AIの整形に失敗しました。時間をおいて再度お試しください。');
+    }finally{
+      btn.disabled = false;
+      btn.textContent = old;
+    }
+  });
+})();
+  </script>
 </body>
 </html>
