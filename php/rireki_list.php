@@ -80,6 +80,45 @@ function _has_experience(array $meta): bool {
   return false;
 }
 
+// --- NEW: detect domestic (kokunai) / overseas (kokugai) by current address ---
+function _extract_address_like(array $meta): string {
+  // Try multiple likely keys safely
+  $candidates = [
+    $meta['address'] ?? null,
+    $meta['current_address'] ?? null,
+    $meta['present_address'] ?? null,
+    $meta['personal']['address'] ?? null,
+    $meta['personal']['current_address'] ?? null,
+    $meta['contact']['address'] ?? null,
+  ];
+  foreach ($candidates as $v) {
+    if (is_string($v) && trim($v) !== '') return trim($v);
+  }
+  return '';
+}
+function _is_address_in_japan(string $addr): bool {
+  if ($addr === '') return false;
+  $a = mb_strtolower($addr, 'UTF-8');
+
+  // Simple signals
+  if (mb_strpos($a, '日本', 0, 'UTF-8') !== false) return true;
+  if (stripos($a, 'japan') !== false) return true;
+
+  // JP postal like 123-4567 somewhere
+  if (preg_match('/\b\d{3}-\d{4}\b/u', $a)) return true;
+
+  // Prefecture names (kanji short set)
+  $prefs = ['北海道','青森','岩手','宮城','秋田','山形','福島','茨城','栃木','群馬','埼玉','千葉','東京','神奈川','新潟','富山','石川','福井','山梨','長野','岐阜','静岡','愛知','三重','滋賀','京都','大阪','兵庫','奈良','和歌山','鳥取','島根','岡山','広島','山口','徳島','香川','愛媛','高知','福岡','佐賀','長崎','熊本','大分','宮崎','鹿児島','沖縄'];
+  foreach ($prefs as $p) {
+    if (mb_strpos($addr, $p, 0, 'UTF-8') !== false) return true;
+  }
+  return false;
+}
+function _resident_tag(array $meta): string {
+  $addr = _extract_address_like($meta);
+  return _is_address_in_japan($addr) ? 'kokunai' : 'kokugai';
+}
+
 // job title lookup cache
 $_JOB_TITLE_CACHE = [];
 function _job_title_by_id(PDO $pdo, int $jobId): ?string {
@@ -164,6 +203,9 @@ if (is_dir($resumeDir)) {
     $jlpt = _normalize_jlpt($meta['jp_comm_level'] ?? ($meta['personal']['jp_comm_level'] ?? ''));
     $exp  = _has_experience($meta) ? 'yes' : 'no';
 
+    // NEW: kokunai/kokugai
+    $resTag = _resident_tag($meta); // 'kokunai' | 'kokugai'
+
     $sd = _detect_source($meta, $pdo);
 
     $rows[] = [
@@ -172,6 +214,7 @@ if (is_dir($resumeDir)) {
       'nat'       => (string)$nat,
       'jlpt'      => (string)$jlpt,
       'exp'       => (string)$exp,
+      'resident'  => (string)$resTag,  // NEW
       'created'   => (int)$createdAt,
       'has_xls'   => (bool)$hasXls,
       'src_type'  => $sd['src_type'],
@@ -188,6 +231,7 @@ $nations = array_values(array_unique(array_filter(array_map(fn($r)=>$r['nat'], $
 sort($nations);
 $jlptOptions = ['JFT A2','N4','N3','N2','N1'];
 $expOptions  = ['yes'=>'あり','no'=>'なし'];
+$resOptions  = ['kokunai'=>'国内（日本在住）','kokugai'=>'国外（日本以外）']; // NEW
 
 // CSRF for delete
 if (empty($_SESSION['csrf_rireki'])) {
@@ -282,6 +326,17 @@ $base   = $scheme . '://' . $host;
           <div class="actions"><button class="btn" onclick="clearMenu(this)">クリア</button><button class="btn" onclick="closeMenu(this)">OK</button></div>
         </div>
       </div>
+
+      <!-- NEW: 国内/国外 filter -->
+      <div class="dropdown" data-key="res">
+        <button class="dropbtn" onclick="toggleMenu(this)">居住地（国内/国外）</button>
+        <div class="dropmenu">
+          <?php foreach ($resOptions as $value=>$label): ?>
+            <label><input type="checkbox" value="<?=htmlspecialchars($value)?>"> <span><?=htmlspecialchars($label)?></span></label>
+          <?php endforeach; ?>
+          <div class="actions"><button class="btn" onclick="clearMenu(this)">クリア</button><button class="btn" onclick="closeMenu(this)">OK</button></div>
+        </div>
+      </div>
     </div>
 
     <table id="rirekiTable">
@@ -337,12 +392,13 @@ $base   = $scheme . '://' . $host;
           }
 
           $rowText = strtolower(
-            ($r['name'].' '.$r['nat'].' '.$r['jlpt'].' '.$date.' '.$srcCellText)
+            ($r['name'].' '.$r['nat'].' '.$r['jlpt'].' '.$date.' '.$srcCellText.' '.$r['resident'])
           );
         ?>
         <tr data-nat="<?=htmlspecialchars($r['nat'])?>"
             data-exp="<?=htmlspecialchars($r['exp'])?>"
             data-jlpt="<?=htmlspecialchars($r['jlpt'])?>"
+            data-res="<?=htmlspecialchars($r['resident'])?>"
             data-text="<?=htmlspecialchars($rowText)?>">
           <td><?= $sn++ ?></td>
           <td><?=htmlspecialchars($r['name'])?></td>
@@ -351,15 +407,19 @@ $base   = $scheme . '://' . $host;
           <td><?=htmlspecialchars($date)?></td>
           <td>
             <div class="badges">
+              <?php if ($r['resident'] === 'kokunai'): ?>
+                <span class="badge">国内</span>
+              <?php else: ?>
+                <span class="badge">国外</span>
+              <?php endif; ?>
+
               <?php if ($r['src_type'] === 'upload'): ?>
-                <!-- アップロード行：Excel/原本リンクは出さず、印刷のみ（原本を印刷） -->
                 <?php if (!empty($printHref)): ?>
                   <a class="btn" href="<?=htmlspecialchars($printHref)?>" target="_blank" rel="noopener">印刷</a>
                 <?php else: ?>
                   <span class="badge">印刷不可（原本なし）</span>
                 <?php endif; ?>
               <?php else: ?>
-                <!-- 通常行：Excel & 印刷（Office Viewer） -->
                 <?php if ($r['has_xls']): ?>
                   <a class="btn" href="<?=$xlsUrl?>" download>Excel</a>
                   <a class="btn" href="<?=htmlspecialchars($printHref)?>" target="_blank" rel="noopener">印刷</a>
@@ -415,6 +475,7 @@ $base   = $scheme . '://' . $host;
       const expSel  = getSelected('exp');
       const jlptSel = getSelected('jlpt');
       const natSel  = getSelected('nat');
+      const resSel  = getSelected('res');   // NEW
       const rows = document.querySelectorAll('#rirekiTable tbody tr');
       rows.forEach(tr=>{
         let show = true;
@@ -434,6 +495,10 @@ $base   = $scheme . '://' . $host;
         if (show && natSel.length){
           const v = (tr.getAttribute('data-nat')||'').trim();
           show = natSel.includes(v);
+        }
+        if (show && resSel.length){                            // NEW
+          const v = (tr.getAttribute('data-res')||'').trim();
+          show = resSel.includes(v);
         }
         tr.style.display = show ? '' : 'none';
       });
