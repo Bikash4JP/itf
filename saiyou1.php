@@ -1,38 +1,44 @@
 <?php
 // /home/it-future/www/itf/saiyou.php
 
-require_once __DIR__ . '/php/user_auth.php';
-
 // ---- helpers (parsers & mappers) ------------------------------------------
 function j_to_half($s){ // normalize full-width digits/tilde/space
   $map = ['０'=>'0','１'=>'1','２'=>'2','３'=>'3','４'=>'4','５'=>'5','６'=>'6','７'=>'7','８'=>'8','９'=>'9','－'=>'-','〜'=>'~','～'=>'~','　'=>' '];
   return strtr($s, $map);
 }
 function parse_salary_jp($raw){
+  // Returns [ 'currency'=>'JPY', 'unit'=>'YEAR|MONTH', 'min'=>float|null, 'max'=>float|null, 'value'=>float|null ]
+  // Accepts examples: "250～280万円年給", "300万円/年", "毎月 26万～３０万円", "時給1200円", "月給23万円〜25万円"
   $s = trim(j_to_half(preg_replace('/\s+/u',' ', $raw ?? '')));
   if ($s === '') return null;
 
-  $unit = null;
+  $unit = null; // YEAR|MONTH|HOUR etc. -> we'll only surface YEAR or MONTH (Google supports HOUR too; keep to YM)
   if (preg_match('/年(給|収|俸)?|\/年|年収/i', $s)) $unit = 'YEAR';
   if (preg_match('/月(給|収)?|\/月/i', $s)) $unit = $unit ?? 'MONTH';
-  if (!$unit && preg_match('/時給|\/時|hour/i', $s)) $unit = 'HOUR';
+  if (!$unit && preg_match('/時給|\/時|hour/i', $s)) $unit = 'HOUR'; // we will later map HOUR to MONTH if desired
 
+  // extract numeric parts (万円・円)
+  // support ranges like 26万～30万, 250~280万円, 300万円
   $yen = null; $min = null; $max = null;
   if (preg_match('/(\d+(?:\.\d+)?)\s*万\s*円?/u', $s)) {
+    // 万単位 present
     $matches = [];
     preg_match_all('/(\d+(?:\.\d+)?)\s*万/u', $s, $matches);
     if (count($matches[1]) === 1) {
-      $yen = (float)$matches[1][0] * 10000;
+      $val = (float)$matches[1][0] * 10000;
+      $yen = $val;
     } elseif (count($matches[1]) >= 2) {
       $min = (float)$matches[1][0] * 10000;
       $max = (float)$matches[1][1] * 10000;
     }
   } elseif (preg_match('/(\d+(?:,\d{3})+|\d+)\s*円/u', $s)) {
+    // 円単位
+    $nums = [];
     preg_match_all('/(\d+(?:,\d{3})+|\d+)\s*円/u', $s, $m2);
-    $nums = array_map(fn($n)=> (float)str_replace(',', '', $n), $m2[1]);
-    if (count($nums) === 1) $yen = $nums[0];
-    elseif (count($nums) >= 2) { $min = $nums[0]; $max = $nums[1]; }
+    $nums = array_map(function($n){ return (float)str_replace(',', '', $n); }, $m2[1]);
+    if (count($nums) === 1) $yen = $nums[0]; elseif (count($nums) >= 2) { $min = $nums[0]; $max = $nums[1]; }
   } elseif (preg_match('/(\d+(?:\.\d+)?)\s*万/u', $s)) {
+    // "26万～30万" without 円
     $matches = [];
     preg_match_all('/(\d+(?:\.\d+)?)\s*万/u', $s, $matches);
     if (count($matches[1]) === 1) {
@@ -42,21 +48,30 @@ function parse_salary_jp($raw){
       $max = (float)$matches[1][1] * 10000;
     }
   } elseif (preg_match('/(\d+(?:\.\d+)?)(?:\s*~\s*|\s*～\s*|\s*-\s*)(\d+(?:\.\d+)?)/u', $s, $m)) {
+    // bare numbers range; assume 万 if ~ 20-60 range; otherwise yen
     $a = (float)$m[1]; $b = (float)$m[2];
     if ($a >= 15 && $a <= 100 && $b >= 15 && $b <= 100) { $min=$a*10000; $max=$b*10000; }
     else { $min=$a; $max=$b; }
   }
 
+  // unit inference: default monthly if contains 月/毎月, else yearly if contains 年
   if (!$unit) {
     if (preg_match('/月/u', $s)) $unit = 'MONTH';
     elseif (preg_match('/年/u', $s)) $unit = 'YEAR';
   }
-  if (!$unit) $unit = 'MONTH';
+  if (!$unit) $unit = 'MONTH'; // safer default for JP job ads
 
+  // if hourly, you could keep HOUR; Google supports HOUR. We'll keep HOUR if clearly hourly.
+  if ($unit === 'HOUR') {
+    // keep as HOUR when explicit; else convert hourly to month? Here, keep HOUR.
+  }
+
+  // assemble result
   $out = ['currency'=>'JPY','unit'=> $unit];
-  if (!is_null($yen)) $out['value'] = $yen;
-  if (!is_null($min)) $out['min']   = $min;
-  if (!is_null($max)) $out['max']   = $max;
+  if (!is_null($yen))      $out['value'] = $yen;
+  if (!is_null($min))      $out['min']   = $min;
+  if (!is_null($max))      $out['max']   = $max;
+
   return $out;
 }
 function make_base_salary_ld($parsed){
@@ -67,11 +82,15 @@ function make_base_salary_ld($parsed){
   $max = $parsed['max']   ?? null;
 
   $valueObj = ["@type"=>"QuantitativeValue","unitText"=>$unitText];
-  if (!is_null($val)) $valueObj["value"] = round($val);
-  if (!is_null($min)) $valueObj["minValue"] = round($min);
-  if (!is_null($max)) $valueObj["maxValue"] = round($max);
+  if (!is_null($val)) { $valueObj["value"] = round($val); }
+  if (!is_null($min)) { $valueObj["minValue"] = round($min); }
+  if (!is_null($max)) { $valueObj["maxValue"] = round($max); }
 
-  return ["@type"=>"MonetaryAmount","currency"=>"JPY","value"=>$valueObj];
+  return [
+    "@type"   => "MonetaryAmount",
+    "currency"=> "JPY",
+    "value"   => $valueObj
+  ];
 }
 function map_employment_type($raw){
   $s = mb_strtolower(trim($raw ?? ''), 'UTF-8');
@@ -106,43 +125,44 @@ function build_job_ld($job){
 
   $salaryParsed = parse_salary_jp($job['salary'] ?? '');
   $baseSalaryLD = make_base_salary_ld($salaryParsed);
+
   $employmentType = map_employment_type($job['job_type'] ?? '');
 
   $ld = [
-    "@context"=>"https://schema.org",
-    "@type"=>"JobPosting",
-    "title"=>$title,
-    "description"=>$desc,
-    "datePosted"=>$posted,
-    "validThrough"=>$valid,
-    "employmentType"=>$employmentType,
-    "hiringOrganization"=>[
-      "@type"=>"Organization",
-      "name"=>"株式会社アイティーエフ",
-      "sameAs"=>"https://it-future.jp/",
-      "logo"=>"https://it-future.jp/images/logo.png"
+    "@context" => "https://schema.org",
+    "@type"    => "JobPosting",
+    "title"    => $title,
+    "description" => $desc,
+    "datePosted"  => $posted,
+    "validThrough"=> $valid,
+    "employmentType" => $employmentType,
+    "hiringOrganization" => [
+      "@type" => "Organization",
+      "name"  => "株式会社アイティーエフ",
+      "sameAs"=> "https://it-future.jp/",
+      "logo"  => "https://it-future.jp/images/logo.png"
     ],
-    "jobLocationType"=>"ON_SITE",
-    "jobLocation"=>[
-      "@type"=>"Place",
-      "name"=>$locRegion,
-      "address"=>[
-        "@type"=>"PostalAddress",
-        "addressCountry"=>"JP",
-        "addressRegion"=>$locRegion
+    "jobLocationType" => "ON_SITE",
+    "jobLocation" => [
+      "@type" => "Place",
+      "name"  => $locRegion,
+      "address" => [
+        "@type" => "PostalAddress",
+        "addressCountry" => "JP",
+        "addressRegion"  => $locRegion
       ]
     ],
-    "applicantLocationRequirements"=>[
-      "@type"=>"Country",
-      "name"=>"Japan"
+    "applicantLocationRequirements" => [
+      "@type" => "Country",
+      "name"  => "Japan"
     ],
-    "industry"=>(string)($job['job_category'] ?? ''),
-    "identifier"=>[
-      "@type"=>"PropertyValue",
-      "name"=>"ITF",
-      "value"=>"JOB-".$id
+    "industry" => (string)($job['job_category'] ?? ''),
+    "identifier" => [
+      "@type" => "PropertyValue",
+      "name"  => "ITF",
+      "value" => "JOB-".$id
     ],
-    "url"=>$url
+    "url" => $url
   ];
   if ($baseSalaryLD) $ld["baseSalary"] = $baseSalaryLD;
   return $ld;
@@ -159,6 +179,7 @@ function build_job_ld($job){
   <meta name="description" content="株式会社アイティーエフの求人一覧ページ。勤務地・職種・日本語レベル・カテゴリ・キーワードで検索できます。最新求人をチェックして応募ください。">
   <link rel="canonical" href="https://it-future.jp/saiyou.php">
 
+  <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="求人一覧・採用情報｜株式会社アイティーエフ">
   <meta property="og:description" content="勤務地・職種・日本語レベルで検索できるアイティーエフの求人一覧。最新求人をチェックして応募ください。">
@@ -166,6 +187,7 @@ function build_job_ld($job){
   <meta property="og:site_name" content="株式会社アイティーエフ">
   <meta property="og:image" content="https://it-future.jp/images/inquiry_main.jpg">
 
+  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="求人一覧・採用情報｜株式会社アイティーエフ">
   <meta name="twitter:description" content="勤務地・職種・日本語レベルで検索できる求人一覧。">
@@ -180,7 +202,7 @@ function build_job_ld($job){
   <link rel="stylesheet" id="wp-pagenavi-css" href="css/pagenavi-css.css" type="text/css" media="all">
   <link rel="stylesheet" href="css/footer.css">
   <link rel="stylesheet" href="css/main_intro.css">
-  <link rel="stylesheet" href="css/saiyou.css?v=2.3">
+  <link rel="stylesheet" href="css/saiyou.css?v=2.2">
   <link rel="stylesheet" href="css/login.css">
 
   <script src="js/jquery.js"></script>
@@ -225,6 +247,7 @@ function build_job_ld($job){
     </div>
   </header><br>
 
+  <!-- Search band -->
   <section class="bg" role="search">
     <div class="overlay">
       <form class="search-form" action="saiyou.php" method="GET" aria-label="求人検索">
@@ -261,6 +284,8 @@ function build_job_ld($job){
           $stmt->execute($params);
           $jobs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+          // ---------- JSON-LD generators ----------
+          // ItemList (first up to 10)
           $ldItems = [];
           if ($jobs) {
             $i = 1;
@@ -275,7 +300,7 @@ function build_job_ld($job){
               $i++;
             }
           }
-
+          // JobPosting list (first up to 25 for performance)
           $jobPostingsLD = [];
           if ($jobs) {
             $count = 0;
@@ -303,6 +328,7 @@ function build_job_ld($job){
           <?php endif; ?>
 
           <?php
+          // ---------- Visible job cards (NO microdata to avoid partial extraction) ----------
           if ($jobs) {
             foreach ($jobs as $idx=>$job) {
               $summary = (string)($job['summary'] ?? '');
@@ -315,7 +341,7 @@ function build_job_ld($job){
 
               if ($tags) {
                 echo '<div class="tag-row" aria-label="タグ">';
-                foreach ($tags as $t) echo '<span class="tag">'.htmlspecialchars($t).'</span>';
+                foreach ($tags as $t) { echo '<span class="tag">'.htmlspecialchars($t).'</span>'; }
                 echo '</div>';
               }
 
@@ -343,40 +369,6 @@ function build_job_ld($job){
         </div>
 
         <aside class="filters" aria-label="求人フィルター">
-          <?php
-            $next = $_SERVER['REQUEST_URI'] ?? '/saiyou.php';
-            $loginUrl  = '/php/user_login.php?next=' . urlencode($next);
-            $logoutUrl = '/php/user_login.php?logout=1&next=' . urlencode($next);
-          ?>
-
-          <!-- ✅ USER PANEL (just above filters) -->
-          <div class="user-box" aria-label="ユーザー">
-            <div class="user-head">
-              <span class="user-title">ユーザー</span>
-              <?php if (app_logged_in()): ?>
-                <span class="user-badge">ログイン中</span>
-              <?php else: ?>
-                <span class="user-badge off">ゲスト</span>
-              <?php endif; ?>
-            </div>
-
-            <?php if (app_logged_in()): ?>
-              <div class="user-actions">
-                <a class="user-link" href="/php/user_applied_jobs.php">応募履歴</a>
-                <a class="user-link" href="/rireki/kaigo/php/rireki_preview.php">マイ情報（履歴書）</a>
-                <a class="user-link ghost" href="<?=htmlspecialchars($logoutUrl,ENT_QUOTES,'UTF-8')?>">ログアウト</a>
-              </div>
-              <div class="user-note">※ 「マイ情報」から履歴書を作成・更新できます。</div>
-            <?php else: ?>
-              <div class="user-note">ログインすると、履歴書を保存して後からダウンロードできます。</div>
-              <div class="user-actions">
-                <a class="user-link primary" href="<?=htmlspecialchars($loginUrl,ENT_QUOTES,'UTF-8')?>">ログイン / 新規登録</a>
-              </div>
-            <?php endif; ?>
-          </div>
-
-          <hr class="user-divider" aria-hidden="true">
-
           <h2>フィルターを設定</h2>
           <form action="saiyou.php" method="GET">
             <label>勤務地:
@@ -434,7 +426,6 @@ function build_job_ld($job){
     </div>
   </section>
 
-  <!-- footer unchanged -->
   <footer class="footer">
     <div class="footer-container">
       <div class="footer-row">
@@ -481,6 +472,7 @@ function build_job_ld($job){
     </svg>
   </a>
 
+  <!-- JSON-LD WebSite + SearchAction -->
   <script type="application/ld+json">
     {
       "@context":"https://schema.org",

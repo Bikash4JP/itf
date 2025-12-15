@@ -196,3 +196,81 @@ section.bg .search-form button{
     background:transparent
   }
 }
+/* /home/it-future/www/itf/css/saiyou.css  (rev 2.3) */
+
+/* ...your existing CSS (rev 2.2) stays SAME... */
+
+/* ===== User box (above filters) ===== */
+.user-box{
+  border:1px solid #dbe7f5;
+  background:#f8fbff;
+  border-radius:14px;
+  padding:12px 12px;
+  margin-bottom:12px;
+}
+.user-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:8px;
+}
+.user-title{
+  font-weight:900;
+  color:#0b3772;
+  font-size:1.05rem;
+}
+.user-badge{
+  font-size:.78rem;
+  font-weight:900;
+  padding:3px 10px;
+  border-radius:999px;
+  border:1px solid #bbf7d0;
+  background:#ecfdf5;
+  color:#0b6b4a;
+}
+.user-badge.off{
+  border:1px solid #cfe2ff;
+  background:#e8f1ff;
+  color:#0a5cc7;
+}
+.user-note{
+  color:#64748b;
+  font-size:.86rem;
+  line-height:1.35;
+  margin:6px 0 10px;
+}
+.user-actions{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.user-link{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  border-radius:10px;
+  padding:9px 10px;
+  border:1px solid #dbe7f5;
+  background:#fff;
+  color:#0b3772;
+  font-weight:800;
+  font-size:.92rem;
+}
+.user-link:hover{ background:#f7fbff; }
+.user-link.primary{
+  background:#2a7de1;
+  border-color:#2a7de1;
+  color:#fff;
+}
+.user-link.primary:hover{ filter:brightness(.96); }
+.user-link.ghost{
+  background:#f3f9ff;
+}
+.user-divider{
+  border:0;
+  border-top:1px solid #e5e7eb;
+  margin:10px 0 14px;
+}
+

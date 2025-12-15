@@ -1,15 +1,15 @@
 <?php
 // /home/it-future/www/itf/rireki/kaigo/php/submit_rireki.php
+// applicant auth (optional)
+$authPath = __DIR__ . '/../../../php/user_auth.php';
+if (is_readable($authPath)) require_once $authPath;
+
 error_reporting(E_ALL);
 ini_set('display_errors', isset($_GET['debug']) ? '1' : '0');
 
 require_once __DIR__ . '/bootstrap.php';
 require_once __DIR__ . '/adapters/adapter_xlsx.php';
 require_once __DIR__ . '/validators.php';
-
-// Optional: applicant auth (public users)
-$authPath = __DIR__ . '/../../../php/user_auth.php';
-if (is_readable($authPath)) require_once $authPath;
 
 // Paths
 $mappingFile = rireki_path('mappings/templateB.json');
@@ -29,52 +29,11 @@ function _reshape_rows(array $group, array $fields): array {
   }
   return $rows;
 }
-
 function _plain_fail(string $msg, int $code = 500): void {
   http_response_code($code);
   header('Content-Type: text/plain; charset=UTF-8');
   echo $msg;
   exit;
-}
-
-function _starts_with(string $hay, string $needle): bool {
-  return $needle === '' ? true : (substr($hay, 0, strlen($needle)) === $needle);
-}
-
-/**
- * Preview page moves photo to /rireki/uploads/tmp/xxx.jpg and sends it as photo_path (web path).
- * Adapter expects readable filesystem path, so convert web path to absolute path safely.
- */
-function _normalize_photo_path_from_preview(array &$data): void {
-  if (empty($data['photo_path']) || !is_string($data['photo_path'])) return;
-
-  $photo = trim($data['photo_path']);
-  if ($photo === '') return;
-
-  // If already a readable filesystem path, keep.
-  if (is_readable($photo)) return;
-
-  // If it's a URL, treat as photo_url (adapter can download it)
-  if (preg_match('#^https?://#i', $photo)) {
-    $data['photo_url'] = $photo;
-    return;
-  }
-
-  // If it's a web path like /rireki/uploads/tmp/xxx.jpg, convert to absolute
-  if (_starts_with($photo, '/')) {
-    $docRoot = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/');
-    if ($docRoot !== '') {
-      $candidate = realpath($docRoot . $photo);
-
-      // allow only under /rireki/uploads to prevent path abuse
-      $allowBase = realpath($docRoot . '/rireki/uploads');
-
-      if ($candidate && $allowBase && _starts_with($candidate, $allowBase) && is_readable($candidate)) {
-        $data['_photo_rel'] = $photo;      // keep web-path too (adapter supports this)
-        $data['photo_path'] = $candidate;  // absolute path for XLS image embedding
-      }
-    }
-  }
 }
 
 // ---------- build data ----------
@@ -101,7 +60,9 @@ if (isset($_GET['demo'])) {
     ],
   ];
   $jobId = 0;
+
 } else {
+
   $data  = $_POST;
   $jobId = isset($data['job_id']) ? (int)$data['job_id'] : 0;
 
@@ -127,20 +88,78 @@ if (isset($_GET['demo'])) {
     $data['past_travel_history'] = ($cnt !== '' || $det !== '') ? ("回数: ".$cnt." / ".$det) : '';
   }
 
-  // photo upload (direct from form case)
+  // ---------------- Photo handling ----------------
+  // A) Direct upload (normal flow: rireki.php -> submit_rireki.php)
   if (isset($_FILES['photo']) && ($_FILES['photo']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
     $dir = rireki_path('uploads/photos');
     if (!is_dir($dir)) @mkdir($dir, 0755, true);
+
     $ext = strtolower(pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION));
     if (!in_array($ext, ['jpg','jpeg','png'], true)) $ext = 'jpg';
+
     $dest = $dir . '/' . bin2hex(random_bytes(8)) . '.' . $ext;
+
     if (move_uploaded_file($_FILES['photo']['tmp_name'], $dest)) {
-      $data['photo_path'] = $dest; // absolute FS path
+      $data['photo_path'] = $dest;
+
+      // optional relative path for other usages
+      $docRoot = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/');
+      if ($docRoot && strpos($dest, $docRoot) === 0) {
+        $data['_photo_rel'] = substr($dest, strlen($docRoot));
+      }
     }
   }
 
-  // photo path from preview (web path -> absolute)
-  _normalize_photo_path_from_preview($data);
+  // B) Preview flow (rireki_preview.php -> submit_rireki.php)
+  // preview stores: photo_path = "/rireki/uploads/tmp/xxxx.jpg" (web path),
+  // but adapter expects readable filesystem path. So resolve + move to permanent.
+  if (!empty($data['photo_path']) && is_string($data['photo_path'])) {
+    $p = trim($data['photo_path']);
+
+    // Only allow tmp web path to avoid abuse
+    if ($p !== '' && $p[0] === '/' && str_starts_with($p, '/rireki/uploads/tmp/')) {
+
+      $ext = strtolower(pathinfo($p, PATHINFO_EXTENSION));
+      if (!in_array($ext, ['jpg','jpeg','png'], true)) {
+        // ignore unsupported
+      } else {
+
+        $docRoot = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/');
+        if ($docRoot !== '') {
+          $candidate = $docRoot . $p;
+
+          if (is_readable($candidate)) {
+            $dir = rireki_path('uploads/photos');
+            if (!is_dir($dir)) @mkdir($dir, 0755, true);
+
+            $dest = $dir . '/' . bin2hex(random_bytes(8)) . '.' . ($ext ?: 'jpg');
+
+            // try rename first, else copy+unlink
+            $moved = @rename($candidate, $dest);
+            if (!$moved) {
+              $moved = (@copy($candidate, $dest) && @unlink($candidate));
+            }
+
+            if ($moved && is_readable($dest)) {
+              $data['photo_path'] = $dest; // ✅ absolute FS path
+
+              // keep relative too (adapter supports _photo_rel)
+              if (strpos($dest, $docRoot) === 0) {
+                $data['_photo_rel'] = substr($dest, strlen($docRoot));
+              } else {
+                $data['_photo_rel'] = $p;
+              }
+            } else {
+              // fallback: at least point to readable absolute
+              $data['photo_path'] = $candidate;
+              $data['_photo_rel'] = $p;
+            }
+          }
+        }
+      }
+    }
+  }
+  // ------------------------------------------------
 }
 
 // ----- persist source metadata for rireki_list.php -----
@@ -162,12 +181,13 @@ if ($jobId > 0) {
   }
 }
 
-// ---------- render XLS ----------
+// ---------- render XLS (auto-detect function) ----------
 $token = bin2hex(random_bytes(16));
 
 if (function_exists('rireki_render_xls_only')) {
   $res = rireki_render_xls_only($data, $mappingFile, $outDir, $token);
 } elseif (function_exists('rireki_render_pdf')) {
+  // fallback: adapter function name (actually writes XLS)
   $res = rireki_render_pdf($data, $mappingFile, $outDir, $token);
 } else {
   _plain_fail("Renderer not found in adapter.", 500);
@@ -177,15 +197,11 @@ if (empty($res['ok']) || empty($res['xls'])) {
   _plain_fail("Kaigo Rirekisho build failed: " . ($res['err'] ?? 'unknown'), 500);
 }
 
-// Save JSON snapshot (used for claim later)
+// Save JSON snapshot
 @file_put_contents($outDir . '/' . $token . '.json', json_encode($data, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
 
 // URLs
 $xlsUrl = '/rireki/kaigo/resumes/' . basename((string)$res['xls']);
-
-$fmt = 'kaigo';
-$claimNext = '/rireki/php/claim_resume.php?token=' . urlencode($token) . '&fmt=' . urlencode($fmt);
-$loginUrl  = '/php/user_login.php?next=' . urlencode($claimNext);
 
 // ---------- success page ----------
 ?>
@@ -247,6 +263,7 @@ $loginUrl  = '/php/user_login.php?next=' . urlencode($claimNext);
     details:first-of-type{ border-top:none }
     summary{ cursor:pointer; font-weight:700 }
     .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; font-size:12px; color:#1f2937 }
+    .links-row{ display:flex; gap:10px; flex-wrap:wrap; margin:10px 0 0 }
   </style>
 </head>
 <body>
@@ -288,16 +305,6 @@ $loginUrl  = '/php/user_login.php?next=' . urlencode($claimNext);
           Excel（.xls）をダウンロード
         </a>
 
-        <?php if (function_exists('app_logged_in') && app_logged_in()): ?>
-          <a class="btn" href="<?= htmlspecialchars($claimNext, ENT_QUOTES, 'UTF-8') ?>">
-            アカウントに保存（あとで再DL）
-          </a>
-        <?php else: ?>
-          <a class="btn" href="<?= htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8') ?>">
-            ログインして保存（あとで再DL）
-          </a>
-        <?php endif; ?>
-
         <?php if ($jobId > 0): ?>
           <a class="btn" href="/php/job_details.php?job_id=<?= (int)$jobId ?>">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -332,7 +339,6 @@ $loginUrl  = '/php/user_login.php?next=' . urlencode($claimNext);
           別のフォーマットで作る
         </a>
       </div>
-
       <p class="hint">※ Excel から「余白：上下左右小さめ」「ページ設定：A4」にして印刷すると綺麗に出力できます。</p>
 
       <hr>
@@ -362,7 +368,6 @@ $loginUrl  = '/php/user_login.php?next=' . urlencode($claimNext);
       <p class="mono">トークン: <?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?> / 出力: <?= htmlspecialchars($xlsUrl, ENT_QUOTES, 'UTF-8') ?></p>
     </div>
   </div>
-
   <footer class="footer">
     <div class="footer-container">
       <div class="footer-row">
