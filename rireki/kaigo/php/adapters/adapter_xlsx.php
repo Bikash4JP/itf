@@ -53,9 +53,6 @@ function rireki_render_xls_only(array $data, string $mappingFile, string $outDir
     // ---- repeater helper: aliases for messy field names (e.g., sigoto_naiyou -> description)
     $FIELD_ALIASES = [
       'description' => ['sigoto_naiyou','work_content','work_desc','duties','job_description'],
-      // add more if ever needed:
-      // 'org'       => ['company','employer'],
-      // 'job_title' => ['title','position'],
     ];
     $getRowVal = function(array $row, string $field) use ($FIELD_ALIASES) {
       $val = isset($row[$field]) ? (string)$row[$field] : '';
@@ -89,7 +86,6 @@ function rireki_render_xls_only(array $data, string $mappingFile, string $outDir
               [$r,     $r+1,          $r+2,          $r+3],
               $tpl
             );
-            // <-- key change: resolve with aliases so AC22/25/28/31 (仕事内容) gets filled
             $value = $getRowVal($row, $field);
             $sheet->setCellValue($coord, (string)$value);
           }
@@ -97,34 +93,63 @@ function rireki_render_xls_only(array $data, string $mappingFile, string $outDir
       }
     }
 
-    // Photo (optional)
-    if (!empty($map['photo']) && !empty($data['photo_path']) && is_readable($data['photo_path'])) {
-      $anchor = $map['photo']['anchor_cell'] ?? 'AD3';
-      [$c1,$r1,$c2,$r2] = findMergedBox($sheet, $anchor);
-      [$boxW,$boxH]     = regionPixelSize($sheet, $c1,$c2,$r1,$r2);
-      [$imgW,$imgH]     = @getimagesize($data['photo_path']) ?: [600,800];
+    // =================== Photo (robust) ===================
+    if (!empty($map['photo'])) {
+      $photoPath = '';
 
-      $pad  = (int)($map['photo']['padding_px'] ?? 3);
-      $maxW = isset($map['photo']['max_width_px'])  ? min((int)$map['photo']['max_width_px'],  max(1,$boxW-2*$pad)) : max(1,$boxW-2*$pad);
-      $maxH = isset($map['photo']['max_height_px']) ? min((int)$map['photo']['max_height_px'], max(1,$boxH-2*$pad)) : max(1,$boxH-2*$pad);
+      // 1) Absolute path direct
+      if (!empty($data['photo_path']) && is_readable($data['photo_path'])) {
+        $photoPath = $data['photo_path'];
+      }
 
-      $scale = min($maxW / max($imgW,1), $maxH / max($imgH,1));
-      $newW  = (int)floor($imgW * $scale);
-      $newH  = (int)floor($imgH * $scale);
-      $offX  = max(0, (int)floor(($maxW - $newW)/2)) + $pad;
-      $offY  = max(0, (int)floor(($maxH - $newH)/2)) + $pad;
+      // 2) Relative -> absolute (via document root)
+      if (!$photoPath && !empty($data['_photo_rel']) && is_string($data['_photo_rel'])) {
+        $docRoot = rtrim($_SERVER['DOCUMENT_ROOT'] ?? dirname(__DIR__, 3), '/');
+        $candidate = $docRoot . '/' . ltrim($data['_photo_rel'], '/');
+        if (is_readable($candidate)) $photoPath = $candidate;
+      }
 
-      $img = new Drawing();
-      $img->setName('Photo');
-      $img->setDescription('Applicant Photo');
-      $img->setPath($data['photo_path']);
-      $img->setResizeProportional(true);
-      $img->setWidthAndHeight($newW, $newH);
-      $img->setCoordinates(Coordinate::stringFromColumnIndex($c1) . $r1);
-      $img->setOffsetX($offX);
-      $img->setOffsetY($offY);
-      $img->setWorksheet($sheet);
+      // 3) Remote URL -> download to temp
+      if (!$photoPath && !empty($data['photo_url']) && preg_match('#^https?://#i', $data['photo_url'])) {
+        $tmpBase  = sys_get_temp_dir();
+        @mkdir($tmpBase, 0755, true);
+        $tmpPhoto = rtrim($tmpBase, '/') . '/photo_' . bin2hex(random_bytes(6)) . '.jpg';
+        $ctx      = stream_context_create(['http'=>['timeout'=>3], 'https'=>['timeout'=>3]]);
+        $bin      = @file_get_contents($data['photo_url'], false, $ctx);
+        if ($bin !== false && file_put_contents($tmpPhoto, $bin) !== false) {
+          $photoPath = $tmpPhoto;
+        }
+      }
+
+      if ($photoPath && is_readable($photoPath)) {
+        $anchor = $map['photo']['anchor_cell'] ?? 'AD3';
+        [$c1,$r1,$c2,$r2] = findMergedBox($sheet, $anchor);
+        [$boxW,$boxH]     = regionPixelSize($sheet, $c1,$c2,$r1,$r2);
+        [$imgW,$imgH]     = @getimagesize($photoPath) ?: [600,800];
+
+        $pad  = (int)($map['photo']['padding_px'] ?? 3);
+        $maxW = isset($map['photo']['max_width_px'])  ? min((int)$map['photo']['max_width_px'],  max(1,$boxW-2*$pad)) : max(1,$boxW-2*$pad);
+        $maxH = isset($map['photo']['max_height_px']) ? min((int)$map['photo']['max_height_px'], max(1,$boxH-2*$pad)) : max(1,$boxH-2*$pad);
+
+        $scale = min($maxW / max($imgW,1), $maxH / max($imgH,1));
+        $newW  = (int)floor($imgW * $scale);
+        $newH  = (int)floor($imgH * $scale);
+        $offX  = max(0, (int)floor(($maxW - $newW)/2)) + $pad;
+        $offY  = max(0, (int)floor(($maxH - $newH)/2)) + $pad;
+
+        $img = new Drawing();
+        $img->setName('Photo');
+        $img->setDescription('Applicant Photo');
+        $img->setPath($photoPath);
+        $img->setResizeProportional(true);
+        $img->setWidthAndHeight($newW, $newH);
+        $img->setCoordinates(Coordinate::stringFromColumnIndex($c1) . $r1);
+        $img->setOffsetX($offX);
+        $img->setOffsetY($offY);
+        $img->setWorksheet($sheet);
+      }
     }
+    // ======================================================
 
     // Page setup
     $ps = $sheet->getPageSetup();
@@ -187,7 +212,7 @@ function rireki_make_pdf_via_html(array $data, string $mappingFile, string $outD
       }
     }
 
-    // aliases (same as XLS path)
+    // aliases
     $FIELD_ALIASES = [
       'description' => ['sigoto_naiyou','work_content','work_desc','duties','job_description'],
     ];
@@ -202,7 +227,7 @@ function rireki_make_pdf_via_html(array $data, string $mappingFile, string $outD
       return '';
     };
 
-    // repeaters (support {row_plus_3})
+    // repeaters
     if (!empty($map['repeaters'])) {
       foreach ($map['repeaters'] as $repKey => $repConf) {
         $rows = $data[$repKey] ?? [];
@@ -228,46 +253,66 @@ function rireki_make_pdf_via_html(array $data, string $mappingFile, string $outD
       }
     }
 
-    // (photo overlay + render…) — unchanged from your file
-    // --- snip: keep your existing mPDF rendering helpers below ---
-
-    // photo overlay (optional)
+    // photo overlay (optional) for PDF preview render
     $overlay = null;
-    if (!empty($map['photo']) && !empty($data['photo_path']) && is_readable($data['photo_path'])) {
-      $anchor = $map['photo']['anchor_cell'] ?? 'AD3';
-      [$c1,$r1,$c2,$r2] = findMergedBox($sheet, $anchor);
-      [$boxW,$boxH]     = regionPixelSize($sheet, $c1,$c2,$r1,$r2);
-      [$imgW,$imgH]     = @getimagesize($data['photo_path']) ?: [600,800];
+    if (!empty($map['photo'])) {
+      $photoPath = '';
 
-      $pad  = (int)($map['photo']['padding_px'] ?? 3);
-      $boxW = max(1, $boxW - 2*$pad);
-      $boxH = max(1, $boxH - 2*$pad);
+      if (!empty($data['photo_path']) && is_readable($data['photo_path'])) {
+        $photoPath = $data['photo_path'];
+      }
+      if (!$photoPath && !empty($data['_photo_rel']) && is_string($data['_photo_rel'])) {
+        $docRoot = rtrim($_SERVER['DOCUMENT_ROOT'] ?? dirname(__DIR__, 3), '/');
+        $candidate = $docRoot . '/' . ltrim($data['_photo_rel'], '/');
+        if (is_readable($candidate)) $photoPath = $candidate;
+      }
+      if (!$photoPath && !empty($data['photo_url']) && preg_match('#^https?://#i', $data['photo_url'])) {
+        $tmpBase  = $tmpDir ?: sys_get_temp_dir();
+        @mkdir($tmpBase, 0755, true);
+        $tmpPhoto = rtrim($tmpBase, '/') . '/photo_' . bin2hex(random_bytes(6)) . '.jpg';
+        $ctx      = stream_context_create(['http'=>['timeout'=>3], 'https'=>['timeout'=>3]]);
+        $bin      = @file_get_contents($data['photo_url'], false, $ctx);
+        if ($bin !== false && file_put_contents($tmpPhoto, $bin) !== false) {
+          $photoPath = $tmpPhoto;
+        }
+      }
 
-      $scale = min($boxW / max($imgW,1), $boxH / max($imgH,1));
-      $newW  = (int)floor($imgW * $scale);
-      $newH  = (int)floor($imgH * $scale);
-      $offX  = max(0, (int)floor(($boxW - $newW)/2)) + $pad + 2; // +2px for TD padding
-      $offY  = max(0, (int)floor(($boxH - $newH)/2)) + $pad;
+      if ($photoPath && is_readable($photoPath)) {
+        $anchor = $map['photo']['anchor_cell'] ?? 'AD3';
+        [$c1,$r1,$c2,$r2] = findMergedBox($sheet, $anchor);
+        [$boxW,$boxH]     = regionPixelSize($sheet, $c1,$c2,$r1,$r2);
+        [$imgW,$imgH]     = @getimagesize($photoPath) ?: [600,800];
 
-      $bin  = @file_get_contents($data['photo_path']);
-      $mime = 'image/jpeg';
-      $gi   = @getimagesize($data['photo_path']);
-      if (is_array($gi) && !empty($gi['mime'])) $mime = $gi['mime'];
-      $dataUri = $bin!==false ? ('data:'.$mime.';base64,'.base64_encode($bin)) : null;
+        $pad  = (int)($map['photo']['padding_px'] ?? 3);
+        $boxW = max(1, $boxW - 2*$pad);
+        $boxH = max(1, $boxH - 2*$pad);
 
-      if ($dataUri) {
-        $overlay = [
-          'addr'   => Coordinate::stringFromColumnIndex($c1) . $r1,
-          'src'    => $dataUri,
-          'width'  => $newW,
-          'height' => $newH,
-          'offX'   => $offX,
-          'offY'   => $offY,
-        ];
+        $scale = min($boxW / max($imgW,1), $boxH / max($imgH,1));
+        $newW  = (int)floor($imgW * $scale);
+        $newH  = (int)floor($imgH * $scale);
+        $offX  = max(0, (int)floor(($boxW - $newW)/2)) + $pad + 2;
+        $offY  = max(0, (int)floor(($boxH - $newH)/2)) + $pad;
+
+        $bin  = @file_get_contents($photoPath);
+        $mime = 'image/jpeg';
+        $gi   = @getimagesize($photoPath);
+        if (is_array($gi) && !empty($gi['mime'])) $mime = $gi['mime'];
+        $dataUri = $bin!==false ? ('data:'.$mime.';base64,'.base64_encode($bin)) : null;
+
+        if ($dataUri) {
+          $overlay = [
+            'addr'   => Coordinate::stringFromColumnIndex($c1) . $r1,
+            'src'    => $dataUri,
+            'width'  => $newW,
+            'height' => $newH,
+            'offX'   => $offX,
+            'offY'   => $offY,
+          ];
+        }
       }
     }
 
-    // ===== mPDF config & streaming (unchanged) =====
+    // ===== mPDF config & streaming (unchanged except for overlay) =====
     $fontDir  = rireki_path('fonts');
     $msMincho = $fontDir . '/msmincho001.ttf';
 
@@ -324,7 +369,6 @@ function rireki_make_pdf_via_html(array $data, string $mappingFile, string $outD
 }
 
 /* ===================== HTML render helpers (scaled) ===================== */
-// (keep the rest of your helper functions unchanged)
 function renderSheetRegionHtmlStreamScaled(
   Worksheet $sheet, string $colStartLetter, string $colEndLetter,
   int $rowStart, int $rowEnd, ?array $overlay, int $targetTotalPx
@@ -382,7 +426,6 @@ function renderSheetRegionHtmlStreamScaled(
       $rs = 1; $cs = 1;
       if (isset($mergeTop[$r][$c])) { [$rs, $cs] = $mergeTop[$r][$c]; }
 
-      // Borders from template
       $stylePieces = [];
       $bTop    = getCellBorderSideCss($sheet, $r,           $c,           'top');
       $bLeft   = getCellBorderSideCss($sheet, $r,           $c,           'left');
@@ -406,16 +449,7 @@ function renderSheetRegionHtmlStreamScaled(
       if ($v instanceof \PhpOffice\PhpSpreadsheet\RichText\RichText) $v = $v->getPlainText();
       $val = htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
 
-      // photo overlay if this is anchor
-      if ($overlay && $overlay['addr'] === $addr) {
-        $img = '<div style="position:relative;width:100%;height:100%;">'
-             . '<img alt="photo" src="'.htmlspecialchars($overlay['src'],ENT_QUOTES,'UTF-8').'" '
-             . 'style="position:absolute;left:'.$overlay['offX'].'px;top:'.$overlay['offY'].'px;'
-             . 'width:'.$overlay['width'].'px;height:'.$overlay['height'].'px;object-fit:cover;border:0;"/>'
-             . '</div>';
-        $val = $img . $val;
-      }
-
+      // photo overlay anchor is handled only in PDF path (here we embed true image into XLS)
       $rowParts[] = '<td'.$extra.$attrs.'>'.$val.'</td>';
     }
     $rowParts[] = '</tr>';
