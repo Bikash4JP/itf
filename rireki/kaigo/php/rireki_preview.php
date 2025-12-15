@@ -1,6 +1,8 @@
 <?php
 // /home/it-future/www/itf/rireki/kaigo/php/rireki_preview.php
 
+require_once __DIR__ . '/../../../php/user_auth.php'; // /itf/php/user_auth.php
+
 // ---------- helpers ----------
 function h($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
 
@@ -17,31 +19,164 @@ function keep($name, $value){
 /** Move uploaded photo to a temp public path for preview; return web path. */
 function moveTempPhoto(?array $file): ?string {
   if (!$file || !isset($file['error']) || $file['error'] !== UPLOAD_ERR_OK) return null;
+
   $dir = $_SERVER['DOCUMENT_ROOT'] . '/rireki/uploads/tmp';
   if (!is_dir($dir)) @mkdir($dir, 0755, true);
+
   $ext = strtolower(pathinfo($file['name'] ?? '', PATHINFO_EXTENSION));
   if (!in_array($ext, ['jpg','jpeg','png'], true)) $ext = 'jpg';
+
   $name = bin2hex(random_bytes(8)).'.'.$ext;
   $dest = $dir.'/'.$name;
+
   if (!@move_uploaded_file($file['tmp_name'], $dest)) return null;
+
   return '/rireki/uploads/tmp/'.$name; // web path
 }
 
-// ---------- gate: allow only POST from the form ----------
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-  header('Location: /rireki/kaigo/rireki.php', true, 302);
-  exit;
+/**
+ * Persist tmp photo to a permanent per-user folder so edits won't require re-upload.
+ * Returns new web path, or original if already permanent, or null if missing.
+ */
+function persistPhotoForUser(int $user_id, ?string $photoPath): ?string {
+  if (!$photoPath) return null;
+
+  $tmpPrefix = '/rireki/uploads/tmp/';
+  // already permanent
+  if (strpos($photoPath, $tmpPrefix) !== 0) return $photoPath;
+
+  $docRoot = rtrim((string)($_SERVER['DOCUMENT_ROOT'] ?? ''), '/');
+  if ($docRoot === '') return null;
+
+  $tmpDir = $docRoot . '/rireki/uploads/tmp';
+  $src    = $docRoot . $photoPath;
+
+  $tmpDirReal = realpath($tmpDir);
+  $srcReal    = realpath($src);
+
+  if (!$tmpDirReal || !$srcReal) return null;
+  // security: ensure src is inside tmp dir
+  if (strpos($srcReal, $tmpDirReal) !== 0) return null;
+  if (!is_file($srcReal)) return null;
+
+  $dstDir = $docRoot . "/rireki/uploads/profile/{$user_id}";
+  if (!is_dir($dstDir)) @mkdir($dstDir, 0755, true);
+
+  $ext = strtolower(pathinfo($srcReal, PATHINFO_EXTENSION));
+  if (!in_array($ext, ['jpg','jpeg','png'], true)) $ext = 'jpg';
+
+  $name = 'photo_' . bin2hex(random_bytes(6)) . '.' . $ext;
+  $dst  = $dstDir . '/' . $name;
+
+  if (!@copy($srcReal, $dst)) return null;
+
+  // optional: delete tmp to reduce clutter (ignore failures)
+  @unlink($srcReal);
+
+  return "/rireki/uploads/profile/{$user_id}/{$name}";
 }
 
-// Collect POST
-$post = $_POST;
-
-// Handle photo (optional → temp path)
-$photoPath = $post['photo_path'] ?? null;
-if (!$photoPath && isset($_FILES['photo'])) {
-  $tmp = moveTempPhoto($_FILES['photo']);
-  if ($tmp) { $photoPath = $tmp; $post['photo_path'] = $photoPath; }
+function ensure_profile_table(PDO $pdo){
+  $pdo->exec("
+    CREATE TABLE IF NOT EXISTS app_user_profiles (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      user_id INT NOT NULL UNIQUE,
+      data_json LONGTEXT NOT NULL,
+      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX(user_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+  ");
 }
+
+function load_profile_post(PDO $pdo, int $user_id): ?array {
+  ensure_profile_table($pdo);
+  $st = $pdo->prepare("SELECT data_json FROM app_user_profiles WHERE user_id=? LIMIT 1");
+  $st->execute([$user_id]);
+  $row = $st->fetch(PDO::FETCH_ASSOC);
+  if (!$row || empty($row['data_json'])) return null;
+  $arr = json_decode((string)$row['data_json'], true);
+  return is_array($arr) ? $arr : null;
+}
+
+function save_profile_post(PDO $pdo, int $user_id, array $post): void {
+  ensure_profile_table($pdo);
+  $json = json_encode($post, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+  $st = $pdo->prepare("
+    INSERT INTO app_user_profiles (user_id, data_json)
+    VALUES (?, ?)
+    ON DUPLICATE KEY UPDATE data_json=VALUES(data_json), updated_at=CURRENT_TIMESTAMP
+  ");
+  $st->execute([$user_id, $json]);
+}
+
+// ---------- Mode selection ----------
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+
+$post = [];
+$photoPath = null;
+
+// GET mode: "プロフィールで進む" → show saved data preview
+if ($method === 'GET') {
+  $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
+
+  if (!app_is_logged_in()) {
+    $next = $_SERVER['REQUEST_URI'] ?? '/saiyou.php';
+    header('Location: /php/user_login.php?next=' . urlencode($next), true, 302);
+    exit;
+  }
+
+  $pdo_app = app_pdo();
+  $uid = (int)app_user_id();
+  $saved = load_profile_post($pdo_app, $uid);
+
+  if (!$saved) {
+    // No saved profile yet → send to form fill
+    $dest = '/rireki/kaigo/rireki.php';
+    if ($job_id > 0) $dest .= '?job_id=' . urlencode((string)$job_id);
+    header('Location: ' . $dest, true, 302);
+    exit;
+  }
+
+  $post = $saved;
+  if ($job_id > 0) $post['job_id'] = $job_id; // keep selected job context
+
+  // Make sure photo is permanent (if it was a tmp path saved earlier)
+  $perma = persistPhotoForUser($uid, $post['photo_path'] ?? null);
+  if ($perma) {
+    $post['photo_path'] = $perma;
+    save_profile_post($pdo_app, $uid, $post); // store back updated path
+  }
+  $photoPath = $post['photo_path'] ?? null;
+
+} else {
+  // POST mode: from form submit → preview
+  $post = $_POST;
+
+  // Handle photo upload → temp path first
+  $photoPath = $post['photo_path'] ?? null;
+  if (!$photoPath && isset($_FILES['photo'])) {
+    $tmp = moveTempPhoto($_FILES['photo']);
+    if ($tmp) { $photoPath = $tmp; $post['photo_path'] = $photoPath; }
+  }
+
+  // If logged in, persist photo + auto-save profile
+  if (app_is_logged_in()) {
+    $pdo_app = app_pdo();
+    $uid = (int)app_user_id();
+
+    // Persist tmp photo into permanent per-user folder
+    $perma = persistPhotoForUser($uid, $post['photo_path'] ?? null);
+    if ($perma) {
+      $photoPath = $perma;
+      $post['photo_path'] = $perma;
+    }
+
+    save_profile_post($pdo_app, $uid, $post);
+  }
+}
+
+// job_id for apply button
+$job_id = isset($post['job_id']) ? (int)$post['job_id'] : (isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0);
 
 // ---------- Build preview data from KAIGO form names ----------
 // STEP 1：基本情報
@@ -89,11 +224,11 @@ $ef  = $post['education']['faculty']    ?? [];
 $N   = max(count($eyF),count($emF),count($eyT),count($emT),count($es),count($ei),count($ef));
 for($i=0;$i<$N;$i++){
   $eduRows[] = [
-    '開始'     => trim(($eyF[$i] ?? '').'/'.($emF[$i] ?? ''), ' /'),
-    '終了'     => trim(($eyT[$i] ?? '').'/'.($emT[$i] ?? ''), ' /'),
-    '在学状況' => $es[$i] ?? '',
-    '学校名'   => $ei[$i] ?? '',
-    '学部・専攻'=> $ef[$i] ?? '',
+    '開始'      => trim(($eyF[$i] ?? '').'/'.($emF[$i] ?? ''), ' /'),
+    '終了'      => trim(($eyT[$i] ?? '').'/'.($emT[$i] ?? ''), ' /'),
+    '在学状況'  => $es[$i] ?? '',
+    '学校名'    => $ei[$i] ?? '',
+    '学部・専攻' => $ef[$i] ?? '',
   ];
 }
 
@@ -123,15 +258,15 @@ $wd  = $post['work_blocks']['description']?? [];
 $W   = max(count($wyF),count($wmF),count($ws),count($wyT),count($wmT),count($wo),count($wt),count($wd));
 for($i=0;$i<$W;$i++){
   $workRows[] = [
-    '開始'       => trim(($wyF[$i] ?? '').'/'.($wmF[$i] ?? ''), ' /'),
-    '在職状況'   => $ws[$i] ?? '',
-    '終了'       => trim(($wyT[$i] ?? '').'/'.($wmT[$i] ?? ''), ' /'),
-    '会社・施設名'=> $wo[$i] ?? '',
-    '職種/役職'   => $wt[$i] ?? '',
-    '仕事内容'     => $wd[$i] ?? '',
+    '開始'        => trim(($wyF[$i] ?? '').'/'.($wmF[$i] ?? ''), ' /'),
+    '在職状況'    => $ws[$i] ?? '',
+    '終了'        => trim(($wyT[$i] ?? '').'/'.($wmT[$i] ?? ''), ' /'),
+    '会社・施設名' => $wo[$i] ?? '',
+    '職種/役職'    => $wt[$i] ?? '',
+    '仕事内容'      => $wd[$i] ?? '',
   ];
 }
-$reasonResign = $post['reason_for_resignation'] ?? '';
+$reasonResign  = $post['reason_for_resignation'] ?? '';
 $plannedResign = trim(($post['planned_resign_year'] ?? '').'/'.($post['planned_resign_month'] ?? ''), ' /');
 
 // STEP 5：自己PR・志望・希望
@@ -162,7 +297,7 @@ $step6 = [
   '仕事の希望期間'         => $post['work_duration_intent'] ?? '',
   '日本語の勉強'           => $post['studying_japanese_now'] ?? '',
   '専門職の勉強'           => $post['studying_specialty_now'] ?? '',
-  '別の送り出し/別施設の面接' => $post['other_agency_or_facility_interview'] ?? '',
+  '別途送り出し/別施設の面接' => $post['other_agency_or_facility_interview'] ?? '',
 ];
 
 ?>
@@ -174,7 +309,6 @@ $step6 = [
   <title>入力内容の確認（Kaigo プレビュー）</title>
   <meta name="robots" content="noindex,follow" />
   <style>
-    /* ==== Theme + base (same as Basic preview) ==== */
     :root{
       --sky:#1e90ff; --sky-2:#39a7ff; --ink:#0b0f19; --muted:#475467;
       --bd:#e6edf6; --bg:#f6fbff; --card:#fff; --ring:#bfe2ff;
@@ -189,12 +323,10 @@ $step6 = [
       background:linear-gradient(180deg,#f8fbff,#eef6ff);
       padding-top: calc(var(--header-h) + var(--header-gap));
     }
-
-    /* Header (fixed) */
     header{
       position:fixed; top:0; left:0; right:0; z-index:1000;
       min-height:var(--header-h);
-      background:#fff; background-color:#9ed1ff;
+      background:#9ed1ff;
       border-bottom:1px solid var(--bd);
       backdrop-filter:saturate(180%) blur(6px);
     }
@@ -203,14 +335,12 @@ $step6 = [
     .title{margin:0;font-size:22px;font-weight:900;letter-spacing:.2px;color:var(--ink)}
     .crumb{color:var(--muted);font-size:12px;margin:2px 0 0}
 
-    /* Layout */
     main.wrap{
       display:grid; grid-template-columns:2fr 1fr; gap:18px; padding:18px;
       align-items:start;
     }
     @media (max-width:980px){ main.wrap{ grid-template-columns:1fr } }
 
-    /* Cards */
     .section{
       background:var(--card); border:1px solid var(--bd); border-radius:var(--radius);
       overflow:hidden; box-shadow:var(--shadow);
@@ -222,7 +352,6 @@ $step6 = [
     .section-head h2{ margin:0; font-size:16px; font-weight:900; letter-spacing:.5px; }
     .section-body{ padding:14px; }
 
-    /* Rows / tables */
     .row{ display:grid; grid-template-columns:260px 1fr; gap:10px; padding:8px 0; border-bottom:1px dashed #e8f2fb; }
     .row:last-child{ border-bottom:none }
     .label{ color:#0b0f19; font-weight:700 }
@@ -232,12 +361,9 @@ $step6 = [
     .table th,.table td{ border:1px solid #e8f2fb; padding:8px 10px; vertical-align:top; color:#0b0f19; }
     .table thead th{ background:#eef6ff; color:#0b0f19; font-weight:800; }
 
-    /* Photo */
     .photo-box{ display:flex; align-items:center; gap:12px; }
     img.photo{ max-width:160px; border:2px solid #e5f0ff; border-radius:10px; }
 
-    /* Buttons */
-    .section-cta{ display:flex; justify-content:center; align-items:center; margin-top:12px; }
     .btn{
       appearance:none; cursor:pointer; border-radius:10px; padding:10px 14px;
       border:1px solid var(--ring); background:#f3f9ff; color:#0c4a7a; font-weight:800;
@@ -246,12 +372,9 @@ $step6 = [
     }
     .btn:hover{ transform:translateY(-1px); box-shadow:0 6px 18px rgba(30,144,255,.16); background:#e9f5ff; }
     .btn.primary{ background:linear-gradient(180deg,var(--sky-2),var(--sky)); color:#fff; border-color:var(--sky-2); }
-    .btn:disabled{ opacity:.7; cursor:not-allowed }
-
     .final{ background:#fff; border:2px solid var(--sky); border-radius:var(--radius); padding:16px; box-shadow:0 14px 28px rgba(30,144,255,.12) }
     .final h3{ margin:0 0 8px 0; color:var(--ink) }
 
-    /* Sticky sidebar */
     main.wrap > aside{
       position:sticky; top: calc(var(--header-h) + var(--header-gap));
       height:fit-content; align-self:start; z-index:5;
@@ -282,7 +405,12 @@ $step6 = [
         <h1 class="title">入力内容の確認（Kaigo プレビュー）</h1>
         <p class="crumb">ホーム ＞ 履歴書メーカー ＞ 介護向け ＞ プレビュー</p>
       </div>
-      <a class="btn" href="/rireki/index.php">フォーマット選択へ戻る</a>
+
+      <?php if ($job_id > 0): ?>
+        <a class="btn" href="/php/job_details.php?job_id=<?=h($job_id)?>">求人詳細へ戻る</a>
+      <?php else: ?>
+        <a class="btn" href="/saiyou.php">求人一覧へ戻る</a>
+      <?php endif; ?>
     </div>
   </div>
 </header>
@@ -299,8 +427,8 @@ $step6 = [
             <div class="value"><?= $v!==''?nl2br(h($v)):'—' ?></div>
           </div>
         <?php endforeach; ?>
-        <div class="section-cta">
-          <a class="btn" href="/rireki/kaigo/rireki.php#step-1">このステップを編集</a>
+        <div style="margin-top:12px; text-align:center;">
+          <a class="btn" href="/rireki/kaigo/rireki.php<?= $job_id>0 ? '?job_id='.h($job_id) : '' ?>#step-1">このステップを編集</a>
         </div>
       </div>
     </div>
@@ -315,17 +443,24 @@ $step6 = [
             <div class="value"><?= $v!==''?nl2br(h($v)):'—' ?></div>
           </div>
         <?php endforeach; ?>
+
         <?php if (!empty($photoPath)): ?>
           <div class="row">
-            <div class="label">証明写真</div>
+            <div class="label">証明写真（保存済み）</div>
             <div class="photo-box">
               <img class="photo" src="<?=h($photoPath)?>" alt="photo preview">
               <span class="muted"><?=h($photoPath)?></span>
             </div>
           </div>
+        <?php else: ?>
+          <div class="row">
+            <div class="label">証明写真</div>
+            <div class="value muted">未登録（編集時に写真を求められる場合があります）</div>
+          </div>
         <?php endif; ?>
-        <div class="section-cta">
-          <a class="btn" href="/rireki/kaigo/rireki.php#step-2">このステップを編集</a>
+
+        <div style="margin-top:12px; text-align:center;">
+          <a class="btn" href="/rireki/kaigo/rireki.php<?= $job_id>0 ? '?job_id='.h($job_id) : '' ?>#step-2">このステップを編集</a>
         </div>
       </div>
     </div>
@@ -372,8 +507,8 @@ $step6 = [
           <p class="muted">未入力</p>
         <?php endif; ?>
 
-        <div class="section-cta">
-          <a class="btn" href="/rireki/kaigo/rireki.php#step-3">このステップを編集</a>
+        <div style="margin-top:12px; text-align:center;">
+          <a class="btn" href="/rireki/kaigo/rireki.php<?= $job_id>0 ? '?job_id='.h($job_id) : '' ?>#step-3">このステップを編集</a>
         </div>
       </div>
     </div>
@@ -411,8 +546,8 @@ $step6 = [
           <div class="value"><?= $plannedResign!=='' ? h($plannedResign) : '—' ?></div>
         </div>
 
-        <div class="section-cta">
-          <a class="btn" href="/rireki/kaigo/rireki.php#step-4">このステップを編集</a>
+        <div style="margin-top:12px; text-align:center;">
+          <a class="btn" href="/rireki/kaigo/rireki.php<?= $job_id>0 ? '?job_id='.h($job_id) : '' ?>#step-4">このステップを編集</a>
         </div>
       </div>
     </div>
@@ -427,11 +562,12 @@ $step6 = [
             <div class="value"><?= $v!==''?nl2br(h($v)):'—' ?></div>
           </div>
         <?php endforeach; ?>
-        <div class="section-cta">
-          <a class="btn" href="/rireki/kaigo/rireki.php#step-5">このステップを編集</a>
+        <div style="margin-top:12px; text-align:center;">
+          <a class="btn" href="/rireki/kaigo/rireki.php<?= $job_id>0 ? '?job_id='.h($job_id) : '' ?>#step-5">このステップを編集</a>
         </div>
       </div>
     </div>
+
     <!-- STEP 6 -->
     <div class="section">
       <div class="section-head"><h2>STEP 6：別途情報</h2></div>
@@ -442,8 +578,8 @@ $step6 = [
             <div class="value"><?= $v!==''?nl2br(h($v)):'—' ?></div>
           </div>
         <?php endforeach; ?>
-        <div class="section-cta">
-          <a class="btn" href="/rireki/kaigo/rireki.php#step-6">このステップを編集</a>
+        <div style="margin-top:12px; text-align:center;">
+          <a class="btn" href="/rireki/kaigo/rireki.php<?= $job_id>0 ? '?job_id='.h($job_id) : '' ?>#step-6">このステップを編集</a>
         </div>
       </div>
     </div>
@@ -451,11 +587,23 @@ $step6 = [
     <!-- Final submit -->
     <div class="final" style="margin-top:18px;">
       <h3>この内容で送信しますか？</h3>
-      <p class="muted" style="margin:6px 0 12px">送信後にExcel出力・プレビュー等が生成されます。必要であれば各ステップの「このステップを編集」から修正してください。</p>
+      <p class="muted" style="margin:6px 0 12px">
+        <?php if ($job_id > 0): ?>
+          この内容で「求人応募」まで進みます。必要であれば各ステップの「このステップを編集」から修正してください。
+        <?php else: ?>
+          この内容で保存・更新されます。必要であれば各ステップの「このステップを編集」から修正してください。
+        <?php endif; ?>
+      </p>
+
       <form method="post" action="/rireki/kaigo/php/submit_rireki.php" style="display:flex;gap:10px;flex-wrap:wrap">
         <?php foreach ($post as $k=>$v) echo keep($k,$v); ?>
-        <a class="btn" href="/rireki/kaigo/rireki.php#step-1">戻って修正する</a>
-        <button type="submit" class="btn primary">この内容で送信する</button>
+        <?php if ($job_id > 0): ?>
+          <a class="btn" href="/php/job_details.php?job_id=<?=h($job_id)?>">求人詳細へ戻る</a>
+          <button type="submit" class="btn primary">この内容で応募する</button>
+        <?php else: ?>
+          <a class="btn" href="/saiyou.php">求人一覧へ戻る</a>
+          <button type="submit" class="btn primary">この内容で保存する</button>
+        <?php endif; ?>
       </form>
     </div>
   </section>
@@ -474,9 +622,7 @@ $step6 = [
     <div class="side-card">
       <h3>関連リンク</h3>
       <ul class="linklist">
-        <li><a href="/rireki/index.php">フォーマット選択に戻る</a></li>
         <li><a href="/saiyou.php">新着採用（求人一覧）</a></li>
-        <li><a href="/index.html#service-naiyo">サービス紹介</a></li>
         <li><a href="/company_info.html">会社概要</a></li>
       </ul>
     </div>

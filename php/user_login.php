@@ -1,26 +1,21 @@
 <?php
 // /home/it-future/www/itf/php/user_login.php
-require_once __DIR__ . '/db_connect.php';
+declare(strict_types=1);
+
 require_once __DIR__ . '/user_auth.php';
 
-function h($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
+$pdo = app_pdo();
+app_ensure_tables($pdo);
 
-$next = $_GET['next'] ?? '/saiyou.php';
-if (!is_string($next) || $next === '') $next = '/saiyou.php';
-
-// basic open-redirect protection: allow only local paths
-if (!preg_match('#^/[^\\r\\n]*$#', $next)) $next = '/saiyou.php';
+$next = (string)($_GET['next'] ?? '/saiyou.php');
+$mode = (string)($_POST['mode'] ?? '');
 
 $err = '';
 $ok  = '';
 
-if (isset($_GET['logout'])) {
-  app_logout();
-  app_redirect('/php/user_login.php?next=' . urlencode($next));
-}
+function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $mode = $_POST['mode'] ?? 'login';
 
   if ($mode === 'register') {
     $username = trim((string)($_POST['username'] ?? ''));
@@ -29,45 +24,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($username === '' || $email === '' || $pass === '') {
       $err = '全て入力してください。';
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-      $err = 'メールアドレスの形式が正しくありません。';
-    } elseif (mb_strlen($username, 'UTF-8') < 3) {
-      $err = 'ユーザー名は3文字以上にしてください。';
-    } elseif (strlen($pass) < 8) {
-      $err = 'パスワードは8文字以上にしてください。';
     } else {
+      $hash = password_hash($pass, PASSWORD_DEFAULT);
+
       try {
-        $hash = password_hash($pass, PASSWORD_DEFAULT);
-
-        $stmt = $pdo->prepare("INSERT INTO applicant_users (username, email, password_hash) VALUES (?, ?, ?)");
+        $stmt = $pdo->prepare("INSERT INTO ".APP_TBL_USERS." (username, email, password_hash) VALUES (?, ?, ?)");
         $stmt->execute([$username, $email, $hash]);
-
         $uid = (int)$pdo->lastInsertId();
-        app_login($uid);
-        app_redirect($next);
+        app_login_user_id($uid);
+
+        // ✅ register → details form page
+        header('Location: /rireki/kaigo/rireki.php', true, 302);
+        exit;
+
       } catch (Throwable $e) {
-        // likely duplicate
-        $err = '登録できませんでした。ユーザー名またはメールが既に使われている可能性があります。';
+        $err = '登録に失敗しました（同じユーザー名/メールが既に存在する可能性があります）。';
       }
     }
-  } else {
-    // login
-    $login = trim((string)($_POST['login'] ?? '')); // username OR email
+
+  } elseif ($mode === 'login') {
+    $email = trim((string)($_POST['email'] ?? ''));
     $pass  = (string)($_POST['password'] ?? '');
 
-    if ($login === '' || $pass === '') {
-      $err = 'ユーザー名（またはメール）とパスワードを入力してください。';
-    } else {
-      $stmt = $pdo->prepare("SELECT id, password_hash FROM applicant_users WHERE username = ? OR email = ? LIMIT 1");
-      $stmt->execute([$login, $login]);
-      $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    $stmt = $pdo->prepare("SELECT id, password_hash FROM ".APP_TBL_USERS." WHERE email = ? LIMIT 1");
+    $stmt->execute([$email]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-      if (!$row || empty($row['password_hash']) || !password_verify($pass, $row['password_hash'])) {
-        $err = 'ログイン情報が正しくありません。';
-      } else {
-        app_login((int)$row['id']);
-        app_redirect($next);
-      }
+    if (!$row || !password_verify($pass, (string)$row['password_hash'])) {
+      $err = 'メールアドレスまたはパスワードが違います。';
+    } else {
+      app_login_user_id((int)$row['id']);
+      header('Location: ' . $next, true, 302);
+      exit;
     }
   }
 }
@@ -75,71 +63,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ユーザーログイン（応募者）</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ユーザーログイン｜株式会社アイティーエフ</title>
+  <link rel="stylesheet" href="/css/common.css">
+  <link rel="stylesheet" href="/css/login.css">
   <style>
-    :root{ --bd:#e6edf6; --ink:#0b0f19; --muted:#667085; --bg:#f6fbff; }
-    body{ margin:0; font-family: system-ui,"Noto Sans JP",Meiryo,Arial; background:linear-gradient(180deg,#f8fbff,#eef6ff); color:var(--ink); }
-    .wrap{ max-width:980px; margin:0 auto; padding:18px; }
-    .grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-    @media(max-width:920px){ .grid{ grid-template-columns:1fr; } }
-    .card{ background:#fff; border:1px solid var(--bd); border-radius:16px; padding:16px; box-shadow:0 10px 24px rgba(0,0,0,.05); }
-    h1{ margin:0 0 8px; font-size:20px; }
-    .muted{ color:var(--muted); margin:0 0 12px; font-size:13px; }
-    label{ display:block; font-weight:700; margin:10px 0 6px; }
-    input{ width:100%; padding:10px 12px; border:1px solid var(--bd); border-radius:10px; font-size:14px; }
-    .btn{ display:inline-flex; align-items:center; justify-content:center; padding:10px 14px; border-radius:10px; border:1px solid #bfe2ff; background:#1e90ff; color:#fff; font-weight:800; cursor:pointer; }
-    .btn2{ display:inline-flex; align-items:center; justify-content:center; padding:10px 14px; border-radius:10px; border:1px solid var(--bd); background:#f3f9ff; color:#0c4a7a; font-weight:800; cursor:pointer; text-decoration:none; }
-    .row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
-    .alert{ padding:10px 12px; border-radius:12px; margin:0 0 12px; }
-    .err{ background:#fff1f2; border:1px solid #fecdd3; color:#9f1239; }
-    .ok{ background:#ecfdf5; border:1px solid #bbf7d0; color:#0b6b4a; }
-    small{ color:var(--muted); }
+    .wrap{max-width:980px;margin:30px auto;padding:0 16px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media(max-width:900px){.grid{grid-template-columns:1fr}}
+    .card{background:#fff;border:1px solid #e6edf6;border-radius:16px;padding:18px;box-shadow:0 3px 10px rgba(10,60,150,.05)}
+    .card h2{margin:0 0 10px;font-size:20px}
+    label{display:block;margin:10px 0 6px;font-weight:700}
+    input{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:10px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:10px;border:1px solid transparent;background:#2a7de1;color:#fff;font-weight:800;cursor:pointer;text-decoration:none}
+    .btn.ghost{background:#fff;color:#0b3772;border-color:#dbe7f5}
+    .msg{margin:12px 0;padding:10px 12px;border-radius:10px}
+    .err{background:#fff1f2;border:1px solid #fecdd3;color:#9f1239}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>応募者ログイン</h1>
-    <p class="muted">保存した履歴書の再ダウンロードや、応募履歴の確認に使います。</p>
-
-    <?php if ($err): ?><div class="alert err"><?=h($err)?></div><?php endif; ?>
-    <?php if ($ok): ?><div class="alert ok"><?=h($ok)?></div><?php endif; ?>
+    <?php if ($err): ?><div class="msg err"><?=h($err)?></div><?php endif; ?>
 
     <div class="grid">
-      <div class="card">
-        <h2 style="margin:0 0 8px;">ログイン</h2>
-        <form method="post" action="">
+      <section class="card">
+        <h2>ログイン</h2>
+        <form method="post" action="/php/user_login.php?next=<?=h($next)?>">
           <input type="hidden" name="mode" value="login">
-          <label>ユーザー名 または メール</label>
-          <input name="login" autocomplete="username" required>
+          <label>メールアドレス</label>
+          <input type="email" name="email" required>
           <label>パスワード</label>
-          <input type="password" name="password" autocomplete="current-password" required>
-          <div class="row">
+          <input type="password" name="password" required>
+          <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
             <button class="btn" type="submit">ログイン</button>
-            <a class="btn2" href="<?=h('/php/user_login.php?logout=1&next='.urlencode($next))?>">ログアウト</a>
+            <a class="btn ghost" href="<?=h($next)?>">戻る</a>
           </div>
-          <p class="muted" style="margin-top:10px;">遷移先: <small><?=h($next)?></small></p>
         </form>
-      </div>
+      </section>
 
-      <div class="card">
-        <h2 style="margin:0 0 8px;">新規登録</h2>
-        <form method="post" action="">
+      <section class="card">
+        <h2>新規登録（無料）</h2>
+        <form method="post" action="/php/user_login.php?next=<?=h($next)?>">
           <input type="hidden" name="mode" value="register">
           <label>ユーザー名</label>
-          <input name="username" autocomplete="username" required>
-          <label>メール</label>
-          <input name="email" type="email" autocomplete="email" required>
-          <label>パスワード（8文字以上）</label>
-          <input type="password" name="password" autocomplete="new-password" required>
-          <div class="row">
+          <input type="text" name="username" required>
+          <label>メールアドレス</label>
+          <input type="email" name="email" required>
+          <label>パスワード</label>
+          <input type="password" name="password" required>
+          <div style="margin-top:12px">
             <button class="btn" type="submit">登録して続ける</button>
-            <a class="btn2" href="<?=h($next)?>">今はしない</a>
           </div>
-          <p class="muted" style="margin-top:10px;">※ パスワードは暗号化して保存されます。</p>
+          <p style="margin-top:10px;color:#6b7280;font-size:13px">
+            ※ 登録後、履歴書フォームへ進みます。
+          </p>
         </form>
-      </div>
+      </section>
     </div>
   </div>
 </body>

@@ -1,44 +1,32 @@
 <?php
 // /home/it-future/www/itf/php/resume.php
+declare(strict_types=1);
+
 require_once __DIR__ . '/db_connect.php';
 require_once __DIR__ . '/user_auth.php';
 
+$pdo2 = app_pdo();
+app_ensure_tables($pdo2);
+
 $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
-if ($job_id <= 0) {
-  http_response_code(400);
-  echo '無効な求人IDです。';
-  exit;
-}
+if ($job_id <= 0) { http_response_code(400); echo '無効な求人IDです。'; exit; }
 
 $stmt = $pdo->prepare("SELECT * FROM posts WHERE id = ? AND post_type = 'job' LIMIT 1");
 $stmt->execute([$job_id]);
 $job = $stmt->fetch(PDO::FETCH_ASSOC);
-if (!$job) {
-  http_response_code(404);
-  echo '求人が見つかりませんでした。';
-  exit;
-}
+if (!$job) { http_response_code(404); echo '求人が見つかりませんでした。'; exit; }
 
 $isKaigo = isset($job['job_category']) && $job['job_category'] === '介護';
-$fmt = $isKaigo ? 'kaigo' : 'basic';
 
+// if user wants new form
 if ($isKaigo && isset($_GET['go']) && $_GET['go'] === 'new') {
-  $dest = '/rireki/kaigo/rireki.php?job_id=' . urlencode((string)$job['id']);
-  header('Location: ' . $dest, true, 302);
+  header('Location: /rireki/kaigo/rireki.php?job_id=' . urlencode((string)$job_id), true, 302);
   exit;
 }
 
-// fetch latest saved resume for this user+fmt
-$latestResume = null;
-if (app_logged_in()) {
-  $u = app_user_id();
-  $st2 = $pdo->prepare("SELECT id, token, xls_url, updated_at FROM applicant_resumes WHERE user_id=? AND fmt=? ORDER BY updated_at DESC, id DESC LIMIT 1");
-  $st2->execute([(int)$u, $fmt]);
-  $latestResume = $st2->fetch(PDO::FETCH_ASSOC) ?: null;
-}
+function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 
-$nextHere = $_SERVER['REQUEST_URI'] ?? ('/php/resume.php?job_id='.(int)$job_id);
-$loginUrl = '/php/user_login.php?next=' . urlencode($nextHere);
+$loggedIn = app_is_logged_in();
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -47,13 +35,7 @@ $loginUrl = '/php/user_login.php?next=' . urlencode($nextHere);
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>応募 - 株式会社アイティーエフ</title>
   <link rel="stylesheet" href="https://it-future.jp/css/common.css">
-  <link rel="stylesheet" href="https://it-future.jp/css/style.min.css">
-  <link rel="stylesheet" href="https://it-future.jp/css/screen.min.css">
-  <link rel="stylesheet" href="https://it-future.jp/css/pagenavi-css.css">
   <link rel="stylesheet" href="https://it-future.jp/css/footer.css">
-  <link rel="stylesheet" href="https://it-future.jp/css/main_intro.css">
-  <link rel="stylesheet" href="https://it-future.jp/css/saiyou.css?v=2.3">
-  <link rel="stylesheet" href="https://it-future.jp/css/login.css">
   <style>
     :root{ --accent:#2a7de1; --muted:#6b7280; --bg:#f0fcfd }
     body{ background:#fff }
@@ -78,165 +60,54 @@ $loginUrl = '/php/user_login.php?next=' . urlencode($nextHere);
     }
     .card h2{ margin:0 0 6px 0;font-size:1.5rem;color:#0b3772;font-weight: bold; }
     .card p{ margin:0 0 14px 0;color:#4b5563;font-size:.95rem }
-    .card .note{ font-size:.85rem;color:#6b7280 }
-    .card .actions{ margin-top:auto;display:flex;gap:10px;flex-wrap:wrap }
+    .actions{ margin-top:auto;display:flex;gap:10px;flex-wrap:wrap }
     .btn{
       display:inline-flex;align-items:center;justify-content:center;gap:8px;
       padding:10px 16px;border-radius:10px;text-decoration:none;border:1px solid transparent;
-      font-weight:600;cursor:pointer
+      font-weight:800;cursor:pointer
     }
     .btn-primary{ background:var(--accent);color:#fff }
-    .btn-primary:hover{ filter:brightness(.95) }
     .btn-ghost{ background:#fff;border-color:#dbe7f5;color:#0b3772 }
     .btn-ghost:hover{ background:#f7fbff }
-
-    .u-drop{ border:2px dashed #cfe2ff;border-radius:12px;padding:16px;background:#fbfdff;margin:10px 0 }
-    .u-drop small{ color:#64748b }
-
-    .form-grid{ display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0 4px }
-    .form-grid .col-2{ grid-column:1/-1 }
-    .form-grid label{ display:block;font-weight:600;margin-bottom:4px;color:#0b3772 }
-    .form-grid input[type="text"], .form-grid select{
-      width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;background:#fff
-    }
-    .backline{ text-align:right;margin-top:16px }
-    .backline a{ color:#374151;text-decoration:none;font-size:.9rem }
-    .backline a:hover{ text-decoration:underline }
-
-    .highlight{
-      border-color:#bbf7d0;
-      background:linear-gradient(180deg,#ecfdf5,#ffffff);
-    }
   </style>
 </head>
 <body>
-  <!-- HEADER same -->
-  <header id="header" class="l-header header" itemscope itemtype="https://schema.org/WPHeader">
-    <div class="header-frame">
-      <div class="header-top">
-        <div class="wrap pc-flex bet">
-          <div class="header-top-in flex bet vcenter">
-            <h1 class="sp-2 logo"><a href="https://it-future.jp/" class="logo-link flex vcenter"><img src="https://it-future.jp/images/logo.png" alt=""></a></h1>
-            <div id="sp-menu-open" class="sp l-animebtn sp-3">
-              <a onclick="document.getElementById('sp-menu-acc').classList.toggle('active')">
-                <div class="bar"><span></span><span></span><span></span></div>
-              </a>
-            </div>
-          </div>
-          <div class="header-menu sp-md-acc">
-            <div id="sp-menu-acc" class="pc-flex hend acc-body">
-              <ul class="contents pc-flex str hend max">
-                <li class="contents-item"><a href="https://it-future.jp/about.html">事業紹介</a></li>
-                <li class="contents-item"><a href="https://it-future.jp/company_info.html">企業情報</a></li>
-                <li class="contents-item"><a href="https://it-future.jp/saiyou.php">新着採用</a></li>
-                <li class="contents-item"><a href="https://it-future.jp/news.html">新着情報</a></li>
-              </ul>
-              <ul class="cta pc-flex max str">
-                <li class="cta-item inquiry flex vcenter">
-                  <a href="https://it-future.jp/inquiry.html" class="cta-item-link flex hcenter vcenter">お問い合わせ</a>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </header>
-
   <div class="wrap">
     <div class="job-hero">
       <span class="badge"><?php echo $isKaigo ? '介護求人' : '求人'; ?></span>
       <div>
-        <h1><?php echo htmlspecialchars($job['title'] ?? '', ENT_QUOTES, 'UTF-8'); ?></h1>
+        <h1><?php echo h($job['title'] ?? ''); ?></h1>
         <div class="job-meta">
-          <span>会社名：<?php echo htmlspecialchars($job['company_name'] ?? '', ENT_QUOTES, 'UTF-8'); ?></span>
-          <span>勤務地：<?php echo htmlspecialchars($job['job_location'] ?? '', ENT_QUOTES, 'UTF-8'); ?></span>
-          <span>雇用形態：<?php echo htmlspecialchars($job['job_type'] ?? '', ENT_QUOTES, 'UTF-8'); ?></span>
-          <span>給与：<?php echo htmlspecialchars($job['salary'] ?? '', ENT_QUOTES, 'UTF-8'); ?></span>
+          <span>会社名：<?php echo h($job['company_name'] ?? ''); ?></span>
+          <span>勤務地：<?php echo h($job['job_location'] ?? ''); ?></span>
+          <span>雇用形態：<?php echo h($job['job_type'] ?? ''); ?></span>
+          <span>給与：<?php echo h($job['salary'] ?? ''); ?></span>
         </div>
       </div>
     </div>
 
     <div class="grid">
-      <!-- ✅ APPLY USING PROFILE -->
-      <div class="card highlight">
-        <h2>プロフィールで応募（おすすめ）</h2>
 
-        <?php if (!app_logged_in()): ?>
-          <p>ログインすると、保存した履歴書でワンクリック応募できます。</p>
+      <!-- ✅ APPLY USING PROFILE (replaces old "upload should be here" main card) -->
+      <div class="card">
+        <h2>プロフィールで応募</h2>
+
+        <?php if (!$loggedIn): ?>
+          <p>ログインすると、登録した履歴書情報（マイ情報）でそのまま応募できます。</p>
           <div class="actions">
-            <a class="btn btn-primary" href="<?php echo htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8'); ?>">ログイン / 新規登録</a>
+            <a class="btn btn-primary" href="/php/user_login.php?next=<?=h('/php/resume.php?job_id='.$job_id)?>">ログイン / 登録</a>
             <a class="btn btn-ghost" href="/php/job_details.php?job_id=<?php echo (int)$job_id; ?>">求人詳細に戻る</a>
           </div>
-          <div class="note">※ ログイン後このページに戻ってきます。</div>
-
-        <?php elseif (!$latestResume): ?>
-          <p>まだ保存済みの履歴書がありません。先に「新規で履歴書を作成」から作って保存してください。</p>
-          <div class="actions">
-            <a class="btn btn-primary" href="<?php echo $isKaigo ? '/rireki/kaigo/rireki.php?job_id='.(int)$job_id : '/rireki/basic/rireki.php?job_id='.(int)$job_id; ?>">履歴書を作成する</a>
-            <a class="btn btn-ghost" href="/php/user_profile.php">マイ情報（履歴書）</a>
-          </div>
-          <div class="note">※ 作成後に保存（claim）すると、ここから応募できます。</div>
-
         <?php else: ?>
-          <p>保存済み履歴書を使って応募します。<strong>アップロード不要</strong>です。</p>
+          <p>保存済みの「マイ情報」から自動で履歴書を作成し、応募できます。</p>
           <div class="actions">
-            <a class="btn btn-primary" href="/php/apply_with_profile.php?job_id=<?php echo (int)$job_id; ?>&fmt=<?php echo htmlspecialchars($fmt,ENT_QUOTES,'UTF-8'); ?>">このプロフィールで応募</a>
-            <a class="btn btn-ghost" href="/php/user_profile.php">履歴書を編集する</a>
+            <a class="btn btn-primary" href="/rireki/kaigo/php/rireki_preview.php?job_id=<?php echo (int)$job_id; ?>">プロフィールで進む</a>
+            <a class="btn btn-ghost" href="/rireki/kaigo/rireki.php?job_id=<?php echo (int)$job_id; ?>">内容を新規入力</a>
           </div>
-          <div class="note">最新更新: <?php echo htmlspecialchars($latestResume['updated_at'] ?? '', ENT_QUOTES, 'UTF-8'); ?></div>
         <?php endif; ?>
       </div>
 
-      <!-- Upload existing resume (your original card) -->
-      <div class="card">
-        <h2>既存の履歴書をアップロード</h2>
-        <p>お手元の履歴書（PDF / 画像 / Excel など）をアップロードして応募します。</p>
-
-        <form id="uploadForm" action="/php/upload_resume.php" method="post" enctype="multipart/form-data" novalidate>
-          <input type="hidden" name="job_id" value="<?php echo (int)$job_id; ?>">
-          <input type="hidden" name="src" value="<?php echo $isKaigo ? 'kaigo' : 'basic'; ?>">
-
-          <div class="form-grid">
-            <div class="col-2">
-              <label>氏名（ローマ字）<span style="color:#dc2626"> *</span></label>
-              <input type="text" id="name_romaji" name="name_romaji" placeholder="Taro Yamada" required>
-            </div>
-            <div>
-              <label>国籍<span style="color:#dc2626"> *</span></label>
-              <select id="nationality" name="nationality" required>
-                <option value=""></option>
-                <?php
-                  $prefs = ["バングラデシュ","インドネシア国籍","ベトナム国籍","ネパール国籍","ミャンマー国籍","ペルー国籍","中国国籍","韓国国籍","日本国籍","その他"];
-                  foreach($prefs as $p){ echo '<option value="'.htmlspecialchars($p,ENT_QUOTES,'UTF-8').'">'.$p.'</option>'; }
-                ?>
-              </select>
-            </div>
-            <div>
-              <label>性別<span style="color:#dc2626"> *</span></label>
-              <select id="gender" name="gender" required>
-                <option value=""></option>
-                <option value="男性">男性</option>
-                <option value="女性">女性</option>
-                <option value="その他">その他</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="u-drop">
-            <input type="file" id="resume_file" name="resume_file" accept=".pdf,.xls,.xlsx,.jpg,.jpeg,.png" required>
-            <br><small>対応形式：PDF / XLS / XLSX / JPG / PNG（最大 10MB）</small>
-          </div>
-
-          <div class="actions">
-            <button id="submitBtn" class="btn btn-primary" type="submit" disabled>アップロードして応募</button>
-            <a class="btn btn-ghost" href="/php/job_details.php?job_id=<?php echo (int)$job_id; ?>">求人詳細に戻る</a>
-          </div>
-        </form>
-        <div class="note">※ 3項目（氏名・国籍・性別）とファイルは必須です。すべて入力後、ボタンが有効になります。</div>
-      </div>
-
-      <!-- Create new resume (your original) -->
+      <!-- Create new resume (keep as option) -->
       <div class="card">
         <h2>新規で履歴書を作成</h2>
         <?php if ($isKaigo): ?>
@@ -245,65 +116,16 @@ $loginUrl = '/php/user_login.php?next=' . urlencode($nextHere);
             <a class="btn btn-primary" href="/php/resume.php?job_id=<?php echo (int)$job_id; ?>&go=new">新規で作成する</a>
             <a class="btn btn-ghost" href="/php/job_details.php?job_id=<?php echo (int)$job_id; ?>">求人詳細に戻る</a>
           </div>
-          <div class="note">次のページで <code>/rireki/kaigo/rireki.php</code> に移動します。</div>
         <?php else: ?>
-          <p>この求人は介護カテゴリではありません。汎用の履歴書フローをご利用ください。</p>
+          <p>この求人は介護カテゴリではありません（暫定で介護フォームを使用）。</p>
           <div class="actions">
-            <a class="btn btn-primary" href="/rireki/kaigo/rireki.php?job_id=<?php echo (int)$job_id; ?>">（暫定）フォームへ進む</a>
+            <a class="btn btn-primary" href="/rireki/kaigo/rireki.php?job_id=<?php echo (int)$job_id; ?>">フォームへ進む</a>
             <a class="btn btn-ghost" href="/php/job_details.php?job_id=<?php echo (int)$job_id; ?>">求人詳細に戻る</a>
           </div>
         <?php endif; ?>
       </div>
-    </div>
 
-    <div class="backline">
-      <a href="/php/job_details.php?job_id=<?php echo (int)$job_id; ?>">← 求人詳細に戻る</a>
     </div>
   </div>
-
-  <script>
-    (function(){
-      const nameInput = document.getElementById('name_romaji');
-      const natSelect = document.getElementById('nationality');
-      const genSelect = document.getElementById('gender');
-      const fileInput = document.getElementById('resume_file');
-      const submitBtn = document.getElementById('submitBtn');
-      const form = document.getElementById('uploadForm');
-
-      if(!form) return;
-
-      const MAX_MB = 10;
-      const ACCEPT = ['pdf','xls','xlsx','jpg','jpeg','png'];
-
-      function hasValue(el){ return !!(el && el.value && el.value.trim() !== ''); }
-      function fileOk(){
-        const f = fileInput.files && fileInput.files[0];
-        if (!f) return false;
-        if (f.size > MAX_MB * 1024 * 1024) return false;
-        const ext = (f.name.split('.').pop() || '').toLowerCase();
-        return ACCEPT.includes(ext);
-      }
-      function updateState(){
-        const ready = hasValue(nameInput) && hasValue(natSelect) && hasValue(genSelect) && fileOk();
-        submitBtn.disabled = !ready;
-      }
-      form.addEventListener('submit', function(e){
-        if (submitBtn.disabled) {
-          e.preventDefault();
-          updateState();
-          alert('氏名（ローマ字）・国籍・性別・ファイルを入力／選択してください（ファイルは10MB以下・PDF/XLS/XLSX/JPG/PNG）。');
-        }
-      });
-      [nameInput, natSelect, genSelect, fileInput].forEach(el=>{
-        if(!el) return;
-        el.addEventListener('input', updateState);
-        el.addEventListener('change', updateState);
-        el.addEventListener('keyup', updateState);
-      });
-      updateState();
-    })();
-  </script>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

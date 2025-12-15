@@ -183,6 +183,41 @@ if (empty($res['ok']) || empty($res['xls'])) {
 // URLs
 $xlsUrl = '/rireki/kaigo/resumes/' . basename((string)$res['xls']);
 
+// ---------- save to logged-in user's history (DB) ----------
+if (function_exists('app_is_logged_in') && app_is_logged_in()) {
+  try {
+    $pdo_app = app_pdo();
+    if (function_exists('app_ensure_tables')) app_ensure_tables($pdo_app);
+
+    $uid = (int) app_user_id();
+    $fmt = 'kaigo';
+
+    // 1) Save resume token + file path
+    $st = $pdo_app->prepare("
+      INSERT INTO app_resumes (user_id, fmt, token, job_id, xls_path)
+      VALUES (?, ?, ?, ?, ?)
+    ");
+    $st->execute([$uid, $fmt, $token, ($jobId > 0 ? $jobId : null), $xlsUrl]);
+
+    // 2) If this came from a job, record application history
+    if ($jobId > 0) {
+      $st2 = $pdo_app->prepare("
+        INSERT INTO app_applications (user_id, job_id, resume_token)
+        VALUES (?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+          resume_token = VALUES(resume_token),
+          created_at = CURRENT_TIMESTAMP
+      ");
+      $st2->execute([$uid, $jobId, $token]);
+    }
+
+  } catch (Throwable $e) {
+    // Don't break user flow if DB insert fails; just log silently
+    error_log('[submit_rireki] db save failed: ' . $e->getMessage());
+  }
+}
+
+
 $fmt = 'kaigo';
 $claimNext = '/rireki/php/claim_resume.php?token=' . urlencode($token) . '&fmt=' . urlencode($fmt);
 $loginUrl  = '/php/user_login.php?next=' . urlencode($claimNext);
@@ -288,7 +323,7 @@ $loginUrl  = '/php/user_login.php?next=' . urlencode($claimNext);
           Excel（.xls）をダウンロード
         </a>
 
-        <?php if (function_exists('app_logged_in') && app_logged_in()): ?>
+        <?php if (function_exists('app_is_logged_in') && app_is_logged_in()): ?>
           <a class="btn" href="<?= htmlspecialchars($claimNext, ENT_QUOTES, 'UTF-8') ?>">
             アカウントに保存（あとで再DL）
           </a>

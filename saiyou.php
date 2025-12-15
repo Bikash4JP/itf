@@ -3,6 +3,10 @@
 
 require_once __DIR__ . '/php/user_auth.php';
 
+// Ensure applicant tables exist (safe)
+$pdo_app = app_pdo();
+app_ensure_tables($pdo_app);
+
 // ---- helpers (parsers & mappers) ------------------------------------------
 function j_to_half($s){ // normalize full-width digits/tilde/space
   $map = ['０'=>'0','１'=>'1','２'=>'2','３'=>'3','４'=>'4','５'=>'5','６'=>'6','７'=>'7','８'=>'8','９'=>'9','－'=>'-','〜'=>'~','～'=>'~','　'=>' '];
@@ -346,21 +350,21 @@ function build_job_ld($job){
           <?php
             $next = $_SERVER['REQUEST_URI'] ?? '/saiyou.php';
             $loginUrl  = '/php/user_login.php?next=' . urlencode($next);
-            $logoutUrl = '/php/user_login.php?logout=1&next=' . urlencode($next);
+            $logoutUrl = '/php/user_logout.php'; // ✅ correct logout
           ?>
 
-          <!-- ✅ USER PANEL (just above filters) -->
+          <!-- ✅ USER PANEL -->
           <div class="user-box" aria-label="ユーザー">
             <div class="user-head">
               <span class="user-title">ユーザー</span>
-              <?php if (app_logged_in()): ?>
+              <?php if (app_is_logged_in()): ?>
                 <span class="user-badge">ログイン中</span>
               <?php else: ?>
                 <span class="user-badge off">ゲスト</span>
               <?php endif; ?>
             </div>
 
-            <?php if (app_logged_in()): ?>
+            <?php if (app_is_logged_in()): ?>
               <div class="user-actions">
                 <a class="user-link" href="/php/user_applied_jobs.php">応募履歴</a>
                 <a class="user-link" href="/rireki/kaigo/php/rireki_preview.php">マイ情報（履歴書）</a>
@@ -434,7 +438,6 @@ function build_job_ld($job){
     </div>
   </section>
 
-  <!-- footer unchanged -->
   <footer class="footer">
     <div class="footer-container">
       <div class="footer-row">
