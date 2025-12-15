@@ -1,77 +1,46 @@
 <?php
 // /home/it-future/www/itf/php/user_dashboard.php
-require_once __DIR__ . '/db_connect.php';
+declare(strict_types=1);
+
 require_once __DIR__ . '/user_auth.php';
+$pdo = app_pdo();
+app_ensure_tables($pdo);
 
-if (!app_logged_in()) {
-  app_redirect_login('/php/user_dashboard.php');
-}
+app_require_login('/php/user_dashboard.php');
 
-function h($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
-
-$uid = app_user_id();
-
-$stmt = $pdo->prepare("SELECT * FROM applicant_resumes WHERE applicant_id = ? ORDER BY claimed_at DESC, created_at DESC");
-$stmt->execute([$uid]);
-$resumes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$me = app_current_user($pdo);
+function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 ?>
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>マイページ</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ユーザーページ</title>
+  <link rel="stylesheet" href="/css/common.css">
   <style>
-    body{font-family:system-ui,"Noto Sans JP",Meiryo,Arial;margin:0;background:#f6fbff;padding:24px}
-    .wrap{max-width:980px;margin:0 auto}
-    .card{background:#fff;border:1px solid #e6edf6;border-radius:16px;padding:18px;box-shadow:0 10px 24px rgba(0,0,0,.05)}
-    h1{margin:0 0 10px;font-size:22px}
-    .muted{color:#667085}
-    table{width:100%;border-collapse:collapse;margin-top:12px}
-    th,td{padding:10px 12px;border-bottom:1px solid #eef2f7;text-align:left}
-    th{color:#1e90ff;font-weight:900}
-    .btn{display:inline-flex;gap:8px;align-items:center;padding:8px 10px;border:1px solid #dbe7f5;border-radius:10px;background:#f3f9ff;color:#0c4a7a;text-decoration:none;font-weight:800}
+    .wrap{max-width:980px;margin:30px auto;padding:0 16px}
+    .card{background:#fff;border:1px solid #e6edf6;border-radius:16px;padding:18px;box-shadow:0 3px 10px rgba(10,60,150,.05)}
+    .btn{display:inline-flex;gap:8px;align-items:center;justify-content:center;padding:10px 14px;border-radius:10px;border:1px solid transparent;background:#2a7de1;color:#fff;font-weight:800;cursor:pointer;text-decoration:none}
+    .btn.ghost{background:#fff;color:#0b3772;border-color:#dbe7f5}
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="card">
-      <h1>マイページ</h1>
-      <p class="muted">保存した履歴書をここから再ダウンロードできます。</p>
+      <h2 style="margin:0 0 6px">こんにちは、<?=h($me['username'] ?? '')?> さん</h2>
+      <div style="color:#6b7280"><?=h($me['email'] ?? '')?></div>
 
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
-        <a class="btn" href="/saiyou.php">求人一覧へ</a>
-        <a class="btn" href="/php/user_logout.php">ログアウト</a>
+      <div class="row">
+        <a class="btn" href="/php/user_applied_jobs.php">応募履歴（Applied Jobs）</a>
+        <a class="btn" href="/rireki/kaigo/php/rireki_preview.php">マイ情報（編集）</a>
+        <a class="btn ghost" href="/php/user_logout.php">ログアウト</a>
       </div>
 
-      <?php if (!$resumes): ?>
-        <p class="muted" style="margin-top:14px">まだ保存された履歴書がありません。</p>
-      <?php else: ?>
-        <table>
-          <thead>
-            <tr>
-              <th>作成</th>
-              <th>フォーマット</th>
-              <th>求人ID</th>
-              <th>ダウンロード</th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php foreach ($resumes as $r):
-              $token = (string)$r['token'];
-              $fmt   = (string)$r['fmt'];
-              $xlsUrl = "/rireki/{$fmt}/resumes/{$token}.xls";
-            ?>
-              <tr>
-                <td><?=h($r['claimed_at'] ?: $r['created_at'])?></td>
-                <td><?=h($fmt)?></td>
-                <td><?=h($r['job_id'] ?? '-')?></td>
-                <td><a class="btn" href="<?=h($xlsUrl)?>" download>Excel</a></td>
-              </tr>
-            <?php endforeach; ?>
-          </tbody>
-        </table>
-      <?php endif; ?>
+      <div style="margin-top:12px">
+        <a class="btn ghost" href="/saiyou.php">求人一覧へ戻る</a>
+      </div>
     </div>
   </div>
 </body>

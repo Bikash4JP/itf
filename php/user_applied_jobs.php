@@ -1,29 +1,34 @@
 <?php
 // /home/it-future/www/itf/php/user_applied_jobs.php
-require_once __DIR__ . '/db_connect.php';
+declare(strict_types=1);
+
 require_once __DIR__ . '/user_auth.php';
+$pdo = app_pdo();
+app_ensure_tables($pdo);
 
 app_require_login('/php/user_applied_jobs.php');
 
-$userId = (int)app_user_id();
+$uid = app_user_id();
 
 $sql = "
-  SELECT a.created_at, a.method,
-         p.id AS job_id, p.title, p.company_name, p.job_location,
-         CONCAT('/rireki/kaigo/resumes/', r.token, '.xls') AS xls_url
-
-  FROM applicant_applications a
-  JOIN posts p ON p.id = a.job_id
-  LEFT JOIN applicant_resumes r ON r.id = a.resume_id
+  SELECT
+    a.created_at,
+    a.job_id,
+    a.resume_token,
+    p.title,
+    p.company_name,
+    p.job_location,
+    p.salary
+  FROM ".APP_TBL_APPLICATIONS." a
+  LEFT JOIN posts p ON p.id = a.job_id
   WHERE a.user_id = ?
-  ORDER BY a.created_at DESC, a.id DESC
-  LIMIT 200
+  ORDER BY a.created_at DESC
 ";
-$st = $pdo->prepare($sql);
-$st->execute([$userId]);
-$rows = $st->fetchAll(PDO::FETCH_ASSOC);
+$stmt = $pdo->prepare($sql);
+$stmt->execute([$uid]);
+$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-function h($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
+function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 ?>
 <!doctype html>
 <html lang="ja">
@@ -31,45 +36,48 @@ function h($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>応募履歴</title>
+  <link rel="stylesheet" href="/css/common.css">
   <style>
-    body{ margin:0; font-family:system-ui,"Noto Sans JP",Meiryo; background:linear-gradient(180deg,#f8fbff,#eef6ff); padding:18px; }
-    .wrap{ max-width:980px; margin:0 auto; }
-    .top{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
-    .card{ background:#fff; border:1px solid #e6edf6; border-radius:16px; padding:14px; box-shadow:0 10px 24px rgba(0,0,0,.05); margin-bottom:12px; }
-    .title{ font-weight:900; color:#0b3772; font-size:16px; margin:0 0 6px; }
-    .meta{ color:#64748b; font-size:13px; display:flex; gap:12px; flex-wrap:wrap; }
-    .btn{ display:inline-flex; padding:9px 12px; border-radius:10px; border:1px solid #bfe2ff; background:#1e90ff; color:#fff; text-decoration:none; font-weight:900; }
-    .btn2{ display:inline-flex; padding:9px 12px; border-radius:10px; border:1px solid #e6edf6; background:#f3f9ff; color:#0c4a7a; text-decoration:none; font-weight:900; }
-    .row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+    .wrap{max-width:1100px;margin:30px auto;padding:0 16px}
+    .card{background:#fff;border:1px solid #e6edf6;border-radius:16px;padding:18px;box-shadow:0 3px 10px rgba(10,60,150,.05);margin-bottom:12px}
+    .btn{display:inline-flex;gap:8px;align-items:center;justify-content:center;padding:8px 12px;border-radius:10px;border:1px solid #dbe7f5;background:#fff;color:#0b3772;font-weight:800;text-decoration:none}
+    .toprow{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .muted{color:#6b7280}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="top">
-      <h1 style="margin:0;">応募履歴</h1>
-      <div class="row" style="margin:0;">
-        <a class="btn2" href="/rireki/kaigo/php/rireki_preview.php">マイ情報</a>
-        <a class="btn2" href="/saiyou.php">求人一覧</a>
-        <a class="btn2" href="/php/user_login.php?logout=1&next=/saiyou.php">ログアウト</a>
+    <div class="toprow" style="margin-bottom:12px">
+      <h2 style="margin:0">応募履歴</h2>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a class="btn" href="/rireki/kaigo/php/rireki_preview.php">マイ情報</a>
+        <a class="btn" href="/saiyou.php">求人一覧へ</a>
       </div>
     </div>
 
     <?php if (!$rows): ?>
-      <div class="card">まだ応募履歴がありません。</div>
+      <div class="card">
+        <div class="muted">まだ応募履歴がありません。</div>
+      </div>
     <?php else: ?>
       <?php foreach ($rows as $r): ?>
+        <?php
+          $token = (string)($r['resume_token'] ?? '');
+          $xlsUrl = ($token && preg_match('/^[a-f0-9]{32}$/', $token))
+            ? ('/rireki/kaigo/resumes/'.$token.'.xls')
+            : '';
+        ?>
         <div class="card">
-          <div class="title"><?=h($r['title'] ?? '')?></div>
-          <div class="meta">
-            <span>会社名: <?=h($r['company_name'] ?? '')?></span>
-            <span>勤務地: <?=h($r['job_location'] ?? '')?></span>
-            <span>方法: <?=h($r['method'] ?? '')?></span>
-            <span>日時: <?=h($r['created_at'] ?? '')?></span>
+          <div style="font-weight:900;font-size:18px"><?=h($r['title'] ?? '求人')?></div>
+          <div class="muted">
+            <?=h($r['company_name'] ?? '')?> / <?=h($r['job_location'] ?? '')?> / <?=h($r['salary'] ?? '')?>
           </div>
-          <div class="row">
-            <a class="btn2" href="/php/job_details.php?job_id=<?=h($r['job_id'] ?? '')?>">求人詳細</a>
-            <?php if (!empty($r['xls_url'])): ?>
-              <a class="btn" href="<?=h($r['xls_url'])?>" download>履歴書DL</a>
+          <div class="muted" style="margin-top:6px">応募日: <?=h($r['created_at'] ?? '')?></div>
+
+          <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
+            <a class="btn" href="/php/job_details.php?job_id=<?= (int)($r['job_id'] ?? 0) ?>">求人詳細</a>
+            <?php if ($xlsUrl): ?>
+              <a class="btn" href="<?=h($xlsUrl)?>" download>履歴書（XLS）</a>
             <?php endif; ?>
           </div>
         </div>
