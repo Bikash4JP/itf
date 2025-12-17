@@ -20,7 +20,7 @@ function keep($name, $value){
 function moveTempPhoto(?array $file): ?string {
   if (!$file || !isset($file['error']) || $file['error'] !== UPLOAD_ERR_OK) return null;
 
-  $dir = $_SERVER['DOCUMENT_ROOT'] . '/rireki/uploads/tmp';
+  $dir = rtrim((string)($_SERVER['DOCUMENT_ROOT'] ?? ''), '/') . '/rireki/uploads/tmp';
   if (!is_dir($dir)) @mkdir($dir, 0755, true);
 
   $ext = strtolower(pathinfo($file['name'] ?? '', PATHINFO_EXTENSION));
@@ -115,9 +115,28 @@ $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $post = [];
 $photoPath = null;
 
-// GET mode: "プロフィールで進む" → show saved data preview
+// NEW: flow selector
+//  - open_resume      : from /rireki/ (no job) => "confirm and download"
+//  - apply_profile    : from saiyou/job -> login -> apply using profile => apply + popup + redirect to applied list
+//  - profile_only     : from saiyou -> login -> mydetails => only "save profile"
+$flow = strtolower(trim((string)($_GET['flow'] ?? ($_POST['flow'] ?? ''))));
+$allowedFlows = ['open_resume','apply_profile','profile_only'];
+if (!in_array($flow, $allowedFlows, true)) $flow = '';
+
+// Flash flag for "profile saved"
+$savedFlash = false;
+
+// GET mode: show saved profile preview
 if ($method === 'GET') {
   $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
+
+  // ✅ IMPORTANT: decide flow FIRST (before touching job_id)
+  if ($flow === '') {
+    // default behavior:
+    // - if job_id present => applying by profile
+    // - else => profile_only (mydetails) OR open_resume (if you pass flow=open_resume explicitly from /rireki/)
+    $flow = ($job_id > 0) ? 'apply_profile' : 'profile_only';
+  }
 
   if (!app_is_logged_in()) {
     $next = $_SERVER['REQUEST_URI'] ?? '/saiyou.php';
@@ -138,19 +157,32 @@ if ($method === 'GET') {
   }
 
   $post = $saved;
-  if ($job_id > 0) $post['job_id'] = $job_id; // keep selected job context
 
-  // Make sure photo is permanent (if it was a tmp path saved earlier)
+  // ✅ Apply job_id ONLY when flow is apply_profile
+  if ($flow === 'apply_profile' && $job_id > 0) {
+    $post['job_id'] = $job_id;
+  } else {
+    unset($post['job_id']);
+    $job_id = 0;
+  }
+
+  // Make sure photo is permanent
   $perma = persistPhotoForUser($uid, $post['photo_path'] ?? null);
   if ($perma) {
     $post['photo_path'] = $perma;
-    save_profile_post($pdo_app, $uid, $post); // store back updated path
+    save_profile_post($pdo_app, $uid, $post);
   }
   $photoPath = $post['photo_path'] ?? null;
 
 } else {
   // POST mode: from form submit → preview
   $post = $_POST;
+
+  // Decide flow for POST
+  if ($flow === '') {
+    $job_id_guess = isset($post['job_id']) ? (int)$post['job_id'] : 0;
+    $flow = ($job_id_guess > 0) ? 'apply_profile' : 'open_resume';
+  }
 
   // Handle photo upload → temp path first
   $photoPath = $post['photo_path'] ?? null;
@@ -177,6 +209,22 @@ if ($method === 'GET') {
 
 // job_id for apply button
 $job_id = isset($post['job_id']) ? (int)$post['job_id'] : (isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0);
+
+// header back button behavior
+$headerBackHref = '/saiyou.php';
+$headerBackLabel = '求人一覧へ戻る';
+if ($job_id > 0) {
+  $headerBackHref = '/php/job_details.php?job_id=' . h($job_id);
+  $headerBackLabel = '求人詳細へ戻る';
+} else {
+  if ($flow === 'open_resume') {
+    $headerBackHref = '/rireki/index.php';
+    $headerBackLabel = '履歴書メーカーへ戻る';
+  } else {
+    $headerBackHref = '/saiyou.php';
+    $headerBackLabel = '求人一覧へ戻る';
+  }
+}
 
 // ---------- Build preview data from KAIGO form names ----------
 // STEP 1：基本情報
@@ -390,6 +438,23 @@ $step6 = [
     .linklist a{ color:#0c4a7a; text-decoration:none; border-bottom:1px dashed #9ed1ff }
     .linklist a:hover{ color:#0a3861; border-bottom-color:#1e90ff }
 
+    /* modal */
+    .modal-backdrop{
+      position:fixed; inset:0; background:rgba(2,6,23,.55);
+      display:none; align-items:center; justify-content:center; z-index:2000;
+      padding:18px;
+    }
+    .modal{
+      width:min(560px, 100%);
+      background:#fff; border:1px solid #e6edf6; border-radius:16px;
+      box-shadow:0 20px 50px rgba(0,0,0,.25);
+      padding:16px;
+    }
+    .modal h3{ margin:0 0 8px; font-size:18px; }
+    .modal p{ margin:0 0 12px; color:#475467; }
+    .modal .rowbtn{ display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap; }
+    .modal .btn{ padding:10px 14px; }
+
     @media (max-width:980px){
       :root{ --header-h:84px; }
       main.wrap > aside{ position:static; }
@@ -406,14 +471,32 @@ $step6 = [
         <p class="crumb">ホーム ＞ 履歴書メーカー ＞ 介護向け ＞ プレビュー</p>
       </div>
 
-      <?php if ($job_id > 0): ?>
-        <a class="btn" href="/php/job_details.php?job_id=<?=h($job_id)?>">求人詳細へ戻る</a>
-      <?php else: ?>
-        <a class="btn" href="/saiyou.php">求人一覧へ戻る</a>
-      <?php endif; ?>
+      <a class="btn" href="<?=h($headerBackHref)?>"><?=h($headerBackLabel)?></a>
     </div>
   </div>
 </header>
+
+<!-- Modal: application success -->
+<div id="appModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal">
+    <h3>Thank you for your application</h3>
+    <p>Our team will contact you shortly.</p>
+    <div class="rowbtn">
+      <a class="btn primary" href="/php/user_applied_jobs.php">戻る</a>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: profile saved -->
+<div id="saveModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal">
+    <h3>保存しました</h3>
+    <p>プロフィール情報を更新しました。</p>
+    <div class="rowbtn">
+      <a class="btn primary" href="/php/user_applied_jobs.php">戻る</a>
+    </div>
+  </div>
+</div>
 
 <main class="wrap">
   <section>
@@ -584,27 +667,48 @@ $step6 = [
       </div>
     </div>
 
-    <!-- Final submit -->
+    <!-- Final submit (UPDATED: 3 flows) -->
     <div class="final" style="margin-top:18px;">
-      <h3>この内容で送信しますか？</h3>
-      <p class="muted" style="margin:6px 0 12px">
-        <?php if ($job_id > 0): ?>
+      <?php if ($flow === 'apply_profile'): ?>
+        <h3>この内容で応募しますか？</h3>
+        <p class="muted" style="margin:6px 0 12px">
           この内容で「求人応募」まで進みます。必要であれば各ステップの「このステップを編集」から修正してください。
-        <?php else: ?>
-          この内容で保存・更新されます。必要であれば各ステップの「このステップを編集」から修正してください。
-        <?php endif; ?>
-      </p>
+        </p>
 
-      <form method="post" action="/rireki/kaigo/php/submit_rireki.php" style="display:flex;gap:10px;flex-wrap:wrap">
-        <?php foreach ($post as $k=>$v) echo keep($k,$v); ?>
-        <?php if ($job_id > 0): ?>
+        <form id="applyForm" method="post" action="/rireki/kaigo/php/submit_rireki.php" style="display:flex;gap:10px;flex-wrap:wrap">
+          <?php foreach ($post as $k=>$v) echo keep($k,$v); ?>
+          <input type="hidden" name="flow" value="apply_profile">
           <a class="btn" href="/php/job_details.php?job_id=<?=h($job_id)?>">求人詳細へ戻る</a>
           <button type="submit" class="btn primary">この内容で応募する</button>
-        <?php else: ?>
+        </form>
+
+      <?php elseif ($flow === 'open_resume'): ?>
+        <h3>確認してダウンロード</h3>
+        <p class="muted" style="margin:6px 0 12px">
+          内容を確認して、Excel を作成・ダウンロードできます。
+        </p>
+
+        <form method="post" action="/rireki/kaigo/php/submit_rireki.php" style="display:flex;gap:10px;flex-wrap:wrap">
+          <?php foreach ($post as $k=>$v) echo keep($k,$v); ?>
+          <input type="hidden" name="flow" value="open_resume">
+          <a class="btn" href="/rireki/index.php">履歴書メーカーへ戻る</a>
+          <button type="submit" class="btn primary">Confirm and Download</button>
+        </form>
+
+      <?php else: /* profile_only */ ?>
+        <h3>プロフィールを保存しますか？</h3>
+        <p class="muted" style="margin:6px 0 12px">
+          この内容をプロフィールとして保存・更新します。
+        </p>
+
+        <!-- Just save profile: re-post to preview itself -->
+        <form id="saveProfileForm" method="post" action="/rireki/kaigo/php/rireki_preview.php" style="display:flex;gap:10px;flex-wrap:wrap">
+          <?php foreach ($post as $k=>$v) echo keep($k,$v); ?>
+          <input type="hidden" name="flow" value="profile_only">
           <a class="btn" href="/saiyou.php">求人一覧へ戻る</a>
-          <button type="submit" class="btn primary">この内容で保存する</button>
-        <?php endif; ?>
-      </form>
+          <button type="submit" class="btn primary">Save Profile</button>
+        </form>
+      <?php endif; ?>
     </div>
   </section>
 
@@ -632,6 +736,57 @@ $step6 = [
     </div>
   </aside>
 </main>
+
+<script>
+  // Apply-with-profile: AJAX submit -> show THANK YOU modal -> user clicks 戻る => applied list
+  (function(){
+    const form = document.getElementById('applyForm');
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+
+      try{
+        const res = await fetch(form.action, { method:'POST', body: fd, credentials:'same-origin' });
+        if (!res.ok) throw new Error('submit failed');
+        // we don't navigate to submit_rireki success page; instead show modal
+        const modal = document.getElementById('appModal');
+        if (modal) { modal.style.display = 'flex'; modal.setAttribute('aria-hidden','false'); }
+      }catch(err){
+        alert('送信に失敗しました。もう一度お試しください。');
+      }
+    });
+  })();
+
+  // Profile-only: POST to preview itself -> it will auto-save already; show modal (client side)
+  (function(){
+    const form = document.getElementById('saveProfileForm');
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+
+      try{
+        const res = await fetch(form.action, { method:'POST', body: fd, credentials:'same-origin' });
+        if (!res.ok) throw new Error('save failed');
+        const modal = document.getElementById('saveModal');
+        if (modal) { modal.style.display = 'flex'; modal.setAttribute('aria-hidden','false'); }
+      }catch(err){
+        alert('保存に失敗しました。もう一度お試しください。');
+      }
+    });
+  })();
+
+  // Close modal when clicking outside
+  document.addEventListener('click', (e) => {
+    const m1 = document.getElementById('appModal');
+    const m2 = document.getElementById('saveModal');
+    if (m1 && e.target === m1) { m1.style.display='none'; m1.setAttribute('aria-hidden','true'); }
+    if (m2 && e.target === m2) { m2.style.display='none'; m2.setAttribute('aria-hidden','true'); }
+  });
+</script>
 
 </body>
 </html>
