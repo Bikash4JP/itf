@@ -70,15 +70,12 @@ function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
         <div class="card">
           <div style="font-weight:900;font-size:18px"><?=h($r['title'] ?? '求人')?></div>
           <div class="muted">
-            <?=h($r['company_name'] ?? '')?> / <?=h($r['job_location'] ?? '')?> / <?=h($r['salary'] ?? '')?>
+            <?=h($r['job_location'] ?? '')?> / <?=h($r['salary'] ?? '')?>
           </div>
           <div class="muted" style="margin-top:6px">応募日: <?=h($r['created_at'] ?? '')?></div>
 
           <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
             <a class="btn" href="/php/job_details.php?job_id=<?= (int)($r['job_id'] ?? 0) ?>">求人詳細</a>
-            <?php if ($xlsUrl): ?>
-              <a class="btn" href="<?=h($xlsUrl)?>" download>履歴書（XLS）</a>
-            <?php endif; ?>
           </div>
         </div>
       <?php endforeach; ?>

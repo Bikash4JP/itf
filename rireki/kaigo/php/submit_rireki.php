@@ -32,6 +32,13 @@ function _reshape_rows(array $group, array $fields): array {
 
 function _plain_fail(string $msg, int $code = 500): void {
   http_response_code($code);
+  // If ajax expects JSON
+  $wantsJson = (!empty($_POST['ajax']) && $_POST['ajax'] === '1');
+  if ($wantsJson) {
+    header('Content-Type: application/json; charset=UTF-8');
+    echo json_encode(['ok'=>false,'err'=>$msg], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+    exit;
+  }
   header('Content-Type: text/plain; charset=UTF-8');
   echo $msg;
   exit;
@@ -101,9 +108,16 @@ if (isset($_GET['demo'])) {
     ],
   ];
   $jobId = 0;
+  $intent = 'download';
+  $ajax = false;
 } else {
   $data  = $_POST;
   $jobId = isset($data['job_id']) ? (int)$data['job_id'] : 0;
+
+  $intent = strtolower(trim((string)($data['intent'] ?? 'download')));
+  if (!in_array($intent, ['apply','download'], true)) $intent = 'download';
+
+  $ajax = (!empty($data['ajax']) && (string)$data['ajax'] === '1');
 
   // normalize planned resignation date
   $data['planned_resign_year']  = trim($data['planned_resign_year']  ?? '');
@@ -141,15 +155,19 @@ if (isset($_GET['demo'])) {
 
   // photo path from preview (web path -> absolute)
   _normalize_photo_path_from_preview($data);
+
+  // IMPORTANT:
+  // For resume-only creation we do NOT treat jobId as "application".
+  // jobId can exist in data, but apply logic depends on intent=apply.
 }
 
 // ----- persist source metadata for rireki_list.php -----
-$data['_source']    = ($jobId > 0) ? 'job' : 'open';
-$data['_job_id']    = $jobId;
+$data['_source'] = ($intent === 'apply' && $jobId > 0) ? 'job' : 'open';
+$data['_job_id'] = ($intent === 'apply') ? $jobId : 0;
 $data['_job_title'] = '';
 
-// fetch job title if coming from a job
-if ($jobId > 0) {
+// fetch job title only when applying
+if ($intent === 'apply' && $jobId > 0) {
   $dbPath = __DIR__ . '/../../../php/db_connect.php';
   if (is_readable($dbPath)) {
     require_once $dbPath;
@@ -177,7 +195,7 @@ if (empty($res['ok']) || empty($res['xls'])) {
   _plain_fail("Kaigo Rirekisho build failed: " . ($res['err'] ?? 'unknown'), 500);
 }
 
-// Save JSON snapshot (used for claim later)
+// Save JSON snapshot
 @file_put_contents($outDir . '/' . $token . '.json', json_encode($data, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
 
 // URLs
@@ -192,35 +210,44 @@ if (function_exists('app_is_logged_in') && app_is_logged_in()) {
     $uid = (int) app_user_id();
     $fmt = 'kaigo';
 
-    // 1) Save resume token + file path
+    // Save resume (schema: app_resumes has no xls_path)
     $st = $pdo_app->prepare("
-      INSERT INTO app_resumes (user_id, fmt, token, job_id, xls_path)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO app_resumes (user_id, fmt, token, job_id)
+      VALUES (?, ?, ?, ?)
     ");
-    $st->execute([$uid, $fmt, $token, ($jobId > 0 ? $jobId : null), $xlsUrl]);
+    $st->execute([$uid, $fmt, $token, ($intent === 'apply' && $jobId > 0) ? $jobId : null]);
 
-    // 2) If this came from a job, record application history
-    if ($jobId > 0) {
+    // Save application history ONLY when intent=apply
+    if ($intent === 'apply' && $jobId > 0) {
       $st2 = $pdo_app->prepare("
         INSERT INTO app_applications (user_id, job_id, resume_token)
         VALUES (?, ?, ?)
-        ON DUPLICATE KEY UPDATE
-          resume_token = VALUES(resume_token),
-          created_at = CURRENT_TIMESTAMP
       ");
       $st2->execute([$uid, $jobId, $token]);
     }
 
   } catch (Throwable $e) {
-    // Don't break user flow if DB insert fails; just log silently
     error_log('[submit_rireki] db save failed: ' . $e->getMessage());
   }
 }
 
+// If AJAX, return JSON and exit (Flow A)
+if (!empty($_POST['ajax']) && (string)$_POST['ajax'] === '1') {
+  header('Content-Type: application/json; charset=UTF-8');
+  echo json_encode([
+    'ok' => true,
+    'token' => $token,
+    'xls_url' => $xlsUrl,
+    'applied_jobs_url' => 'https://it-future.jp/php/user_applied_jobs.php',
+  ], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+  exit;
+}
 
 $fmt = 'kaigo';
 $claimNext = '/rireki/php/claim_resume.php?token=' . urlencode($token) . '&fmt=' . urlencode($fmt);
 $loginUrl  = '/php/user_login.php?next=' . urlencode($claimNext);
+
+$showApplyThanks = ($intent === 'apply' && $jobId > 0);
 
 // ---------- success page ----------
 ?>
@@ -234,8 +261,7 @@ $loginUrl  = '/php/user_login.php?next=' . urlencode($claimNext);
   <style>
     :root{
       --ink:#0b0f19; --muted:#667085; --border:#e6edf6;
-      --bg:#f8fbff; --ok:#0b6b4a; --ring:#bfe2ff;
-      --btn-bg:#f3f9ff; --btn-bd:#dbe7f5; --btn-ink:#0c4a7a;
+      --ok:#0b6b4a; --btn-bg:#f3f9ff; --btn-bd:#dbe7f5; --btn-ink:#0c4a7a;
       --warn:#b45309; --warn-bg:#fff7ed; --warn-bd:#fed7aa;
     }
     *{ box-sizing:border-box }
@@ -290,36 +316,22 @@ $loginUrl  = '/php/user_login.php?next=' . urlencode($claimNext);
       <h1>介護向け 履歴書の作成が完了しました。</h1>
       <p class="sub">Excelファイルを保存し、そのまま印刷または編集してご利用ください。</p>
 
-      <?php if ($jobId > 0): ?>
+      <?php if ($showApplyThanks): ?>
         <div class="apply">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-            <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path>
-          </svg>
           ご応募ありがとうございます。担当チームにて内容を確認のうえ、<strong>2営業日以内</strong>にご連絡いたします。
         </div>
       <?php else: ?>
         <div class="done">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="20 6 9 17 4 12"></polyline>
-          </svg>
           履歴書が完成しました。ダウンロードしてご確認ください。
         </div>
       <?php endif; ?>
 
       <div class="notice" role="note" aria-live="polite">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-        </svg>
         PDF は環境差により体裁が100%一致しない場合があります。<strong>Excel（.xls）からの印刷</strong>を推奨します。
       </div>
 
       <div class="actions">
         <a class="btn" href="<?= htmlspecialchars($xlsUrl, ENT_QUOTES, 'UTF-8') ?>" download>
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <path d="M14 2v6h6"></path>
-          </svg>
           Excel（.xls）をダウンロード
         </a>
 
@@ -333,39 +345,9 @@ $loginUrl  = '/php/user_login.php?next=' . urlencode($claimNext);
           </a>
         <?php endif; ?>
 
-        <?php if ($jobId > 0): ?>
-          <a class="btn" href="/php/job_details.php?job_id=<?= (int)$jobId ?>">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M18 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-              <path d="M15 3h6v6"></path>
-              <path d="M10 14 21 3"></path>
-            </svg>
-            応募先の求人詳細を見る
-          </a>
-        <?php endif; ?>
-
-        <a class="btn" href="/saiyou.php">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-            <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path>
-          </svg>
-          他の求人を探す
-        </a>
-        <a class="btn" href="https://it-future.jp/">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="m3 9 9-7 9 7"></path>
-            <path d="M9 22V12h6v10"></path>
-          </svg>
-          会社ホームページへ
-        </a>
-        <a class="btn" href="/rireki/index.php">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="1 4 1 10 7 10"></polyline>
-            <polyline points="23 20 23 14 17 14"></polyline>
-            <path d="M20.49 9A9 9 0 1 0 6.2 18.8"></path>
-          </svg>
-          別のフォーマットで作る
-        </a>
+        <a class="btn" href="/saiyou.php">他の求人を探す</a>
+        <a class="btn" href="https://it-future.jp/">会社ホームページへ</a>
+        <a class="btn" href="/rireki/index.php">別のフォーマットで作る</a>
       </div>
 
       <p class="hint">※ Excel から「余白：上下左右小さめ」「ページ設定：A4」にして印刷すると綺麗に出力できます。</p>
@@ -381,14 +363,6 @@ $loginUrl  = '/php/user_login.php?next=' . urlencode($claimNext);
         <details>
           <summary>内容を修正したいです。</summary>
           <div>ダウンロードした Excel をそのまま編集できます。不要な枠線や余分な余白はページ設定から調整してください。</div>
-        </details>
-        <details>
-          <summary>介護向け項目（夜勤・シフト・資格）も出力されますか？</summary>
-          <div>はい。入力いただいた夜勤可否・希望シフト・介護資格などがテンプレートに反映されます。</div>
-        </details>
-        <details>
-          <summary>求人へはどう応募しますか？</summary>
-          <div><a href="/saiyou.php">新着採用</a>ページから、求人詳細の指示に従って応募してください。すでに求人から作成した場合は、担当より2営業日以内に連絡いたします。</div>
         </details>
       </section>
 
