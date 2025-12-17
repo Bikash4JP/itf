@@ -11,7 +11,7 @@ if (!isset($_SESSION['id']) || !isset($_SESSION['username'])) {
   exit;
 }
 
-// DB for job title lookup (when only job_id is saved)
+// DB for job lookup
 require_once __DIR__ . '/db_connect.php';
 
 // ---------- paths ----------
@@ -82,7 +82,6 @@ function _has_experience(array $meta): bool {
 
 // --- NEW: detect domestic (kokunai) / overseas (kokugai) by current address ---
 function _extract_address_like(array $meta): string {
-  // Try multiple likely keys safely
   $candidates = [
     $meta['address'] ?? null,
     $meta['current_address'] ?? null,
@@ -100,14 +99,11 @@ function _is_address_in_japan(string $addr): bool {
   if ($addr === '') return false;
   $a = mb_strtolower($addr, 'UTF-8');
 
-  // Simple signals
   if (mb_strpos($a, '日本', 0, 'UTF-8') !== false) return true;
   if (stripos($a, 'japan') !== false) return true;
 
-  // JP postal like 123-4567 somewhere
   if (preg_match('/\b\d{3}-\d{4}\b/u', $a)) return true;
 
-  // Prefecture names (kanji short set)
   $prefs = ['北海道','青森','岩手','宮城','秋田','山形','福島','茨城','栃木','群馬','埼玉','千葉','東京','神奈川','新潟','富山','石川','福井','山梨','長野','岐阜','静岡','愛知','三重','滋賀','京都','大阪','兵庫','奈良','和歌山','鳥取','島根','岡山','広島','山口','徳島','香川','愛媛','高知','福岡','佐賀','長崎','熊本','大分','宮崎','鹿児島','沖縄'];
   foreach ($prefs as $p) {
     if (mb_strpos($addr, $p, 0, 'UTF-8') !== false) return true;
@@ -119,8 +115,10 @@ function _resident_tag(array $meta): string {
   return _is_address_in_japan($addr) ? 'kokunai' : 'kokugai';
 }
 
-// job title lookup cache
+// job lookup cache (title + company)
 $_JOB_TITLE_CACHE = [];
+$_JOB_COMPANY_CACHE = [];
+
 function _job_title_by_id(PDO $pdo, int $jobId): ?string {
   global $_JOB_TITLE_CACHE;
   if ($jobId <= 0) return null;
@@ -132,7 +130,18 @@ function _job_title_by_id(PDO $pdo, int $jobId): ?string {
   return $_JOB_TITLE_CACHE[$jobId];
 }
 
-// Robust source detector
+function _job_company_by_id(PDO $pdo, int $jobId): ?string {
+  global $_JOB_COMPANY_CACHE;
+  if ($jobId <= 0) return null;
+  if (isset($_JOB_COMPANY_CACHE[$jobId])) return $_JOB_COMPANY_CACHE[$jobId];
+  $stmt = $pdo->prepare("SELECT company_name FROM posts WHERE id = ? AND post_type = 'job' LIMIT 1");
+  $stmt->execute([$jobId]);
+  $c = $stmt->fetchColumn();
+  $_JOB_COMPANY_CACHE[$jobId] = $c ?: null;
+  return $_JOB_COMPANY_CACHE[$jobId];
+}
+
+// Robust source detector (+ company name)
 function _detect_source(array $meta, PDO $pdo): array {
   $srcKeyCandidates = [
     $meta['source']      ?? null,
@@ -144,7 +153,12 @@ function _detect_source(array $meta, PDO $pdo): array {
   $srcKeyCandidates = array_map(fn($v) => is_string($v) ? strtolower(trim($v)) : '', $srcKeyCandidates);
 
   $jobId  = (int)($meta['job_id'] ?? ($meta['_job_id'] ?? 0));
+
+  // keep job_title (for fallback/search)
   $jTitle = trim((string)($meta['job_title'] ?? ($meta['_job_title'] ?? '')));
+
+  // NEW: company_name (preferred for source display)
+  $jCompany = trim((string)($meta['company_name'] ?? ($meta['_company_name'] ?? '')));
 
   // original upload file rel path (for print/download if needed)
   $origRel = '';
@@ -157,6 +171,7 @@ function _detect_source(array $meta, PDO $pdo): array {
   // Decide src_type
   $srcType = 'open';
   $jobish = ['job', 'from_job', 'job_flow', 'resume_job', 'via_job'];
+
   if ($jobId > 0) {
     $srcType = 'job';
   } else {
@@ -164,22 +179,31 @@ function _detect_source(array $meta, PDO $pdo): array {
       if ($k !== '' && in_array($k, $jobish, true)) { $srcType = 'job'; break; }
     }
   }
+
   $uploadish = ['upload', 'uploaded', 'from_upload'];
   foreach ($srcKeyCandidates as $k) {
     if ($k !== '' && in_array($k, $uploadish, true)) { $srcType = 'upload'; break; }
   }
   if ($srcType === 'open' && $origRel !== '') $srcType = 'upload';
 
-  if ($srcType === 'job' && $jTitle === '' && $jobId > 0) {
-    $t = _job_title_by_id($pdo, $jobId);
-    if (is_string($t) && $t !== '') $jTitle = $t;
+  // fill missing title/company from DB when job
+  if ($srcType === 'job' && $jobId > 0) {
+    if ($jCompany === '') {
+      $c = _job_company_by_id($pdo, $jobId);
+      if (is_string($c) && trim($c) !== '') $jCompany = trim($c);
+    }
+    if ($jTitle === '') {
+      $t = _job_title_by_id($pdo, $jobId);
+      if (is_string($t) && trim($t) !== '') $jTitle = trim($t);
+    }
   }
 
   return [
-    'src_type'  => $srcType,   // 'job' | 'upload' | 'open'
-    'job_id'    => $jobId,
-    'job_title' => $jTitle,
-    'orig_rel'  => $origRel,
+    'src_type'     => $srcType,   // 'job' | 'upload' | 'open'
+    'job_id'       => $jobId,
+    'job_title'    => $jTitle,
+    'company_name' => $jCompany,
+    'orig_rel'     => $origRel,
   ];
 }
 
@@ -203,24 +227,25 @@ if (is_dir($resumeDir)) {
     $jlpt = _normalize_jlpt($meta['jp_comm_level'] ?? ($meta['personal']['jp_comm_level'] ?? ''));
     $exp  = _has_experience($meta) ? 'yes' : 'no';
 
-    // NEW: kokunai/kokugai
+    // kokunai/kokugai
     $resTag = _resident_tag($meta); // 'kokunai' | 'kokugai'
 
     $sd = _detect_source($meta, $pdo);
 
     $rows[] = [
-      'token'     => $token,
-      'name'      => (string)$name,
-      'nat'       => (string)$nat,
-      'jlpt'      => (string)$jlpt,
-      'exp'       => (string)$exp,
-      'resident'  => (string)$resTag,  // NEW
-      'created'   => (int)$createdAt,
-      'has_xls'   => (bool)$hasXls,
-      'src_type'  => $sd['src_type'],
-      'job_id'    => (int)$sd['job_id'],
-      'job_title' => (string)$sd['job_title'],
-      'orig_rel'  => (string)$sd['orig_rel'],
+      'token'        => $token,
+      'name'         => (string)$name,
+      'nat'          => (string)$nat,
+      'jlpt'         => (string)$jlpt,
+      'exp'          => (string)$exp,
+      'resident'     => (string)$resTag,
+      'created'      => (int)$createdAt,
+      'has_xls'      => (bool)$hasXls,
+      'src_type'     => $sd['src_type'],
+      'job_id'       => (int)$sd['job_id'],
+      'job_title'    => (string)$sd['job_title'],     // keep for fallback/search
+      'company_name' => (string)$sd['company_name'],  // NEW
+      'orig_rel'     => (string)$sd['orig_rel'],
     ];
   }
 }
@@ -229,9 +254,10 @@ usort($rows, fn($a,$b)=> $b['created'] <=> $a['created']);
 // unique lists for filters
 $nations = array_values(array_unique(array_filter(array_map(fn($r)=>$r['nat'], $rows))));
 sort($nations);
+
 $jlptOptions = ['JFT A2','N4','N3','N2','N1'];
 $expOptions  = ['yes'=>'あり','no'=>'なし'];
-$resOptions  = ['kokunai'=>'国内（日本在住）','kokugai'=>'国外（日本以外）']; // NEW
+$resOptions  = ['kokunai'=>'国内（日本在住）','kokugai'=>'国外（日本以外）'];
 
 // CSRF for delete
 if (empty($_SESSION['csrf_rireki'])) {
@@ -308,6 +334,7 @@ $base   = $scheme . '://' . $host;
           <div class="actions"><button class="btn" onclick="clearMenu(this)">クリア</button><button class="btn" onclick="closeMenu(this)">OK</button></div>
         </div>
       </div>
+
       <div class="dropdown" data-key="jlpt">
         <button class="dropbtn" onclick="toggleMenu(this)">JLPT / JFT</button>
         <div class="dropmenu">
@@ -317,6 +344,7 @@ $base   = $scheme . '://' . $host;
           <div class="actions"><button class="btn" onclick="clearMenu(this)">クリア</button><button class="btn" onclick="closeMenu(this)">OK</button></div>
         </div>
       </div>
+
       <div class="dropdown" data-key="nat">
         <button class="dropbtn" onclick="toggleMenu(this)">国籍で絞り込み</button>
         <div class="dropmenu" style="min-width:260px">
@@ -327,7 +355,6 @@ $base   = $scheme . '://' . $host;
         </div>
       </div>
 
-      <!-- NEW: 国内/国外 filter -->
       <div class="dropdown" data-key="res">
         <button class="dropbtn" onclick="toggleMenu(this)">居住地（国内/国外）</button>
         <div class="dropmenu">
@@ -361,14 +388,20 @@ $base   = $scheme . '://' . $host;
           $viewerX = 'https://view.officeapps.live.com/op/view.aspx?src=' . rawurlencode($absXls);
           $date    = $r['created'] ? date('Y-m-d H:i', $r['created']) : '-';
 
-          // source cell: show job title link whenever job_id present
+          // source cell: show COMPANY NAME link whenever job_id present (replace job title)
           $srcCellText = 'open';
           $srcCellHtml = 'open';
           if ($r['job_id'] > 0) {
-            $jt   = $r['job_title'] !== '' ? $r['job_title'] : ('求人ID '.$r['job_id']);
+            $label = trim((string)($r['company_name'] ?? ''));
+            if ($label === '') {
+              // fallback: keep old behavior if company_name missing
+              $label = trim((string)($r['job_title'] ?? ''));
+            }
+            if ($label === '') $label = '求人ID ' . (int)$r['job_id'];
+
             $href = '/php/job_details.php?job_id=' . (int)$r['job_id'];
-            $srcCellText = $jt;
-            $srcCellHtml = '<a href="'.htmlspecialchars($href).'" target="_blank">'.htmlspecialchars($jt).'</a>';
+            $srcCellText = $label;
+            $srcCellHtml = '<a href="'.htmlspecialchars($href).'" target="_blank">'.htmlspecialchars($label).'</a>';
           } elseif ($r['src_type'] === 'upload') {
             $srcCellText = 'アップロード';
             $srcCellHtml = 'アップロード';
@@ -384,7 +417,6 @@ $base   = $scheme . '://' . $host;
             if (in_array($ext, ['xls','xlsx'], true)) {
               $printHref = 'https://view.officeapps.live.com/op/view.aspx?src=' . rawurlencode($absOrig);
             } else {
-              // pdf / jpg / jpeg / png → open directly (browser print)
               $printHref = $r['orig_rel'];
             }
           } else {
@@ -475,7 +507,7 @@ $base   = $scheme . '://' . $host;
       const expSel  = getSelected('exp');
       const jlptSel = getSelected('jlpt');
       const natSel  = getSelected('nat');
-      const resSel  = getSelected('res');   // NEW
+      const resSel  = getSelected('res');
       const rows = document.querySelectorAll('#rirekiTable tbody tr');
       rows.forEach(tr=>{
         let show = true;
@@ -496,7 +528,7 @@ $base   = $scheme . '://' . $host;
           const v = (tr.getAttribute('data-nat')||'').trim();
           show = natSel.includes(v);
         }
-        if (show && resSel.length){                            // NEW
+        if (show && resSel.length){
           const v = (tr.getAttribute('data-res')||'').trim();
           show = resSel.includes(v);
         }
