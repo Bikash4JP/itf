@@ -19,7 +19,6 @@ if (empty($_SESSION['csrf_token'])) {
 
 require_once __DIR__ . '/db_connect.php';
 
-// staff dropdown (求人担当)
 $staffList = [];
 try {
   $st = $pdo->query("SELECT id, name, username FROM staff ORDER BY name ASC");
@@ -36,22 +35,23 @@ try {
   <title>求人管理（Airtable風）</title>
 
   <link rel="stylesheet" href="https://it-future.jp/css/staffdb.css">
-
-  <!-- Tabulator -->
   <link href="https://unpkg.com/tabulator-tables@6.3.0/dist/css/tabulator.min.css" rel="stylesheet">
   <script src="https://unpkg.com/tabulator-tables@6.3.0/dist/js/tabulator.min.js"></script>
 
   <style>
     :root{
       --border:#e6edf6; --ink:#0b2243; --muted:#667085;
-      --primary:#1e90ff; --primary-d:#1677d3;
+      --primary:#1e90ff; --primary-d:#1677d3; --success:#10b981;
     }
     body{margin:0;font-family:ui-sans-serif,system-ui,"Segoe UI",Roboto,"Noto Sans JP","Hiragino Kaku Gothic ProN",Meiryo,Arial,sans-serif;background:#fff}
     .wrap{max-width:1900px;margin:0 auto;padding:14px 16px}
     .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:14px 0}
-    .btn{padding:10px 12px;border:1px solid #dbe7f5;border-radius:10px;background:#f3f9ff;color:#0b3772;cursor:pointer;text-decoration:none}
+    .btn{padding:10px 12px;border:1px solid #dbe7f5;border-radius:10px;background:#f3f9ff;color:#0b3772;cursor:pointer;text-decoration:none;font-family:inherit;font-size:14px;font-weight:600;transition:.15s}
+    .btn:hover{filter:brightness(.97)}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
     .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
-    .btn.primary:hover{background:var(--primary-d)}
+    .btn.primary:hover:not(:disabled){background:var(--primary-d)}
+    .btn.success{background:var(--success);border-color:var(--success);color:#fff}
     .muted{color:var(--muted);font-size:12px}
 
     .pill{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:900;line-height:1;color:#fff}
@@ -62,19 +62,19 @@ try {
     .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:900;border:1px solid #dbe7f5;background:#f8fafc;color:#0b2243}
     .chip small{opacity:.75;font-weight:800}
 
-    .btnDel{
-      background:#fee2e2;border:1px solid #fecaca;color:#991b1b;
-      padding:6px 10px;border-radius:10px;cursor:pointer;font-weight:900;
-    }
+    .btnDel{background:#fee2e2;border:1px solid #fecaca;color:#991b1b;padding:6px 10px;border-radius:10px;cursor:pointer;font-weight:900}
     .btnDel:hover{filter:brightness(.98)}
 
     .drawerBack{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;z-index:9998}
     .drawerBack.open{display:block}
-    .drawer{
-      position:fixed;top:0;right:0;height:100%;width:min(560px, 96vw);background:#fff;border-left:1px solid var(--border);
-      transform:translateX(100%);transition:.18s;overflow:auto;z-index:9999
-    }
+    .drawer{position:fixed;top:0;right:0;height:100%;width:min(560px, 96vw);background:#fff;border-left:1px solid var(--border);transform:translateX(100%);transition:.18s;overflow:auto;z-index:9999}
     .drawer.open{transform:translateX(0)}
+
+    .tabulator-row.edited{background:#fffbeb !important}
+    .tabulator-row.edited:hover{background:#fef3c7 !important}
+
+    .saveNotif{position:fixed;top:20px;right:20px;padding:12px 20px;background:var(--success);color:#fff;border-radius:10px;font-weight:900;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:10000;opacity:0;transition:.2s;pointer-events:none}
+    .saveNotif.show{opacity:1}
   </style>
 </head>
 <body>
@@ -93,7 +93,8 @@ try {
 <div class="wrap">
   <div class="toolbar">
     <button class="btn primary" id="btnAdd">＋ 新規行（下書き）</button>
-    <button class="btn" id="btnRefresh">↻ 更新</button>
+    <button class="btn success" id="btnSaveAll">💾 更新（全て保存）</button>
+    <button class="btn" id="btnRefresh">↻ 再読込</button>
 
     <label class="muted">Group:</label>
     <select id="groupBy" class="btn" style="padding:8px 10px">
@@ -106,13 +107,14 @@ try {
     </select>
 
     <a class="btn" href="/saiyou.php" target="_blank">公開（求人一覧）を見る</a>
-    <span class="muted">セルをクリックして編集 → 自動保存</span>
+    <span class="muted" id="editHint">セルをクリックして編集 → <strong>更新</strong>ボタンで保存</span>
   </div>
 
   <div id="jobsGrid"></div>
 </div>
 
-<!-- Drawer (求人票 upload / preview) -->
+<div class="saveNotif" id="saveNotif">✓ 保存しました</div>
+
 <div class="drawerBack" id="drawerBack"></div>
 <div class="drawer" id="drawer">
   <div style="padding:14px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center">
@@ -139,92 +141,52 @@ try {
 
 <script>
 const CSRF = <?= json_encode($_SESSION['csrf_token']) ?>;
-
 const STAFF_LIST = <?= json_encode($staffList, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) ?>;
 
-// ===== staff values for Tabulator list editor (label/value) =====
 const STAFF_NAME_BY_ID = {};
 const STAFF_VALUE_LIST = (function(){
   const arr = [{label:"", value:""}];
   for(const s of STAFF_LIST){
     const id = String(s.id);
     STAFF_NAME_BY_ID[id] = s.name;
-    arr.push({label: s.name, value: id}); // store id, show name
+    arr.push({label: s.name, value: id});
   }
   return arr;
 })();
 
-// ===== Dropdown options =====
-// 状況 is already perfect (don't change logic)
 const statusOpts = ["募集中","急募","募集終"];
-
-// 職種 (strict dropdown: no freetext)
 const workTypeOpts = ["介護","外食","工業製品","食品製造","その他"];
-
-// 住所 (keep as is)
 const prefTop = ["東京都","大阪府","神奈川県","埼玉県","千葉県","愛知県","福岡県","兵庫県","京都府","北海道"];
 const prefAll = ["北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県","茨城県","栃木県","群馬県","埼玉県","千葉県","東京都","神奈川県","新潟県","富山県","石川県","福井県","山梨県","長野県","岐阜県","静岡県","愛知県","三重県","滋賀県","京都府","大阪府","兵庫県","奈良県","和歌山県","鳥取県","島根県","岡山県","広島県","山口県","徳島県","香川県","愛媛県","高知県","福岡県","佐賀県","長崎県","熊本県","大分県","宮崎県","鹿児島県","沖縄県"];
 const prefectureOpts = [...prefTop, ...prefAll.filter(p=>!prefTop.includes(p))];
-
-// 賞与 (keep as is)
 const bonusOpts = ["あり","なし"];
-
-// 現在の居住地 (strict)
-const residenceOpts = [
-  {label:"国内", value:"国内"},
-  {label:"国外", value:"国外"},
-  {label:"どちらでもOK", value:"どちらでもOK"},
-];
-
-// 性別 (UI: 男性/女性, DB: 男/女)
-const genderOpts = [
-  {label:"男性", value:"男"},
-  {label:"女性", value:"女"},
-  {label:"どちらでもOK", value:"どちらでもOK"},
-];
-
-// 経験 (UI: あり/OK, DB: あり/どちらでもOK)
-const expOpts = [
-  {label:"あり", value:"あり"},
-  {label:"OK", value:"どちらでもOK"},
-];
-
-// ヒジャブ (strict)
-const hijabOpts = [
-  {label:"OK", value:"OK"},
-  {label:"禁止", value:"禁止"},
-];
-
-// 国籍 checklist (strict multi, no freetext)
-const nationalityOpts = [
-  "国籍問わず",
-  "Japan",
-  "Indonesia",
-  "Nepal",
-  "India",
-  "Vietnam",
-  "China",
-  "Bangladesh",
-  "Korea",
-  "Myanmar",
-  "Others"
-];
-
-// 公開状態 (keep)
+const residenceOpts = [{label:"国内", value:"国内"},{label:"国外", value:"国外"},{label:"どちらでもOK", value:"どちらでもOK"}];
+const genderOpts = [{label:"男性", value:"男"},{label:"女性", value:"女"},{label:"どちらでもOK", value:"どちらでもOK"}];
+// ✅ experience dropdown should include なし too (otherwise old numeric/string values feel weird)
+const expOpts = [{label:"あり", value:"あり"},{label:"なし", value:"なし"},{label:"どちらでもOK", value:"どちらでもOK"}];
+const hijabOpts = [{label:"OK", value:"OK"},{label:"禁止", value:"禁止"}];
+const nationalityOpts = ["国籍問わず","Japan","Indonesia","Nepal","India","Vietnam","China","Bangladesh","Korea","Myanmar","Others"];
 const publishKeys = ["draft","published","archived"];
 const publishLabel = {draft:"下書き", published:"公開", archived:"アーカイブ"};
 
 let currentJobId = null;
+const editedRows = new Set();
+const originalData = new Map(); // row snapshot
 
-// ===== UI helpers =====
-function escapeHtml(s){
-  return String(s ?? "").replace(/[&<>"']/g, (m)=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
-}
-function hashHue(str){
-  let h=0; str=String(str||"");
-  for(let i=0;i<str.length;i++) h = (h*31 + str.charCodeAt(i)) >>> 0;
-  return h % 360;
-}
+// Fields that matter for diff fallback (same as API allow-list)
+const TRACK_FIELDS = [
+  'company_name','status','request_date','deadline_date',
+  'job_staff_id','level','title','summary','content',
+  'org_work_type','job_location',
+  'bonuses','bonus_amount',
+  'salary','salary_basic','salary_takehome','transport_amount_limit','rent_support',
+  'current_residence','gender_pref','experience','hijab_policy',
+  'nationality_pref_json','required_vacancy','japanese_level',
+  'publish_state',
+];
+
+function escapeHtml(s){ return String(s ?? "").replace(/[&<>"']/g, (m)=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m])); }
+function hashHue(str){ let h=0; str=String(str||""); for(let i=0;i<str.length;i++) h = (h*31 + str.charCodeAt(i)) >>> 0; return h % 360; }
 function chip(val){
   const s = (val||"").trim();
   if(!s) return "";
@@ -257,7 +219,6 @@ function publishPill(val){
 function filesPreviewFormatter(cell){
   const arr = cell.getValue() || [];
   if(!Array.isArray(arr) || !arr.length) return `<span class="chip"><small>アップロード</small></span>`;
-
   const html = arr.slice(0,2).map(f=>{
     if((f.mime||"").startsWith("image/")){
       return `<span style="width:46px;height:34px;border-radius:8px;margin-right:6px;display:inline-block;overflow:hidden;vertical-align:middle;border:1px solid var(--border);background:#fafafa">
@@ -266,12 +227,10 @@ function filesPreviewFormatter(cell){
     }
     return `<span style="width:46px;height:34px;border-radius:8px;margin-right:6px;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;font-size:10px;border:1px solid var(--border);background:#fafafa;font-weight:900">PDF</span>`;
   }).join("");
-
   const more = arr.length > 2 ? `<span class="chip"><small>+${arr.length-2}</small></span>` : "";
   return html + more;
 }
 
-// ===== API =====
 async function api(action, data=null){
   const url = "jobs_api.php?action=" + encodeURIComponent(action);
   if(!data){
@@ -282,6 +241,7 @@ async function api(action, data=null){
   for(const k in data){
     const v = data[k];
     if(Array.isArray(v)) form.append(k, JSON.stringify(v));
+    else if(typeof v === 'object' && v !== null) form.append(k, JSON.stringify(v));
     else form.append(k, v);
   }
   form.append("csrf_token", CSRF);
@@ -293,9 +253,57 @@ async function loadGrid(){
   const res = await api("list");
   if(!res.ok){ alert(res.error || "Load failed"); return; }
   table.setData(res.rows);
+
+  originalData.clear();
+  res.rows.forEach(row => originalData.set(row.id, JSON.parse(JSON.stringify(row))));
+
+  editedRows.clear();
+  updateEditHint();
 }
 
-// ===== Drawer (求人票) =====
+function showSaveNotif(){
+  const el = document.getElementById("saveNotif");
+  el.classList.add("show");
+  setTimeout(()=>{ el.classList.remove("show"); }, 2000);
+}
+
+function updateEditHint(){
+  const hint = document.getElementById("editHint");
+  if(editedRows.size > 0){
+    hint.innerHTML = `<strong style="color:#dc2626">${editedRows.size}行</strong> 編集中 → <strong>更新</strong>ボタンで保存`;
+  } else {
+    hint.innerHTML = 'セルをクリックして編集 → <strong>更新</strong>ボタンで保存';
+  }
+}
+
+function markRowEdited(rowId){
+  editedRows.add(rowId);
+  const row = table.getRow(rowId);
+  if(row){
+    const elem = row.getElement();
+    if(elem) elem.classList.add("edited");
+  }
+  updateEditHint();
+}
+
+// Fallback diff (in case edit event missed)
+function normalizeVal(v){
+  if(Array.isArray(v)) return JSON.stringify(v.slice().sort());
+  if(v === undefined) return null;
+  return v;
+}
+function rowHasDiff(row){
+  const id = row.id;
+  const orig = originalData.get(id);
+  if(!orig) return true;
+  for(const f of TRACK_FIELDS){
+    const a = normalizeVal(row[f]);
+    const b = normalizeVal(orig[f]);
+    if(String(a ?? "") !== String(b ?? "")) return true;
+  }
+  return false;
+}
+
 function openDrawer(job, autoPick=false){
   currentJobId = job.id;
   document.getElementById("dTitle").textContent = `#${job.id} ${job.company_name || "(施設名未入力)"}`;
@@ -323,33 +331,15 @@ async function loadFiles(jobId){
   const box = document.getElementById("filesBox");
   box.innerHTML = "";
   if(!res.ok){ box.textContent = res.error || "読み込み失敗"; return; }
-
-  if(!res.files.length){
-    box.innerHTML = `<div class="muted">ファイルなし</div>`;
-    return;
-  }
-
+  if(!res.files.length){ box.innerHTML = `<div class="muted">ファイルなし</div>`; return; }
   for(const f of res.files){
     const wrap = document.createElement("div");
-    wrap.style.width="160px";
-    wrap.style.height="120px";
-    wrap.style.border="1px solid var(--border)";
-    wrap.style.borderRadius="10px";
-    wrap.style.overflow="hidden";
-    wrap.style.display="flex";
-    wrap.style.alignItems="center";
-    wrap.style.justifyContent="center";
-    wrap.style.background="#fafafa";
-    wrap.style.cursor="pointer";
-
+    wrap.style.cssText = "width:160px;height:120px;border:1px solid var(--border);border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#fafafa;cursor:pointer";
     const openUrl = f.file_path;
-
     if((f.mime||"").startsWith("image/")){
       wrap.innerHTML = `<img src="${f.file_path}" alt="" style="width:100%;height:100%;object-fit:cover">`;
     }else{
-      wrap.innerHTML = `<div style="font-size:12px;color:#0b3772;font-weight:900;text-align:center;line-height:1.2">
-        PDF<br><span style="font-weight:700;font-size:11px;opacity:.85">${escapeHtml(f.file_name||"")}</span>
-      </div>`;
+      wrap.innerHTML = `<div style="font-size:12px;color:#0b3772;font-weight:900;text-align:center;line-height:1.2">PDF<br><span style="font-weight:700;font-size:11px;opacity:.85">${escapeHtml(f.file_name||"")}</span></div>`;
     }
     wrap.addEventListener("click", ()=> window.open(openUrl, "_blank"));
     box.appendChild(wrap);
@@ -361,28 +351,23 @@ document.getElementById("uploadForm").addEventListener("submit", async (e)=>{
   if(!currentJobId){ alert("求人を選択してください"); return; }
   const file = document.getElementById("fileInput").files[0];
   if(!file){ alert("ファイルを選択してください"); return; }
-
   const form = new FormData();
   form.append("id", currentJobId);
   form.append("file", file);
   form.append("csrf_token", CSRF);
-
   const r = await fetch("jobs_api.php?action=uploadFile", {method:"POST", body:form, credentials:"same-origin"});
   const res = await r.json();
   if(!res.ok){ alert(res.error || "アップロード失敗"); return; }
-
   document.getElementById("fileInput").value = "";
   await loadFiles(currentJobId);
   await loadGrid();
 });
 
-// status sort (急募 top, then 募集中, then 募集終)
 function statusSort(a,b){
   const m = {"急募":0,"募集中":1,"募集終":2};
   return (m[a] ?? 9) - (m[b] ?? 9);
 }
 
-// ===== Tabulator =====
 const table = new Tabulator("#jobsGrid",{
   height:"74vh",
   layout:"fitColumns",
@@ -398,101 +383,38 @@ const table = new Tabulator("#jobsGrid",{
         if(!confirm(`#${row.id} を削除しますか？（DBからも削除）`)) return;
         const res = await api("delete",{id: row.id});
         if(!res.ok){ alert(res.error || "削除失敗"); return; }
+        editedRows.delete(row.id);
+        originalData.delete(row.id);
         cell.getRow().delete();
+        updateEditHint();
       }
     },
 
     {title:"施設名", field:"company_name", editor:"input", width:220},
-
-    // ✅ 状況 (KEEP)
-    {title:"状況", field:"status",
-      sorter:statusSort,
-      formatter:(c)=>statusPill(c.getValue()),
-      editor:"list",
-      editorParams:{
-        values: statusOpts,
-        freetext:false,
-        autocomplete:false,
-        clearable:false,
-        listOnEmpty:true
-      },
-      width:120
-    },
-
-    // ✅ 職種 (moved here right after 状況, strict dropdown)
-    {title:"職種", field:"org_work_type",
-      formatter:(c)=>chip(c.getValue()),
-      editor:"list",
-      editorParams:{
-        values: workTypeOpts,
-        freetext:false,
-        autocomplete:false,
-        clearable:true,
-        listOnEmpty:true
-      },
-      width:170
-    },
-
+    {title:"状況", field:"status", sorter:statusSort, formatter:(c)=>statusPill(c.getValue()), editor:"list",
+      editorParams:{values: statusOpts, freetext:false, autocomplete:false, clearable:false, listOnEmpty:true}, width:120},
+    {title:"職種", field:"org_work_type", formatter:(c)=>chip(c.getValue()), editor:"list",
+      editorParams:{values: workTypeOpts, freetext:false, autocomplete:false, clearable:true, listOnEmpty:true}, width:170},
     {title:"最終更新", field:"updated_at", sorter:"datetime", width:150},
-
-    // ✅ date inputs
-    {title:"受注日", field:"request_date",
-      editor:"input",
-      editorParams:{elementAttributes:{type:"date"}},
-      width:130
-    },
-    {title:"締切日", field:"deadline_date",
-      editor:"input",
-      editorParams:{elementAttributes:{type:"date"}},
-      width:130
-    },
-
-    // ✅ 求人担当 (FIXED: real dropdown; no typing)
-    {title:"求人担当", field:"job_staff_id",
-      formatter:(c)=>staffChipById(c.getValue()),
-      editor:"list",
-      editorParams:{
-        values: STAFF_VALUE_LIST,    // <--- important: label/value list
-        freetext:false,
-        autocomplete:false,
-        clearable:true,
-        listOnEmpty:true
-      },
-      width:190
-    },
-
+    {title:"受注日", field:"request_date", editor:"input", editorParams:{elementAttributes:{type:"date"}}, width:130},
+    {title:"締切日", field:"deadline_date", editor:"input", editorParams:{elementAttributes:{type:"date"}}, width:130},
+    {title:"求人担当", field:"job_staff_id", formatter:(c)=>staffChipById(c.getValue()), editor:"list",
+      editorParams:{values: STAFF_VALUE_LIST, freetext:false, autocomplete:false, clearable:true, listOnEmpty:true}, width:190},
     {title:"メモ詳細", field:"level", editor:"input", width:220},
-
     {title:"タイトル", field:"title", editor:"input", width:260},
     {title:"概要", field:"summary", editor:"textarea", width:320},
     {title:"詳細内容", field:"content", editor:"textarea", width:360},
-
-    // ✅ 住所 (KEEP)
-    {title:"住所", field:"job_location",
-      editor:"list",
-      editorParams:{values: prefectureOpts, clearable:true, autocomplete:true, freetext:true},
-      width:150
-    },
-
-    // ✅ 賞与 (KEEP)
+    {title:"住所", field:"job_location", editor:"list",
+      editorParams:{values: prefectureOpts, clearable:true, autocomplete:true, freetext:true}, width:150},
     {title:"賞与", field:"bonuses",
-      formatter:(c)=>{
-        const v = (c.getValue() || "なし");
-        return v === "あり" ? `<span class="chip"><small>あり</small></span>` : `<span class="chip"><small>なし</small></span>`;
-      },
-      editor:"list",
-      editorParams:{values: bonusOpts, clearable:true, autocomplete:true},
-      width:120
-    },
-
+      formatter:(c)=>{ const v = (c.getValue() || "なし"); return v === "あり" ? `<span class="chip"><small>あり</small></span>` : `<span class="chip"><small>なし</small></span>`; },
+      editor:"list", editorParams:{values: bonusOpts, clearable:true, autocomplete:true}, width:120},
     {title:"賞与内容", field:"bonus_amount", editor:"input", width:200},
     {title:"月給", field:"salary", editor:"input", width:170},
     {title:"基本給", field:"salary_basic", editor:"input", width:140},
     {title:"手取り", field:"salary_takehome", editor:"input", width:140},
     {title:"交通費上限", field:"transport_amount_limit", editor:"input", width:160},
     {title:"住宅手当", field:"rent_support", editor:"input", width:160},
-
-    // ✅ 国籍 checklist (FIXED: strict multiselect, no freetext)
     {title:"国籍", field:"nationality_pref_json",
       formatter:(cell)=>{
         const v = cell.getValue();
@@ -501,130 +423,128 @@ const table = new Tabulator("#jobsGrid",{
         return `<span class="chip"><small>${escapeHtml(arr.join(", "))}</small></span>`;
       },
       editor:"list",
-      editorParams:{
-        values: nationalityOpts,
-        multiselect:true,
-        clearable:true,
-        freetext:false,
-        autocomplete:false,
-        listOnEmpty:true
-      },
-      width:320
-    },
-
-    // ✅ 現在の居住地 (FIXED strict)
-    {title:"現在の居住地", field:"current_residence",
-      editor:"list",
-      editorParams:{
-        values: residenceOpts,
-        freetext:false,
-        autocomplete:false,
-        clearable:true,
-        listOnEmpty:true
-      },
-      width:170
-    },
-
-    // ✅ 性別 (FIXED: show 男性/女性, store 男/女)
-    {title:"性別", field:"gender_pref",
-      editor:"list",
-      editorParams:{
-        values: genderOpts,
-        freetext:false,
-        autocomplete:false,
-        clearable:true,
-        listOnEmpty:true
-      },
-      width:150
-    },
-
-    // ✅ 経験 (FIXED: あり / OK)
-    {title:"経験", field:"experience",
-      editor:"list",
-      editorParams:{
-        values: expOpts,
-        freetext:false,
-        autocomplete:false,
-        clearable:true,
-        listOnEmpty:true
-      },
-      width:150
-    },
-
-    // ✅ ヒジャブ (FIXED strict)
-    {title:"ヒジャブ", field:"hijab_policy",
-      editor:"list",
-      editorParams:{
-        values: hijabOpts,
-        freetext:false,
-        autocomplete:false,
-        clearable:true,
-        listOnEmpty:true
-      },
-      width:140
-    },
-
+      editorParams:{values: nationalityOpts, multiselect:true, clearable:true, freetext:false, autocomplete:false, listOnEmpty:true}, width:320},
+    {title:"現在の居住地", field:"current_residence", editor:"list",
+      editorParams:{values: residenceOpts, freetext:false, autocomplete:false, clearable:true, listOnEmpty:true}, width:170},
+    {title:"性別", field:"gender_pref", editor:"list",
+      editorParams:{values: genderOpts, freetext:false, autocomplete:false, clearable:true, listOnEmpty:true}, width:150},
+    {title:"経験", field:"experience", editor:"list",
+      editorParams:{values: expOpts, freetext:false, autocomplete:false, clearable:true, listOnEmpty:true}, width:150},
+    {title:"ヒジャブ", field:"hijab_policy", editor:"list",
+      editorParams:{values: hijabOpts, freetext:false, autocomplete:false, clearable:true, listOnEmpty:true}, width:140},
     {title:"募集人数", field:"required_vacancy", editor:"input", width:120},
     {title:"日本語レベル", field:"japanese_level", editor:"input", width:140},
-
-    {title:"求人票", field:"files_preview",
-      formatter:filesPreviewFormatter,
-      width:190,
-      headerSort:false,
-      cellClick:(e, cell)=>{
-        const row = cell.getRow().getData();
-        openDrawer(row, true);
-      }
-    },
-
-    {title:"公開状態", field:"publish_state",
-      formatter:(c)=>publishPill(c.getValue()),
-      editor:"list",
-      editorParams:{values: publishKeys, freetext:false, autocomplete:false, clearable:false, listOnEmpty:true},
-      width:140
-    },
+    {title:"求人票", field:"files_preview", formatter:filesPreviewFormatter, width:190, headerSort:false,
+      cellClick:(e, cell)=>{ const row = cell.getRow().getData(); openDrawer(row, true); }},
+    {title:"公開状態", field:"publish_state", formatter:(c)=>publishPill(c.getValue()), editor:"list",
+      editorParams:{values: publishKeys, freetext:false, autocomplete:false, clearable:false, listOnEmpty:true}, width:140},
   ],
-
-  cellEdited: async function(cell){
-    const row = cell.getRow().getData();
-    const field = cell.getField();
-    if(field === "files_preview" || field === "__del") return;
-
-    let val = cell.getValue();
-
-    // nationality must be array
-    if(field === "nationality_pref_json"){
-      if(typeof val === "string"){
-        try { const j = JSON.parse(val); if(Array.isArray(j)) val = j; } catch(e){}
-      }
-      if(val == null) val = [];
-      if(!Array.isArray(val)) val = [];
-    }
-
-    const res = await api("updateCell",{id: row.id, field: field, value: val});
-    if(!res.ok){
-      alert(res.error || "保存失敗");
-      loadGrid();
-      return;
-    }
-    if(res.row){
-      cell.getRow().update(res.row);
-    }
-  },
 });
 
-document.getElementById("btnRefresh").addEventListener("click", loadGrid);
+// ✅✅✅ REAL FIX: Bind Tabulator events (not options)
+table.on("cellEdited", (cell)=>{
+  const field = cell.getField();
+  if(field === "files_preview" || field === "__del") return;
+  const id = cell.getRow().getData().id;
+  markRowEdited(id);
+});
+
+// Optional: if user edits but value same, don’t mark
+table.on("cellEditCancelled", (cell)=>{
+  // Usually do nothing (cancel means no change)
+});
+
+// ✅ Save All
+document.getElementById("btnSaveAll").addEventListener("click", async ()=>{
+  // force commit current edit before checking editedRows
+  if(document.activeElement) document.activeElement.blur();
+  await new Promise(r=>setTimeout(r, 0));
+
+  // fallback diff scan (in case event missed)
+  if(editedRows.size === 0){
+    const all = table.getData();
+    for(const r of all){
+      if(rowHasDiff(r)) markRowEdited(r.id);
+    }
+  }
+
+  if(editedRows.size === 0){
+    alert("編集された行がありません。\n\nヒント：セルをクリックして値を変更してください。");
+    return;
+  }
+
+  const btn = document.getElementById("btnSaveAll");
+  const origText = btn.textContent;
+  btn.textContent = "保存中...";
+  btn.disabled = true;
+
+  let successCount = 0;
+  let failCount = 0;
+  const failedIds = new Set();
+
+  for(const rowId of Array.from(editedRows)){
+    try {
+      const row = table.getRow(rowId);
+      if(!row){ failedIds.add(rowId); failCount++; continue; }
+
+      const data = row.getData();
+
+      const res = await api("updateRow", {
+        id: data.id,
+        data: JSON.stringify(data)
+      });
+
+      if(res.ok && res.row){
+        row.update(res.row);
+        originalData.set(data.id, JSON.parse(JSON.stringify(res.row)));
+        const elem = row.getElement();
+        if(elem) elem.classList.remove("edited");
+        successCount++;
+      } else {
+        failedIds.add(rowId);
+        failCount++;
+      }
+    } catch(err) {
+      failedIds.add(rowId);
+      failCount++;
+    }
+  }
+
+  // keep only failed rows marked
+  editedRows.clear();
+  failedIds.forEach(id=>editedRows.add(id));
+  updateEditHint();
+
+  btn.textContent = origText;
+  btn.disabled = false;
+
+  if(failCount > 0){
+    alert(`保存完了:\n成功: ${successCount}行\n失敗: ${failCount}行`);
+  } else {
+    showSaveNotif();
+  }
+
+  await loadGrid();
+});
+
+document.getElementById("btnRefresh").addEventListener("click", ()=>{
+  if(editedRows.size > 0){
+    if(!confirm("未保存の変更があります。再読込しますか？")) return;
+  }
+  loadGrid();
+});
+
 document.getElementById("btnAdd").addEventListener("click", async ()=>{
   const res = await api("create",{});
   if(!res.ok){ alert(res.error || "作成失敗"); return; }
   await loadGrid();
 });
+
 document.getElementById("groupBy").addEventListener("change", (e)=>{
   const v = e.target.value;
   table.setGroupBy(v || false);
 });
 
-// first load
 loadGrid();
 </script>
 
