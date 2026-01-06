@@ -5,32 +5,46 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="theme-color" content="#1e90ff" />
 
-  <!-- Primary SEO -->
-  <title>【無料】オンライン履歴書メーカー｜5分で作成・Excel出力・テンプレ即対応</title>
-  <meta name="description" content="オンラインで無料の履歴書メーカー。入力は最短5分、Excel（.xls）でダウンロード可能。介護業界向けテンプレにも対応。スマホOK・インストール不要・日本語/外国籍も使いやすい。">
+  <!-- Primary SEO (UPDATED) -->
+  <title>【無料】履歴書作成ツール（スマホ対応）｜オンラインで5分・Excelダウンロード</title>
+  <meta name="description" content="【無料】履歴書をオンラインで作成。スマホ/PC対応で最短5分、Excel（.xls）でダウンロード可能。標準/介護テンプレ対応、インストール不要でかんたん作成。">
 
   <!-- Canonical / robots -->
   <link rel="canonical" href="https://it-future.jp/rireki/" />
   <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1">
 
-  <!-- Open Graph -->
+  <!-- Hreflang -->
+  <link rel="alternate" hreflang="ja-JP" href="https://it-future.jp/rireki/" />
+  <link rel="alternate" hreflang="x-default" href="https://it-future.jp/rireki/" />
+
+  <!-- Open Graph (UPDATED) -->
   <meta property="og:type" content="website">
+  <meta property="og:locale" content="ja_JP">
   <meta property="og:site_name" content="ITF オンライン履歴書メーカー">
-  <meta property="og:title" content="【無料】オンライン履歴書メーカー｜5分で作成・Excel出力">
+  <meta property="og:title" content="【無料】履歴書作成ツール（スマホ対応）｜オンラインで5分・Excelダウンロード">
   <meta property="og:description" content="最短5分で履歴書をオンライン作成。無料・Excel出力・テンプレ対応・スマホOK。介護向けフォーマットも。">
   <meta property="og:url" content="https://it-future.jp/rireki/">
-  <meta property="og:image" content="https://it-future.jp/images/og/rireki_og.jpg">
+  <meta property="og:image" content="https://it-future.jp/images/og/rireki_og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
 
-  <!-- Twitter -->
+  <!-- Twitter (UPDATED) -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="【無料】オンライン履歴書メーカー｜5分で作成・Excel出力">
+  <meta name="twitter:title" content="【無料】履歴書作成ツール（スマホ対応）｜オンラインで5分・Excelダウンロード">
   <meta name="twitter:description" content="最短5分で履歴書をオンライン作成。無料・Excel出力・テンプレ対応・スマホOK。介護向けフォーマットも。">
-  <meta name="twitter:image" content="https://it-future.jp/images/og/rireki_og.jpg">
+  <meta name="twitter:image" content="https://it-future.jp/images/og/rireki_og.png">
 
-  <!-- Preloads -->
+  <!-- Performance (UPDATED) -->
   <link rel="preconnect" href="https://it-future.jp" crossorigin>
   <link rel="dns-prefetch" href="https://it-future.jp">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+
+  <!-- Preload LCP image (UPDATED) -->
+  <link rel="preload" as="image" href="https://it-future.jp/rireki/images/basicRireki_sample.png" fetchpriority="high" />
 
   <!-- Styles -->
   <link rel="stylesheet" href="https://it-future.jp/css/footer.css">
@@ -119,17 +133,51 @@
     #back-to-top:focus{ outline:none; box-shadow:0 0 0 4px rgba(59,130,246,.5),0 6px 18px rgba(30,144,255,.16) }
   </style>
 
-  <!-- JSON-LD: WebSite + SearchAction -->
+  <!-- JSON-LD: WebPage (UPDATED) -->
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
-    "@type":"WebSite",
+    "@type":"WebPage",
+    "name":"オンライン履歴書メーカー（無料）",
+    "url":"https://it-future.jp/rireki/",
+    "description":"履歴書をオンラインで作成できる無料ツール。スマホ/PC対応、最短5分、Excel（.xls）ダウンロード、標準/介護テンプレ対応。",
+    "inLanguage":"ja-JP",
+    "isPartOf":{
+      "@type":"WebSite",
+      "name":"株式会社アイティーエフ",
+      "url":"https://it-future.jp/"
+    },
+    "primaryImageOfPage":{
+      "@type":"ImageObject",
+      "url":"https://it-future.jp/rireki/images/basicRireki_sample.png",
+      "width":720,
+      "height":480
+    }
+  }
+  </script>
+
+  <!-- JSON-LD: WebApplication (UPDATED) -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"WebApplication",
     "name":"ITF オンライン履歴書メーカー",
-    "url":"https://it-future.jp/",
-    "potentialAction":{
-      "@type":"SearchAction",
-      "target":"https://it-future.jp/saiyou.php?q={search_term_string}",
-      "query-input":"required name=search_term_string"
+    "url":"https://it-future.jp/rireki/",
+    "applicationCategory":"BusinessApplication",
+    "operatingSystem":"Web",
+    "inLanguage":"ja-JP",
+    "offers":{"@type":"Offer","price":"0","priceCurrency":"JPY"},
+    "featureList":[
+      "スマホで履歴書作成",
+      "オンラインで入力して作成",
+      "Excel（.xls）ダウンロード",
+      "標準/介護テンプレ対応",
+      "インストール不要"
+    ],
+    "publisher":{
+      "@type":"Organization",
+      "name":"株式会社アイティーエフ",
+      "url":"https://it-future.jp/"
     }
   }
   </script>
@@ -185,7 +233,14 @@
         </div>
       </div>
       <div class="thumb-hero">
-        <img src="https://it-future.jp/rireki/images/basicRireki_sample.png" alt="オンライン履歴書メーカーのスクリーンショット" loading="lazy" width="720" height="480">
+        <!-- LCP improvement: eager + fetchpriority (UPDATED) -->
+        <img src="https://it-future.jp/rireki/images/basicRireki_sample.png"
+             alt="オンライン履歴書メーカーのスクリーンショット"
+             loading="eager"
+             fetchpriority="high"
+             decoding="async"
+             width="720"
+             height="480">
       </div>
     </div>
   </header>
