@@ -250,8 +250,11 @@ function build_job_ld($job){
           <?php
           require_once 'php/db_connect.php';
 
-          $query = "SELECT * FROM posts WHERE post_type = 'job'";
-          $params = [];
+          $query = "SELECT * FROM posts
+          WHERE post_type='job'
+            AND publish_state='published'
+            AND (status IS NULL OR status='' OR status NOT IN ('募集終','募集終了','募集終わり','2'))";
+$params = [];
 
           if (!empty($_GET['q'])) {
             $search = "%".$_GET['q']."%";
@@ -263,7 +266,18 @@ function build_job_ld($job){
           if (!empty($_GET['japanese_level'])) { $query .= " AND japanese_level = :jl";     $params[':jl']=$_GET['japanese_level']; }
           if (!empty($_GET['job_category']))   { $query .= " AND job_category = :jc";       $params[':jc']=$_GET['job_category']; }
 
-          $query .= " ORDER BY date DESC";
+          $query .= "
+            ORDER BY
+              CASE
+                WHEN status IN ('急募','1') THEN 0
+                WHEN status IN ('募集中','0','', NULL) THEN 1
+                WHEN status IN ('募集終','募集終了','募集終わり','2') THEN 2
+                ELSE 1
+              END ASC,
+              COALESCE(updated_at, date) DESC,
+            id DESC
+          ";
+
           $stmt = $pdo->prepare($query);
           $stmt->execute($params);
           $jobs = $stmt->fetchAll(PDO::FETCH_ASSOC);
