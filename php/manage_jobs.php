@@ -13,6 +13,14 @@ if (!isset($_SESSION['id']) || !isset($_SESSION['username'])) {
   exit;
 }
 
+// ✅ Only these admins can access manage_jobs.php
+$JOB_ADMIN_USERS = ['osaka_ueda', 'bikash', 'kimura'];
+if (!in_array($_SESSION['username'], $JOB_ADMIN_USERS, true)) {
+  // direct URL access bhi block
+  header("Location: /php/staffdb.php");
+  exit;
+}
+
 if (empty($_SESSION['csrf_token'])) {
   $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
@@ -27,6 +35,7 @@ try {
   $staffList = [];
 }
 ?>
+
 <!doctype html>
 <html lang="ja">
 <head>

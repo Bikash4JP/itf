@@ -16,6 +16,16 @@ if (!isset($_SESSION['id']) || !isset($_SESSION['username'])) {
   exit;
 }
 
+// ✅ Only selected admins can use jobs_api.php
+$JOB_ADMIN_USERS = ['osaka_ueda', 'bikash', 'kimura'];
+$currentUser = (string)($_SESSION['username'] ?? '');
+
+if (!in_array($currentUser, $JOB_ADMIN_USERS, true)) {
+  http_response_code(403);
+  echo json_encode(['ok'=>false,'error'=>'Forbidden']);
+  exit;
+}
+
 require_once __DIR__ . '/db_connect.php';
 
 if (empty($_SESSION['csrf_token'])) {
@@ -36,6 +46,7 @@ function require_csrf(){
     json_out(['ok'=>false,'error'=>'CSRF invalid'], 403);
   }
 }
+
 
 function normalize_status($s){
   $s = trim((string)$s);
