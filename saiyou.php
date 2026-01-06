@@ -168,12 +168,15 @@ function build_job_ld($job){
   <meta property="og:description" content="勤務地・職種・日本語レベルで検索できるアイティーエフの求人一覧。最新求人をチェックして応募ください。">
   <meta property="og:url" content="https://it-future.jp/saiyou.php">
   <meta property="og:site_name" content="株式会社アイティーエフ">
-  <meta property="og:image" content="https://it-future.jp/images/inquiry_main.jpg">
+  <meta property="og:image" content="https://it-future.jp/images/og/saiyou_og.png">
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="求人一覧・採用情報｜株式会社アイティーエフ">
   <meta name="twitter:description" content="勤務地・職種・日本語レベルで検索できる求人一覧。">
-  <meta name="twitter:image" content="https://it-future.jp/images/inquiry_main.jpg">
+  <meta name="twitter:image" content="https://it-future.jp/images/og/saiyou_og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:type" content="image/png">
 
   <meta name="robots" content="max-image-preview:large">
 

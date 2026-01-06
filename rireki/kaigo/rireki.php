@@ -1292,46 +1292,87 @@ $job_id = isset($_GET['job_id']) ? (int) $_GET['job_id'] : 0;
 
     /* ===== AI: simple-Japanese rewrite via your Worker ===== */
     (function () {
-      const WORKER_URL = 'https://rireki-ai.bikash4jp.workers.dev';
+  const WORKER_URL = 'https://rireki-ai.bikash4jp.workers.dev';
 
-      async function rewriteToSimpleJa(text) {
-        const res = await fetch(WORKER_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ task: 'rewrite_to_simple_japanese', text })
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok || !data || !data.ok) throw new Error('AI request failed');
-        return (data.output || '').trim();
-      }
+  const TASK_BY_TARGET = {
+    '#prText': 'kaigo_compose_self_pr',
+    '#motivationText': 'kaigo_compose_motivation',
+    '#prefText': 'kaigo_compose_preferences',
+  };
 
-      document.addEventListener('click', async (e) => {
-        const btn = e.target.closest('button[data-ai-target]');
-        if (!btn) return;
+  async function fetchJSON(url, payload) {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
 
-        const sel = btn.getAttribute('data-ai-target');
-        const ta = document.querySelector(sel);
-        if (!ta) return;
+    const raw = await res.text();
+    let data = null;
+    try { data = JSON.parse(raw); } catch (_) {}
 
-        const original = (ta.value || '').trim();
-        if (!original) { alert('まずテキストを入力してください。'); return; }
+    if (!res.ok) {
+      const msg = (data && (data.error || data.message)) ? (data.error || data.message) : raw;
+      throw new Error(`HTTP ${res.status}: ${msg}`);
+    }
+    if (!data || data.ok !== true) {
+      const msg = data && (data.error || data.message) ? (data.error || data.message) : raw;
+      throw new Error(`Bad JSON: ${msg}`);
+    }
+    return data;
+  }
 
-        btn.disabled = true;
-        const old = btn.textContent;
-        btn.textContent = '整え中…';
-
-        try {
-          const rewritten = await rewriteToSimpleJa(original);
-          if (rewritten) ta.value = rewritten;
-        } catch (err) {
-          console.error(err);
-          alert('AIの整形に失敗しました。時間をおいて再度お試しください。');
-        } finally {
-          btn.disabled = false;
-          btn.textContent = old;
-        }
+  async function callAI(task, text) {
+    // 1) try new task
+    try {
+      const data = await fetchJSON(WORKER_URL, {
+        task,
+        text,
+        meta: { domain: 'kaigo', level: 'simple', max_chars: 420 }
       });
-    })();
+      return (data.output || '').trim();
+    } catch (err) {
+      console.warn('[AI] primary failed', err);
+
+      // 2) fallback to old task so it never fails (temporary)
+      const data = await fetchJSON(WORKER_URL, {
+        task: 'rewrite_to_simple_japanese',
+        text,
+        meta: { note: 'fallback', wanted_task: task }
+      });
+      return (data.output || '').trim();
+    }
+  }
+
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('button[data-ai-target]');
+    if (!btn) return;
+
+    const sel = btn.getAttribute('data-ai-target');
+    const ta = document.querySelector(sel);
+    if (!ta) return;
+
+    const original = (ta.value || '').trim();
+    if (!original) { alert('キーワードでもOKなので、まず入力してください。'); return; }
+
+    const task = TASK_BY_TARGET[sel] || 'kaigo_compose_self_pr';
+
+    btn.disabled = true;
+    const old = btn.textContent;
+    btn.textContent = '作成中…';
+
+    try {
+      const out = await callAI(task, original);
+      if (out) ta.value = out;
+    } catch (err) {
+      console.error(err);
+      alert('AIエラー：' + (err?.message || 'unknown'));
+    } finally {
+      btn.disabled = false;
+      btn.textContent = old;
+    }
+  });
+})();
   </script>
 </body>
 
