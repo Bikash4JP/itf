@@ -75,6 +75,17 @@ try {
 
     .saveNotif{position:fixed;top:20px;right:20px;padding:12px 20px;background:var(--success);color:#fff;border-radius:10px;font-weight:900;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:10000;opacity:0;transition:.2s;pointer-events:none}
     .saveNotif.show{opacity:1}
+
+    /* ✅✅✅ ONLY HEADER STYLE CHANGES */
+    .tabulator .tabulator-header .tabulator-col .tabulator-col-title{
+      text-align:center;
+      font-size:18px; /* ~4px bigger */
+      font-weight:900;
+    }
+    .th-wrap{display:inline-flex;align-items:center;justify-content:center;gap:6px;width:100%}
+    .th-public{color:#dc2626;font-weight:900}
+    .th-public .th-star{color:#dc2626;font-weight:900}
+    .th-unused{color:#2563eb;font-weight:900}
   </style>
 </head>
 <body>
@@ -162,7 +173,6 @@ const prefectureOpts = [...prefTop, ...prefAll.filter(p=>!prefTop.includes(p))];
 const bonusOpts = ["あり","なし"];
 const residenceOpts = [{label:"国内", value:"国内"},{label:"国外", value:"国外"},{label:"どちらでもOK", value:"どちらでもOK"}];
 const genderOpts = [{label:"男性", value:"男"},{label:"女性", value:"女"},{label:"どちらでもOK", value:"どちらでもOK"}];
-// ✅ experience dropdown should include なし too (otherwise old numeric/string values feel weird)
 const expOpts = [{label:"あり", value:"あり"},{label:"なし", value:"なし"},{label:"どちらでもOK", value:"どちらでもOK"}];
 const hijabOpts = [{label:"OK", value:"OK"},{label:"禁止", value:"禁止"}];
 const nationalityOpts = ["国籍問わず","Japan","Indonesia","Nepal","India","Vietnam","China","Bangladesh","Korea","Myanmar","Others"];
@@ -171,9 +181,8 @@ const publishLabel = {draft:"下書き", published:"公開", archived:"アーカ
 
 let currentJobId = null;
 const editedRows = new Set();
-const originalData = new Map(); // row snapshot
+const originalData = new Map();
 
-// Fields that matter for diff fallback (same as API allow-list)
 const TRACK_FIELDS = [
   'company_name','status','request_date','deadline_date',
   'job_staff_id','level','title','summary','content',
@@ -186,6 +195,14 @@ const TRACK_FIELDS = [
 ];
 
 function escapeHtml(s){ return String(s ?? "").replace(/[&<>"']/g, (m)=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m])); }
+
+function thPublic(label){
+  return `<span class="th-wrap th-public"><strong class="th-star">*</strong><strong>${escapeHtml(label)}</strong></span>`;
+}
+function thUnused(label){
+  return `<span class="th-wrap th-unused"><strong>${escapeHtml(label)}</strong></span>`;
+}
+
 function hashHue(str){ let h=0; str=String(str||""); for(let i=0;i<str.length;i++) h = (h*31 + str.charCodeAt(i)) >>> 0; return h % 360; }
 function chip(val){
   const s = (val||"").trim();
@@ -286,7 +303,6 @@ function markRowEdited(rowId){
   updateEditHint();
 }
 
-// Fallback diff (in case edit event missed)
 function normalizeVal(v){
   if(Array.isArray(v)) return JSON.stringify(v.slice().sort());
   if(v === undefined) return null;
@@ -330,19 +346,86 @@ async function loadFiles(jobId){
   const res = await r.json();
   const box = document.getElementById("filesBox");
   box.innerHTML = "";
+
   if(!res.ok){ box.textContent = res.error || "読み込み失敗"; return; }
   if(!res.files.length){ box.innerHTML = `<div class="muted">ファイルなし</div>`; return; }
+
   for(const f of res.files){
-    const wrap = document.createElement("div");
-    wrap.style.cssText = "width:160px;height:120px;border:1px solid var(--border);border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#fafafa;cursor:pointer";
+    // outer card (column)
+    const card = document.createElement("div");
+    card.style.cssText = `
+      width:170px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      align-items:stretch;
+    `;
+
+    // preview area
+    const preview = document.createElement("div");
+    preview.style.cssText = `
+      width:170px;height:120px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#fafafa;
+      cursor:pointer;
+    `;
+
     const openUrl = f.file_path;
+
     if((f.mime||"").startsWith("image/")){
-      wrap.innerHTML = `<img src="${f.file_path}" alt="" style="width:100%;height:100%;object-fit:cover">`;
+      preview.innerHTML = `<img src="${f.file_path}" alt="" style="width:100%;height:100%;object-fit:cover">`;
     }else{
-      wrap.innerHTML = `<div style="font-size:12px;color:#0b3772;font-weight:900;text-align:center;line-height:1.2">PDF<br><span style="font-weight:700;font-size:11px;opacity:.85">${escapeHtml(f.file_name||"")}</span></div>`;
+      preview.innerHTML = `
+        <div style="font-size:12px;color:#0b3772;font-weight:900;text-align:center;line-height:1.25;padding:10px">
+          PDF<br>
+          <span style="font-weight:700;font-size:11px;opacity:.85;display:block;word-break:break-all;margin-top:6px">
+            ${escapeHtml(f.file_name||"")}
+          </span>
+        </div>
+      `;
     }
-    wrap.addEventListener("click", ()=> window.open(openUrl, "_blank"));
-    box.appendChild(wrap);
+
+    preview.addEventListener("click", ()=> window.open(openUrl, "_blank"));
+
+    // delete button (sample red box style)
+    const delBtn = document.createElement("button");
+    delBtn.type = "button";
+    delBtn.textContent = "削除";
+    delBtn.style.cssText = `
+      height:34px;
+      border-radius:8px;
+      border:2px solid #ef4444;
+      background:#fff;
+      color:#ef4444;
+      font-weight:900;
+      cursor:pointer;
+    `;
+
+    delBtn.addEventListener("click", async (e)=>{
+      e.preventDefault();
+      e.stopPropagation();
+
+      if(!confirm(`このファイルを削除しますか？\n${f.file_name || ""}`)) return;
+
+      const res2 = await api("deleteFile", { file_id: f.id, job_id: jobId });
+      if(!res2.ok){
+        alert(res2.error || "削除失敗");
+        return;
+      }
+
+      // refresh drawer + grid preview
+      await loadFiles(jobId);
+      await loadGrid();
+    });
+
+    card.appendChild(preview);
+    card.appendChild(delBtn);
+    box.appendChild(card);
   }
 }
 
@@ -390,32 +473,42 @@ const table = new Tabulator("#jobsGrid",{
       }
     },
 
-    {title:"施設名", field:"company_name", editor:"input", width:220},
-    {title:"状況", field:"status", sorter:statusSort, formatter:(c)=>statusPill(c.getValue()), editor:"list",
+    /* ✅ Public-visible fields => thPublic()  */
+    {title: thUnused("施設名"), field:"company_name", editor:"input", width:220},
+    {title: thPublic("状況"), field:"status", sorter:statusSort, formatter:(c)=>statusPill(c.getValue()), editor:"list",
       editorParams:{values: statusOpts, freetext:false, autocomplete:false, clearable:false, listOnEmpty:true}, width:120},
-    {title:"職種", field:"org_work_type", formatter:(c)=>chip(c.getValue()), editor:"list",
+
+    {title: thUnused("職種"), field:"org_work_type", formatter:(c)=>chip(c.getValue()), editor:"list",
       editorParams:{values: workTypeOpts, freetext:false, autocomplete:false, clearable:true, listOnEmpty:true}, width:170},
-    {title:"最終更新", field:"updated_at", sorter:"datetime", width:150},
-    {title:"受注日", field:"request_date", editor:"input", editorParams:{elementAttributes:{type:"date"}}, width:130},
-    {title:"締切日", field:"deadline_date", editor:"input", editorParams:{elementAttributes:{type:"date"}}, width:130},
-    {title:"求人担当", field:"job_staff_id", formatter:(c)=>staffChipById(c.getValue()), editor:"list",
+
+    {title: thUnused("最終更新"), field:"updated_at", sorter:"datetime", width:150},
+    {title: thUnused("受注日"), field:"request_date", editor:"input", editorParams:{elementAttributes:{type:"date"}}, width:130},
+    {title: thUnused("締切日"), field:"deadline_date", editor:"input", editorParams:{elementAttributes:{type:"date"}}, width:130},
+    {title: thUnused("求人担当"), field:"job_staff_id", formatter:(c)=>staffChipById(c.getValue()), editor:"list",
       editorParams:{values: STAFF_VALUE_LIST, freetext:false, autocomplete:false, clearable:true, listOnEmpty:true}, width:190},
-    {title:"メモ詳細", field:"level", editor:"input", width:220},
-    {title:"タイトル", field:"title", editor:"input", width:260},
-    {title:"概要", field:"summary", editor:"textarea", width:320},
-    {title:"詳細内容", field:"content", editor:"textarea", width:360},
-    {title:"住所", field:"job_location", editor:"list",
+    {title: thUnused("メモ詳細"), field:"level", editor:"input", width:220},
+
+    {title: thPublic("タイトル"), field:"title", editor:"input", width:260},
+    {title: thPublic("概要"), field:"summary", editor:"textarea", width:320},
+    {title: thPublic("詳細内容"), field:"content", editor:"textarea", width:360},
+
+    {title: thPublic("住所"), field:"job_location", editor:"list",
       editorParams:{values: prefectureOpts, clearable:true, autocomplete:true, freetext:true}, width:150},
-    {title:"賞与", field:"bonuses",
+
+    {title: thPublic("賞与"), field:"bonuses",
       formatter:(c)=>{ const v = (c.getValue() || "なし"); return v === "あり" ? `<span class="chip"><small>あり</small></span>` : `<span class="chip"><small>なし</small></span>`; },
       editor:"list", editorParams:{values: bonusOpts, clearable:true, autocomplete:true}, width:120},
-    {title:"賞与内容", field:"bonus_amount", editor:"input", width:200},
-    {title:"月給", field:"salary", editor:"input", width:170},
-    {title:"基本給", field:"salary_basic", editor:"input", width:140},
-    {title:"手取り", field:"salary_takehome", editor:"input", width:140},
-    {title:"交通費上限", field:"transport_amount_limit", editor:"input", width:160},
-    {title:"住宅手当", field:"rent_support", editor:"input", width:160},
-    {title:"国籍", field:"nationality_pref_json",
+
+    {title: thPublic("賞与内容"), field:"bonus_amount", editor:"input", width:200},
+
+    {title: thPublic("月給"), field:"salary", editor:"input", width:170},
+    {title: thUnused("基本給"), field:"salary_basic", editor:"input", width:140},
+    {title: thUnused("手取り"), field:"salary_takehome", editor:"input", width:140},
+
+    {title: thPublic("交通費上限"), field:"transport_amount_limit", editor:"input", width:160},
+    {title: thPublic("住宅手当"), field:"rent_support", editor:"input", width:160},
+
+    {title: thUnused("国籍"), field:"nationality_pref_json",
       formatter:(cell)=>{
         const v = cell.getValue();
         const arr = Array.isArray(v) ? v : [];
@@ -424,24 +517,30 @@ const table = new Tabulator("#jobsGrid",{
       },
       editor:"list",
       editorParams:{values: nationalityOpts, multiselect:true, clearable:true, freetext:false, autocomplete:false, listOnEmpty:true}, width:320},
-    {title:"現在の居住地", field:"current_residence", editor:"list",
+
+    {title: thUnused("現在の居住地"), field:"current_residence", editor:"list",
       editorParams:{values: residenceOpts, freetext:false, autocomplete:false, clearable:true, listOnEmpty:true}, width:170},
-    {title:"性別", field:"gender_pref", editor:"list",
+
+    {title: thUnused("性別"), field:"gender_pref", editor:"list",
       editorParams:{values: genderOpts, freetext:false, autocomplete:false, clearable:true, listOnEmpty:true}, width:150},
-    {title:"経験", field:"experience", editor:"list",
+
+    {title: thPublic("経験"), field:"experience", editor:"list",
       editorParams:{values: expOpts, freetext:false, autocomplete:false, clearable:true, listOnEmpty:true}, width:150},
-    {title:"ヒジャブ", field:"hijab_policy", editor:"list",
+
+    {title: thUnused("ヒジャブ"), field:"hijab_policy", editor:"list",
       editorParams:{values: hijabOpts, freetext:false, autocomplete:false, clearable:true, listOnEmpty:true}, width:140},
-    {title:"募集人数", field:"required_vacancy", editor:"input", width:120},
-    {title:"日本語レベル", field:"japanese_level", editor:"input", width:140},
-    {title:"求人票", field:"files_preview", formatter:filesPreviewFormatter, width:190, headerSort:false,
+
+    {title: thPublic("募集人数"), field:"required_vacancy", editor:"input", width:120},
+    {title: thPublic("日本語レベル"), field:"japanese_level", editor:"input", width:140},
+
+    {title: thUnused("求人票"), field:"files_preview", formatter:filesPreviewFormatter, width:190, headerSort:false,
       cellClick:(e, cell)=>{ const row = cell.getRow().getData(); openDrawer(row, true); }},
-    {title:"公開状態", field:"publish_state", formatter:(c)=>publishPill(c.getValue()), editor:"list",
+
+    {title: thUnused("公開状態"), field:"publish_state", formatter:(c)=>publishPill(c.getValue()), editor:"list",
       editorParams:{values: publishKeys, freetext:false, autocomplete:false, clearable:false, listOnEmpty:true}, width:140},
   ],
 });
 
-// ✅✅✅ REAL FIX: Bind Tabulator events (not options)
 table.on("cellEdited", (cell)=>{
   const field = cell.getField();
   if(field === "files_preview" || field === "__del") return;
@@ -449,18 +548,10 @@ table.on("cellEdited", (cell)=>{
   markRowEdited(id);
 });
 
-// Optional: if user edits but value same, don’t mark
-table.on("cellEditCancelled", (cell)=>{
-  // Usually do nothing (cancel means no change)
-});
-
-// ✅ Save All
 document.getElementById("btnSaveAll").addEventListener("click", async ()=>{
-  // force commit current edit before checking editedRows
   if(document.activeElement) document.activeElement.blur();
   await new Promise(r=>setTimeout(r, 0));
 
-  // fallback diff scan (in case event missed)
   if(editedRows.size === 0){
     const all = table.getData();
     for(const r of all){
@@ -510,7 +601,6 @@ document.getElementById("btnSaveAll").addEventListener("click", async ()=>{
     }
   }
 
-  // keep only failed rows marked
   editedRows.clear();
   failedIds.forEach(id=>editedRows.add(id));
   updateEditHint();

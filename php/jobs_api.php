@@ -389,6 +389,41 @@ try {
     $st->execute([$id]);
     json_out(['ok'=>true,'files'=>$st->fetchAll(PDO::FETCH_ASSOC)]);
   }
+  if ($action === 'deleteFile') {
+  require_csrf();
+
+  $fileId = (int)($_POST['file_id'] ?? 0);
+  $jobId  = (int)($_POST['job_id'] ?? 0);
+  if ($fileId <= 0 || $jobId <= 0) json_out(['ok'=>false,'error'=>'Invalid request'], 400);
+
+  // confirm file belongs to that job
+  $st = $pdo->prepare("SELECT id, job_post_id, file_path FROM job_files WHERE id=? AND job_post_id=?");
+  $st->execute([$fileId, $jobId]);
+  $f = $st->fetch(PDO::FETCH_ASSOC);
+  if (!$f) json_out(['ok'=>false,'error'=>'File not found'], 404);
+
+  $filePath = (string)($f['file_path'] ?? '');
+
+  // delete DB row first
+  $pdo->prepare("DELETE FROM job_files WHERE id=? AND job_post_id=?")->execute([$fileId, $jobId]);
+
+  // delete physical file (safe path)
+  if ($filePath !== '' && str_starts_with($filePath, '/uploads/jobs/')) {
+    $base = realpath(__DIR__ . "/.."); // /home/it-future/www/itf
+    $abs  = realpath($base . $filePath);
+
+    // ensure the resolved path is inside uploads/jobs
+    $uploadsRoot = realpath($base . "/uploads/jobs");
+    if ($abs && $uploadsRoot && str_starts_with($abs, $uploadsRoot) && is_file($abs)) {
+      @unlink($abs);
+    }
+  }
+
+  // touch updated_at so list reflects change
+  $pdo->prepare("UPDATE posts SET updated_at=NOW() WHERE id=? AND post_type='job'")->execute([$jobId]);
+
+  json_out(['ok'=>true]);
+}
 
   if ($action === 'uploadFile') {
     require_csrf();
