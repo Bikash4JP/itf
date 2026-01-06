@@ -12,6 +12,10 @@ if (!isset($_SESSION['id']) || !isset($_SESSION['username'])) {
     exit;
 }
 
+// ✅ Only these usernames can see "求人管理"
+$JOB_ADMIN_USERS = ['osaka_ueda', 'bikash', 'kimura'];
+$canManageJobs = in_array((string)$_SESSION['username'], $JOB_ADMIN_USERS, true);
+
 // Database connection
 require_once 'db_connect.php';
 
@@ -27,6 +31,7 @@ $nationalityOptions = getUniqueValues($pdo, '雇用者情報（国籍）');
 $jlptOptions = getUniqueValues($pdo, 'JLPT状況');
 $genderOptions = getUniqueValues($pdo, '雇用者情報（性別）');
 ?>
+
 
 <!DOCTYPE html>
 <html lang="ja">
@@ -55,14 +60,19 @@ $genderOptions = getUniqueValues($pdo, '雇用者情報（性別）');
             <div class="menu-icon"><img src="../images/searcch.png" alt="Search Icon"></div>
             <div class="menu-title">Menus</div>
             <ul>
-                <li><a href="addstaff.php" class="menu-btn">✙雇用者情報</a></li>
-                <li><a href="addjobs.php" class="menu-btn">✙求人情報</a></li✙>
-                <li><a href="addnews.php" class="menu-btn">✙お知らせ</a></li>
-                <li><a href="t.html" class="menu-btn">請求書発行</a></li>
-                <li><a href="t.html" class="menu-btn">今月の入社</a></li>
-                <li><a href="rireki_list.php" class="menu-btn">履歴書一覧</a></li>
-                <li><a href="manage_posts.php" class="menu-btn">投稿を管理</a></li>
-            </ul>
+    <li><a href="addstaff.php" class="menu-btn">✙雇用者情報</a></li>
+
+    <?php if ($canManageJobs): ?>
+        <li><a href="manage_jobs.php" class="menu-btn">求人管理</a></li>
+    <?php endif; ?>
+
+    <li><a href="addnews.php" class="menu-btn">✙お知らせ</a></li>
+    <li><a href="t.html" class="menu-btn">請求書発行</a></li>
+    <li><a href="t.html" class="menu-btn">今月の入社</a></li>
+    <li><a href="rireki_list.php" class="menu-btn">履歴書一覧</a></li>
+    <li><a href="manage_posts.php" class="menu-btn">投稿を管理</a></li>
+</ul>
+
         </div>
 
         <!-- Main Content -->
