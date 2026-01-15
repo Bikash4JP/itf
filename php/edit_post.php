@@ -1,3 +1,4 @@
+<!-- php\edit_post.php -->
 <?php
 ini_set('session.cookie_path', '/itf');
 session_start();

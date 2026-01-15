@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $_SESSION['id'] = $user['id'];
                 $_SESSION['username'] = $user['username'];
-                $response = array('success' => true, 'redirect' => '../staffdb.php');
+                $response = array('success' => true, 'redirect' => 'staffdb.php');
                 echo json_encode($response);
                 exit();
             } else {

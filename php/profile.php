@@ -65,12 +65,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reset_password'])) {
             <div class="logo"><a href="../index.html"><img src="../images/logo.png" alt="ITF Logo"></a></div>
             <nav>
     <ul>
-        <li><a href="../staffdb.php">ホーム</a></li>
+        <li><a href="staffdb.php">ホーム</a></li>
         <!-- <li><a href="#" onclick="showForm('posts')">投稿を追加</a></li>
         <li><a href="#" onclick="showForm('jobs')">求人を追加</a></li> -->
         <li><a href="manage_posts.php">投稿を管理</a></li>
         <li><a href="profile.php">プロフィール</a></li>
-        <li><a href="dashboard.php">ダッシュボード</a></li>
+        <!-- <li><a href="dashboard.php">ダッシュボード</a></li> -->
         <li><a href="logout.php">ログアウト</a></li>
     </ul>
 </nav>

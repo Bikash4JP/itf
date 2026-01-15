@@ -1,0 +1,179 @@
+/* Base: system JP-friendly stack (no external fonts to avoid CORS) */
+:root{
+  --rf-bg:#e2e8f0;              /* page background */
+  --rf-card:#ffffff;            /* panels/tables background */
+  --rf-border:#cbd5e1;          /* light border */
+  --rf-border-dark:#94a3b8;     /* darker border */
+  --rf-text:#0f172a;            /* main text */
+  --rf-muted:#475569;           /* muted text */
+  --rf-accent:#2563eb;          /* links/accents */
+  --rf-danger:#b91c1c;          /* remove links */
+  --rf-radius:12px;
+}
+
+html,body{
+  height:100%;
+}
+body.rf-body{
+  margin:0;
+  color:var(--rf-text);
+  background:var(--rf-bg);
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN",
+    "Hiragino Sans","Yu Gothic UI","Yu Gothic","Meiryo",
+    system-ui,"Segoe UI","Helvetica Neue", Arial, sans-serif;
+  -webkit-text-size-adjust:100%;
+  text-size-adjust:100%;
+}
+
+.rf-main{
+  min-height:100vh;
+  padding:24px;
+  display:flex;
+  flex-direction:column;
+  gap:24px;
+}
+
+/* Tables */
+.rf-table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  background:var(--rf-card);
+  border:1px solid var(--rf-border);
+  border-radius:var(--rf-radius);
+  overflow:hidden;
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
+  margin-bottom:16px;
+}
+
+.rf-table th,
+.rf-table td{
+  padding:12px 14px;
+  border-bottom:1px solid var(--rf-border);
+  vertical-align:top;
+  font-size:14px;
+}
+.rf-table tr:last-child > td,
+.rf-table tr:last-child > th{
+  border-bottom:none;
+}
+.rf-table thead th{
+  background:#f1f5f9;
+  color:var(--rf-muted);
+  font-weight:600;
+  text-align:left;
+}
+
+.rf-table-basic th{
+  width:160px;
+  white-space:nowrap;
+}
+.rf-title{
+  margin:8px 0 12px;
+  font-size:22px;
+  font-weight:700;
+}
+.rf-current-date select{ min-width:90px; }
+
+/* Inputs */
+.rf-input,
+.rf-textarea,
+.rf-select{
+  width:100%;
+  box-sizing:border-box;
+  padding:8px 10px;
+  border:1px solid var(--rf-border);
+  border-radius:8px;
+  background:#fff;
+  font-size:14px;
+  outline:none;
+}
+.rf-input:focus,
+.rf-textarea:focus,
+.rf-select:focus{
+  border-color:var(--rf-border-dark);
+  box-shadow:0 0 0 3px rgba(37,99,235,.12);
+}
+.rf-input-number{
+  width:110px;
+}
+.rf-textarea{
+  resize:vertical;
+  min-height:96px;
+}
+.rf-input-group{ display:flex; align-items:center; gap:8px; }
+.rf-inline{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.rf-label-inline{ min-width:40px; color:var(--rf-muted); }
+
+/* Photo */
+.rf-photo-cell{ width:280px; }
+#rf-photo-area{
+  cursor:pointer;
+  user-select:none;
+  height:260px;
+  border:2px dashed var(--rf-border);
+  border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  background:#f8fafc;
+  transition:border-color .2s ease, background .2s ease;
+}
+#rf-photo-area.rf-drag{ border-color:var(--rf-border-dark); background:#eef2f6; }
+#rf-photo-placeholder{ text-align:center; color:var(--rf-muted); font-size:12px; }
+
+/* Links & row controls */
+.rf-links{ margin:8px 0 18px; }
+a.rf-add-row{
+  display:inline-block;
+  padding:8px 12px;
+  background:#e2e8f0;
+  border:1px solid var(--rf-border);
+  border-radius:10px;
+  color:#0f172a;
+  text-decoration:none;
+  font-weight:600;
+}
+a.rf-add-row:hover{ background:#cbd5e1; }
+a.rf-remove{
+  margin-left:10px;
+  color:var(--rf-danger);
+  text-decoration:underline;
+  font-size:13px;
+}
+
+/* Radio/checkbox clean look */
+.rf-radio-group, .rf-spouse, .rf-spouse-obligation{
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+}
+.rf-radio{ display:inline-flex; align-items:center; gap:6px; }
+.rf-radio-input{ transform:translateY(1px); }
+
+/* Notes */
+.rf-note{ color:var(--rf-muted); margin-left:8px; }
+
+/* Section spacing */
+.rf-section{ margin-top:8px; }
+
+/* Responsiveness */
+@media (max-width: 960px){
+  .rf-table-basic .rf-photo-cell{ display:none; }
+  .rf-table th{ width:120px; }
+}
+/* === Strong black grid borders on all tables & cells === */
+.rf-table{
+  /* collapse so borders don't double between cells */
+  border-collapse: collapse;
+  border-spacing: 0;
+  border: 2px solid #000;
+}
+
+.rf-table th,
+.rf-table td{
+  border: 2px solid #000;
+}
+
+/* ensure the last row ALSO keeps its bottom border (overrides earlier 'none') */
+.rf-table tr:last-child > td,
+.rf-table tr:last-child > th{
+  border-bottom: 2px solid #000;
+}

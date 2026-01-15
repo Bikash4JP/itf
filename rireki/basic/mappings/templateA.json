@@ -1,0 +1,69 @@
+{
+  "template_file": "../templates/Template_A.xlsx",
+  "sheet_name": "",
+
+  "singles": {
+    "personal.name_kana": "C6",
+    "personal.name_kanji": "C9",
+
+    "personal.dob_yyyy": "C14",
+    "personal.dob_mm":   "E14",
+    "personal.dob_dd":   "G14",
+    "personal.age":      "I14",
+
+    "gender":            "K15",
+
+    "address.kana":      "C16",
+    "address.postcode":  "D19",
+    "address.full":      "C21",
+
+    "contact.phone":     "M16",
+    "contact.email":     "M21"
+  },
+
+  "blocks": {
+    "pr.self_pr": { "cell": "Q47", "wrap": true },
+    "preferences.hopes": { "cell": "Q71", "wrap": true }
+  },
+
+  "repeaters": {
+    "education": {
+      "start_row": 38,
+      "row_step": 3,
+      "max_rows": 6,
+      "columns": {
+        "year":   "B{row}",
+        "month":  "C{row}",
+        "school": "D{row}"
+      }
+    },
+
+    "experience": {
+      "start_row": 5,
+      "row_step": 3,
+      "max_rows": 6,
+      "columns": {
+        "year":   "Q{row}",
+        "month":  "R{row}",
+        "text":   "S{row}"
+      }
+    },
+
+    "licenses": {
+      "start_row": 25,
+      "row_step": 3,
+      "max_rows": 8,
+      "columns": {
+        "year":        "Q{row}",
+        "month":       "R{row}",
+        "certificate": "S{row}"
+      }
+    }
+  },
+
+  "photo": {
+    "anchor_cell": "M3",
+    "fit_merged": true,
+    "padding_px": 3
+  }
+}

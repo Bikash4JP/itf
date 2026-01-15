@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #2ecc71, #3498db); /* Jungle gradient */
+            color: #fff;
+            overflow-x: hidden;
+            animation: jungleFade 5s infinite alternate;
+        }
+
+        @keyframes jungleFade {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.7); /* Dark overlay for contrast */
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5); /* Green glow */
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 0, 0.2) 0%, transparent 70%);
+            animation: glowPulse 8s infinite;
+            z-index: 0;
+        }
+
+        @keyframes glowPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            color: #e74c3c; /* Dragon fire red */
+            text-shadow: 2px 2px 4px #000;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        p {
+            font-size: 1.2em;
+            line-height: 1.6;
+            text-align: justify;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 5px solid #e67e22; /* Samurai gold */
+            border-radius: 5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        p::after {
+            content: '✨';
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            animation: sparkle 3s infinite;
+        }
+
+        @keyframes sparkle {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px;
+                padding: 15px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            p {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>The Menu Bar Saga</h1>
+        <p>昔々、デジタルの世界に一つのメニューバーがありました。これは、BIKASHという名前のプログラマーが作ったものでした。このメニューバーには「人材を追加」「人材を編集」「請求書リクエスト」などのボタンがついていました。でも、2025年8月18日の夕方5時51分、まだ動いていませんでした。メニューバーは、宝物を守る龍のように、まだ眠っていました。でも大丈夫です。素晴らしいものは、一晩では作れません。ピラミッドも、何年もかけて石を一つずつ積み上げて作られました。美味しいお寿司も、職人さんが時間をかけて作ります。このメニューバーも同じです。今は準備中ですが、きっと素晴らしいものになります。侍が戦いの時を待つように、どうぞ気長にお待ちください。お茶でも飲みながら、完成を楽しみにしていてください。最高の料理には時間がかかります。このデジタルの料理も、きっと素晴らしいものになるでしょう。もう少しお待ちください。きっと良いものができあがります！</p>
+    </div>
+</body>
+</html>

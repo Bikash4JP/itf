@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <title>求人詳細 - 株式会社アイティーエフ</title>
-    <link rel="stylesheet" href="../css/common.css">
-    <link rel="stylesheet" href="../css/style.min.css">
-    <link rel="stylesheet" href="../css/screen.min.css">
-    <link rel="stylesheet" href="../css/pagenavi-css.css">
-    <link rel="stylesheet" href="../css/footer.css">
-    <link rel="stylesheet" href="../css/main_intro.css">
-    <link rel="stylesheet" href="../css/saiyou.css">
-    <link rel="stylesheet" href="../css/login.css">
+    <link rel="stylesheet" href="https://it-future.jp/css/common.css">
+    <link rel="stylesheet" href="https://it-future.jp/css/style.min.css">
+    <link rel="stylesheet" href="https://it-future.jp/css/screen.min.css">
+    <link rel="stylesheet" href="https://it-future.jp/css/pagenavi-css.css">
+    <link rel="stylesheet" href="https://it-future.jp/css/footer.css">
+    <link rel="stylesheet" href="https://it-future.jp/css/main_intro.css">
+    <link rel="stylesheet" href="https://it-future.jp/css/saiyou.css">
+    <link rel="stylesheet" href="https://it-future.jp/css/login.css">
     <style>
         .job-details-section {
             max-width: 800px;
@@ -23,12 +23,13 @@
         }
         .job-details-section h2 {
             color: #0577c5;
-            font-size: 1.5rem;
+            font-size: 2rem;
             margin-bottom: 20px;
+            font-weight: bolder;
         }
         .job-details-section p, .job-details-section ul {
             margin: 10px 0;
-            font-size: 0.95rem;
+            font-size: 1.2rem;
         }
         .job-details-section ul {
             list-style-type: disc;
@@ -43,8 +44,8 @@
             padding: 10px 20px;
             color: #fff;
             text-decoration: none;
-            border-radius: 4px;
-            font-size: 0.95rem;
+            border-radius: 15px;
+            font-size: 1.4rem;
             margin-left: 10px;
         }
         .apply-button {
@@ -59,6 +60,9 @@
         .back-button:hover {
             background: #333;
         }
+        .meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+        @media (max-width:700px){.meta-grid{grid-template-columns:1fr}}
+        .muted{color:#64748b}
     </style>
 </head>
 <body>
@@ -67,7 +71,7 @@
             <div class="header-top">
                 <div class="wrap pc-flex bet">
                     <div class="header-top-in flex bet vcenter">
-                        <h1 class="sp-2 logo"><a href="../index.html" class="logo-link flex vcenter"><img src="../images/logo.png" alt=""></a></h1>
+                        <h1 class="sp-2 logo"><a href="https://it-future.jp/" class="logo-link flex vcenter"><img src="https://it-future.jp/images/logo.png" alt=""></a></h1>
                         <div id="sp-menu-open" class="sp l-animebtn sp-3">
                             <a onclick="document.getElementById('sp-menu-acc').classList.toggle('active')">
                                 <div class="bar"><span></span><span></span><span></span></div>
@@ -77,10 +81,10 @@
                     <div class="header-menu sp-md-acc">
                         <div id="sp-menu-acc" class="pc-flex hend acc-body">
                             <ul class="contents pc-flex str hend max">
-                                <li class="contents-item"><a href="../about.html">事業紹介</a></li>
-                                <li class="contents-item"><a href="../company_info.html">企業情報</a></li>
-                                <li class="contents-item"><a href="../saiyou.php">新着採用</a></li>
-                                <li class="contents-item"><a href="../news.html">新着情報</a></li>
+                                <li class="contents-item"><a href="https://it-future.jp/about.html">事業紹介</a></li>
+                                <li class="contents-item"><a href="https://it-future.jp/company_info.html">企業情報</a></li>
+                                <li class="contents-item"><a href="https://it-future.jp/saiyou.php">新着採用</a></li>
+                                <li class="contents-item"><a href="https://it-future.jp/news.html">新着情報</a></li>
                             </ul>
                             <ul class="cta pc-flex max str">
                                 <li class="cta-item tel sp">
@@ -93,7 +97,7 @@
                                     <a href="/itf/Recruitment" class="cta-item-link flex hcenter vcenter">資料請求</a>
                                 </li>
                                 <li class="cta-item inquiry flex vcenter">
-                                    <a href="../inquiry.html" class="cta-item-link flex hcenter vcenter">お問い合わせ</a>
+                                    <a href="https://it-future.jp/inquiry.html" class="cta-item-link flex hcenter vcenter">お問い合わせ</a>
                                 </li>
                             </ul>
                         </div>
@@ -106,46 +110,65 @@
     <!-- Job Details Section -->
     <section class="job-details-section">
         <?php
-        // Include database connection
         require_once 'db_connect.php';
 
-        // Get job ID from URL
         $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
         if ($job_id <= 0) {
             echo '<p>無効な求人IDです。</p>';
             exit;
         }
 
-        // Fetch job details
         $stmt = $pdo->prepare("SELECT * FROM posts WHERE id = ? AND post_type = 'job'");
         $stmt->execute([$job_id]);
         $job = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($job) {
             echo '<h2>' . htmlspecialchars($job['title']) . '</h2>';
-            echo '<p><strong>投稿日:</strong> ' . htmlspecialchars($job['date']) . '</p>';
-            echo '<p><strong>会社名:</strong> ' . htmlspecialchars($job['company_name']) . '</p>';
+            echo '<div class="meta-grid">';
+              echo '<div><strong>投稿日:</strong> ' . htmlspecialchars($job['date']) . '</div>';
+              // 公開ページでは会社名は非表示（社内用）
+              echo '<div><strong>勤務地:</strong> ' . htmlspecialchars($job['job_location']) . '</div>';
+              echo '<div><strong>職種カテゴリ:</strong> ' . htmlspecialchars($job['job_category']) . '</div>';
+              echo '<div><strong>雇用形態:</strong> ' . htmlspecialchars($job['job_type']) . '</div>';
+              echo '<div><strong>給与:</strong> ' . htmlspecialchars($job['salary']) . '</div>';
+              echo '<div><strong>必要日本語レベル:</strong> ' . htmlspecialchars($job['japanese_level']) . '</div>';
+              echo '<div><strong>経験:</strong> ' . htmlspecialchars($job['experience']) . '</div>';
+              echo '<div><strong>募集人数:</strong> ' . htmlspecialchars($job['required_vacancy']) . '</div>';
+            echo '</div>';
+
+            echo '<p class="muted">※ 企業名は非公開です（社内管理項目）。</p>';
+
             echo '<p><strong>概要:</strong> ' . htmlspecialchars($job['summary']) . '</p>';
             echo '<p><strong>詳細内容:</strong></p>';
             echo '<div>' . nl2br(htmlspecialchars($job['content'])) . '</div>';
-            echo '<p><strong>勤務地:</strong> ' . htmlspecialchars($job['job_location']) . '</p>';
-            echo '<p><strong>職種カテゴリ:</strong> ' . htmlspecialchars($job['job_category']) . '</p>';
-            echo '<p><strong>雇用形態:</strong> ' . htmlspecialchars($job['job_type']) . '</p>';
-            echo '<p><strong>給与:</strong> ' . htmlspecialchars($job['salary']) . '</p>';
-            echo '<p><strong>賞与:</strong> ' . ($job['bonuses'] ? 'あり (金額: ' . htmlspecialchars($job['bonus_amount']) . ')' : 'なし') . '</p>';
-            echo '<p><strong>住宅手当:</strong> ' . ($job['living_support'] ? 'あり (金額: ' . htmlspecialchars($job['rent_support']) . ')' : 'なし') . '</p>';
-            echo '<p><strong>保険:</strong> ' . ($job['insurance'] ? 'あり' : 'なし') . '</p>';
-            echo '<p><strong>交通費:</strong> ' . ($job['transportation_charges'] ? 'あり (月額上限: ' . htmlspecialchars($job['transport_amount_limit']) . ')' : 'なし') . '</p>';
-            echo '<p><strong>昇給:</strong> ' . ($job['salary_increment'] ? 'あり (条件: ' . htmlspecialchars($job['increment_condition']) . ')' : 'なし') . '</p>';
-            echo '<p><strong>必要日本語レベル:</strong> ' . htmlspecialchars($job['japanese_level']) . '</p>';
-            echo '<p><strong>経験:</strong> ' . htmlspecialchars($job['experience']) . '</p>';
-            echo '<p><strong>年間最低休暇日数:</strong> ' . htmlspecialchars($job['minimum_leave_per_year']) . ' 日</p>';
-            echo '<p><strong>現在の従業員数:</strong> ' . htmlspecialchars($job['employee_size']) . '</p>';
-            echo '<p><strong>募集人数:</strong> ' . htmlspecialchars($job['required_vacancy']) . '</p>';
-            echo '<p><strong>投稿者:</strong> ' . htmlspecialchars($job['posted_by']) . '</p>';
+
+            // 福利
+            echo '<h3>福利・待遇</h3><ul>';
+            echo '<li><strong>賞与:</strong> ' . ($job['bonuses'] ? 'あり (金額: ' . htmlspecialchars($job['bonus_amount']) . ')' : 'なし') . '</li>';
+            echo '<li><strong>住宅手当:</strong> ' . ($job['living_support'] ? 'あり (金額: ' . htmlspecialchars($job['rent_support']) . ')' : 'なし') . '</li>';
+            echo '<li><strong>保険:</strong> ' . ($job['insurance'] ? 'あり' : 'なし') . '</li>';
+            echo '<li><strong>交通費:</strong> ' . ($job['transportation_charges'] ? 'あり (月額上限: ' . htmlspecialchars($job['transport_amount_limit']) . ')' : 'なし') . '</li>';
+            echo '<li><strong>昇給:</strong> ' . ($job['salary_increment'] ? 'あり (条件: ' . htmlspecialchars($job['increment_condition']) . ')' : 'なし') . '</li>';
+            echo '</ul>';
+
+            // Preference block (NEW)
+            if (!empty($job['preferred_nationalities']) || !empty($job['preferred_candidate_status']) || !empty($job['job_memo'])) {
+              echo '<h3>応募に関する補足</h3><ul>';
+              if (!empty($job['preferred_nationalities'])) {
+                echo '<li><strong>優先したい国籍:</strong> ' . nl2br(htmlspecialchars($job['preferred_nationalities'])) . '</li>';
+              }
+              if (!empty($job['preferred_candidate_status'])) {
+                echo '<li><strong>応募者の現在地:</strong> ' . htmlspecialchars($job['preferred_candidate_status']) . '</li>';
+              }
+              if (!empty($job['job_memo'])) {
+                echo '<li><strong>メモ:</strong> ' . nl2br(htmlspecialchars($job['job_memo'])) . '</li>';
+              }
+              echo '</ul>';
+            }
+
             echo '<div class="button-container">';
-            echo '<a href="../recruitment.php?job_id=' . htmlspecialchars($job['id']) . '" class="apply-button">この求人に応募する</a>';
-            echo '<a href="../saiyou.php" class="back-button">求人一覧に戻る</a>';
+            echo '<a href="resume.php?job_id=' . htmlspecialchars($job['id']) . '" class="apply-button">この求人に応募する</a>';
+            echo '<a href="https://it-future.jp/saiyou.php" class="back-button">求人一覧に戻る</a>';
             echo '</div>';
         } else {
             echo '<p>求人が見つかりませんでした。</p>';
@@ -198,26 +221,16 @@
             </div>
         </footer>
     </div>
-    <!-- Add this just before the closing </body> tag -->
+
     <a href="#" id="back-to-top" class="back-to-top" title="Back to Top">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="18 15 12 9 6 15"></polyline>
         </svg>
     </a>
-     <!-- i18next Scripts -->
-    <script src="https://unpkg.com/i18next@23.11.5/dist/umd/i18next.min.js"></script>
-    <script src="js/i18nextHttpBackend.min.js"></script>
-    <script src="https://unpkg.com/i18next-browser-languagedetector@7.1.0/dist/umd/i18nextBrowserLanguageDetector.min.js"></script>
-    <script src="js/i18n.js"></script>
-    <!-- Other Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/form.min.js"></script>
-    <script src="js/main.min.js"></script>
-    <script src="js/video.js"></script>
-    <script src="js/scripts.js"></script>
-    <script src="js/news.js"></script>
-    <script type="text/javascript" src="js/front.min.js"></script>
-    <script type="text/javascript" src="js/wp-embed.min.js"></script>
+    <!-- <script src="https://it-future.jp/js/main.min.js"></script> -->
+    <!-- <script src="https://it-future.jp/js/scripts.js"></script> -->
+    <script type="text/javascript" src="https://it-future.jp/js/wp-embed.min.js"></script>
 </body>
 </html>

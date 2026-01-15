@@ -6,7 +6,7 @@ body {
 .container.my-5 {
     background: #fff;
     padding: 30px;
-    padding-top: 80px; /* Add padding-top to create gap below navbar */
+    padding-top: 80px; /* Margin below navbar */
     border-radius: 15px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }

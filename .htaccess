@@ -24,3 +24,10 @@
            Header set Cache-Control "public, max-age=2592000"
        </FilesMatch>
    </IfModule>
+
+   RewriteEngine On
+
+# If you already have rules, keep them; just add these BEFORE other generic rewrites.
+# Send /rirek and anything under it to Laravel's public/ front controller
+RewriteRule ^rirek/?$ rirek/public/ [L]
+RewriteRule ^rirek/(.*)$ rirek/public/$1 [L]
