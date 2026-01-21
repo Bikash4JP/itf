@@ -119,7 +119,7 @@ if ($isKaigo && isset($_GET['go']) && $_GET['go'] === 'new') {
               <ul class="contents pc-flex str hend max">
                 <li class="contents-item"><a href="https://it-future.jp/about.html">事業紹介</a></li>
                 <li class="contents-item"><a href="https://it-future.jp/company_info.html">企業情報</a></li>
-                <li class="contents-item"><a href="https://it-future.jp/saiyou.php">新着採用</a></li>
+                <li class="contents-item"><a href="https://it-future.jp/saiyou.php">求人情報</a></li>
                 <li class="contents-item"><a href="https://it-future.jp/news.html">新着情報</a></li>
               </ul>
               <ul class="cta pc-flex max str">

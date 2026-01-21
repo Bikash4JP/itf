@@ -16,7 +16,7 @@ if (!isset($_SESSION['id']) || !isset($_SESSION['username'])) {
 // ✅ Only these admins can access manage_jobs.php
 $JOB_ADMIN_USERS = ['osaka_ueda', 'bikash', 'kimura'];
 if (!in_array($_SESSION['username'], $JOB_ADMIN_USERS, true)) {
-  // direct URL access bhi block
+  // direct URL access block
   header("Location: /php/staffdb.php");
   exit;
 }
@@ -184,7 +184,7 @@ const residenceOpts = [{label:"国内", value:"国内"},{label:"国外", value:"
 const genderOpts = [{label:"男性", value:"男"},{label:"女性", value:"女"},{label:"どちらでもOK", value:"どちらでもOK"}];
 const expOpts = [{label:"あり", value:"あり"},{label:"なし", value:"なし"},{label:"どちらでもOK", value:"どちらでもOK"}];
 const hijabOpts = [{label:"OK", value:"OK"},{label:"禁止", value:"禁止"}];
-const nationalityOpts = ["国籍問わず","Japan","Indonesia","Nepal","India","Vietnam","China","Bangladesh","Korea","Myanmar","Others"];
+const nationalityOpts = ["国籍問わず","日本人","インドネシア人","ネパール人","インド人","ベトナム人","中国人","バングラデシュ人","韓国人","ミャンマー人","その他"];
 const publishKeys = ["draft","published","archived"];
 const publishLabel = {draft:"下書き", published:"公開", archived:"アーカイブ"};
 
@@ -498,7 +498,7 @@ const table = new Tabulator("#jobsGrid",{
     {title: thUnused("メモ詳細"), field:"level", editor:"input", width:220},
 
     {title: thPublic("タイトル"), field:"title", editor:"input", width:260},
-    {title: thPublic("概要"), field:"summary", editor:"textarea", width:320},
+    {title: thPublic("キーワード"), field:"summary", editor:"textarea", width:320},
     {title: thPublic("詳細内容"), field:"content", editor:"textarea", width:360},
 
     {title: thPublic("住所"), field:"job_location", editor:"list",

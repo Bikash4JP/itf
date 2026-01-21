@@ -198,6 +198,27 @@ function build_job_ld($job){
   <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
   <link rel="manifest" href="images/site.webmanifest">
   <meta name="theme-color" content="#000000">
+
+  <!-- ✅ Urgent label style (title ke BAAD red alert) -->
+  <style>
+    .urgent-alert{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      margin-left:10px;
+      padding:3px 10px;
+      border-radius:999px;
+      background:#fee2e2;
+      border:1px solid #fecaca;
+      color:#dc2626;
+      font-weight:900;
+      font-size:12px;
+      line-height:1;
+      vertical-align:middle;
+      white-space:nowrap;
+    }
+    .urgent-alert .star{font-size:14px;line-height:1}
+  </style>
 </head>
 <body class="home blog">
   <header id="header" class="l-header header" itemscope itemtype="https://schema.org/WPHeader">
@@ -217,7 +238,7 @@ function build_job_ld($job){
               <ul class="contents pc-flex str hend max">
                 <li class="contents-item"><a href="about.html">事業紹介</a></li>
                 <li class="contents-item"><a href="company_info.html">企業情報</a></li>
-                <li class="contents-item"><a href="saiyou.php" aria-current="page">新着採用</a></li>
+                <li class="contents-item"><a href="saiyou.php" aria-current="page">求人情報</a></li>
                 <li class="contents-item"><a href="news.html">新着情報</a></li>
               </ul>
               <ul class="cta pc-flex max str">
@@ -254,7 +275,7 @@ function build_job_ld($job){
           WHERE post_type='job'
             AND publish_state='published'
             AND (status IS NULL OR status='' OR status NOT IN ('募集終','募集終了','募集終わり','2'))";
-$params = [];
+          $params = [];
 
           if (!empty($_GET['q'])) {
             $search = "%".$_GET['q']."%";
@@ -275,7 +296,7 @@ $params = [];
                 ELSE 1
               END ASC,
               COALESCE(updated_at, date) DESC,
-            id DESC
+              id DESC
           ";
 
           $stmt = $pdo->prepare($query);
@@ -331,8 +352,22 @@ $params = [];
               $tags = $m[0] ?? [];
 
               $jobUrl = 'php/job_details.php?job_id='.htmlspecialchars($job['id']);
+
+              // ✅ IMPORTANT: normalize status (remove spaces incl full-width)
+              $statusRaw  = (string)($job['status'] ?? '');
+              $statusNorm = preg_replace('/\s+/u', '', trim($statusRaw));
+              $isUrgent   = in_array($statusNorm, ['急募','1'], true);
+
               echo '<article class="job-item" role="listitem">';
-              echo '  <h2 class="job-title"><a href="'.$jobUrl.'">'.htmlspecialchars($job['title']).'</a></h2>';
+              echo '  <h2 class="job-title">';
+              echo '    <a href="'.$jobUrl.'">'.htmlspecialchars($job['title']).'</a>';
+
+              // ✅ Title ke BAAD red alert
+              if ($isUrgent) {
+                echo ' <span class="urgent-alert" aria-label="急募"><span class="star">★</span>急募中</span>';
+              }
+
+              echo '  </h2>';
 
               if ($tags) {
                 echo '<div class="tag-row" aria-label="タグ">';

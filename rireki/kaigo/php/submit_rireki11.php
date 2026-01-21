@@ -359,7 +359,7 @@ $xlsUrl = '/rireki/kaigo/resumes/' . basename((string)$res['xls']);
         </details>
         <details>
           <summary>求人へはどう応募しますか？</summary>
-          <div><a href="/saiyou.php">新着採用</a>ページから、求人詳細の指示に従って応募してください。すでに求人から作成した場合は、担当より2営業日以内に連絡いたします。</div>
+          <div><a href="/saiyou.php">求人情報</a>ページから、求人詳細の指示に従って応募してください。すでに求人から作成した場合は、担当より2営業日以内に連絡いたします。</div>
         </details>
       </section>
 

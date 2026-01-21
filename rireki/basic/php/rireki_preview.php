@@ -364,7 +364,7 @@ $seed['__active_step'] = isset($post['__active_step']) ? $post['__active_step'] 
       <h3 style="margin:0 0 8px 0;">関連リンク</h3>
       <ul class="linklist">
         <li><a href="/rireki/index.php">フォーマット選択に戻る</a></li>
-        <li><a href="/saiyou.php">新着採用（求人一覧）</a></li>
+        <li><a href="/saiyou.php">求人情報（求人一覧）</a></li>
         <li><a href="/index.html#service-naiyo">サービス紹介</a></li>
         <li><a href="/company_info.html">会社概要</a></li>
       </ul>

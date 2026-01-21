@@ -726,7 +726,7 @@ $step6 = [
     <div class="side-card">
       <h3>関連リンク</h3>
       <ul class="linklist">
-        <li><a href="/saiyou.php">新着採用（求人一覧）</a></li>
+        <li><a href="/saiyou.php">求人情報（求人一覧）</a></li>
         <li><a href="/company_info.html">会社概要</a></li>
       </ul>
     </div>

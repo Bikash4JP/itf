@@ -83,7 +83,7 @@
                             <ul class="contents pc-flex str hend max">
                                 <li class="contents-item"><a href="https://it-future.jp/about.html">事業紹介</a></li>
                                 <li class="contents-item"><a href="https://it-future.jp/company_info.html">企業情報</a></li>
-                                <li class="contents-item"><a href="https://it-future.jp/saiyou.php">新着採用</a></li>
+                                <li class="contents-item"><a href="https://it-future.jp/saiyou.php">求人情報</a></li>
                                 <li class="contents-item"><a href="https://it-future.jp/news.html">新着情報</a></li>
                             </ul>
                             <ul class="cta pc-flex max str">
@@ -132,7 +132,7 @@
               echo '<div><strong>雇用形態:</strong> ' . htmlspecialchars($job['job_type']) . '</div>';
               echo '<div><strong>給与:</strong> ' . htmlspecialchars($job['salary']) . '</div>';
               echo '<div><strong>必要日本語レベル:</strong> ' . htmlspecialchars($job['japanese_level']) . '</div>';
-              echo '<div><strong>経験:</strong> ' . htmlspecialchars($job['experience']) . '</div>';
+            //   echo '<div><strong>経験:</strong> ' . htmlspecialchars($job['experience']) . '</div>';
               echo '<div><strong>募集人数:</strong> ' . htmlspecialchars($job['required_vacancy']) . '</div>';
             echo '</div>';
 

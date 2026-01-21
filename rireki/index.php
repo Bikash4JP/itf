@@ -309,7 +309,7 @@
         <li><strong>Excel（.xls）で保存：</strong>そのままダウンロードできます（推奨）。<br>
             <small style="color:#6b7280">※ PDF は環境により体裁が崩れる場合があります。Excel からの印刷が最も綺麗です。</small>
         </li>
-        <li><strong>求人へ応募：</strong><a href="/saiyou.php">新着採用</a>から応募、または直接提出。</li>
+        <li><strong>求人へ応募：</strong><a href="/saiyou.php">求人情報</a>から応募、または直接提出。</li>
       </ol>
       <p class="lead">求人詳細ページからの応募でも、履歴書の自動作成に対応しています。</p>
     </section>
