@@ -16,7 +16,6 @@ if (!isset($_SESSION['id']) || !isset($_SESSION['username'])) {
 // ✅ Only these admins can access manage_jobs.php
 $JOB_ADMIN_USERS = ['osaka_ueda', 'bikash', 'kimura'];
 if (!in_array($_SESSION['username'], $JOB_ADMIN_USERS, true)) {
-  // direct URL access block
   header("Location: /php/staffdb.php");
   exit;
 }
@@ -35,7 +34,6 @@ try {
   $staffList = [];
 }
 ?>
-
 <!doctype html>
 <html lang="ja">
 <head>
@@ -48,10 +46,7 @@ try {
   <script src="https://unpkg.com/tabulator-tables@6.3.0/dist/js/tabulator.min.js"></script>
 
   <style>
-    :root{
-      --border:#e6edf6; --ink:#0b2243; --muted:#667085;
-      --primary:#1e90ff; --primary-d:#1677d3; --success:#10b981;
-    }
+    :root{--border:#e6edf6; --ink:#0b2243; --muted:#667085; --primary:#1e90ff; --primary-d:#1677d3; --success:#10b981;}
     body{margin:0;font-family:ui-sans-serif,system-ui,"Segoe UI",Roboto,"Noto Sans JP","Hiragino Kaku Gothic ProN",Meiryo,Arial,sans-serif;background:#fff}
     .wrap{max-width:1900px;margin:0 auto;padding:14px 16px}
     .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:14px 0}
@@ -85,12 +80,7 @@ try {
     .saveNotif{position:fixed;top:20px;right:20px;padding:12px 20px;background:var(--success);color:#fff;border-radius:10px;font-weight:900;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:10000;opacity:0;transition:.2s;pointer-events:none}
     .saveNotif.show{opacity:1}
 
-    /* ✅✅✅ ONLY HEADER STYLE CHANGES */
-    .tabulator .tabulator-header .tabulator-col .tabulator-col-title{
-      text-align:center;
-      font-size:18px; /* ~4px bigger */
-      font-weight:900;
-    }
+    .tabulator .tabulator-header .tabulator-col .tabulator-col-title{text-align:center;font-size:18px;font-weight:900}
     .th-wrap{display:inline-flex;align-items:center;justify-content:center;gap:6px;width:100%}
     .th-public{color:#dc2626;font-weight:900}
     .th-public .th-star{color:#dc2626;font-weight:900}
@@ -122,7 +112,6 @@ try {
       <option value="status">状況</option>
       <option value="job_location">住所</option>
       <option value="org_work_type">職種</option>
-      <option value="publish_state">公開状態</option>
       <option value="job_staff_id">求人担当</option>
     </select>
 
@@ -176,17 +165,30 @@ const STAFF_VALUE_LIST = (function(){
 
 const statusOpts = ["募集中","急募","募集終"];
 const workTypeOpts = ["介護","外食","工業製品","食品製造","その他"];
+
 const prefTop = ["東京都","大阪府","神奈川県","埼玉県","千葉県","愛知県","福岡県","兵庫県","京都府","北海道"];
 const prefAll = ["北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県","茨城県","栃木県","群馬県","埼玉県","千葉県","東京都","神奈川県","新潟県","富山県","石川県","福井県","山梨県","長野県","岐阜県","静岡県","愛知県","三重県","滋賀県","京都府","大阪府","兵庫県","奈良県","和歌山県","鳥取県","島根県","岡山県","広島県","山口県","徳島県","香川県","愛媛県","高知県","福岡県","佐賀県","長崎県","熊本県","大分県","宮崎県","鹿児島県","沖縄県"];
 const prefectureOpts = [...prefTop, ...prefAll.filter(p=>!prefTop.includes(p))];
-const bonusOpts = ["あり","なし"];
+
 const residenceOpts = [{label:"国内", value:"国内"},{label:"国外", value:"国外"},{label:"どちらでもOK", value:"どちらでもOK"}];
 const genderOpts = [{label:"男性", value:"男"},{label:"女性", value:"女"},{label:"どちらでもOK", value:"どちらでもOK"}];
 const expOpts = [{label:"あり", value:"あり"},{label:"なし", value:"なし"},{label:"どちらでもOK", value:"どちらでもOK"}];
 const hijabOpts = [{label:"OK", value:"OK"},{label:"禁止", value:"禁止"}];
+
 const nationalityOpts = ["国籍問わず","日本人","インドネシア人","ネパール人","インド人","ベトナム人","中国人","バングラデシュ人","韓国人","ミャンマー人","その他"];
-const publishKeys = ["draft","published","archived"];
-const publishLabel = {draft:"下書き", published:"公開", archived:"アーカイブ"};
+const smokingOpts = ["禁煙","喫煙可","分煙","不明"];
+
+// tinyint sync options (0/1)
+const yesNoOpts = [
+  {label:"あり", value:1},
+  {label:"なし", value:0},
+];
+
+// ✅ 完備/なし
+const insuranceCoverOpts = [
+  {label:"完備", value:1},
+  {label:"なし", value:0},
+];
 
 let currentJobId = null;
 const editedRows = new Set();
@@ -195,12 +197,21 @@ const originalData = new Map();
 const TRACK_FIELDS = [
   'company_name','status','request_date','deadline_date',
   'job_staff_id','level','title','summary','content',
-  'org_work_type','job_location',
+  'org_work_type','job_location','work_location_detail',
+
+  'contract_period','probation_period','job_change_scope','workplace_change_scope',
+  'work_hours_shift','break_time','overtime','holidays','paid_leave','annual_holidays',
+
+  'current_residence','japanese_level','required_age','gender_pref','experience','skills_certifications',
+  'hijab_policy','preferred_nationalities','required_vacancy',
+
+  'salary','salary_basic','tax_pension_insurance','salary_takehome',
   'bonuses','bonus_amount',
-  'salary','salary_basic','salary_takehome','transport_amount_limit','rent_support',
-  'current_residence','gender_pref','experience','hijab_policy',
-  'nationality_pref_json','required_vacancy','japanese_level',
-  'publish_state',
+  'transportation_charges','transport_amount_limit',
+  'rent_support','life_support','visa_support',
+  'social_insurance',
+  'salary_increment','increment_condition',
+  'smoking',
 ];
 
 function escapeHtml(s){ return String(s ?? "").replace(/[&<>"']/g, (m)=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m])); }
@@ -237,11 +248,19 @@ function statusPill(val){
   if(val === "急募") return `<span class="pill urgent">急募</span>`;
   return `<span class="pill open">募集中</span>`;
 }
-function publishPill(val){
-  const key = (val || "draft");
-  const label = publishLabel[key] || "下書き";
-  return `<span class="chip"><small>${escapeHtml(label)}</small></span>`;
+function yesNoChip(val){
+  const v = (val === true) ? 1 : (val === false ? 0 : val);
+  if(String(v) === "1") return `<span class="chip"><small>あり</small></span>`;
+  if(String(v) === "0") return `<span class="chip"><small>なし</small></span>`;
+  return `<span class="chip"><small>-</small></span>`;
 }
+function coverChip(val){
+  const v = (val === true) ? 1 : (val === false ? 0 : val);
+  if(String(v) === "1") return `<span class="chip"><small>完備</small></span>`;
+  if(String(v) === "0") return `<span class="chip"><small>なし</small></span>`;
+  return `<span class="chip"><small>-</small></span>`;
+}
+
 function filesPreviewFormatter(cell){
   const arr = cell.getValue() || [];
   if(!Array.isArray(arr) || !arr.length) return `<span class="chip"><small>アップロード</small></span>`;
@@ -275,13 +294,33 @@ async function api(action, data=null){
   return r.json();
 }
 
+function normalizeRow(row){
+  if(!row) return row;
+  if(typeof row.preferred_nationalities === "string"){
+    const s = row.preferred_nationalities.trim();
+    if(!s){
+      row.preferred_nationalities = [];
+    }else{
+      try {
+        const parsed = JSON.parse(s);
+        row.preferred_nationalities = Array.isArray(parsed) ? parsed : [String(parsed)];
+      } catch(e){
+        row.preferred_nationalities = s.split(",").map(x=>x.trim()).filter(Boolean);
+      }
+    }
+  }
+  return row;
+}
+
 async function loadGrid(){
   const res = await api("list");
   if(!res.ok){ alert(res.error || "Load failed"); return; }
+
+  (res.rows || []).forEach(r=>normalizeRow(r));
   table.setData(res.rows);
 
   originalData.clear();
-  res.rows.forEach(row => originalData.set(row.id, JSON.parse(JSON.stringify(row))));
+  (res.rows || []).forEach(row => originalData.set(row.id, JSON.parse(JSON.stringify(row))));
 
   editedRows.clear();
   updateEditHint();
@@ -332,7 +371,7 @@ function rowHasDiff(row){
 function openDrawer(job, autoPick=false){
   currentJobId = job.id;
   document.getElementById("dTitle").textContent = `#${job.id} ${job.company_name || "(施設名未入力)"}`;
-  document.getElementById("dSub").textContent = `状況: ${job.status || "-"} / 公開: ${job.publish_state || "draft"}`;
+  document.getElementById("dSub").textContent = `状況: ${job.status || "-"}`;
   document.getElementById("drawerBack").classList.add("open");
   document.getElementById("drawer").classList.add("open");
   loadFiles(job.id).then(()=>{
@@ -360,29 +399,11 @@ async function loadFiles(jobId){
   if(!res.files.length){ box.innerHTML = `<div class="muted">ファイルなし</div>`; return; }
 
   for(const f of res.files){
-    // outer card (column)
     const card = document.createElement("div");
-    card.style.cssText = `
-      width:170px;
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      align-items:stretch;
-    `;
+    card.style.cssText = `width:170px;display:flex;flex-direction:column;gap:8px;align-items:stretch;`;
 
-    // preview area
     const preview = document.createElement("div");
-    preview.style.cssText = `
-      width:170px;height:120px;
-      border:1px solid var(--border);
-      border-radius:12px;
-      overflow:hidden;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:#fafafa;
-      cursor:pointer;
-    `;
+    preview.style.cssText = `width:170px;height:120px;border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#fafafa;cursor:pointer;`;
 
     const openUrl = f.file_path;
 
@@ -401,19 +422,10 @@ async function loadFiles(jobId){
 
     preview.addEventListener("click", ()=> window.open(openUrl, "_blank"));
 
-    // delete button (sample red box style)
     const delBtn = document.createElement("button");
     delBtn.type = "button";
     delBtn.textContent = "削除";
-    delBtn.style.cssText = `
-      height:34px;
-      border-radius:8px;
-      border:2px solid #ef4444;
-      background:#fff;
-      color:#ef4444;
-      font-weight:900;
-      cursor:pointer;
-    `;
+    delBtn.style.cssText = `height:34px;border-radius:8px;border:2px solid #ef4444;background:#fff;color:#ef4444;font-weight:900;cursor:pointer;`;
 
     delBtn.addEventListener("click", async (e)=>{
       e.preventDefault();
@@ -427,7 +439,6 @@ async function loadFiles(jobId){
         return;
       }
 
-      // refresh drawer + grid preview
       await loadFiles(jobId);
       await loadGrid();
     });
@@ -482,7 +493,6 @@ const table = new Tabulator("#jobsGrid",{
       }
     },
 
-    /* ✅ Public-visible fields => thPublic()  */
     {title: thUnused("施設名"), field:"company_name", editor:"input", width:220},
     {title: thPublic("状況"), field:"status", sorter:statusSort, formatter:(c)=>statusPill(c.getValue()), editor:"list",
       editorParams:{values: statusOpts, freetext:false, autocomplete:false, clearable:false, listOnEmpty:true}, width:120},
@@ -499,25 +509,40 @@ const table = new Tabulator("#jobsGrid",{
 
     {title: thPublic("タイトル"), field:"title", editor:"input", width:260},
     {title: thPublic("キーワード"), field:"summary", editor:"textarea", width:320},
-    {title: thPublic("詳細内容"), field:"content", editor:"textarea", width:360},
+    {title: thPublic("業務内容"), field:"content", editor:"textarea", width:360},
 
-    {title: thPublic("住所"), field:"job_location", editor:"list",
+    {title: thPublic("勤務地"), field:"job_location", editor:"list",
       editorParams:{values: prefectureOpts, clearable:true, autocomplete:true, freetext:true}, width:150},
 
-    {title: thPublic("賞与"), field:"bonuses",
-      formatter:(c)=>{ const v = (c.getValue() || "なし"); return v === "あり" ? `<span class="chip"><small>あり</small></span>` : `<span class="chip"><small>なし</small></span>`; },
-      editor:"list", editorParams:{values: bonusOpts, clearable:true, autocomplete:true}, width:120},
+    {title: thPublic("勤務地住所(詳細)"), field:"work_location_detail", editor:"input", width:240},
+    {title: thPublic("契約期間"), field:"contract_period", editor:"input", width:180},
+    {title: thPublic("試用期間"), field:"probation_period", editor:"input", width:180},
+    {title: thPublic("業務変更の範囲"), field:"job_change_scope", editor:"textarea", width:260},
+    {title: thPublic("就業場所変更の範囲"), field:"workplace_change_scope", editor:"textarea", width:260},
+    {title: thPublic("就業時間(シフト)"), field:"work_hours_shift", editor:"textarea", width:260},
+    {title: thPublic("休憩時間"), field:"break_time", editor:"input", width:160},
+    {title: thPublic("時間外労働"), field:"overtime", editor:"textarea", width:220},
+    {title: thPublic("休日"), field:"holidays", editor:"textarea", width:220},
+    {title: thPublic("年次有給休暇"), field:"paid_leave", editor:"textarea", width:240},
+    {title: thPublic("年間休日"), field:"annual_holidays", editor:"input", width:160},
 
-    {title: thPublic("賞与内容"), field:"bonus_amount", editor:"input", width:200},
+    {title: thPublic("応募者の現在地"), field:"current_residence", editor:"list",
+      editorParams:{values: residenceOpts, freetext:false, autocomplete:false, clearable:true, listOnEmpty:true}, width:170},
 
-    {title: thPublic("月給"), field:"salary", editor:"input", width:170},
-    {title: thUnused("基本給"), field:"salary_basic", editor:"input", width:140},
-    {title: thUnused("手取り"), field:"salary_takehome", editor:"input", width:140},
+    {title: thPublic("日本語レベル"), field:"japanese_level", editor:"input", width:140},
+    {title: thPublic("年齢"), field:"required_age", editor:"input", width:120},
+    {title: thPublic("性別"), field:"gender_pref", editor:"list",
+      editorParams:{values: genderOpts, freetext:false, autocomplete:false, clearable:true, listOnEmpty:true}, width:150},
 
-    {title: thPublic("交通費上限"), field:"transport_amount_limit", editor:"input", width:160},
-    {title: thPublic("住宅手当"), field:"rent_support", editor:"input", width:160},
+    {title: thPublic("経験"), field:"experience", editor:"list",
+      editorParams:{values: expOpts, freetext:false, autocomplete:false, clearable:true, listOnEmpty:true}, width:150},
 
-    {title: thUnused("国籍"), field:"nationality_pref_json",
+    {title: thPublic("技能・資格"), field:"skills_certifications", editor:"textarea", width:260},
+
+    {title: thUnused("ヒジャブ"), field:"hijab_policy", editor:"list",
+      editorParams:{values: hijabOpts, freetext:false, autocomplete:false, clearable:true, listOnEmpty:true}, width:140},
+
+    {title: thPublic("国籍"), field:"preferred_nationalities",
       formatter:(cell)=>{
         const v = cell.getValue();
         const arr = Array.isArray(v) ? v : [];
@@ -527,26 +552,47 @@ const table = new Tabulator("#jobsGrid",{
       editor:"list",
       editorParams:{values: nationalityOpts, multiselect:true, clearable:true, freetext:false, autocomplete:false, listOnEmpty:true}, width:320},
 
-    {title: thUnused("現在の居住地"), field:"current_residence", editor:"list",
-      editorParams:{values: residenceOpts, freetext:false, autocomplete:false, clearable:true, listOnEmpty:true}, width:170},
-
-    {title: thUnused("性別"), field:"gender_pref", editor:"list",
-      editorParams:{values: genderOpts, freetext:false, autocomplete:false, clearable:true, listOnEmpty:true}, width:150},
-
-    {title: thPublic("経験"), field:"experience", editor:"list",
-      editorParams:{values: expOpts, freetext:false, autocomplete:false, clearable:true, listOnEmpty:true}, width:150},
-
-    {title: thUnused("ヒジャブ"), field:"hijab_policy", editor:"list",
-      editorParams:{values: hijabOpts, freetext:false, autocomplete:false, clearable:true, listOnEmpty:true}, width:140},
+    {title: thPublic("喫煙"), field:"smoking", formatter:(c)=>chip(c.getValue()), editor:"list",
+      editorParams:{values: smokingOpts, freetext:true, autocomplete:true, clearable:true, listOnEmpty:true}, width:140},
 
     {title: thPublic("募集人数"), field:"required_vacancy", editor:"input", width:120},
-    {title: thPublic("日本語レベル"), field:"japanese_level", editor:"input", width:140},
+
+    {title: thPublic("月給"), field:"salary", editor:"input", width:170},
+    {title: thPublic("基本給"), field:"salary_basic", editor:"input", width:140},
+
+    // ✅ 税金・年金・保険等 → 完備/なし
+    {title: thPublic("税金・年金・保険等"), field:"tax_pension_insurance", formatter:(c)=>coverChip(c.getValue()), editor:"list",
+      editorParams:{values: insuranceCoverOpts, clearable:true, listOnEmpty:true}, width:170},
+
+    {title: thPublic("手取り"), field:"salary_takehome", editor:"input", width:140},
+
+    {title: thPublic("賞与"), field:"bonuses", formatter:(c)=>yesNoChip(c.getValue()), editor:"list",
+      editorParams:{values: yesNoOpts, freetext:false, autocomplete:false, clearable:true, listOnEmpty:true}, width:120},
+
+    {title: thPublic("賞与内容"), field:"bonus_amount", editor:"input", width:200},
+
+    {title: thPublic("交通費"), field:"transportation_charges", formatter:(c)=>yesNoChip(c.getValue()), editor:"list",
+      editorParams:{values: yesNoOpts, clearable:true, listOnEmpty:true}, width:120},
+
+    {title: thPublic("交通費上限"), field:"transport_amount_limit", editor:"input", width:160},
+    {title: thPublic("住宅手当"), field:"rent_support", editor:"input", width:160},
+
+    {title: thPublic("生活支援"), field:"life_support", formatter:(c)=>yesNoChip(c.getValue()), editor:"list",
+      editorParams:{values: yesNoOpts, clearable:true, listOnEmpty:true}, width:140},
+
+    {title: thPublic("ビザ支援"), field:"visa_support", formatter:(c)=>yesNoChip(c.getValue()), editor:"list",
+      editorParams:{values: yesNoOpts, clearable:true, listOnEmpty:true}, width:140},
+
+    {title: thPublic("社会保険"), field:"social_insurance", formatter:(c)=>coverChip(c.getValue()), editor:"list",
+      editorParams:{values: insuranceCoverOpts, clearable:true, listOnEmpty:true}, width:140},
+
+    {title: thPublic("昇給あり"), field:"salary_increment", formatter:(c)=>yesNoChip(c.getValue()), editor:"list",
+      editorParams:{values: yesNoOpts, clearable:true, listOnEmpty:true}, width:140},
+
+    {title: thPublic("昇給条件"), field:"increment_condition", editor:"textarea", width:240},
 
     {title: thUnused("求人票"), field:"files_preview", formatter:filesPreviewFormatter, width:190, headerSort:false,
       cellClick:(e, cell)=>{ const row = cell.getRow().getData(); openDrawer(row, true); }},
-
-    {title: thUnused("公開状態"), field:"publish_state", formatter:(c)=>publishPill(c.getValue()), editor:"list",
-      editorParams:{values: publishKeys, freetext:false, autocomplete:false, clearable:false, listOnEmpty:true}, width:140},
   ],
 });
 
@@ -588,15 +634,18 @@ document.getElementById("btnSaveAll").addEventListener("click", async ()=>{
       if(!row){ failedIds.add(rowId); failCount++; continue; }
 
       const data = row.getData();
+      const payload = {...data};
 
-      const res = await api("updateRow", {
-        id: data.id,
-        data: JSON.stringify(data)
-      });
+      if(Array.isArray(payload.preferred_nationalities)){
+        payload.preferred_nationalities = JSON.stringify(payload.preferred_nationalities);
+      }
+
+      const res = await api("updateRow", { id: payload.id, data: JSON.stringify(payload) });
 
       if(res.ok && res.row){
+        normalizeRow(res.row);
         row.update(res.row);
-        originalData.set(data.id, JSON.parse(JSON.stringify(res.row)));
+        originalData.set(payload.id, JSON.parse(JSON.stringify(res.row)));
         const elem = row.getElement();
         if(elem) elem.classList.remove("edited");
         successCount++;
@@ -646,6 +695,5 @@ document.getElementById("groupBy").addEventListener("change", (e)=>{
 
 loadGrid();
 </script>
-
 </body>
 </html>
