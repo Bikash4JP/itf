@@ -169,7 +169,7 @@ try {
             <input
                 type="text"
                 id="searchInput"
-                placeholder="氏名、施設、住所、担当者、電話番号など何でもキーワード　スペースで区切って検索できます..."
+                placeholder="雇用者情報氏名、施設、住所、担当者、電話番号など何でもキーワード..."
                 onkeyup="searchWorkers()"
                 onfocus="showSuggestions()"
                 onblur="hideSuggestions()"

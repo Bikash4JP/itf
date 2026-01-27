@@ -1,4 +1,5 @@
 <?php
+// php\addstaff.php
 ini_set('session.cookie_path', '/itf');
 session_start();
 
@@ -462,7 +463,7 @@ function calculateAge($dob)
             alert('エラー: ' + data.error);
           } else {
             alert('Successfully stored in database, try to search from main page for verification');
-            window.location.href = 'https://it-future.jp/php/searcch.php';
+            window.location.href = 'https://it-future.jp/php/staffdb.php';
           }
         })
         .catch(error => alert('エラー: ' + error.message));
