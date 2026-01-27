@@ -1,17 +1,24 @@
-<!-- php\edit_post.php -->
 <?php
-ini_set('session.cookie_path', '/itf');
+// php/edit_post.php
+
+ini_set('session.cookie_path', '/');
+ini_set('session.cookie_domain', '.it-future.jp');
+ini_set('session.cookie_lifetime', 86400);
+ini_set('session.cookie_secure', true);
+ini_set('session.cookie_httponly', true);
+ini_set('session.cookie_samesite', 'Lax');
 session_start();
+
+date_default_timezone_set('Asia/Tokyo');
 
 if (!isset($_SESSION['id']) || !isset($_SESSION['username'])) {
     header("Location: login.php");
     exit;
 }
 
-// Database connection
-require_once 'db_connect.php';
+require_once __DIR__ . '/db_connect.php';
+require_once __DIR__ . '/activity_logger.php';
 
-// Check if post ID is provided and valid
 $post_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 if ($post_id === false || $post_id <= 0) {
     header("Location: error.php?message=" . urlencode("Invalid post ID."));
@@ -19,7 +26,6 @@ if ($post_id === false || $post_id <= 0) {
 }
 
 try {
-    // Fetch the post by ID and staff_id
     $stmt = $pdo->prepare("SELECT * FROM posts WHERE id = ? AND staff_id = ?");
     $stmt->execute([$post_id, $_SESSION['id']]);
     $post = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -29,76 +35,90 @@ try {
         exit;
     }
 
-    // Handle form submission
+    $oldTitle    = (string)($post['title'] ?? '');
+    $oldType     = (string)($post['post_type'] ?? '');
+    $oldCategory = (string)($post['category'] ?? '');
+
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        // Validate CSRF token
-        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== ($_SESSION['csrf_token'] ?? '')) {
             die("無効なリクエストです。");
         }
 
-        $title = trim($_POST['title']);
-        $summary = trim($_POST['summary']);
-        $content = trim($_POST['content']);
-        $category = $_POST['category'] ?? '';
+        $title    = trim((string)($_POST['title'] ?? ''));
+        $summary  = trim((string)($_POST['summary'] ?? ''));
+        $content  = trim((string)($_POST['content'] ?? ''));
+        $category = (string)($_POST['category'] ?? '');
+
         $company_name = $_POST['company_name'] ?? null;
         $job_location = $_POST['job_location'] ?? null;
         $job_category = $_POST['job_category'] ?? null;
-        $job_type = $_POST['job_type'] ?? null;
+        $job_type     = $_POST['job_type'] ?? null;
+
         $salary = $_POST['salary'] ?? null;
         $bonuses = isset($_POST['bonuses']) ? (int)$_POST['bonuses'] : null;
         $bonus_amount = $_POST['bonus_amount'] ?? null;
+
         $living_support = isset($_POST['living_support']) ? (int)$_POST['living_support'] : null;
         $rent_support = $_POST['rent_support_amount'] ?? null;
+
         $insurance = isset($_POST['insurance']) ? (int)$_POST['insurance'] : null;
         $transportation_charges = isset($_POST['transportation_charges']) ? (int)$_POST['transportation_charges'] : null;
         $transport_amount_limit = $_POST['transport_amount'] ?? null;
+
         $salary_increment = isset($_POST['salary_increment']) ? (int)$_POST['salary_increment'] : null;
         $increment_condition = $_POST['increment_condition'] ?? null;
+
         $japanese_level = $_POST['japanese_level'] ?? null;
         $experience = $_POST['experience'] ?? null;
         $minimum_leave_per_year = $_POST['minimum_leave_per_year'] ?? null;
         $employee_size = $_POST['employee_size'] ?? null;
         $required_vacancy = $_POST['required_vacancy'] ?? null;
 
-        if (empty($title) || empty($summary) || empty($content)) {
+        if ($title === '' || $summary === '' || $content === '') {
             die("Title, summary, and content cannot be empty.");
         }
 
         // Handle image upload
         $image_path = $post['image'];
-        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-            $upload_dir = '../uploads/';
+        if (isset($_FILES['image']) && ($_FILES['image']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
+
+            $docroot = rtrim($_SERVER['DOCUMENT_ROOT'] ?? dirname(__DIR__), '/');
+            $upload_dir = $docroot . '/uploads/'; // existing behavior
             if (!is_dir($upload_dir)) {
                 mkdir($upload_dir, 0755, true);
             }
+
             $image_name = uniqid() . '_' . basename($_FILES['image']['name']);
-            $image_path = $upload_dir . $image_name;
+            $absPath    = $upload_dir . $image_name;
 
             $allowed_types = ['image/jpeg', 'image/png'];
-            $max_size = 2 * 1024 * 1024; // 2MB
+            $max_size = 2 * 1024 * 1024;
             $file_type = mime_content_type($_FILES['image']['tmp_name']);
-            $file_size = $_FILES['image']['size'];
+            $file_size = (int)$_FILES['image']['size'];
 
-            if (!in_array($file_type, $allowed_types)) {
+            if (!in_array($file_type, $allowed_types, true)) {
                 die("画像はJPEGまたはPNG形式である必要があります。");
             }
             if ($file_size > $max_size) {
                 die("画像サイズは2MB以下である必要があります。");
             }
 
-            if (!move_uploaded_file($_FILES['image']['tmp_name'], $image_path)) {
+            if (!move_uploaded_file($_FILES['image']['tmp_name'], $absPath)) {
                 die("画像のアップロードに失敗しました。");
             }
+
+            // store relative like "uploads/xxxx.png"
+            $image_path = 'uploads/' . $image_name;
         }
 
-        // Update post in the database
+        // Update post
         $stmt = $pdo->prepare("
-            UPDATE posts SET 
-                title = ?, summary = ?, content = ?, category = ?, image = ?, company_name = ?, 
-                job_location = ?, job_category = ?, job_type = ?, salary = ?, bonuses = ?, bonus_amount = ?, 
-                living_support = ?, rent_support = ?, insurance = ?, transportation_charges = ?, 
-                transport_amount_limit = ?, salary_increment = ?, increment_condition = ?, 
-                japanese_level = ?, experience = ?, minimum_leave_per_year = ?, employee_size = ?, 
+            UPDATE posts SET
+                title = ?, summary = ?, content = ?, category = ?, image = ?, company_name = ?,
+                job_location = ?, job_category = ?, job_type = ?, salary = ?, bonuses = ?, bonus_amount = ?,
+                living_support = ?, rent_support = ?, insurance = ?, transportation_charges = ?,
+                transport_amount_limit = ?, salary_increment = ?, increment_condition = ?,
+                japanese_level = ?, experience = ?, minimum_leave_per_year = ?, employee_size = ?,
                 required_vacancy = ?
             WHERE id = ? AND staff_id = ?
         ");
@@ -111,15 +131,46 @@ try {
             $required_vacancy, $post_id, $_SESSION['id']
         ]);
 
-        // Redirect back to manage posts
+        // ✅ log activity
+        $actor = (string)($_SESSION['username'] ?? '');
+        $actorId = (int)($_SESSION['id'] ?? 0);
+
+        if (($oldType ?: $post['post_type']) === 'news') {
+            $msg = ($oldTitle !== $title)
+                ? sprintf('%s が お知らせのタイトルを「%s」→「%s」に更新しました。', $actor, $oldTitle, $title)
+                : sprintf('%s が お知らせ「%s」を更新しました。', $actor, $title);
+
+            log_activity($pdo, [
+                'actor_type'     => 'staff',
+                'actor_staff_id' => $actorId,
+                'actor_username' => $actor,
+                'action'         => 'news_update',
+                'entity_type'    => 'news',
+                'entity_id'      => $post_id,
+                'message_ja'     => $msg,
+            ]);
+        } else {
+            // (optional) job edits also logged
+            $msg = sprintf('%s が 投稿（%s）「%s」を更新しました。', $actor, (string)$oldType, $title);
+            log_activity($pdo, [
+                'actor_type'     => 'staff',
+                'actor_staff_id' => $actorId,
+                'actor_username' => $actor,
+                'action'         => 'post_update',
+                'entity_type'    => (string)$oldType,
+                'entity_id'      => $post_id,
+                'message_ja'     => $msg,
+            ]);
+        }
+
         header("Location: manage_posts.php");
         exit;
     }
 
-    // Generate new CSRF token for the form
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+
 } catch (PDOException $e) {
-    echo "エラー: " . $e->getMessage();
+    echo "エラー: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
     exit;
 }
 ?>

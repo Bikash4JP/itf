@@ -70,16 +70,13 @@ function calculateAge($dob) {
   <header>
     <div class="logo"><a href="https://it-future.jp/"><img src="../images/logo.png" alt="ITF Logo"></a></div>
     <nav>
-      <ul>
-        <li><a href="../staffdb.php">ホーム</a></li>
-        <li><a href="#" onclick="showForm('posts')">投稿を追加</a></li>
-        <li><a href="#" onclick="showForm('jobs')">求人を追加</a></li>
-        <li><a href="manage_posts.php">投稿を管理</a></li>
-        <li><a href="searcch.php" class="active">検索</a></li>
-        <li><a href="logout.php">ログアウト</a></li>
-      </ul>
+        <ul>
+            <li><a href="staffdb.php">ホーム</a></li>
+            <li><a href="profile.php">プロフィール</a></li>
+            <li><a href="logout.php">ログアウト</a></li>
+        </ul>
     </nav>
-  </header>
+</header>
   <div class="form-container">
     <!-- Step Header -->
     <div class="step-header">
@@ -459,7 +456,7 @@ function calculateAge($dob) {
           alert('エラー: ' + data.error);
         } else {
           alert('Successfully updated in database, try to search from main page for verification');
-          window.location.href = 'https://it-future.jp/php/searcch.php';
+          window.location.href = 'https://it-future.jp/php/staffdb.php';
         }
       })
       .catch(error => alert('エラー: ' + error.message));

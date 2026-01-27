@@ -1,6 +1,6 @@
 <?php
 // /home/it-future/www/itf/php/addnews.php
-// Add "News/Announcement" (お知らせ) — separate page version
+// Add "News/Announcement" (お知らせ)
 
 // ---- session & auth ----
 ini_set('session.cookie_path', '/');
@@ -11,6 +11,8 @@ ini_set('session.cookie_httponly', true);
 ini_set('session.cookie_samesite', 'Lax');
 session_start();
 
+date_default_timezone_set('Asia/Tokyo');
+
 if (!isset($_SESSION['id']) || !isset($_SESSION['username'])) {
   header("Location: /php/login.php");
   exit;
@@ -18,6 +20,9 @@ if (!isset($_SESSION['id']) || !isset($_SESSION['username'])) {
 
 // ---- DB ----
 require_once __DIR__ . '/db_connect.php';
+
+// ✅ activity logger
+require_once __DIR__ . '/activity_logger.php';
 
 // ---- CSRF helpers ----
 if (empty($_SESSION['csrf_addnews'])) {
@@ -27,22 +32,22 @@ $csrf = $_SESSION['csrf_addnews'];
 
 // ---- POST handler ----
 $err = [];
-$done = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
   // CSRF
-  if (!isset($_POST['csrf']) || !hash_equals($csrf, $_POST['csrf'])) {
+  if (!isset($_POST['csrf']) || !hash_equals($csrf, (string)$_POST['csrf'])) {
     $err[] = '不正なリクエストです（CSRF）。もう一度お試しください。';
   }
 
   // Collect/validate inputs
-  $title    = trim($_POST['title'] ?? '');
-  $summary  = trim($_POST['summary'] ?? '');
-  $category = trim($_POST['category'] ?? 'その他');
-  $content  = trim($_POST['content'] ?? '');
-  $date     = trim($_POST['date'] ?? date('Y-m-d'));
-  $posted_by= trim($_POST['posted_by'] ?? $_SESSION['username']);
-  $staff_id = (int)($_POST['staff_id'] ?? $_SESSION['id']);
+  $title     = trim((string)($_POST['title'] ?? ''));
+  $summary   = trim((string)($_POST['summary'] ?? ''));
+  $category  = trim((string)($_POST['category'] ?? 'その他'));
+  $content   = trim((string)($_POST['content'] ?? ''));
+  $date      = trim((string)($_POST['date'] ?? date('Y-m-d')));
+  $posted_by = (string)($_SESSION['username'] ?? '');
+  $staff_id  = (int)($_SESSION['id'] ?? 0);
 
   if ($title === '')   $err[] = 'タイトルは必須です。';
   if ($summary === '') $err[] = '概要は必須です。';
@@ -53,11 +58,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $imageRel = null; // e.g., "uploads/news/xxx.jpg"
   if (!empty($_FILES['image']) && is_array($_FILES['image']) && ($_FILES['image']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
     $up = $_FILES['image'];
-    if ($up['error'] !== UPLOAD_ERR_OK) {
+    if (($up['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
       $err[] = '画像のアップロードに失敗しました。';
     } else {
       // Validate size <= 2MB
-      if ($up['size'] > 2 * 1024 * 1024) {
+      if (($up['size'] ?? 0) > 2 * 1024 * 1024) {
         $err[] = '画像は 2MB 以下にしてください。';
       } else {
         // Validate type
@@ -80,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           if (!move_uploaded_file($up['tmp_name'], $absPath)) {
             $err[] = '画像の保存に失敗しました。';
           } else {
-            // Relative path saved to DB (fetch_news expects paths starting with "uploads/")
+            // Relative path saved to DB
             $imageRel = 'uploads/news/' . $base;
           }
         }
@@ -99,25 +104,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ':summary'   => $summary,
         ':category'  => $category,
         ':content'   => $content,
-        ':image'     => $imageRel,     // can be null
+        ':image'     => $imageRel,
         ':date'      => $date,
         ':posted_by' => $posted_by,
         ':staff_id'  => $staff_id,
       ]);
-      // success → go back to staff home
+
+      $newsId = (int)$pdo->lastInsertId();
+
+      // ✅ log activity
+      $msg = sprintf('%s が お知らせ「%s」を投稿しました。', $posted_by, $title);
+      log_activity($pdo, [
+        'actor_type'      => 'staff',
+        'actor_staff_id'  => $staff_id,
+        'actor_username'  => $posted_by,
+        'action'          => 'news_create',
+        'entity_type'     => 'news',
+        'entity_id'       => $newsId,
+        'message_ja'      => $msg,
+      ]);
+
       $_SESSION['flash_ok'] = 'お知らせを投稿しました。';
       header('Location: /staffdb.php');
       exit;
+
     } catch (PDOException $e) {
       $err[] = 'データベース保存時にエラーが発生しました。';
-      // Log quietly
       @file_put_contents("/home/it-future/www/itf/logs/db_error.log",
         "AddNews Error: ".$e->getMessage()." | Time: ".date('Y-m-d H:i:s')."\n", FILE_APPEND);
     }
   }
 }
-
-// ---- View (form) ----
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -140,7 +157,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
     button{padding:10px 14px;border:1px solid #dbe7f5;border-radius:8px;background:#0ea5e9;color:#fff;cursor:pointer}
-    button.secondary{background:#f3f9ff;color:#0c4a7a}
+    .secondary{background:#f3f9ff;color:#0c4a7a}
     .errors{background:#fff7f7;border:1px solid #fecaca;color:#7f1d1d;padding:12px;border-radius:10px;margin-bottom:12px}
     .note{color:#667085;font-size:12px}
   </style>
@@ -155,20 +172,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php if ($err): ?>
       <div class="errors">
         <ul style="margin:0;padding-left:18px">
-          <?php foreach ($err as $e): ?><li><?=htmlspecialchars($e)?></li><?php endforeach; ?>
+          <?php foreach ($err as $e): ?><li><?=htmlspecialchars($e, ENT_QUOTES, 'UTF-8')?></li><?php endforeach; ?>
         </ul>
       </div>
     <?php endif; ?>
 
     <form method="post" enctype="multipart/form-data" novalidate>
-      <input type="hidden" name="csrf" value="<?=htmlspecialchars($csrf)?>">
-      <input type="hidden" name="posted_by" value="<?=htmlspecialchars($_SESSION['username'])?>">
-      <input type="hidden" name="staff_id" value="<?=htmlspecialchars((string)$_SESSION['id'])?>">
+      <input type="hidden" name="csrf" value="<?=htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8')?>">
 
       <div class="grid-2">
         <div>
           <label>掲載日 *</label>
-          <input type="date" name="date" value="<?=htmlspecialchars(date('Y-m-d'))?>" required>
+          <input type="date" name="date" value="<?=htmlspecialchars(date('Y-m-d'), ENT_QUOTES, 'UTF-8')?>" required>
         </div>
         <div>
           <label>カテゴリ *</label>
@@ -194,10 +209,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       <label>画像（JPEG/PNG、最大2MB）</label>
       <input type="file" name="image" accept="image/jpeg,image/png">
-      <p class="note">※ 画像は任意です。アップロードされた場合は <code>uploads/news/</code> に保存され、API（fetch_news.php）から参照されます。</p>
+      <p class="note">※ 画像は任意です。アップロードされた場合は <code>uploads/news/</code> に保存されます。</p>
 
       <div class="actions">
-        <a class="btn secondary" href="/staffdb.php">キャンセル</a>
+        <a class="btn secondary" href="staffdb.php">キャンセル</a>
         <button type="submit">投稿する</button>
       </div>
     </form>

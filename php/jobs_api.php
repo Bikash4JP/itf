@@ -28,9 +28,7 @@ if (!in_array($currentUser, $JOB_ADMIN_USERS, true)) {
 
 require_once __DIR__ . '/db_connect.php';
 
-// ✅ activity logger
-// Make sure /home/it-future/www/itf/php/activity_logger.php exists
-// and has log_activity(PDO $pdo, array $data)
+// ✅ activity logger（Recent Activityは触らない）
 require_once __DIR__ . '/activity_logger.php';
 
 if (empty($_SESSION['csrf_token'])) {
@@ -138,6 +136,29 @@ function posts_existing_cols(PDO $pdo): array {
   return $cache;
 }
 
+// ✅ column meta (NULL可否/型/デフォルト)
+function posts_column_meta(PDO $pdo): array {
+  static $meta = null;
+  if (is_array($meta)) return $meta;
+
+  $st = $pdo->query("
+    SELECT COLUMN_NAME, IS_NULLABLE, COLUMN_DEFAULT, DATA_TYPE
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'posts'
+  ");
+  $rows = $st->fetchAll(PDO::FETCH_ASSOC);
+  $meta = [];
+  foreach ($rows as $r) {
+    $name = (string)$r['COLUMN_NAME'];
+    $meta[$name] = [
+      'nullable' => ((string)$r['IS_NULLABLE'] === 'YES'),
+      'default'  => $r['COLUMN_DEFAULT'], // can be null
+      'type'     => (string)$r['DATA_TYPE'],
+    ];
+  }
+  return $meta;
+}
+
 function field_exists(PDO $pdo, string $field): bool {
   $exists = posts_existing_cols($pdo);
   return isset($exists[$field]);
@@ -172,7 +193,10 @@ function format_row_for_ui(PDO $pdo, array $row, array $filesMap = []): array {
   }
 
   // tinyint fields -> int
-  $tinyFields = ['bonuses','transportation_charges','life_support','visa_support','social_insurance','salary_increment','tax_pension_insurance'];
+  $tinyFields = [
+    'bonuses','transportation_charges','life_support','visa_support',
+    'social_insurance','salary_increment','tax_pension_insurance'
+  ];
   foreach($tinyFields as $f){
     if (isset($row[$f]) && field_exists($pdo, $f)) {
       $row[$f] = (int)($row[$f] ?? 0);
@@ -201,6 +225,24 @@ function format_row_for_ui(PDO $pdo, array $row, array $filesMap = []): array {
   return $row;
 }
 
+// ✅ create時の日付カラム用（NULL可ならNULL、ダメなら今日）
+function default_date_value_for_create(PDO $pdo, string $col) {
+  if (!field_exists($pdo, $col)) return null;
+  $meta = posts_column_meta($pdo);
+  $m = $meta[$col] ?? null;
+  if (!$m) return null;
+
+  // date/datetime/timestamp系のみ対象
+  $type = strtolower((string)($m['type'] ?? ''));
+  $isDateLike = in_array($type, ['date','datetime','timestamp'], true);
+  if (!$isDateLike) return null;
+
+  if (!empty($m['nullable'])) return null;
+
+  // NOT NULL の場合は today を入れて落ちないようにする
+  return date('Y-m-d');
+}
+
 // -------- activity helpers --------
 function _label_of_field(string $f): string {
   $map = [
@@ -219,33 +261,28 @@ function _label_of_field(string $f): string {
     'life_support' => '生活支援',
     'visa_support' => 'ビザ支援',
     'salary_increment' => '昇給あり',
+    'request_date' => '依頼日',
+    'deadline_date' => '締切日',
   ];
   return $map[$f] ?? $f;
 }
 function _val_to_ja(string $field, $val): string {
   if ($val === null || $val === '') return '（空）';
 
-  // status normalize
   if ($field === 'status') return normalize_status((string)$val);
 
-  // yes/no style
   $yesNo = ['bonuses','transportation_charges','life_support','visa_support','salary_increment'];
   if (in_array($field, $yesNo, true)) {
     return ((int)$val === 1) ? 'あり' : 'なし';
   }
 
-  // cover style (完備/なし)
   $cover = ['social_insurance','tax_pension_insurance'];
   if (in_array($field, $cover, true)) {
     return ((int)$val === 1) ? '完備' : 'なし';
   }
 
-  // job_staff_id -> just show id (we keep message simple)
-  if ($field === 'job_staff_id') {
-    return (string)$val;
-  }
+  if ($field === 'job_staff_id') return (string)$val;
 
-  // array -> join
   if (is_array($val)) return implode(', ', $val);
 
   return (string)$val;
@@ -345,6 +382,14 @@ try {
       'smoking' => '',
     ];
 
+    // ✅ ここで request_date / deadline_date を "" にしない（NULL or today）
+    if (field_exists($pdo, 'request_date')) {
+      $defaults['request_date'] = default_date_value_for_create($pdo, 'request_date'); // NULL or today
+    }
+    if (field_exists($pdo, 'deadline_date')) {
+      $defaults['deadline_date'] = default_date_value_for_create($pdo, 'deadline_date'); // NULL or today
+    }
+
     $textDefaults = [
       'level','salary','salary_basic','salary_takehome','bonus_amount',
       'transport_amount_limit','rent_support','increment_condition',
@@ -352,7 +397,7 @@ try {
       'work_location_detail','contract_period','probation_period','job_change_scope','workplace_change_scope',
       'work_hours_shift','break_time','overtime','holidays','paid_leave','annual_holidays',
       'required_vacancy','japanese_level',
-      'request_date','deadline_date',
+      // ❌ request_date, deadline_date はここに入れない（空文字事故を防ぐ）
     ];
 
     $exists = posts_existing_cols($pdo);
@@ -390,7 +435,6 @@ try {
     $data = json_decode($_POST['data'] ?? '{}', true);
     if ($id <= 0 || !is_array($data)) json_out(['ok'=>false,'error'=>'Invalid data'], 400);
 
-    // ✅ fetch BEFORE for diff
     $stBefore = $pdo->prepare("SELECT ".select_cols_sql($pdo)." FROM posts WHERE id=? AND post_type='job'");
     $stBefore->execute([$id]);
     $before = $stBefore->fetch(PDO::FETCH_ASSOC) ?: [];
@@ -454,10 +498,8 @@ try {
         $value = null;
       }
 
-      // track field change (compare to BEFORE)
       $old = $before[$field] ?? null;
 
-      // normalize BEFORE for some fields to reduce false diff
       if ($field === 'status') $old = normalize_status((string)$old);
       if (in_array($field, ['bonuses','transportation_charges','life_support','visa_support','social_insurance','tax_pension_insurance','salary_increment'], true)) {
         $old = (int)($old ?? 0);
@@ -478,7 +520,6 @@ try {
       $st->execute($values);
     }
 
-    // fetch AFTER
     $st2 = $pdo->prepare("SELECT ".select_cols_sql($pdo)." FROM posts WHERE id=? AND post_type='job'");
     $st2->execute([$id]);
     $row = $st2->fetch(PDO::FETCH_ASSOC);
@@ -494,7 +535,6 @@ try {
       $row = format_row_for_ui($pdo, $row, $filesMap);
     }
 
-    // ✅ LOG (only if something changed)
     if (!empty($changedFields)) {
       $u = (string)($_SESSION['username'] ?? '');
       $company = _safe_company($row ?: $before);
@@ -520,7 +560,6 @@ try {
     $id = (int)($_POST['id'] ?? 0);
     if ($id <= 0) json_out(['ok'=>false,'error'=>'Invalid id'], 400);
 
-    // fetch before delete
     $stB = $pdo->prepare("SELECT company_name FROM posts WHERE id=? AND post_type='job'");
     $stB->execute([$id]);
     $before = $stB->fetch(PDO::FETCH_ASSOC) ?: [];
@@ -529,7 +568,6 @@ try {
 
     $pdo->prepare("DELETE FROM posts WHERE id=? AND post_type='job'")->execute([$id]);
 
-    // ✅ LOG
     $u = (string)($_SESSION['username'] ?? '');
     _log_job_activity($pdo, 'delete', $id, "{$u} が「{$company}」（求人ID: {$id}）を削除しました。", $company);
 
@@ -556,7 +594,6 @@ try {
     $f = $st->fetch(PDO::FETCH_ASSOC);
     if (!$f) json_out(['ok'=>false,'error'=>'File not found'], 404);
 
-    // company name
     $stC = $pdo->prepare("SELECT company_name FROM posts WHERE id=? AND post_type='job'");
     $stC->execute([$jobId]);
     $company = trim((string)($stC->fetchColumn() ?: ''));
@@ -578,7 +615,6 @@ try {
 
     $pdo->prepare("UPDATE posts SET updated_at=NOW() WHERE id=? AND post_type='job'")->execute([$jobId]);
 
-    // ✅ LOG
     $u = (string)($_SESSION['username'] ?? '');
     _log_job_activity($pdo, 'delete_file', $jobId, "{$u} が「{$company}」（求人ID: {$jobId}）の求人票ファイルを削除しました。{$fileName}", $company);
 
@@ -625,13 +661,11 @@ try {
 
     $pdo->prepare("UPDATE posts SET updated_at=NOW() WHERE id=? AND post_type='job'")->execute([$id]);
 
-    // company name
     $stC = $pdo->prepare("SELECT company_name FROM posts WHERE id=? AND post_type='job'");
     $stC->execute([$id]);
     $company = trim((string)($stC->fetchColumn() ?: ''));
     if ($company === '') $company = '（施設名未入力）';
 
-    // ✅ LOG
     $u = (string)($_SESSION['username'] ?? '');
     _log_job_activity($pdo, 'upload_file', $id, "{$u} が「{$company}」（求人ID: {$id}）に求人票ファイルをアップロードしました。{$orig}", $company);
 
