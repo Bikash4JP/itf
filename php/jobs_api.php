@@ -8,6 +8,8 @@ ini_set('session.cookie_httponly', true);
 ini_set('session.cookie_samesite', 'Lax');
 session_start();
 
+date_default_timezone_set('Asia/Tokyo');
+
 header('Content-Type: application/json; charset=utf-8');
 
 if (!isset($_SESSION['id']) || !isset($_SESSION['username'])) {
@@ -25,6 +27,11 @@ if (!in_array($currentUser, $JOB_ADMIN_USERS, true)) {
 }
 
 require_once __DIR__ . '/db_connect.php';
+
+// ✅ activity logger
+// Make sure /home/it-future/www/itf/php/activity_logger.php exists
+// and has log_activity(PDO $pdo, array $data)
+require_once __DIR__ . '/activity_logger.php';
 
 if (empty($_SESSION['csrf_token'])) {
   $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -164,8 +171,8 @@ function format_row_for_ui(PDO $pdo, array $row, array $filesMap = []): array {
     else $row['job_staff_id'] = (int)$row['job_staff_id'];
   }
 
-  // tinyint fields -> int (keep 0/1; UI decides labels)
-  $tinyFields = ['bonuses','transportation_charges','life_support','visa_support','social_insurance','salary_increment'];
+  // tinyint fields -> int
+  $tinyFields = ['bonuses','transportation_charges','life_support','visa_support','social_insurance','salary_increment','tax_pension_insurance'];
   foreach($tinyFields as $f){
     if (isset($row[$f]) && field_exists($pdo, $f)) {
       $row[$f] = (int)($row[$f] ?? 0);
@@ -184,7 +191,6 @@ function format_row_for_ui(PDO $pdo, array $row, array $filesMap = []): array {
       if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
         $arr = array_values(array_filter(array_map('strval', $decoded), fn($x)=>trim($x)!=='' ));
       } else {
-        // fallback: comma separated
         $arr = array_values(array_filter(array_map('trim', explode(',', (string)$row['preferred_nationalities'])), fn($x)=>$x!==''));
       }
     }
@@ -193,6 +199,79 @@ function format_row_for_ui(PDO $pdo, array $row, array $filesMap = []): array {
 
   $row['files_preview'] = $filesMap[$jid] ?? [];
   return $row;
+}
+
+// -------- activity helpers --------
+function _label_of_field(string $f): string {
+  $map = [
+    'company_name' => '施設名',
+    'status' => '状況',
+    'probation_period' => '試用期間',
+    'title' => 'タイトル',
+    'job_location' => '勤務地',
+    'work_location_detail' => '勤務地住所(詳細)',
+    'org_work_type' => '職種',
+    'job_staff_id' => '求人担当',
+    'social_insurance' => '社会保険',
+    'tax_pension_insurance' => '税金・年金・保険等',
+    'bonuses' => '賞与',
+    'transportation_charges' => '交通費',
+    'life_support' => '生活支援',
+    'visa_support' => 'ビザ支援',
+    'salary_increment' => '昇給あり',
+  ];
+  return $map[$f] ?? $f;
+}
+function _val_to_ja(string $field, $val): string {
+  if ($val === null || $val === '') return '（空）';
+
+  // status normalize
+  if ($field === 'status') return normalize_status((string)$val);
+
+  // yes/no style
+  $yesNo = ['bonuses','transportation_charges','life_support','visa_support','salary_increment'];
+  if (in_array($field, $yesNo, true)) {
+    return ((int)$val === 1) ? 'あり' : 'なし';
+  }
+
+  // cover style (完備/なし)
+  $cover = ['social_insurance','tax_pension_insurance'];
+  if (in_array($field, $cover, true)) {
+    return ((int)$val === 1) ? '完備' : 'なし';
+  }
+
+  // job_staff_id -> just show id (we keep message simple)
+  if ($field === 'job_staff_id') {
+    return (string)$val;
+  }
+
+  // array -> join
+  if (is_array($val)) return implode(', ', $val);
+
+  return (string)$val;
+}
+
+function _safe_company(array $row): string {
+  $c = trim((string)($row['company_name'] ?? ''));
+  return $c !== '' ? $c : '（施設名未入力）';
+}
+
+function _log_job_activity(PDO $pdo, string $action, int $jobId, string $message, ?string $companyName=null): void {
+  $companyName = $companyName ?? '';
+  try {
+    log_activity($pdo, [
+      'actor_type' => 'staff',
+      'actor_staff_id' => (int)($_SESSION['id'] ?? 0),
+      'actor_username' => (string)($_SESSION['username'] ?? ''),
+      'action' => $action,
+      'entity_type' => 'job',
+      'entity_id' => $jobId,
+      'company_name' => $companyName,
+      'message_ja' => $message,
+    ]);
+  } catch (Throwable $e) {
+    // logging failure should not break main action
+  }
 }
 
 try {
@@ -239,7 +318,6 @@ try {
   if ($action === 'create') {
     require_csrf();
 
-    // defaults (only include columns that actually exist)
     $defaults = [
       'post_type'    => 'job',
       'publish_state'=> 'draft',
@@ -255,23 +333,20 @@ try {
       'job_location' => '',
       'date'         => date('Y-m-d'),
 
-      // boolean defaults
       'bonuses' => 0,
       'transportation_charges' => 0,
       'life_support' => 0,
       'visa_support' => 0,
       'social_insurance' => 0,
+      'tax_pension_insurance' => 0,
       'salary_increment' => 0,
 
-      // array defaults
       'preferred_nationalities' => null,
-
-      // misc
       'smoking' => '',
     ];
 
     $textDefaults = [
-      'level','salary','salary_basic','salary_takehome','tax_pension_insurance','bonus_amount',
+      'level','salary','salary_basic','salary_takehome','bonus_amount',
       'transport_amount_limit','rent_support','increment_condition',
       'current_residence','required_age','gender_pref','experience','skills_certifications','hijab_policy',
       'work_location_detail','contract_period','probation_period','job_change_scope','workplace_change_scope',
@@ -281,7 +356,6 @@ try {
     ];
 
     $exists = posts_existing_cols($pdo);
-
     foreach ($textDefaults as $f) {
       if (isset($exists[$f]) && !array_key_exists($f, $defaults)) $defaults[$f] = '';
     }
@@ -301,6 +375,11 @@ try {
     $stmt->execute($vals);
 
     $id = (int)$pdo->lastInsertId();
+
+    // ✅ LOG
+    $u = (string)($_SESSION['username'] ?? '');
+    _log_job_activity($pdo, 'create', $id, "{$u} が新しい求人（ID: {$id}）を作成しました。", null);
+
     json_out(['ok'=>true,'id'=>$id]);
   }
 
@@ -311,8 +390,14 @@ try {
     $data = json_decode($_POST['data'] ?? '{}', true);
     if ($id <= 0 || !is_array($data)) json_out(['ok'=>false,'error'=>'Invalid data'], 400);
 
+    // ✅ fetch BEFORE for diff
+    $stBefore = $pdo->prepare("SELECT ".select_cols_sql($pdo)." FROM posts WHERE id=? AND post_type='job'");
+    $stBefore->execute([$id]);
+    $before = $stBefore->fetch(PDO::FETCH_ASSOC) ?: [];
+
     $updates = [];
     $values  = [];
+    $changedFields = [];
 
     foreach($data as $field => $value) {
       $field = (string)$field;
@@ -336,8 +421,7 @@ try {
         $value = in_array($v, ['draft','published','archived'], true) ? $v : 'draft';
       }
 
-      // tinyint fields
-      $yesNoFields = ['bonuses','transportation_charges','life_support','visa_support','social_insurance','salary_increment'];
+      $yesNoFields = ['bonuses','transportation_charges','life_support','visa_support','social_insurance','tax_pension_insurance','salary_increment'];
       if (in_array($field, $yesNoFields, true)) {
         $value = normalize_yesno_to_int($value);
       }
@@ -359,7 +443,6 @@ try {
         $value = in_array($v, ['OK','禁止', null, ''], true) ? $v : null;
       }
 
-      // preferred_nationalities: array/json/comma -> JSON string
       if ($field === 'preferred_nationalities') {
         $arr = parse_json_array($value);
         $arr = array_values(array_unique($arr));
@@ -369,6 +452,19 @@ try {
 
       if (($field === 'request_date' || $field === 'deadline_date') && ($value === '' || $value === null)) {
         $value = null;
+      }
+
+      // track field change (compare to BEFORE)
+      $old = $before[$field] ?? null;
+
+      // normalize BEFORE for some fields to reduce false diff
+      if ($field === 'status') $old = normalize_status((string)$old);
+      if (in_array($field, ['bonuses','transportation_charges','life_support','visa_support','social_insurance','tax_pension_insurance','salary_increment'], true)) {
+        $old = (int)($old ?? 0);
+      }
+
+      if ((string)$old !== (string)$value) {
+        $changedFields[$field] = ['old'=>$old, 'new'=>$value];
       }
 
       $updates[] = "`$field` = ?";
@@ -382,6 +478,7 @@ try {
       $st->execute($values);
     }
 
+    // fetch AFTER
     $st2 = $pdo->prepare("SELECT ".select_cols_sql($pdo)." FROM posts WHERE id=? AND post_type='job'");
     $st2->execute([$id]);
     $row = $st2->fetch(PDO::FETCH_ASSOC);
@@ -397,88 +494,22 @@ try {
       $row = format_row_for_ui($pdo, $row, $filesMap);
     }
 
-    json_out(['ok'=>true,'row'=>$row]);
-  }
+    // ✅ LOG (only if something changed)
+    if (!empty($changedFields)) {
+      $u = (string)($_SESSION['username'] ?? '');
+      $company = _safe_company($row ?: $before);
 
-  if ($action === 'updateCell') {
-    require_csrf();
-
-    $id    = (int)($_POST['id'] ?? 0);
-    $field = (string)($_POST['field'] ?? '');
-    $value = $_POST['value'] ?? null;
-
-    if ($id <= 0 || !is_allowed_field($pdo, $field)) {
-      json_out(['ok'=>false,'error'=>'Invalid field/id'], 400);
-    }
-
-    if (($field === 'request_date' || $field === 'deadline_date') && ($value === '' || $value === null)) {
-      $value = null;
-    }
-
-    if ($field === 'status') $value = normalize_status($value);
-
-    if ($field === 'job_staff_id') {
-      if ($value === '' || $value === null) $value = null;
-      else {
-        $sv = trim((string)$value);
-        $value = ctype_digit($sv) ? (int)$sv : ($staffByName[$sv] ?? null);
+      $parts = [];
+      foreach ($changedFields as $f => $chg) {
+        $label = _label_of_field($f);
+        $oldJa = _val_to_ja($f, $chg['old']);
+        $newJa = _val_to_ja($f, $chg['new']);
+        $parts[] = "{$label}: {$oldJa} → {$newJa}";
       }
-    }
 
-    $yesNoFields = ['bonuses','transportation_charges','life_support','visa_support','social_insurance','salary_increment'];
-    if (in_array($field, $yesNoFields, true)) {
-      $value = normalize_yesno_to_int($value);
-    }
-
-    if ($field === 'current_residence') {
-      $v = normalize_ok3($value);
-      $value = in_array($v, ['国内','国外','どちらでもOK', null, ''], true) ? $v : null;
-    }
-    if ($field === 'gender_pref') {
-      $v = normalize_ok3($value);
-      $value = in_array($v, ['男','女','どちらでもOK', null, ''], true) ? $v : null;
-    }
-    if ($field === 'experience') {
-      $v = normalize_ok3($value);
-      $value = in_array($v, ['あり','なし','どちらでもOK', null, ''], true) ? $v : null;
-    }
-    if ($field === 'hijab_policy') {
-      $v = trim((string)$value);
-      $value = in_array($v, ['OK','禁止', null, ''], true) ? $v : null;
-    }
-
-    if ($field === 'preferred_nationalities') {
-      $arr = parse_json_array($value);
-      $arr = array_values(array_unique(array_values(array_filter(array_map('strval', $arr), fn($x)=>trim($x)!=='' ))));
-      $json = json_encode($arr, JSON_UNESCAPED_UNICODE);
-      $value = ($json === '[]') ? null : $json;
-    }
-
-    if ($field === 'publish_state') {
-      $v = trim((string)$value);
-      if ($v === '下書き') $v = 'draft';
-      if ($v === '公開') $v = 'published';
-      if ($v === 'アーカイブ') $v = 'archived';
-      $value = in_array($v, ['draft','published','archived'], true) ? $v : 'draft';
-    }
-
-    $sql = "UPDATE posts SET `$field` = ?, updated_at = NOW() WHERE id = ? AND post_type='job'";
-    $st = $pdo->prepare($sql);
-    $st->execute([$value, $id]);
-
-    $st2 = $pdo->prepare("SELECT ".select_cols_sql($pdo)." FROM posts WHERE id=? AND post_type='job'");
-    $st2->execute([$id]);
-    $row = $st2->fetch(PDO::FETCH_ASSOC);
-
-    if ($row) {
-      $st3 = $pdo->prepare("SELECT job_post_id, id, file_path, file_name, mime, created_at FROM job_files WHERE job_post_id = ? ORDER BY created_at DESC LIMIT 3");
-      $st3->execute([$id]);
-      $filesMap = [];
-      while($f = $st3->fetch(PDO::FETCH_ASSOC)){
-        if (!isset($filesMap[$id])) $filesMap[$id] = [];
-        $filesMap[$id][] = $f;
-      }
-      $row = format_row_for_ui($pdo, $row, $filesMap);
+      $detail = implode('、', $parts);
+      $msg = "{$u} が「{$company}」（求人ID: {$id}）を更新しました。{$detail}";
+      _log_job_activity($pdo, 'update', $id, $msg, $company);
     }
 
     json_out(['ok'=>true,'row'=>$row]);
@@ -489,8 +520,19 @@ try {
     $id = (int)($_POST['id'] ?? 0);
     if ($id <= 0) json_out(['ok'=>false,'error'=>'Invalid id'], 400);
 
-    // job_files は FK ON DELETE CASCADE で自動削除される想定
+    // fetch before delete
+    $stB = $pdo->prepare("SELECT company_name FROM posts WHERE id=? AND post_type='job'");
+    $stB->execute([$id]);
+    $before = $stB->fetch(PDO::FETCH_ASSOC) ?: [];
+    $company = trim((string)($before['company_name'] ?? ''));
+    if ($company === '') $company = '（施設名未入力）';
+
     $pdo->prepare("DELETE FROM posts WHERE id=? AND post_type='job'")->execute([$id]);
+
+    // ✅ LOG
+    $u = (string)($_SESSION['username'] ?? '');
+    _log_job_activity($pdo, 'delete', $id, "{$u} が「{$company}」（求人ID: {$id}）を削除しました。", $company);
+
     json_out(['ok'=>true]);
   }
 
@@ -509,12 +551,19 @@ try {
     $jobId  = (int)($_POST['job_id'] ?? 0);
     if ($fileId <= 0 || $jobId <= 0) json_out(['ok'=>false,'error'=>'Invalid request'], 400);
 
-    $st = $pdo->prepare("SELECT id, job_post_id, file_path FROM job_files WHERE id=? AND job_post_id=?");
+    $st = $pdo->prepare("SELECT id, job_post_id, file_path, file_name FROM job_files WHERE id=? AND job_post_id=?");
     $st->execute([$fileId, $jobId]);
     $f = $st->fetch(PDO::FETCH_ASSOC);
     if (!$f) json_out(['ok'=>false,'error'=>'File not found'], 404);
 
+    // company name
+    $stC = $pdo->prepare("SELECT company_name FROM posts WHERE id=? AND post_type='job'");
+    $stC->execute([$jobId]);
+    $company = trim((string)($stC->fetchColumn() ?: ''));
+    if ($company === '') $company = '（施設名未入力）';
+
     $filePath = (string)($f['file_path'] ?? '');
+    $fileName = (string)($f['file_name'] ?? '');
 
     $pdo->prepare("DELETE FROM job_files WHERE id=? AND job_post_id=?")->execute([$fileId, $jobId]);
 
@@ -528,6 +577,11 @@ try {
     }
 
     $pdo->prepare("UPDATE posts SET updated_at=NOW() WHERE id=? AND post_type='job'")->execute([$jobId]);
+
+    // ✅ LOG
+    $u = (string)($_SESSION['username'] ?? '');
+    _log_job_activity($pdo, 'delete_file', $jobId, "{$u} が「{$company}」（求人ID: {$jobId}）の求人票ファイルを削除しました。{$fileName}", $company);
+
     json_out(['ok'=>true]);
   }
 
@@ -570,6 +624,17 @@ try {
     $st->execute([$id, $publicPath, $orig, $mime]);
 
     $pdo->prepare("UPDATE posts SET updated_at=NOW() WHERE id=? AND post_type='job'")->execute([$id]);
+
+    // company name
+    $stC = $pdo->prepare("SELECT company_name FROM posts WHERE id=? AND post_type='job'");
+    $stC->execute([$id]);
+    $company = trim((string)($stC->fetchColumn() ?: ''));
+    if ($company === '') $company = '（施設名未入力）';
+
+    // ✅ LOG
+    $u = (string)($_SESSION['username'] ?? '');
+    _log_job_activity($pdo, 'upload_file', $id, "{$u} が「{$company}」（求人ID: {$id}）に求人票ファイルをアップロードしました。{$orig}", $company);
+
     json_out(['ok'=>true,'file'=>['file_path'=>$publicPath,'file_name'=>$orig,'mime'=>$mime]]);
   }
 
