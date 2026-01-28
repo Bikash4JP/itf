@@ -206,7 +206,7 @@ function json_out(array $arr, int $code = 200): void {
 /* =========================
    Token bootstrap
    ========================= */
-$token = normalize_token($_GET['token'] ?? ($_POST['token'] ?? ''));
+$token = normalize_token($_GET['token'] ?? ($_POST['token'] ?? ($_SESSION['kaigo_token'] ?? '')));
 if (!$token) {
   $token = bin2hex(random_bytes(16));
   $_SESSION['kaigo_token'] = $token;

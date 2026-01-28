@@ -8,8 +8,16 @@ require_once __DIR__ . '/adapters/adapter_xlsx.php';
 require_once __DIR__ . '/validators.php';
 
 // Optional: applicant auth (public users)
-$authPath = __DIR__ . '/../../../php/user_auth.php';
+$authPath = __DIR__ . '/../../../php/user_auth.php'; // /itf/php/user_auth.php
 if (is_readable($authPath)) require_once $authPath;
+
+// ✅ Main DB (expects $pdo as PDO)
+require_once $_SERVER['DOCUMENT_ROOT'] . '/php/db_connect.php';
+if (!isset($pdo) || !($pdo instanceof PDO)) {
+  http_response_code(500);
+  echo "DB connection missing.";
+  exit;
+}
 
 // Paths
 $mappingFile = rireki_path('mappings/templateB.json');
@@ -18,21 +26,18 @@ $tmpDir      = rireki_path('tmp');
 @mkdir($outDir, 0755, true);
 @mkdir($tmpDir, 0755, true);
 
-// ---------- helpers ----------
-function _reshape_rows(array $group, array $fields): array {
-  $rows = []; $len = 0;
-  foreach ($fields as $f) $len = max($len, isset($group[$f]) ? count((array)$group[$f]) : 0);
-  for ($i=0; $i<$len; $i++) {
-    $row = [];
-    foreach ($fields as $f) $row[$f] = trim($group[$f][$i] ?? '');
-    if (implode('', $row) !== '') $rows[] = $row;
-  }
-  return $rows;
+/* =========================
+   helpers
+   ========================= */
+function h($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
+
+function normalize_token($t): string {
+  $t = strtolower(trim((string)$t));
+  return preg_match('/^[a-f0-9]{32}$/', $t) ? $t : '';
 }
 
 function _plain_fail(string $msg, int $code = 500): void {
   http_response_code($code);
-  // If ajax expects JSON
   $wantsJson = (!empty($_POST['ajax']) && $_POST['ajax'] === '1');
   if ($wantsJson) {
     header('Content-Type: application/json; charset=UTF-8');
@@ -49,144 +54,184 @@ function _starts_with(string $hay, string $needle): bool {
 }
 
 /**
- * Preview page moves photo to /rireki/uploads/tmp/xxx.jpg and sends it as photo_path (web path).
- * Adapter expects readable filesystem path, so convert web path to absolute path safely.
+ * Convert web photo path to absolute filesystem path safely for XLS embedding.
+ * Accept only under allowed upload bases.
  */
-function _normalize_photo_path_from_preview(array &$data): void {
+function _normalize_photo_path_from_web(array &$data): void {
   if (empty($data['photo_path']) || !is_string($data['photo_path'])) return;
 
   $photo = trim($data['photo_path']);
   if ($photo === '') return;
 
-  // If already a readable filesystem path, keep.
+  // already filesystem readable
   if (is_readable($photo)) return;
 
-  // If it's a URL, treat as photo_url (adapter can download it)
+  // URL -> treat as photo_url
   if (preg_match('#^https?://#i', $photo)) {
     $data['photo_url'] = $photo;
     return;
   }
 
-  // If it's a web path like /rireki/uploads/tmp/xxx.jpg, convert to absolute
-  if (_starts_with($photo, '/')) {
-    $docRoot = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/');
-    if ($docRoot !== '') {
-      $candidate = realpath($docRoot . $photo);
+  if (!_starts_with($photo, '/')) return;
 
-      // allow only under /rireki/uploads to prevent path abuse
-      $allowBase = realpath($docRoot . '/rireki/uploads');
+  $docRoot = rtrim((string)($_SERVER['DOCUMENT_ROOT'] ?? ''), '/');
+  if ($docRoot === '') return;
 
-      if ($candidate && $allowBase && _starts_with($candidate, $allowBase) && is_readable($candidate)) {
-        $data['_photo_rel'] = $photo;      // keep web-path too (adapter supports this)
-        $data['photo_path'] = $candidate;  // absolute path for XLS image embedding
-      }
+  $candidate = realpath($docRoot . $photo);
+  if (!$candidate) return;
+
+  // allow only under these bases
+  $allowBases = [
+    realpath($docRoot . '/rireki/uploads'),
+    realpath($docRoot . '/rireki/kaigo/uploads'),
+  ];
+
+  foreach ($allowBases as $base) {
+    if ($base && _starts_with($candidate, $base) && is_readable($candidate)) {
+      $data['_photo_rel'] = $photo;      // keep web path too
+      $data['photo_path'] = $candidate;  // absolute path for adapter
+      return;
     }
   }
 }
 
-// ---------- build data ----------
-if (isset($_GET['demo'])) {
-  $data = [
-    'name_romaji'=>'TARO YAMADA','name_kana'=>'やまだ たろう',
-    'dob_year'=>'1998','dob_month'=>'04','dob_day'=>'01',
-    'birthplace'=>'東京','postal'=>'123-4567','address'=>'東京都千代田区1-2-3',
-    'nationality'=>'ネパール国籍','gender'=>'男性','religion'=>'仏教','marital_status'=>'無し',
-    'contact_phone'=>'090-1111-2222','email'=>'taro@example.com',
-    'height_cm'=>'170','weight_kg'=>'60','passport_has'=>'有り','passport_no'=>'AB123456',
-    'self_pr'=>'責任感が強く、学習意欲が高いです。','motivation'=>'介護の現場で働きたい。','preferences'=>'東京23区で勤務希望',
-    'planned_resign_year'=>'2026','planned_resign_month'=>'03',
-    'education'=>[
-      ['from_year'=>'2015','from_month'=>'04','to_year'=>'2018','to_month'=>'03','institution'=>'ABC高校','faculty'=>'普通科'],
-      ['from_year'=>'2018','from_month'=>'04','to_year'=>'2022','to_month'=>'03','institution'=>'XYZ大学','faculty'=>'福祉学部'],
-    ],
-    'work_blocks'=>[
-      ['from_year'=>'2022','from_month'=>'04','to_year'=>'2024','to_month'=>'03','org'=>'介護施設ABC','job_title'=>'介護職','work_time_start'=>'09:00','work_time_end'=>'18:00','work_days_per_week'=>'5','status'=>'退職','description'=>'入浴介助、排泄介助、記録業務など']
-    ],
-    'licenses'=>[
-      ['cert_year'=>'2021','cert_month'=>'12','cert_name'=>'日本語能力試験N2'],
-      ['cert_year'=>'2022','cert_month'=>'07','cert_name'=>'介護職員初任者研修'],
-    ],
-  ];
-  $jobId = 0;
-  $intent = 'download';
-  $ajax = false;
-} else {
-  $data  = $_POST;
-  $jobId = isset($data['job_id']) ? (int)$data['job_id'] : 0;
+/**
+ * Fetch draft row by token (new flow: token is the source of truth).
+ */
+function fetch_kaigo_row(PDO $pdo, string $token): array {
+  $st = $pdo->prepare("SELECT * FROM app_resume_kaigo WHERE token = :t LIMIT 1");
+  $st->execute([':t' => $token]);
+  $row = $st->fetch(PDO::FETCH_ASSOC);
+  return is_array($row) ? $row : [];
+}
 
-  $intent = strtolower(trim((string)($data['intent'] ?? 'download')));
-  if (!in_array($intent, ['apply','download'], true)) $intent = 'download';
+/**
+ * Build adapter-friendly data arrays from flattened DB row.
+ */
+function build_data_from_row(array $row): array {
+  $data = $row;
 
-  $ajax = (!empty($data['ajax']) && (string)$data['ajax'] === '1');
-
-  // normalize planned resignation date
-  $data['planned_resign_year']  = trim($data['planned_resign_year']  ?? '');
-  $data['planned_resign_month'] = trim($data['planned_resign_month'] ?? '');
-
-  // reshape repeaters
-  if (!empty($data['education']) && is_array($data['education']) && isset($data['education']['from_year'])) {
-    $data['education'] = _reshape_rows($data['education'], ['from_year','from_month','to_year','to_month','institution','faculty','status']);
+  // education edu1..8 -> rows
+  $edu = [];
+  for ($i=1; $i<=8; $i++) {
+    $r = [
+      'from_year'    => trim((string)($row["edu{$i}_from_year"] ?? '')),
+      'from_month'   => trim((string)($row["edu{$i}_from_month"] ?? '')),
+      'to_year'      => trim((string)($row["edu{$i}_to_year"] ?? '')),
+      'to_month'     => trim((string)($row["edu{$i}_to_month"] ?? '')),
+      'status'       => trim((string)($row["edu{$i}_status"] ?? '')),
+      'institution'  => trim((string)($row["edu{$i}_institution"] ?? '')),
+      'faculty'      => trim((string)($row["edu{$i}_faculty"] ?? '')),
+    ];
+    if (implode('', $r) !== '') $edu[] = $r;
   }
-  if (!empty($data['work_blocks']) && is_array($data['work_blocks']) && isset($data['work_blocks']['from_year'])) {
-    $data['work_blocks'] = _reshape_rows($data['work_blocks'], ['from_year','from_month','to_year','to_month','org','job_title','work_time_start','work_time_end','work_days_per_week','status','description']);
-  }
-  if (!empty($data['licenses']) && is_array($data['licenses']) && isset($data['licenses']['cert_year'])) {
-    $data['licenses'] = _reshape_rows($data['licenses'], ['cert_year','cert_month','cert_name']);
-  }
+  $data['education'] = $edu;
 
-  // consolidate travel notes
+  // licenses lic1..8 -> rows
+  $lic = [];
+  for ($i=1; $i<=8; $i++) {
+    $r = [
+      'cert_year' => trim((string)($row["lic{$i}_year"] ?? '')),
+      'cert_month'=> trim((string)($row["lic{$i}_month"] ?? '')),
+      'cert_name' => trim((string)($row["lic{$i}_name"] ?? '')),
+    ];
+    if (implode('', $r) !== '') $lic[] = $r;
+  }
+  $data['licenses'] = $lic;
+
+  // work work1..8 -> rows
+  $wk = [];
+  for ($i=1; $i<=8; $i++) {
+    $r = [
+      'from_year'    => trim((string)($row["work{$i}_from_year"] ?? '')),
+      'from_month'   => trim((string)($row["work{$i}_from_month"] ?? '')),
+      'status'       => trim((string)($row["work{$i}_status"] ?? '')),
+      'to_year'      => trim((string)($row["work{$i}_to_year"] ?? '')),
+      'to_month'     => trim((string)($row["work{$i}_to_month"] ?? '')),
+      'org'          => trim((string)($row["work{$i}_org"] ?? '')),
+      'job_title'    => trim((string)($row["work{$i}_job_title"] ?? '')),
+      'description'  => trim((string)($row["work{$i}_description"] ?? '')),
+      // optional keys (template may ignore, but keep for compatibility)
+      'work_time_start'   => '',
+      'work_time_end'     => '',
+      'work_days_per_week'=> '',
+    ];
+    if (implode('', $r) !== '') $wk[] = $r;
+  }
+  $data['work_blocks'] = $wk;
+
+  // travel note consolidation (optional)
   if (empty($data['past_travel_history'])) {
-    $cnt = trim($data['past_travel_count'] ?? '');
-    $det = trim($data['past_travel_details'] ?? '');
+    $cnt = trim((string)($data['past_travel_count'] ?? ''));
+    $det = trim((string)($data['past_travel_details'] ?? ''));
     $data['past_travel_history'] = ($cnt !== '' || $det !== '') ? ("回数: ".$cnt." / ".$det) : '';
   }
 
-  // photo upload (direct from form case)
-  if (isset($_FILES['photo']) && ($_FILES['photo']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
-    $dir = rireki_path('uploads/photos');
-    if (!is_dir($dir)) @mkdir($dir, 0755, true);
-    $ext = strtolower(pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION));
-    if (!in_array($ext, ['jpg','jpeg','png'], true)) $ext = 'jpg';
-    $dest = $dir . '/' . bin2hex(random_bytes(8)) . '.' . $ext;
-    if (move_uploaded_file($_FILES['photo']['tmp_name'], $dest)) {
-      $data['photo_path'] = $dest; // absolute FS path
-    }
-  }
+  // normalize planned resignation
+  $data['planned_resign_year']  = trim((string)($data['planned_resign_year'] ?? ''));
+  $data['planned_resign_month'] = trim((string)($data['planned_resign_month'] ?? ''));
 
-  // photo path from preview (web path -> absolute)
-  _normalize_photo_path_from_preview($data);
-
-  // IMPORTANT:
-  // For resume-only creation we do NOT treat jobId as "application".
-  // jobId can exist in data, but apply logic depends on intent=apply.
+  return $data;
 }
 
-// ----- persist source metadata for rireki_list.php -----
+/* =========================
+   Read token + flow
+   ========================= */
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+if ($method !== 'POST') _plain_fail('Method not allowed', 405);
+
+$token = normalize_token($_POST['token'] ?? '');
+if (!$token) _plain_fail('Invalid token', 400);
+
+$row = fetch_kaigo_row($pdo, $token);
+if (!$row) _plain_fail('Invalid token', 400);
+
+// flow: apply_profile | open_resume | profile_only
+$flow = strtolower(trim((string)($_POST['flow'] ?? '')));
+$allowedFlows = ['open_resume','apply_profile','profile_only'];
+if (!in_array($flow, $allowedFlows, true)) {
+  // fallback: if job_id exists -> apply_profile else open_resume
+  $guessJob = (int)($row['job_id'] ?? 0);
+  $flow = ($guessJob > 0) ? 'apply_profile' : 'open_resume';
+}
+
+// intent for downstream logic
+$jobId = (int)($row['job_id'] ?? 0);
+$intent = ($flow === 'apply_profile' && $jobId > 0) ? 'apply' : 'download';
+$ajax = (!empty($_POST['ajax']) && (string)$_POST['ajax'] === '1');
+
+// build data from DB row (source of truth)
+$data = build_data_from_row($row);
+
+// metadata for lists/history
 $data['_source'] = ($intent === 'apply' && $jobId > 0) ? 'job' : 'open';
 $data['_job_id'] = ($intent === 'apply') ? $jobId : 0;
 $data['_job_title'] = '';
 
 // fetch job title only when applying
 if ($intent === 'apply' && $jobId > 0) {
-  $dbPath = __DIR__ . '/../../../php/db_connect.php';
-  if (is_readable($dbPath)) {
-    require_once $dbPath;
-    if (isset($pdo) && $pdo instanceof PDO) {
-      $stmt = $pdo->prepare("SELECT title FROM posts WHERE id = ? AND post_type = 'job' LIMIT 1");
-      $stmt->execute([$jobId]);
-      $t = $stmt->fetchColumn();
-      if (is_string($t) && $t !== '') $data['_job_title'] = $t;
-    }
+  try {
+    $stmt = $pdo->prepare("SELECT title FROM posts WHERE id = ? AND post_type = 'job' LIMIT 1");
+    $stmt->execute([$jobId]);
+    $t = $stmt->fetchColumn();
+    if (is_string($t) && $t !== '') $data['_job_title'] = $t;
+  } catch (Throwable $e) {
+    error_log('[submit_rireki] job title fetch failed: '.$e->getMessage());
   }
 }
 
-// ---------- render XLS ----------
-$token = bin2hex(random_bytes(16));
+// photo: DB keeps web path => normalize to absolute for renderer
+_normalize_photo_path_from_web($data);
+
+/* =========================
+   render XLS
+   ========================= */
+$outToken = bin2hex(random_bytes(16));
 
 if (function_exists('rireki_render_xls_only')) {
-  $res = rireki_render_xls_only($data, $mappingFile, $outDir, $token);
+  $res = rireki_render_xls_only($data, $mappingFile, $outDir, $outToken);
 } elseif (function_exists('rireki_render_pdf')) {
-  $res = rireki_render_pdf($data, $mappingFile, $outDir, $token);
+  $res = rireki_render_pdf($data, $mappingFile, $outDir, $outToken);
 } else {
   _plain_fail("Renderer not found in adapter.", 500);
 }
@@ -196,12 +241,14 @@ if (empty($res['ok']) || empty($res['xls'])) {
 }
 
 // Save JSON snapshot
-@file_put_contents($outDir . '/' . $token . '.json', json_encode($data, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
+@file_put_contents($outDir . '/' . $outToken . '.json', json_encode($data, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
 
 // URLs
 $xlsUrl = '/rireki/kaigo/resumes/' . basename((string)$res['xls']);
 
-// ---------- save to logged-in user's history (DB) ----------
+/* =========================
+   save to logged-in user's history (DB) - unchanged
+   ========================= */
 if (function_exists('app_is_logged_in') && app_is_logged_in()) {
   try {
     $pdo_app = app_pdo();
@@ -215,7 +262,7 @@ if (function_exists('app_is_logged_in') && app_is_logged_in()) {
       INSERT INTO app_resumes (user_id, fmt, token, job_id)
       VALUES (?, ?, ?, ?)
     ");
-    $st->execute([$uid, $fmt, $token, ($intent === 'apply' && $jobId > 0) ? $jobId : null]);
+    $st->execute([$uid, $fmt, $outToken, ($intent === 'apply' && $jobId > 0) ? $jobId : null]);
 
     // Save application history ONLY when intent=apply
     if ($intent === 'apply' && $jobId > 0) {
@@ -223,7 +270,27 @@ if (function_exists('app_is_logged_in') && app_is_logged_in()) {
         INSERT INTO app_applications (user_id, job_id, resume_token)
         VALUES (?, ?, ?)
       ");
-      $st2->execute([$uid, $jobId, $token]);
+      $st2->execute([$uid, $jobId, $outToken]);
+
+      // NEW: log activity so staff dashboard recent_activities shows the apply notice
+      $actPath = __DIR__ . '/../../../php/activity_logger.php';
+      if (is_readable($actPath)) {
+        require_once $actPath;
+        if (function_exists('log_activity')) {
+          $company = '';
+          try {
+            $stC = $pdo_app->prepare('SELECT company_name FROM posts WHERE id = ? LIMIT 1');
+            $stC->execute([$jobId]);
+            $company = (string)($stC->fetchColumn() ?: '');
+          } catch (Throwable $e) { /* ignore */ }
+          if ($company === '') $company = '求人ID ' . (string)$jobId;
+
+          $who = trim((string)($data['name_romaji'] ?? ''));
+          if ($who === '') $who = 'applicant';
+          $msg = '【応募】' . $company . ' に新しい応募が届きました。';
+          log_activity($pdo_app, $msg, 'applicant', $uid, $who);
+        }
+      }
     }
 
   } catch (Throwable $e) {
@@ -231,12 +298,12 @@ if (function_exists('app_is_logged_in') && app_is_logged_in()) {
   }
 }
 
-// If AJAX, return JSON and exit (Flow A)
-if (!empty($_POST['ajax']) && (string)$_POST['ajax'] === '1') {
+// If AJAX, return JSON and exit
+if ($ajax) {
   header('Content-Type: application/json; charset=UTF-8');
   echo json_encode([
     'ok' => true,
-    'token' => $token,
+    'token' => $outToken,
     'xls_url' => $xlsUrl,
     'applied_jobs_url' => 'https://it-future.jp/php/user_applied_jobs.php',
   ], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
@@ -244,12 +311,14 @@ if (!empty($_POST['ajax']) && (string)$_POST['ajax'] === '1') {
 }
 
 $fmt = 'kaigo';
-$claimNext = '/rireki/php/claim_resume.php?token=' . urlencode($token) . '&fmt=' . urlencode($fmt);
+$claimNext = '/rireki/kaigo/php/claim_resume.php?token=' . urlencode($outToken) . '&fmt=' . urlencode($fmt);
 $loginUrl  = '/php/user_login.php?next=' . urlencode($claimNext);
 
 $showApplyThanks = ($intent === 'apply' && $jobId > 0);
 
-// ---------- success page ----------
+/* =========================
+   success page (styles kept same)
+   ========================= */
 ?>
 <!doctype html>
 <html lang="ja">
@@ -368,7 +437,7 @@ $showApplyThanks = ($intent === 'apply' && $jobId > 0);
 
       <hr>
 
-      <p class="mono">トークン: <?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?> / 出力: <?= htmlspecialchars($xlsUrl, ENT_QUOTES, 'UTF-8') ?></p>
+      <p class="mono">トークン: <?= htmlspecialchars($outToken, ENT_QUOTES, 'UTF-8') ?> / 出力: <?= htmlspecialchars($xlsUrl, ENT_QUOTES, 'UTF-8') ?></p>
     </div>
   </div>
 

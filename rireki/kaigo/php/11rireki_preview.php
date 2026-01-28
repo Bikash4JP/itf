@@ -206,107 +206,15 @@ function row_to_post(array $row): array {
   return $post;
 }
 
-function upsert_kaigo_draft_from_post(PDO $pdo, string $token, int $user_id, int $job_id, array $post): void {
-  // Allow only known scalar columns (ignore nested arrays etc.)
-  $cols = [
-    'user_id','job_id','step_current',
-    'name_romaji','name_kana','dob_year','dob_month','dob_day','age_autofill','birthplace',
-    'postal','address','contact_phone','email','nationality','gender','religion','marital_status',
-    'height_cm','weight_kg',
-    'passport_has','passport_exp_year','passport_exp_month','passport_exp_day','passport_no',
-    'past_travel_count','past_travel_details',
-    'recent_entry_year','recent_entry_month','recent_entry_day',
-    'recent_exit_year','recent_exit_month','recent_exit_day',
-    'current_status','status_from_year','status_from_month','status_from_day','status_to_year','status_to_month','status_to_day',
-    'photo_path',
-  ];
-
-  // edu1..8
-  for ($i=1;$i<=8;$i++) {
-    $cols[] = "edu{$i}_from_year";
-    $cols[] = "edu{$i}_from_month";
-    $cols[] = "edu{$i}_to_year";
-    $cols[] = "edu{$i}_to_month";
-    $cols[] = "edu{$i}_status";
-    $cols[] = "edu{$i}_institution";
-    $cols[] = "edu{$i}_faculty";
-  }
-  // lic1..8
-  for ($i=1;$i<=8;$i++) {
-    $cols[] = "lic{$i}_year";
-    $cols[] = "lic{$i}_month";
-    $cols[] = "lic{$i}_name";
-  }
-  // work1..8
-  for ($i=1;$i<=8;$i++) {
-    $cols[] = "work{$i}_from_year";
-    $cols[] = "work{$i}_from_month";
-    $cols[] = "work{$i}_status";
-    $cols[] = "work{$i}_to_year";
-    $cols[] = "work{$i}_to_month";
-    $cols[] = "work{$i}_org";
-    $cols[] = "work{$i}_job_title";
-    $cols[] = "work{$i}_description";
-  }
-
-  // Other free fields
-  $cols = array_merge($cols, [
-    'reason_for_resignation','planned_resign_year','planned_resign_month',
-    'self_pr','motivation','preferences',
-    'jp_comm_level','kanji_rw','blood_type','english_level',
-    'acquaintances_in_japan','jp_friends_count','home_country_friends_in_japan',
-    'smoking','alcohol','tattoo','clothes_size','shoe_size',
-    'prayer','fasting','food_rules','hijab',
-    'work_duration_intent','studying_japanese_now','studying_specialty_now','other_agency_or_facility_interview',
-  ]);
-
-  $data = [':token' => $token];
-  $insertCols = ['token'];
-  $insertVals = [':token'];
-  $updates = [];
-
-  foreach ($cols as $c) {
-    $ph = ':' . $c;
-    $insertCols[] = $c;
-    $insertVals[] = $ph;
-    // Override user_id/job_id/step_current from arguments
-    if ($c === 'user_id') {
-      $val = $user_id;
-    } elseif ($c === 'job_id') {
-      $val = $job_id;
-    } elseif ($c === 'step_current') {
-      $val = 6;
-    } else {
-      $val = $post[$c] ?? null;
-    }
-    $data[$ph] = $val;
-    $updates[] = "$c = VALUES($c)";
-  }
-
-  $sql = "INSERT INTO app_resume_kaigo (" . implode(',', $insertCols) . ") VALUES (" . implode(',', $insertVals) . ")\n          ON DUPLICATE KEY UPDATE " . implode(', ', $updates) . ", updated_at=CURRENT_TIMESTAMP";
-  $st = $pdo->prepare($sql);
-  $st->execute($data);
-}
-
 // ---------- Mode selection ----------
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
 $post = [];
 $photoPath = null;
 
-// token (priority: POST -> GET)
-$token = normalize_token($_POST['token'] ?? ($_GET['token'] ?? ''));
-
-// NEW: convert initial POST(from rireki.php) -> GET (refresh-safe)
-// Skip when this POST is a profile-save request (flow is present).
-$flow_post = strtolower(trim((string)($_POST['flow'] ?? '')));
-if (($method === 'POST') && $token && empty($_GET['token']) && $flow_post === '') {
-  $job_id_tmp = isset($_POST['job_id']) ? (int)$_POST['job_id'] : 0;
-  $qs = ['token' => $token];
-  if ($job_id_tmp > 0) $qs['job_id'] = $job_id_tmp;
-  header('Location: ' . strtok($_SERVER['REQUEST_URI'], '?') . '?' . http_build_query($qs), true, 302);
-  exit;
-}
+// token (priority: POST -> GET -> session)
+$token = normalize_token($_POST['token'] ?? ($_GET['token'] ?? ($_SESSION['kaigo_token'] ?? '')));
+if ($token) $_SESSION['kaigo_token'] = $token;
 
 // NEW: flow selector
 $flow = strtolower(trim((string)($_GET['flow'] ?? ($_POST['flow'] ?? ''))));
@@ -315,6 +223,14 @@ if (!in_array($flow, $allowedFlows, true)) $flow = '';
 
 // Flash flag for "profile saved"
 $savedFlash = false;
+
+// Public maker registration (only for open_resume + not logged in)
+$regErr = '';
+$regData = [
+  'name' => '',
+  'email' => '',
+];
+
 
 // ===== GET mode =====
 // - If token provided: show preview using DB row
@@ -386,22 +302,6 @@ if ($method === 'GET') {
       $post['photo_path'] = $perma;
       save_profile_post($pdo_app, $uid, $post);
     }
-
-    // NEW:
-    // When preview is opened without token (e.g. 「プロフィールで進む」 or 「マイ情報」),
-    // create a temporary draft in app_resume_kaigo and redirect with ?token=...
-    // so that submit_rireki.php can work with token->DB.
-    if (!$token) {
-      $token = bin2hex(random_bytes(16));
-      $draftJobId = ($flow === 'apply_profile' && $job_id > 0) ? $job_id : 0;
-      upsert_kaigo_draft_from_post($pdo_app, $token, $uid, $draftJobId, $post);
-
-      $qs = ['token' => $token];
-      if ($draftJobId > 0) $qs['job_id'] = $draftJobId;
-      $qs['flow'] = $flow;
-      header('Location: ' . strtok($_SERVER['REQUEST_URI'], '?') . '?' . http_build_query($qs), true, 302);
-      exit;
-    }
     $photoPath = $post['photo_path'] ?? null;
   }
 
@@ -431,6 +331,95 @@ if ($method === 'GET') {
   if ($flow === '') {
     $flow = ((int)($post['job_id'] ?? 0) > 0) ? 'apply_profile' : 'open_resume';
   }
+
+
+// ===== Public maker: require simple registration before going to submit (open_resume only) =====
+// This block runs only when:
+// - flow is open_resume
+// - user is NOT logged in
+// - user pressed "Confirm and Download" on preview (POST back to this page)
+if ($flow === 'open_resume' && $HAS_USER_AUTH && !app_is_logged_in() && isset($_POST['public_register'])) {
+  $regData['name']  = trim((string)($_POST['reg_name'] ?? ''));
+  $regData['email'] = trim((string)($_POST['reg_email'] ?? ($post['email'] ?? '')));
+
+  $pass1 = (string)($_POST['reg_pass'] ?? '');
+  $pass2 = (string)($_POST['reg_pass2'] ?? '');
+
+  // basic validation
+  if ($regData['name'] === '' || $regData['email'] === '' || $pass1 === '' || $pass2 === '') {
+    $regErr = 'お名前・メールアドレス・パスワードをすべて入力してください。';
+  } elseif (!filter_var($regData['email'], FILTER_VALIDATE_EMAIL)) {
+    $regErr = 'メールアドレスの形式が正しくありません。';
+  } elseif (strlen($pass1) < 8) {
+    $regErr = 'パスワードは8文字以上で設定してください。';
+  } elseif ($pass1 !== $pass2) {
+    $regErr = 'パスワードが一致しません。';
+  } else {
+    try {
+      // ensure tables exist
+      if (function_exists('app_ensure_tables')) app_ensure_tables($pdo);
+
+      
+// create user (avoid duplicates)
+$hash = password_hash($pass1, PASSWORD_DEFAULT);
+
+// if email already exists, stop (they should login)
+$chk = $pdo->prepare("SELECT id FROM app_users WHERE email=? LIMIT 1");
+$chk->execute([$regData['email']]);
+if ($chk->fetchColumn()) {
+  throw new RuntimeException('EMAIL_EXISTS');
+}
+
+$base = $regData['name'];
+$uname = $base;
+$uid = 0;
+
+for ($i=0; $i<4; $i++) {
+  try {
+    $stmt = $pdo->prepare("INSERT INTO app_users (username, email, password_hash) VALUES (?, ?, ?)");
+    $stmt->execute([$uname, $regData['email'], $hash]);
+    $uid = (int)$pdo->lastInsertId();
+    break;
+  } catch (Throwable $e) {
+    // retry with a suffix if username duplicate
+    $uname = $base . '_' . substr(bin2hex(random_bytes(3)), 0, 6);
+    $uid = 0;
+  }
+}
+
+if ($uid <= 0) {
+  throw new RuntimeException('REGISTER_FAILED');
+}
+// log in immediately (so it becomes "マイ情報" usable)
+      if (function_exists('app_login_user_id')) app_login_user_id($uid);
+
+      // link draft to the new user (and keep key identity fields in the draft)
+      $up = $pdo->prepare("UPDATE app_resume_kaigo SET user_id=?, email=?, name_romaji=? WHERE token=?");
+      $up->execute([$uid, $regData['email'], $regData['name'], $pt]);
+
+      // save profile snapshot (so user can use プロフィールで進む later)
+      // (preview uses app_user_profiles table, not app_profiles)
+      save_profile_post($pdo, $uid, $post);
+
+      // auto-post to submit page (submit expects POST token)
+      $tokenEsc = h($pt);
+      header('Content-Type: text/html; charset=UTF-8');
+      echo '<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">';
+      echo '<title>処理中...</title>';
+      echo '<style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#f6f8fb;margin:0} .box{max-width:560px;margin:14vh auto;background:#fff;border:1px solid #e6edf6;border-radius:14px;padding:18px;text-align:center;box-shadow:0 3px 10px rgba(10,60,150,.05)} .muted{color:#5a6473}</style>';
+      echo '</head><body><div class="box"><h2 style="margin:0 0 6px">登録完了</h2><p class="muted" style="margin:0">履歴書作成ページへ移動します...</p>';
+      echo '<form id="go" method="post" action="/rireki/kaigo/php/submit_rireki.php">';
+      echo '<input type="hidden" name="flow" value="open_resume">';
+      echo '<input type="hidden" name="token" value="'.$tokenEsc.'">';
+      echo '</form></div><script>document.getElementById("go").submit();</script></body></html>';
+      exit;
+
+    } catch (Throwable $e) {
+      // duplicate username/email etc
+      $regErr = '登録に失敗しました（同じメール/ユーザー名が既に存在する可能性があります）。別のメールアドレスでお試しください。';
+    }
+  }
+}
 
   // Photo: if a file was uploaded directly to preview (rare), take it as temp path
   $photoPath = $post['photo_path'] ?? null;
@@ -780,7 +769,7 @@ $step6 = [
             <div class="label">証明写真（保存済み）</div>
             <div class="photo-box">
               <img class="photo" src="<?=h($photoPath)?>" alt="photo preview">
-              <span class="muted"><?=h($photoPath)?></span>
+              <!-- photo file name hidden -->
             </div>
           </div>
         <?php else: ?>
@@ -931,21 +920,75 @@ $step6 = [
           <button type="submit" class="btn primary">この内容で応募する</button>
         </form>
 
-      <?php elseif ($flow === 'open_resume'): ?>
-        <h3>確認してダウンロード</h3>
-        <p class="muted" style="margin:6px 0 12px">
-          内容を確認して、Excel を作成・ダウンロードできます。
+      
+<?php elseif ($flow === 'open_resume'): ?>
+  <h3>確認してダウンロード</h3>
+  <p class="muted" style="margin:6px 0 12px">
+    内容を確認して、Excel を作成・ダウンロードできます。
+  </p>
+
+  <?php $isLoggedIn = ($HAS_USER_AUTH && function_exists('app_is_logged_in') && app_is_logged_in()); ?>
+
+  <?php if (!$isLoggedIn): ?>
+    <!-- Public maker registration (required) -->
+    <div class="section" style="margin:0 0 14px">
+      <div class="section-head"><h2 style="font-size:18px;margin:0">無料登録（必須）</h2></div>
+      <div class="section-body">
+        <p class="muted" style="margin:0 0 10px">
+          この履歴書を<strong>いつでも編集・更新・再ダウンロード</strong>できるようにするため、また、求人一覧から気になる求人へ<strong>プロフィールで簡単に応募</strong>できるようにするため、簡単な登録が必要です。
         </p>
 
-        <form method="post" action="/rireki/kaigo/php/submit_rireki.php" style="display:flex;gap:10px;flex-wrap:wrap">
-          <?php foreach ($post as $k=>$v) echo keep($k,$v); ?>
+        <?php if ($regErr !== ''): ?>
+          <div class="muted" style="background:#fff3f3;border:1px solid #ffd4d4;color:#a12a2a;padding:10px 12px;border-radius:12px;margin:0 0 10px">
+            <?= h($regErr) ?>
+          </div>
+        <?php endif; ?>
+
+        <form id="openResumeRegisterForm" method="post" action="/rireki/kaigo/php/rireki_preview.php" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end">
           <input type="hidden" name="flow" value="open_resume">
           <input type="hidden" name="token" value="<?=h($token)?>">
-          <a class="btn" href="/rireki/index.php">履歴書メーカーへ戻る</a>
-          <button type="submit" class="btn primary">Confirm and Download</button>
-        </form>
+          <input type="hidden" name="public_register" value="1">
 
-      <?php else: /* profile_only */ ?>
+          <div style="grid-column:1 / -1">
+            <label class="muted" style="display:block;margin:0 0 4px">お名前（ログイン用）</label>
+            <input type="text" name="reg_name" value="<?=h($regData['name'] ?: ($post['name_romaji'] ?? ''))?>" required style="width:100%;padding:10px 12px;border:1px solid #dbe6f3;border-radius:10px">
+          </div>
+
+          <div style="grid-column:1 / -1">
+            <label class="muted" style="display:block;margin:0 0 4px">メールアドレス</label>
+            <input type="email" name="reg_email" value="<?=h($regData['email'] ?: ($post['email'] ?? ''))?>" required style="width:100%;padding:10px 12px;border:1px solid #dbe6f3;border-radius:10px">
+          </div>
+
+          <div>
+            <label class="muted" style="display:block;margin:0 0 4px">パスワード（8文字以上）</label>
+            <input type="password" name="reg_pass" id="reg_pass" required minlength="8" style="width:100%;padding:10px 12px;border:1px solid #dbe6f3;border-radius:10px">
+          </div>
+
+          <div>
+            <label class="muted" style="display:block;margin:0 0 4px">パスワード（確認）</label>
+            <input type="password" name="reg_pass2" id="reg_pass2" required minlength="8" style="width:100%;padding:10px 12px;border:1px solid #dbe6f3;border-radius:10px">
+          </div>
+
+          <div class="muted" id="pass_hint" style="grid-column:1 / -1;margin-top:2px"></div>
+
+          <div style="grid-column:1 / -1;display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+            <a class="btn" href="/rireki/index.php">履歴書メーカーへ戻る</a>
+            <button type="submit" class="btn primary" id="confirmDownloadBtn">Confirm and Download</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  <?php else: ?>
+    <!-- Logged in: keep existing submit directly -->
+    <form method="post" action="/rireki/kaigo/php/submit_rireki.php" style="display:flex;gap:10px;flex-wrap:wrap">
+      <?php foreach ($post as $k=>$v) echo keep($k,$v); ?>
+      <input type="hidden" name="flow" value="open_resume">
+      <input type="hidden" name="token" value="<?=h($token)?>">
+      <a class="btn" href="/rireki/index.php">履歴書メーカーへ戻る</a>
+      <button type="submit" class="btn primary">Confirm and Download</button>
+    </form>
+  <?php endif; ?><?php else: /* profile_only */ ?>
         <h3>プロフィールを保存しますか？</h3>
         <p class="muted" style="margin:6px 0 12px">
           この内容をプロフィールとして保存・更新します。
@@ -1038,5 +1081,6 @@ $step6 = [
   });
 </script>
 
+  <script src="/rireki/kaigo/js/preview.js" defer></script>
 </body>
 </html>

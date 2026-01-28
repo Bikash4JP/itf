@@ -14,6 +14,18 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/php/db_connect.php'; // expects $pdo 
 
 $job_id = isset($_GET['job_id']) ? (int)$_GET['job_id'] : 0;
 
+// ✅ optional: logged-in applicant context (for My情報 / profile)
+$authPath = $_SERVER['DOCUMENT_ROOT'] . '/php/user_auth.php';
+if (is_readable($authPath)) require_once $authPath;
+$uid = (function_exists('app_is_logged_in') && app_is_logged_in()) ? (int)app_user_id() : 0;
+
+// flow: open_resume | apply_profile | profile_only
+$flow = (string)($_GET['flow'] ?? '');
+$flow = in_array($flow, ['open_resume','apply_profile','profile_only'], true) ? $flow : '';
+if ($flow === '') {
+  $flow = ($job_id > 0) ? 'apply_profile' : ($uid > 0 ? 'profile_only' : 'open_resume');
+}
+
 /* =========================
    Helpers
    ========================= */
@@ -24,7 +36,7 @@ function normalize_token($t): string {
   return preg_match('/^[a-f0-9]{32}$/', $t) ? $t : '';
 }
 
-function ensure_row(PDO $pdo, string $token, int $job_id): array {
+function ensure_row(PDO $pdo, string $token, int $job_id, int $uid = 0): array {
   // find
   $st = $pdo->prepare("SELECT * FROM app_resume_kaigo WHERE token = :t LIMIT 1");
   $st->execute([':t' => $token]);
@@ -41,61 +53,33 @@ function ensure_row(PDO $pdo, string $token, int $job_id): array {
   }
 
   // create
-  $ins = $pdo->prepare("INSERT INTO app_resume_kaigo (token, job_id, step_current) VALUES (:t, :j, 1)");
-  $ins->execute([':t' => $token, ':j' => ($job_id > 0 ? $job_id : null)]);
+  $ins = $pdo->prepare("INSERT INTO app_resume_kaigo (token, user_id, job_id, step_current) VALUES (:t, :u, :j, 1)");
+  $ins->execute([':t' => $token, ':u' => ($uid > 0 ? $uid : null), ':j' => ($job_id > 0 ? $job_id : null)]);
   $st->execute([':t' => $token]);
   $row = $st->fetch(PDO::FETCH_ASSOC);
   return $row ?: [];
 }
 
-function allowed_columns(): array {
-  // ✅ keep strict whitelist (security)
-  return [
-    'step_current',
-    'name_romaji','name_kana','dob_year','dob_month','dob_day','age_autofill','birthplace','postal','address','contact_phone','email',
-    'nationality','gender','religion','marital_status','height_cm','weight_kg',
-    'passport_has','passport_exp_year','passport_exp_month','passport_exp_day','passport_no','past_travel_count','past_travel_details',
-    'recent_entry_year','recent_entry_month','recent_entry_day','recent_exit_year','recent_exit_month','recent_exit_day',
-    'current_status','status_from_year','status_from_month','status_from_day','status_to_year','status_to_month','status_to_day',
-    'photo_path',
-    // edu1..8
-    'edu1_from_year','edu1_from_month','edu1_to_year','edu1_to_month','edu1_status','edu1_institution','edu1_faculty',
-    'edu2_from_year','edu2_from_month','edu2_to_year','edu2_to_month','edu2_status','edu2_institution','edu2_faculty',
-    'edu3_from_year','edu3_from_month','edu3_to_year','edu3_to_month','edu3_status','edu3_institution','edu3_faculty',
-    'edu4_from_year','edu4_from_month','edu4_to_year','edu4_to_month','edu4_status','edu4_institution','edu4_faculty',
-    'edu5_from_year','edu5_from_month','edu5_to_year','edu5_to_month','edu5_status','edu5_institution','edu5_faculty',
-    'edu6_from_year','edu6_from_month','edu6_to_year','edu6_to_month','edu6_status','edu6_institution','edu6_faculty',
-    'edu7_from_year','edu7_from_month','edu7_to_year','edu7_to_month','edu7_status','edu7_institution','edu7_faculty',
-    'edu8_from_year','edu8_from_month','edu8_to_year','edu8_to_month','edu8_status','edu8_institution','edu8_faculty',
-    // lic1..8
-    'lic1_year','lic1_month','lic1_name',
-    'lic2_year','lic2_month','lic2_name',
-    'lic3_year','lic3_month','lic3_name',
-    'lic4_year','lic4_month','lic4_name',
-    'lic5_year','lic5_month','lic5_name',
-    'lic6_year','lic6_month','lic6_name',
-    'lic7_year','lic7_month','lic7_name',
-    'lic8_year','lic8_month','lic8_name',
-    // work1..8
-    'work1_from_year','work1_from_month','work1_status','work1_to_year','work1_to_month','work1_org','work1_job_title','work1_description',
-    'work2_from_year','work2_from_month','work2_status','work2_to_year','work2_to_month','work2_org','work2_job_title','work2_description',
-    'work3_from_year','work3_from_month','work3_status','work3_to_year','work3_to_month','work3_org','work3_job_title','work3_description',
-    'work4_from_year','work4_from_month','work4_status','work4_to_year','work4_to_month','work4_org','work4_job_title','work4_description',
-    'work5_from_year','work5_from_month','work5_status','work5_to_year','work5_to_month','work5_org','work5_job_title','work5_description',
-    'work6_from_year','work6_from_month','work6_status','work6_to_year','work6_to_month','work6_org','work6_job_title','work6_description',
-    'work7_from_year','work7_from_month','work7_status','work7_to_year','work7_to_month','work7_org','work7_job_title','work7_description',
-    'work8_from_year','work8_from_month','work8_status','work8_to_year','work8_to_month','work8_org','work8_job_title','work8_description',
+function allowed_columns(PDO $pdo): array {
+  // ✅ allow only real table columns (dynamic whitelist) to avoid missing fields
+  static $cols = null;
+  if (is_array($cols)) return $cols;
 
-    'reason_for_resignation','planned_resign_year','planned_resign_month',
-    'self_pr','motivation','preferences',
-    'jp_comm_level','kanji_rw','blood_type','english_level','acquaintances_in_japan','jp_friends_count','home_country_friends_in_japan',
-    'smoking','alcohol','tattoo','clothes_size','shoe_size','prayer','fasting','food_rules','hijab','work_duration_intent',
-    'studying_japanese_now','studying_specialty_now','other_agency_or_facility_interview',
-  ];
+  try {
+    $all = $pdo->query("DESCRIBE app_resume_kaigo")->fetchAll(PDO::FETCH_COLUMN, 0);
+  } catch (Throwable $e) {
+    // fallback (minimal) if DESCRIBE not allowed
+    $all = ['step_current','photo_path'];
+  }
+
+  $deny = ['id','token','created_at','updated_at'];
+  $cols = array_values(array_diff($all, $deny));
+  return $cols;
 }
 
+
 function update_by_token(PDO $pdo, string $token, array $data): void {
-  $allow = array_flip(allowed_columns());
+  $allow = array_flip(allowed_columns($pdo));
   $set = [];
   $params = [':t' => $token];
 
@@ -206,7 +190,7 @@ function json_out(array $arr, int $code = 200): void {
 /* =========================
    Token bootstrap
    ========================= */
-$token = normalize_token($_GET['token'] ?? ($_POST['token'] ?? ''));
+$token = normalize_token($_GET['token'] ?? ($_POST['token'] ?? ($_SESSION['kaigo_token'] ?? '')));
 if (!$token) {
   $token = bin2hex(random_bytes(16));
   $_SESSION['kaigo_token'] = $token;
@@ -219,7 +203,7 @@ if (!$token) {
 }
 $_SESSION['kaigo_token'] = $token;
 
-$row = ensure_row($pdo, $token, $job_id);
+$row = ensure_row($pdo, $token, $job_id, $uid);
 
 /* =========================
    AJAX API (same file)
@@ -508,6 +492,7 @@ $photoPath = (string)($row['photo_path'] ?? '');
       <input type="hidden" name="__fmt" value="basic">
       <!-- ✅ DB draft token -->
       <input type="hidden" name="token" id="token" value="<?php echo h($token); ?>">
+      <input type="hidden" name="flow" id="flow" value="<?php echo h($flow); ?>">
 
       <?php if ($job_id > 0): ?>
         <div class="banner">この履歴書は求人応募フローから作成されます（Job ID: <?php echo (int)$job_id; ?>）。</div>
@@ -1357,473 +1342,10 @@ $photoPath = (string)($row['photo_path'] ?? '');
 
   <div class="site-footer">© ITF co. Ltd. ALL Rights Reserved</div>
 
-  <script src="/rireki/kaigo/js/kaigo.js?v=5"></script>
+  <script src="/rireki/kaigo/js/kaigo.js?v=6"></script>
 
-  <script>
-    /* ✅ Auto-add data-label to each TD from TH text (for mobile stacked table UI) */
-    (function () {
-      function applyLabels(table) {
-        const headers = Array.from(table.querySelectorAll('thead th'))
-          .map(th => (th.textContent || '').trim());
+  <script src="/rireki/kaigo/js/rireki_form_extra.js?v=1"></script>
 
-        table.querySelectorAll('tbody tr').forEach(tr => {
-          Array.from(tr.children).forEach((cell, i) => {
-            if (cell && cell.tagName === 'TD') cell.setAttribute('data-label', headers[i] || '');
-          });
-        });
-      }
 
-      function init() {
-        const tables = document.querySelectorAll('table.table');
-        tables.forEach(t => applyLabels(t));
-
-        tables.forEach(t => {
-          const tb = t.tBodies && t.tBodies[0];
-          if (!tb) return;
-          new MutationObserver(() => applyLabels(t))
-            .observe(tb, { childList: true, subtree: true });
-        });
-      }
-
-      window.addEventListener('load', init);
-    })();
-
-    /* ✅ STEP gate rules (required + format) BEFORE going next */
-    (function () {
-      const form = document.getElementById('rirekiForm');
-      if (!form) return;
-
-      const step1 = document.querySelector('.step-pane[d="step-1"]');
-      const step2 = document.querySelector('.step-pane[d="step-2"]');
-
-      const elRomaji = document.getElementById('name_romaji');
-      const elKana   = document.getElementById('name_kana');
-      const elY = document.getElementById('dob_year');
-      const elM = document.getElementById('dob_month');
-      const elD = document.getElementById('dob_day');
-      const elPostal = document.getElementById('postal');
-      const elPhone  = document.getElementById('contact_phone');
-      const elPhoto  = document.getElementById('photo');
-
-      // Helpers
-      const reJPName = /^[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}ー・'’\s]+$/u;
-      const reRomajiCaps = /^[A-Z][A-Z\s.'’-]*$/;
-      const reKatakana = /^[\p{Script=Katakana}ー\s・]+$/u;
-
-      function normalizeRomaji(){
-        if (!elRomaji) return;
-        elRomaji.value = (elRomaji.value || '').replace(/[a-z]/g, m => m.toUpperCase());
-      }
-
-      function setValid(el){ if (el) el.setCustomValidity(''); }
-      function setInvalid(el, msg){ if (el) el.setCustomValidity(msg); }
-
-      function validateNameFields(){
-        if (!elRomaji || !elKana) return true;
-
-        normalizeRomaji();
-
-        const vR = (elRomaji.value || '').trim();
-        const vK = (elKana.value || '').trim();
-
-        if (!vR) {
-          setInvalid(elRomaji, '氏名（ローマ字）を入力してください。');
-        } else if (!(reJPName.test(vR) || reRomajiCaps.test(vR))) {
-          setInvalid(elRomaji, '英字は大文字（A-Z）のみ、または漢字で入力してください。');
-        } else {
-          setValid(elRomaji);
-        }
-
-        if (!vK) {
-          setInvalid(elKana, '氏名（カタカナ）を入力してください。');
-        } else if (!reKatakana.test(vK)) {
-          setInvalid(elKana, 'カタカナで入力してください。');
-        } else {
-          setValid(elKana);
-        }
-
-        return elRomaji.checkValidity() && elKana.checkValidity();
-      }
-
-      function validateDob(){
-        if (!elY || !elM || !elD) return true;
-        const y = (elY.value || '').trim();
-        const m = (elM.value || '').trim();
-        const d = (elD.value || '').trim();
-
-        let ok = true;
-        [elY, elM, elD].forEach(el => setValid(el));
-
-        if (!y || !m || !d) {
-          if (!y) setInvalid(elY, '生年月日（年）を入力してください。');
-          if (!m) setInvalid(elM, '生年月日（月）を入力してください。');
-          if (!d) setInvalid(elD, '生年月日（日）を入力してください。');
-          return false;
-        }
-
-        const yy = parseInt(y, 10), mm = parseInt(m, 10), dd = parseInt(d, 10);
-        if (!Number.isFinite(yy) || yy < 1900 || yy > 2100) { setInvalid(elY, '年（YYYY）が正しくありません。'); ok = false; }
-        if (!Number.isFinite(mm) || mm < 1 || mm > 12) { setInvalid(elM, '月（MM）が正しくありません。'); ok = false; }
-        if (!Number.isFinite(dd) || dd < 1 || dd > 31) { setInvalid(elD, '日（DD）が正しくありません。'); ok = false; }
-
-        if (!ok) return false;
-
-        const dt = new Date(yy, mm - 1, dd);
-        const real = (dt.getFullYear() === yy && (dt.getMonth() + 1) === mm && dt.getDate() === dd);
-        if (!real) { setInvalid(elD, '存在しない日付です。'); return false; }
-
-        return true;
-      }
-
-      function validatePhone(){
-        if (!elPhone) return true;
-        const v = (elPhone.value || '').trim();
-        const digits = v.replace(/[^\d]/g, '');
-        if (!v) { setInvalid(elPhone, '個人携帯番号を入力してください。'); return false; }
-        if (digits.length < 10 || digits.length > 13) { setInvalid(elPhone, '電話番号が正しくありません。'); return false; }
-        setValid(elPhone);
-        return true;
-      }
-
-      function validatePostal(){
-        if (!elPostal) return true;
-        const v = (elPostal.value || '').trim();
-        const ok = /^\d{3}-?\d{4}$/.test(v);
-        if (!v) { setInvalid(elPostal, '郵便番号を入力してください。'); return false; }
-        if (!ok) { setInvalid(elPostal, '郵便番号は 123-4567 の形式で入力してください。'); return false; }
-        setValid(elPostal);
-        return true;
-      }
-
-      function validatePhoto(){
-        // ✅ if already saved in DB, file input is not required
-        const saved = (document.getElementById('photo_path')?.value || '').trim();
-        if (saved) { setValid(elPhoto); return true; }
-
-        if (!elPhoto) return true;
-        if (!elPhoto.files || elPhoto.files.length === 0) {
-          setInvalid(elPhoto, '証明写真をアップロードしてください。');
-          return false;
-        }
-        setValid(elPhoto);
-        return true;
-      }
-
-      function validatePane(pane){
-        if (!pane) return true;
-
-        let ok = true;
-
-        // Base HTML required checks
-        const requiredEls = Array.from(pane.querySelectorAll('[required]'));
-        requiredEls.forEach(el => { if (!el.checkValidity()) ok = false; });
-
-        // Our extra gate rules
-        if (pane === step1){
-          ok = validateNameFields() && ok;
-          ok = validateDob() && ok;
-          ok = validatePostal() && ok;
-          ok = validatePhone() && ok;
-        }
-        if (pane === step2){
-          ok = validatePhoto() && ok;
-        }
-
-        if (!ok){
-          const firstInvalid = pane.querySelector(':invalid');
-          if (firstInvalid && typeof firstInvalid.reportValidity === 'function') firstInvalid.reportValidity();
-        }
-        return ok;
-      }
-
-      if (elRomaji){
-        elRomaji.addEventListener('input', normalizeRomaji);
-        elRomaji.addEventListener('blur', () => { normalizeRomaji(); validateNameFields(); });
-      }
-      if (elKana){
-        elKana.addEventListener('blur', () => { validateNameFields(); });
-      }
-      [elY, elM, elD].forEach(el => el && el.addEventListener('blur', validateDob));
-      if (elPostal) elPostal.addEventListener('blur', validatePostal);
-      if (elPhone) elPhone.addEventListener('blur', validatePhone);
-
-      // Gate next-step clicks
-      document.addEventListener('click', function(e){
-        const btn = e.target.closest('.js-next-step');
-        if (!btn) return;
-
-        const activePane = document.querySelector('.steps .step-pane.is-active');
-        if (!activePane) return;
-
-        if (activePane === step1 || activePane === step2){
-          const ok = validatePane(activePane);
-          if (!ok){
-            e.preventDefault();
-            e.stopImmediatePropagation();
-          }
-        }
-      }, true);
-    })();
-
-    /* ===== Progress bar logic (unchanged) ===== */
-    (function () {
-      const SEGMENTS = 6;
-      const INC = 100 / SEGMENTS;
-      const stepsRoot = document.querySelector('.steps');
-      const panes = Array.from(document.querySelectorAll('.steps .step-pane'));
-      const progressFill = document.getElementById('progressFill');
-      const labels = Array.from(document.querySelectorAll('#progressWrap .progress-labels li'));
-      const lastPane = panes[panes.length - 1];
-      const submitBtn = lastPane ? lastPane.querySelector('button[type="submit"]') : null;
-
-      function getActiveIdx() {
-        const i = panes.findIndex(p => p.classList.contains('is-active'));
-        return i >= 0 ? i : 0;
-      }
-      function allLastPaneFieldsFilled() {
-        if (!lastPane) return false;
-        const fields = Array.from(lastPane.querySelectorAll('input:not([type="hidden"]), select, textarea'));
-        if (!fields.length) return false;
-        return fields.every(el => el.disabled || (el.value || '').trim() !== '');
-      }
-      function setSubmitState(done) {
-        if (!submitBtn) return;
-        submitBtn.disabled = !done;
-        submitBtn.style.opacity = done ? '' : '0.7';
-        submitBtn.style.pointerEvents = done ? '' : 'none';
-      }
-      function setLabelStates(activeSegments, isDone) {
-        if (!labels.length) return;
-        labels.forEach(li => li.classList.remove('is-active', 'is-dim', 'is-done'));
-        const activeStepIdx = getActiveIdx();
-        const currentLabelIdx = Math.min(activeStepIdx, labels.length - 2);
-        labels.forEach((li, i) => {
-          if (i < currentLabelIdx) li.classList.add('is-done');
-          if (i === currentLabelIdx) li.classList.add('is-active');
-          if (i > currentLabelIdx) li.classList.add('is-dim');
-        });
-        if (isDone && labels.length) {
-          labels.forEach(li => li.classList.add('is-dim'));
-          labels[labels.length - 1].classList.remove('is-dim');
-          labels[labels.length - 1].classList.add('is-active');
-        }
-      }
-      function updateProgress() {
-        const idx = getActiveIdx();
-        const atLastPane = (idx === panes.length - 1);
-        let segments = Math.min(idx, SEGMENTS - 1);
-        let finalDone = false;
-        if (atLastPane && allLastPaneFieldsFilled()) { segments = SEGMENTS; finalDone = true; }
-        const pct = Math.min(100, Math.max(0, segments * INC));
-        if (progressFill) {
-          progressFill.style.width = pct + '%';
-          progressFill.setAttribute('aria-valuenow', String(Math.round(pct)));
-        }
-        setLabelStates(segments, finalDone);
-        setSubmitState(finalDone);
-      }
-      function deferUpdate() { requestAnimationFrame(() => requestAnimationFrame(updateProgress)); }
-      document.addEventListener('click', (e) => {
-        if (e.target.closest('.js-next-step') || e.target.closest('.js-prev-step')) deferUpdate();
-      });
-      if (stepsRoot && 'MutationObserver' in window) {
-        new MutationObserver(deferUpdate).observe(stepsRoot, { attributes: true, subtree: true, attributeFilter: ['class'] });
-      }
-      if (lastPane) {
-        lastPane.addEventListener('input', updateProgress, true);
-        lastPane.addEventListener('change', updateProgress, true);
-      }
-      window.addEventListener('load', updateProgress);
-      updateProgress();
-    })();
-
-    /* ===== ✅ DB Autosave (replaces old sessionStorage autosave) ===== */
-    (function () {
-      const form = document.getElementById('rirekiForm');
-      if (!form) return;
-
-      const token = document.getElementById('token')?.value || '';
-      const saveUrl = window.location.pathname + window.location.search.replace(/([?&])action=[^&]*/,'$1').replace(/[?&]$/,'') + (window.location.search.includes('?') ? '&' : '?') + 'action=save';
-
-      function activeStepNumber(){
-        const panes = Array.from(document.querySelectorAll('.steps .step-pane'));
-        const idx = panes.findIndex(p => p.classList.contains('is-active'));
-        return (idx >= 0 ? idx + 1 : 1);
-      }
-
-      function toFormData(){
-        const fd = new FormData(form);
-        fd.set('_step_current', String(activeStepNumber()));
-        return fd;
-      }
-
-      let t = null;
-      let lastSent = 0;
-
-      async function saveDraft(){
-        // throttle
-        const now = Date.now();
-        if (now - lastSent < 400) return;
-        lastSent = now;
-
-        const fd = toFormData();
-        try {
-          const res = await fetch(saveUrl, { method: 'POST', body: fd });
-          const data = await res.json().catch(() => null);
-          if (!res.ok || !data || data.ok !== true) {
-            console.warn('[DB save] failed', data);
-          }
-        } catch (e) {
-          console.warn('[DB save] error', e);
-        }
-      }
-
-      function scheduleSave(){
-        clearTimeout(t);
-        t = setTimeout(saveDraft, 600);
-      }
-
-      form.addEventListener('input', scheduleSave, true);
-      form.addEventListener('change', scheduleSave, true);
-
-      window.addEventListener('beforeunload', () => {
-        // best-effort sync via sendBeacon
-        try {
-          const fd = toFormData();
-          const url = saveUrl;
-          if (navigator.sendBeacon) navigator.sendBeacon(url, fd);
-        } catch (_) {}
-      });
-    })();
-
-    /* ===== ✅ Photo upload to DB (same file) ===== */
-    (function(){
-      const elPhoto = document.getElementById('photo');
-      const token = document.getElementById('token')?.value || '';
-      const preview = document.getElementById('photoPreview');
-      const img = document.getElementById('photoPreviewImg');
-      const photoPath = document.getElementById('photo_path');
-
-      if (!elPhoto) return;
-
-      const uploadUrl = window.location.pathname + (window.location.search ? window.location.search + '&' : '?') + 'action=upload_photo';
-
-      function showPreview(src){
-        if (!preview || !img) return;
-        img.src = src;
-        preview.style.display = 'flex';
-      }
-
-      elPhoto.addEventListener('change', async () => {
-        if (!elPhoto.files || !elPhoto.files[0]) return;
-
-        // instant local preview
-        try { showPreview(URL.createObjectURL(elPhoto.files[0])); } catch(_) {}
-
-        const fd = new FormData();
-        fd.append('token', token);
-        fd.append('photo', elPhoto.files[0]);
-
-        try {
-          const res = await fetch(uploadUrl, { method: 'POST', body: fd });
-          const data = await res.json().catch(() => null);
-
-          if (!res.ok || !data || data.ok !== true) {
-            alert('写真アップロードに失敗しました：' + (data?.error || 'unknown'));
-            return;
-          }
-
-          if (photoPath) photoPath.value = data.photo_path || '';
-          if (data.photo_path) showPreview(data.photo_path);
-        } catch (e) {
-          alert('写真アップロードに失敗しました（通信エラー）');
-          console.warn(e);
-        }
-      });
-    })();
-
-    /* ===== AI: simple-Japanese rewrite via your Worker (unchanged) ===== */
-    (function () {
-      const WORKER_URL = 'https://rireki-ai.bikash4jp.workers.dev';
-
-      const TASK_BY_TARGET = {
-        '#prText': 'kaigo_compose_self_pr',
-        '#motivationText': 'kaigo_compose_motivation',
-        '#prefText': 'kaigo_compose_preferences',
-      };
-
-      async function fetchJSON(url, payload) {
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-
-        const raw = await res.text();
-        let data = null;
-        try { data = JSON.parse(raw); } catch (_) {}
-
-        if (!res.ok) {
-          const msg = (data && (data.error || data.message)) ? (data.error || data.message) : raw;
-          throw new Error(`HTTP ${res.status}: ${msg}`);
-        }
-        if (!data || data.ok !== true) {
-          const msg = data && (data.error || data.message) ? (data.error || data.message) : raw;
-          throw new Error(`Bad JSON: ${msg}`);
-        }
-        return data;
-      }
-
-      async function callAI(task, text) {
-        try {
-          const data = await fetchJSON(WORKER_URL, {
-            task,
-            text,
-            meta: { domain: 'kaigo', level: 'simple', max_chars: 420 }
-          });
-          return (data.output || '').trim();
-        } catch (err) {
-          console.warn('[AI] primary failed', err);
-
-          const data = await fetchJSON(WORKER_URL, {
-            task: 'rewrite_to_simple_japanese',
-            text,
-            meta: { note: 'fallback', wanted_task: task }
-          });
-          return (data.output || '').trim();
-        }
-      }
-
-      document.addEventListener('click', async (e) => {
-        const btn = e.target.closest('button[data-ai-target]');
-        if (!btn) return;
-
-        const sel = btn.getAttribute('data-ai-target');
-        const ta = document.querySelector(sel);
-        if (!ta) return;
-
-        const original = (ta.value || '').trim();
-        if (!original) { alert('キーワードでもOKなので、まず入力してください。'); return; }
-
-        const task = TASK_BY_TARGET[sel] || 'kaigo_compose_self_pr';
-
-        btn.disabled = true;
-        const old = btn.textContent;
-        btn.textContent = '作成中…';
-
-        try {
-          const out = await callAI(task, original);
-          if (out) ta.value = out;
-        } catch (err) {
-          console.error(err);
-          alert('AIエラー：' + (err?.message || 'unknown'));
-        } finally {
-          btn.disabled = false;
-          btn.textContent = old;
-        }
-      });
-    })();
-  </script>
-</body>
 
 </html>
