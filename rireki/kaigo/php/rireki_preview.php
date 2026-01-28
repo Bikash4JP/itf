@@ -313,8 +313,87 @@ $flow = strtolower(trim((string)($_GET['flow'] ?? ($_POST['flow'] ?? ''))));
 $allowedFlows = ['open_resume','apply_profile','profile_only'];
 if (!in_array($flow, $allowedFlows, true)) $flow = '';
 
+
+// NEW: myinfo context identifier (only trust if logged-in user matches)
+$req_userid = (int)($_GET['userid'] ?? ($_POST['userid'] ?? 0));
+$session_uid = ($HAS_USER_AUTH && function_exists('app_is_logged_in') && app_is_logged_in()) ? (int)app_user_id() : 0;
+$myinfo_uid  = ($req_userid > 0 && $session_uid > 0 && $req_userid === $session_uid) ? $session_uid : 0;
+
 // Flash flag for "profile saved"
 $savedFlash = false;
+
+
+// ===== AJAX register (public maker) =====
+// Only for: open_resume + not logged in + token exists
+if ($method === 'POST' && (string)($_POST['action'] ?? '') === 'register_open') {
+  header('Content-Type: application/json; charset=utf-8');
+
+  if (!$token) {
+    http_response_code(400);
+    echo json_encode(['ok'=>false,'error'=>'token_missing'], JSON_UNESCAPED_UNICODE);
+    exit;
+  }
+  if ($session_uid > 0) {
+    echo json_encode(['ok'=>true,'already_logged_in'=>true], JSON_UNESCAPED_UNICODE);
+    exit;
+  }
+
+  $name  = trim((string)($_POST['name'] ?? ''));
+  $email = trim((string)($_POST['email'] ?? ''));
+  $pass  = (string)($_POST['password'] ?? '');
+
+  if ($name === '' || mb_strlen($name) > 60) { http_response_code(422); echo json_encode(['ok'=>false,'error'=>'name_invalid'], JSON_UNESCAPED_UNICODE); exit; }
+  if (!filter_var($email, FILTER_VALIDATE_EMAIL) || mb_strlen($email) > 190) { http_response_code(422); echo json_encode(['ok'=>false,'error'=>'email_invalid'], JSON_UNESCAPED_UNICODE); exit; }
+  if (strlen($pass) < 8) { http_response_code(422); echo json_encode(['ok'=>false,'error'=>'password_short'], JSON_UNESCAPED_UNICODE); exit; }
+
+  $row = fetch_kaigo_by_token($pdo, $token);
+  if (!$row) { http_response_code(400); echo json_encode(['ok'=>false,'error'=>'token_invalid'], JSON_UNESCAPED_UNICODE); exit; }
+
+  if (!$HAS_USER_AUTH) { http_response_code(500); echo json_encode(['ok'=>false,'error'=>'auth_missing'], JSON_UNESCAPED_UNICODE); exit; }
+
+  try {
+    $hash = password_hash($pass, PASSWORD_DEFAULT);
+
+    $base = preg_replace('/[^a-zA-Z0-9_\-\.]/', '', strtok($email, '@'));
+    $base = $base !== '' ? $base : 'user';
+    $username = $base;
+
+    $newUid = 0;
+    for ($i=0; $i<10; $i++) {
+      try {
+        $stmt = $pdo->prepare("INSERT INTO ".APP_TBL_USERS." (username, email, password_hash) VALUES (?, ?, ?)");
+        $stmt->execute([$username, $email, $hash]);
+        $newUid = (int)$pdo->lastInsertId();
+        break;
+      } catch (Throwable $e) {
+        $msg = (string)$e->getMessage();
+        if (stripos($msg, 'email') !== false) { http_response_code(409); echo json_encode(['ok'=>false,'error'=>'email_exists'], JSON_UNESCAPED_UNICODE); exit; }
+        $username = $base . random_int(100, 9999);
+      }
+    }
+    if ($newUid <= 0) { http_response_code(500); echo json_encode(['ok'=>false,'error'=>'register_failed'], JSON_UNESCAPED_UNICODE); exit; }
+
+    app_login_user_id($newUid);
+
+    $stmt = $pdo->prepare("UPDATE app_resume_kaigo SET user_id = ?, email = COALESCE(NULLIF(email,''), ?), name_romaji = COALESCE(NULLIF(name_romaji,''), ?) WHERE token = ? LIMIT 1");
+    $stmt->execute([$newUid, $email, $name, $token]);
+
+    $row2 = fetch_kaigo_by_token($pdo, $token);
+    if ($row2) {
+      $post2 = row_to_post($row2);
+      app_save_profile($pdo, $newUid, $post2, 'kaigo');
+    }
+
+    echo json_encode(['ok'=>true,'user_id'=>$newUid], JSON_UNESCAPED_UNICODE);
+    exit;
+
+  } catch (Throwable $e) {
+    error_log('[rireki_preview register_open] '.$e->getMessage());
+    http_response_code(500);
+    echo json_encode(['ok'=>false,'error'=>'server_error'], JSON_UNESCAPED_UNICODE);
+    exit;
+  }
+}
 
 // ===== GET mode =====
 // - If token provided: show preview using DB row
@@ -339,10 +418,34 @@ if ($method === 'GET') {
 
     // Decide flow if missing
     if ($flow === '') {
-      $flow = ((int)($post['job_id'] ?? 0) > 0) ? 'apply_profile' : 'open_resume';
+      if ($job_id > 0 || (int)($post['job_id'] ?? 0) > 0) {
+        $flow = 'apply_profile';
+      } elseif ($myinfo_uid > 0) {
+        $flow = 'profile_only';
+      } elseif ($session_uid > 0 && (int)($post['user_id'] ?? 0) === $session_uid) {
+        $flow = 'profile_only';
+      } else {
+        $flow = 'open_resume';
+      }
     }
 
     $photoPath = $post['photo_path'] ?? null;
+    // Force profile view when accessed from マイ情報 (userid param)
+    if ($myinfo_uid > 0 && $job_id === 0) {
+      $flow = 'profile_only';
+    }
+
+    // Build query params for edit links (preserve context)
+    $link_qs = '';
+    if ($flow === 'apply_profile') {
+      $link_qs = ($job_id > 0) ? ('&job_id=' . (int)$job_id . '&flow=apply_profile') : '&flow=apply_profile';
+    } elseif ($flow === 'profile_only') {
+      $link_qs = ($myinfo_uid > 0) ? ('&userid=' . (int)$myinfo_uid . '&flow=profile_only') : '&flow=profile_only';
+    } else {
+      $link_qs = '&flow=open_resume';
+    }
+
+
 
   } else {
     // No token: keep old profile-view behavior (only if auth exists)
@@ -759,7 +862,7 @@ $step6 = [
           </div>
         <?php endforeach; ?>
         <div style="margin-top:12px; text-align:center;">
-          <a class="btn" href="/rireki/kaigo/rireki.php?token=<?=h($token)?><?= $job_id>0 ? '&job_id='.h($job_id) : '' ?>#step-1">このステップを編集</a>
+          <a class="btn" href="/rireki/kaigo/rireki.php?token=<?=h($token)?><?=h($link_qs)?>#step-1">このステップを編集</a>
         </div>
       </div>
     </div>
@@ -791,7 +894,7 @@ $step6 = [
         <?php endif; ?>
 
         <div style="margin-top:12px; text-align:center;">
-          <a class="btn" href="/rireki/kaigo/rireki.php?token=<?=h($token)?><?= $job_id>0 ? '&job_id='.h($job_id) : '' ?>#step-2">このステップを編集</a>
+          <a class="btn" href="/rireki/kaigo/rireki.php?token=<?=h($token)?><?=h($link_qs)?>#step-2">このステップを編集</a>
         </div>
       </div>
     </div>
@@ -839,7 +942,7 @@ $step6 = [
         <?php endif; ?>
 
         <div style="margin-top:12px; text-align:center;">
-          <a class="btn" href="/rireki/kaigo/rireki.php?token=<?=h($token)?><?= $job_id>0 ? '&job_id='.h($job_id) : '' ?>#step-3">このステップを編集</a>
+          <a class="btn" href="/rireki/kaigo/rireki.php?token=<?=h($token)?><?=h($link_qs)?>#step-3">このステップを編集</a>
         </div>
       </div>
     </div>
@@ -878,7 +981,7 @@ $step6 = [
         </div>
 
         <div style="margin-top:12px; text-align:center;">
-          <a class="btn" href="/rireki/kaigo/rireki.php?token=<?=h($token)?><?= $job_id>0 ? '&job_id='.h($job_id) : '' ?>#step-4">このステップを編集</a>
+          <a class="btn" href="/rireki/kaigo/rireki.php?token=<?=h($token)?><?=h($link_qs)?>#step-4">このステップを編集</a>
         </div>
       </div>
     </div>
@@ -894,7 +997,7 @@ $step6 = [
           </div>
         <?php endforeach; ?>
         <div style="margin-top:12px; text-align:center;">
-          <a class="btn" href="/rireki/kaigo/rireki.php?token=<?=h($token)?><?= $job_id>0 ? '&job_id='.h($job_id) : '' ?>#step-5">このステップを編集</a>
+          <a class="btn" href="/rireki/kaigo/rireki.php?token=<?=h($token)?><?=h($link_qs)?>#step-5">このステップを編集</a>
         </div>
       </div>
     </div>
@@ -910,7 +1013,7 @@ $step6 = [
           </div>
         <?php endforeach; ?>
         <div style="margin-top:12px; text-align:center;">
-          <a class="btn" href="/rireki/kaigo/rireki.php?token=<?=h($token)?><?= $job_id>0 ? '&job_id='.h($job_id) : '' ?>#step-6">このステップを編集</a>
+          <a class="btn" href="/rireki/kaigo/rireki.php?token=<?=h($token)?><?=h($link_qs)?>#step-6">このステップを編集</a>
         </div>
       </div>
     </div>
@@ -957,6 +1060,9 @@ $step6 = [
           <input type="hidden" name="flow" value="profile_only">
           <input type="hidden" name="token" value="<?=h($token)?>">
           <a class="btn" href="/saiyou.php">求人一覧へ戻る</a>
+          <?php if ($myinfo_uid > 0): ?>
+            <button type="submit" class="btn" formaction="/rireki/kaigo/php/submit_rireki.php" formmethod="post">エクスポート</button>
+          <?php endif; ?>
           <button type="submit" class="btn primary">Save Profile</button>
         </form>
       <?php endif; ?>

@@ -1827,3 +1827,9 @@ $photoPath = (string)($row['photo_path'] ?? '');
 </body>
 
 </html>
+// ✅ optional: explicit myinfo context (when coming from マイ情報 preview/edit)
+// Only trust userid if the session user matches.
+$userid_q = isset($_GET['userid']) ? (int)$_GET['userid'] : 0;
+$myinfo_uid = ($uid > 0 && $userid_q > 0 && $userid_q === $uid) ? $uid : 0;
+
+
