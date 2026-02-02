@@ -150,16 +150,14 @@ header {
 }
 
 /* Info Text Box */
-.info-text {
-    margin-top: 20px;
-    width: 80%;
-    padding: 40px;
-    background-color: #58a0e9;
-    color: white;
-    text-align: center;
-    border-radius: 5px;
-    font-size: 18px;
-    display: block;
+.info-text{
+  margin-top:14px;        /* same intent as your inline */
+  background: transparent; /* remove #58a0e9 from search.css */
+  padding: 0;              /* remove 40px padding that makes it look thick */
+  color: inherit;          /* stop forcing white text */
+  text-align: initial;     /* stop centering everything */
+  border-radius: 0;        /* wrapper radius not needed now */
+  
 }
 
 /* Results */

@@ -69,12 +69,16 @@ try {
         .info-text{ margin-top:14px; }
 
         .recent-activities{
-            background:#fff;
-            border:1px solid #e6edf6;
-            border-radius:14px;
-            padding:16px 18px;
-            box-shadow:0 6px 18px rgba(0,0,0,0.04);
-        }
+  background:#fff;
+  border:2px solid black; /* requested 2px thickness */
+  border-radius:14px;
+  padding:16px 18px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.04);
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;          /* important for inner scroll */
+}
         .ra-header{
             display:flex;
             align-items:baseline;
@@ -230,7 +234,7 @@ try {
         <div class="info-text" id="infoText">
             <div class="recent-activities" id="recentActivities">
                 <div class="ra-header">
-                    <h3>Recent Activities</h3>
+                    <h3>最近の更新情報</h3>
                     <span class="ra-sub">最新50件</span>
                 </div>
 
