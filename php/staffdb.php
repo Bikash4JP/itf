@@ -155,8 +155,8 @@ try {
             <?php endif; ?>
 
             <li><a href="addnews.php" class="menu-btn">✙お知らせ</a></li>
-            <li><a href="addjobs.php" class="menu-btn">✙求人報</a></li>
-            <li><a href="manage_posts" class="menu-btn">edit</a></li>
+            <!-- <li><a href="addjobs.php" class="menu-btn">✙求人報</a></li> -->
+            <li><a href="manage_posts" class="menu-btn">お知らせ管理</a></li>
             <li><a href="rireki_list.php" class="menu-btn">履歴書一覧</a></li>
         </ul>
     </div>

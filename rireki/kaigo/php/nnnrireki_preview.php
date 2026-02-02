@@ -22,14 +22,6 @@ if (is_file(__DIR__ . '/../../../php/user_auth.php')) {
   $HAS_USER_AUTH = function_exists('app_is_logged_in') && function_exists('app_pdo') && function_exists('app_user_id');
 }
 
-
-// (Optional) Activity logger (recent activities on staff dashboard)
-$HAS_ACTIVITY_LOGGER = false;
-if (is_file(__DIR__ . '/../../../php/activity_logger.php')) {
-  require_once __DIR__ . '/../../../php/activity_logger.php';
-  $HAS_ACTIVITY_LOGGER = function_exists('log_activity');
-}
-
 // ---------- helpers ----------
 function h($v)
 {
@@ -168,82 +160,6 @@ function fetch_kaigo_by_token(PDO $pdo, string $token): ?array
   $row = $st->fetch(PDO::FETCH_ASSOC);
   return $row ?: null;
 }
-
-
-/**
- * ✅ Activity log: when an application is submitted (apply_profile),
- * we log a "recent activity" entry for staff dashboard.
- *
- * This endpoint is called via AJAX from this preview page after submit_rireki.php succeeds.
- * IMPORTANT: It does NOT change any existing apply/save/export flows.
- */
-if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && (string)($_POST['action'] ?? '') === 'log_apply_activity') {
-  header('Content-Type: application/json; charset=utf-8');
-
-  if (!$HAS_ACTIVITY_LOGGER) {
-    echo json_encode(['ok'=>false,'error'=>'activity_logger_missing'], JSON_UNESCAPED_UNICODE);
-    exit;
-  }
-
-  $t = normalize_token($_POST['token'] ?? '');
-  if ($t === '') {
-    http_response_code(400);
-    echo json_encode(['ok'=>false,'error'=>'token_invalid'], JSON_UNESCAPED_UNICODE);
-    exit;
-  }
-
-  try {
-    $row = fetch_kaigo_by_token($pdo, $t);
-    if (!$row) {
-      http_response_code(400);
-      echo json_encode(['ok'=>false,'error'=>'token_not_found'], JSON_UNESCAPED_UNICODE);
-      exit;
-    }
-
-    $jobId = isset($row['job_id']) ? (int)$row['job_id'] : 0;
-    if ($jobId <= 0 && isset($_POST['job_id'])) $jobId = (int)$_POST['job_id'];
-
-    $applicantName = trim((string)($row['name_romaji'] ?? ''));
-    if ($applicantName === '') $applicantName = trim((string)($row['name_kana'] ?? ''));
-    if ($applicantName === '') $applicantName = '応募者';
-
-    $companyName = '';
-    if ($jobId > 0) {
-      // match submit_rireki.php behavior (posts table)
-      $st = $pdo->prepare("SELECT company_name FROM posts WHERE id = ? LIMIT 1");
-      $st->execute([$jobId]);
-      $companyName = (string)($st->fetchColumn() ?: '');
-    }
-
-    $org = $companyName !== '' ? $companyName : '求人';
-    $msg = "【応募】{$org} に新しい応募が届きました。（氏名: {$applicantName}）";
-
-    $data = [
-      'actor_type'      => 'applicant',
-      'actor_staff_id'  => null,
-      'actor_username'  => $applicantName,
-      'action'          => 'apply',
-      'entity_type'     => 'job',
-      'entity_id'       => ($jobId > 0 ? $jobId : null),
-      'company_name'    => ($companyName !== '' ? $companyName : null),
-      'talent_name_kana'=> null,
-      'message_ja'      => $msg,
-      'meta'            => ['token'=>$t],
-    ];
-
-    log_activity($pdo, $data);
-
-    echo json_encode(['ok'=>true], JSON_UNESCAPED_UNICODE);
-    exit;
-
-  } catch (Throwable $e) {
-    error_log('[rireki_preview log_apply_activity] '.$e->getMessage());
-    http_response_code(500);
-    echo json_encode(['ok'=>false,'error'=>'server_error'], JSON_UNESCAPED_UNICODE);
-    exit;
-  }
-}
-
 
 function row_to_post(array $row): array
 {
@@ -1294,7 +1210,7 @@ $step6 = [
     <div class="wrap">
       <div class="hdr">
         <div>
-          <h1 class="title">入力内容の確認</h1>
+          <h1 class="title">入力内容の確認（Kaigo プレビュー）</h1>
           <p class="crumb">ホーム ＞ 履歴書メーカー ＞ 介護向け ＞ プレビュー</p>
         </div>
 
@@ -1306,8 +1222,8 @@ $step6 = [
   <!-- Modal: application success -->
   <div id="appModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal">
-      <h3>ご応募ありがとうございます。</h3>
-      <p>担当者より近日中にご連絡差し上げます。</p>
+      <h3>Thank you for your application</h3>
+      <p>Our team will contact you shortly.</p>
       <div class="rowbtn">
         <a class="btn primary" href="/php/user_applied_jobs.php">戻る</a>
       </div>
@@ -1576,7 +1492,7 @@ $step6 = [
               <button type="submit" class="btn" formaction="/rireki/kaigo/php/submit_rireki.php"
                 formmethod="post">エクスポート</button>
             <?php endif; ?>
-            <button type="submit" class="btn primary">プロフィールを保存</button>
+            <button type="submit" class="btn primary">Save Profile</button>
           </form>
         <?php endif; ?>
       </div>
@@ -1708,15 +1624,6 @@ $step6 = [
         try {
           const res = await fetch(form.action, { method: 'POST', body: fd, credentials: 'same-origin' });
           if (!res.ok) throw new Error('submit failed');
-
-        // fire-and-forget: recent activity log (staff dashboard)
-        try{
-          const fd2 = new FormData();
-          fd2.append('action', 'log_apply_activity');
-          fd2.append('token', "<?=h($token)?>");
-          fd2.append('job_id', "<?=h($job_id)?>");
-          await fetch(window.location.pathname + window.location.search, { method:'POST', body: fd2, credentials:'same-origin' });
-        }catch(_){}
           const modal = document.getElementById('appModal');
           if (modal) { modal.style.display = 'flex'; modal.setAttribute('aria-hidden', 'false'); }
         } catch (err) {
