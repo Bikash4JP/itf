@@ -40,7 +40,7 @@ composer_audit.php
 sitemap_generator.php
 test_db_connection.php
 
-# --- Personal links and Notes Files ---
+# --- Personal links and Notes ,  Files ---
 links/
 notes/
 mail_sign.html
