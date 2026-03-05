@@ -4,16 +4,16 @@ php/config.php
 .env
 itf.sql
 .htaccess
-.sftp.json
+sftp.json
 .sftpignore
 .vscode/
 
 # --- Dependencies ---
 vendor/
 node_modules/
-.composer.json
-.composer.lock
-.composer.phar
+composer.json
+composer.lock
+composer.phar
 package-lock.json
 yarn.lock
 package.json
@@ -32,8 +32,8 @@ APP/
 # --- Utility & Script Files ---
 sitemap.xml
 robots.txt
-.install_composer.php
-.run_composer.php
-.composer_audit.php
-.sitemap_generator.php
-.test_db_connection.php
+install_composer.php
+run_composer.php
+composer_audit.php
+sitemap_generator.php
+test_db_connection.php
