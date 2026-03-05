@@ -35,3 +35,43 @@ templates/
 # Ignore the SFTP ignore file
 uploads/
 # Ignore the uploads directory for user-uploaded files
+links/
+# Ignore the links directory for storing generated links
+.vscode/
+# Ignore the .vscode directory for Visual Studio Code settings
+locales/
+# Ignore the locales directory for language files
+recruit/
+# Ignore the recruit directory for storing recruitment-related files
+.htaccess
+# Ignore the .htaccess file for Apache configuration
+.sftpignore
+# Ignore the SFTP ignore file
+.composer.json
+# Ignore the composer.json file for PHP dependencies
+.composer.lock
+# Ignore the composer.lock file for PHP dependencies
+.composer.phar
+# Ignore the composer.phar file for PHP dependencies
+.install_composer.php
+# Ignore the install_composer.php file for installing Composer
+.package-lock.json
+# Ignore the package-lock.json file for Node.js dependencies
+yarn.lock
+# Ignore the yarn.lock file for Node.js dependencies    
+.package.json
+# Ignore the package.json file for Node.js dependencies
+.sftp.json
+# Ignore the SFTP configuration file
+.run_composer.php
+# Ignore the run_composer.php file for running Composer commands
+.robots.txt
+# Ignore the robots.txt file for web crawling instructions
+.git/
+# Ignore the .git directory for version control
+.composer_audit.php
+# Ignore the composer_audit.php file for auditing Composer dependencies
+.sitemap_generator.php
+# Ignore the sitemap_generator.php file for generating the sitemap
+.test_db_connection.php
+# Ignore the test_db_connection.php file for testing database connections
