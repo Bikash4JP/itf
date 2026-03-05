@@ -1,7 +1,0 @@
-Failed to save applicant data: SQLSTATE[01000]: Warning: 1265 Data truncated for column 'marital_status' at row 1 | Time: 2025-05-23 17:22:33
-Failed to save applicant data: SQLSTATE[22007]: Invalid datetime format: 1292 Incorrect date value: '' for column 'passport_expiry' at row 1 | Time: 2025-05-23 17:30:11
-Failed to save applicant data: SQLSTATE[22007]: Invalid datetime format: 1292 Incorrect date value: '' for column 'passport_expiry' at row 1 | Time: 2025-05-23 17:36:37
-Invalid job_id at 2025-09-02 14:12:51
-Invalid job_id at 2025-09-02 14:16:56
-Invalid job_id at 2025-09-02 14:17:21
-Invalid job_id at 2025-09-02 14:58:18
