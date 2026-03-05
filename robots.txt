@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://it-future.jp/sitemap.xml

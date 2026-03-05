@@ -1,77 +1,39 @@
+# --- Sensitive & Config Files ---
 php/db_connect.php
-# Ignore the database connection file
 php/config.php
-# Ignore the configuration file
-vendor/
-# Ignore the vendor directory for Composer dependencies
-# Ignore the vendor directory for Composer dependencies
-node_modules/
-resumes/
-# Ignore the resumes directory for storing generated resumes
 .env
-# Ignore the environment configuration file
-.sftp.json
-# Ignore the SFTP configuration file
 itf.sql
-# Ignore the SQL file for the initial database schema
-sitemap.xml
-# Ignore the sitemap file
-
-# Ignore the node_modules directory for Node.js dependencies
-php/App/
-# Ignore the App directory in PHP
-APP/
-# Ignore the APP directory 
-# ljk
-uploads/
-# Ignore the uploads directory for user-uploaded files
-php/uploads/
-# Ignore the uploads directory in PHP
 .htaccess
-# Ignore the .htaccess file for Apache configuration
-templates/
-# Ignore the templates directory for resume templates
-.sftpignore
-# Ignore the SFTP ignore file
-uploads/
-# Ignore the uploads directory for user-uploaded files
-links/
-# Ignore the links directory for storing generated links
-.vscode/
-# Ignore the .vscode directory for Visual Studio Code settings
-locales/
-# Ignore the locales directory for language files
-recruit/
-# Ignore the recruit directory for storing recruitment-related files
-.htaccess
-# Ignore the .htaccess file for Apache configuration
-.sftpignore
-# Ignore the SFTP ignore file
-.composer.json
-# Ignore the composer.json file for PHP dependencies
-.composer.lock
-# Ignore the composer.lock file for PHP dependencies
-.composer.phar
-# Ignore the composer.phar file for PHP dependencies
-.install_composer.php
-# Ignore the install_composer.php file for installing Composer
-.package-lock.json
-# Ignore the package-lock.json file for Node.js dependencies
-yarn.lock
-# Ignore the yarn.lock file for Node.js dependencies    
-.package.json
-# Ignore the package.json file for Node.js dependencies
 .sftp.json
-# Ignore the SFTP configuration file
+.sftpignore
+.vscode/
+
+# --- Dependencies ---
+vendor/
+node_modules/
+.composer.json
+.composer.lock
+.composer.phar
+package-lock.json
+yarn.lock
+package.json
+
+# --- Directories / Uploads ---
+uploads/
+php/uploads/
+resumes/
+links/
+recruit/
+locales/
+templates/
+php/App/
+APP/
+
+# --- Utility & Script Files ---
+sitemap.xml
+robots.txt
+.install_composer.php
 .run_composer.php
-# Ignore the run_composer.php file for running Composer commands
-.robots.txt
-# Ignore the robots.txt file for web crawling instructions
-.git/
-# Ignore the .git directory for version control
 .composer_audit.php
-# Ignore the composer_audit.php file for auditing Composer dependencies
 .sitemap_generator.php
-# Ignore the sitemap_generator.php file for generating the sitemap
 .test_db_connection.php
-# Ignore the test_db_connection.php file for testing database connections
