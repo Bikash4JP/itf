@@ -22,13 +22,15 @@ package.json
 uploads/
 php/uploads/
 resumes/
-links/
 recruit/
 locales/
 templates/
 php/App/
 APP/
-
+logs/
+images/
+p_info/
+favicon.ico
 # --- Utility & Script Files ---
 sitemap.xml
 robots.txt
@@ -37,3 +39,9 @@ run_composer.php
 composer_audit.php
 sitemap_generator.php
 test_db_connection.php
+
+# --- Personal links and Notes Files ---
+links/
+notes/
+mail_sign.html
+privacy.html
