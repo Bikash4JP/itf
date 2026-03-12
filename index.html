@@ -106,8 +106,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link rel="stylesheet" type="text/css" media="all" href="css/common.css">
-<link rel="stylesheet" id="wp-block-library-css" href="css/style.min.css" type="text/css" media="all">
-<link rel="stylesheet" id="toc-screen-css" href="css/screen.min.css" type="text/css" media="all">
 <link rel="stylesheet" id="wp-pagenavi-css" href="css/pagenavi-css.css" type="text/css" media="all">
 <link rel="stylesheet" href="css/footer.css">
 <link rel="stylesheet" href="css/greeting.css">
@@ -120,6 +118,8 @@
 <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
 <link rel="manifest" href="images/site.webmanifest">
 <meta name="msapplication-TileImage" content="images/url_logo.PNG">
+<link rel="preload" as="image" href="images/mv01_pc.webp" media="(min-width: 481px)" fetchpriority="high">
+<link rel="preload" as="image" href="images/mv01_sp.webp" media="(max-width: 480px)" fetchpriority="high">
 </head>
 
 <body class="home blog">
@@ -187,40 +187,40 @@
             <section>
                 <div class="topSlider" id="topSlider">
                     <ul id="topImages">
-                        <li class="topImagesInner topImagesInner--01">
+                        <li class="topImagesInner topImagesInner--01 js-current">
                             <a href="#">
-                                <img src="images/mv01_pc_content.png" alt="株式会社アイティーエフ - 会社概要" class="topImagesBody u-only_pc_tab">
-                                <img src="images/mv01_sp_content.png" alt="株式会社アイティーエフ - 会社概要" class="topImagesBody u-only_sp">
+                                <img src="images/mv01_pc_content.webp" alt="株式会社アイティーエフ - 会社概要" class="topImagesBody u-only_pc_tab">
+                                <img src="images/mv01_sp_content.webp" alt="株式会社アイティーエフ - 会社概要" class="topImagesBody u-only_sp">
                             </a>
                         </li>
                         <li class="topImagesInner topImagesInner--02">
                             <a href="about.html#itf-reu">
-                                <img src="images/mv02_pc_content.png" alt="株式会社アイティーエフ - 事業紹介" class="topImagesBody u-only_pc_tab">
-                                <img src="images/mv02_sp_content.png" alt="株式会社アイティーエフ - 事業紹介" class="topImagesBody u-only_sp">
+                                <img src="images/mv02_pc_content.webp" alt="株式会社アイティーエフ - 事業紹介" class="topImagesBody u-only_pc_tab">
+                                <img src="images/mv02_sp_content.webp" alt="株式会社アイティーエフ - 事業紹介" class="topImagesBody u-only_sp">
                             </a>
                         </li>
                         <li class="topImagesInner topImagesInner--03">
                             <a href="index.html#service-naiyo">
-                                <img src="images/mv03_pc_content.png" alt="株式会社アイティーエフ - サービス紹介" class="topImagesBody u-only_pc_tab">
-                                <img src="images/mv03_sp_content.png" alt="株式会社アイティーエフ - サービス紹介" class="topImagesBody u-only_sp">
+                                <img src="images/mv03_pc_content.webp" alt="株式会社アイティーエフ - サービス紹介" class="topImagesBody u-only_pc_tab">
+                                <img src="images/mv03_sp_content.webp" alt="株式会社アイティーエフ - サービス紹介" class="topImagesBody u-only_sp">
                             </a>
                         </li>
                         <li class="topImagesInner topImagesInner--04">
                             <a href="index.html#ITF-point">
-                                <img src="images/mv04_pc_content.png" alt="株式会社アイティーエフ - ITFのポイント" class="topImagesBody u-only_pc_tab">
-                                <img src="images/mv04_sp_content.png" alt="株式会社アイティーエフ - ITFのポイント" class="topImagesBody u-only_sp">
+                                <img src="images/mv04_pc_content.webp" alt="株式会社アイティーエフ - ITFのポイント" class="topImagesBody u-only_pc_tab">
+                                <img src="images/mv04_sp_content.webp" alt="株式会社アイティーエフ - ITFのポイント" class="topImagesBody u-only_sp">
                             </a>
                         </li>
                         <li class="topImagesInner topImagesInner--05">
                             <a href="index.html#work-step">
-                                <img src="images/mv05_pc_content.png" alt="株式会社アイティーエフ - 紹介の流れ" class="topImagesBody u-only_pc_tab">
-                                <img src="images/mv05_sp_content.png" alt="株式会社アイティーエフ - 紹介の流れ" class="topImagesBody u-only_sp">
+                                <img src="images/mv05_pc_content.webp" alt="株式会社アイティーエフ - 紹介の流れ" class="topImagesBody u-only_pc_tab">
+                                <img src="images/mv05_sp_content.webp" alt="株式会社アイティーエフ - 紹介の流れ" class="topImagesBody u-only_sp">
                             </a>
                         </li>
                         <li class="topImagesInner topImagesInner--06">
                             <a href="index.html#osirase">
-                                <img src="images/mv06_pc_content.png" alt="株式会社アイティーエフ - お知らせ" class="topImagesBody u-only_pc_tab">
-                                <img src="images/mv06_sp_content.png" alt="株式会社アイティーエフ - お知らせ" class="topImagesBody u-only_sp">
+                                <img src="images/mv06_pc_content.webp" alt="株式会社アイティーエフ - お知らせ" class="topImagesBody u-only_pc_tab">
+                                <img src="images/mv06_sp_content.webp" alt="株式会社アイティーエフ - お知らせ" class="topImagesBody u-only_sp">
                             </a>
                         </li>
                     </ul>
@@ -631,8 +631,6 @@
     <script defer src="js/shortcut.js"></script>
     <script defer src="js/scripts.js"></script>
     <script defer src="js/news.js"></script>
-    <script defer type="text/javascript" src="js/front.min.js"></script>
-    <script defer type="text/javascript" src="js/wp-embed.min.js"></script>
 </body>
 
 </html>

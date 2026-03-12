@@ -51,7 +51,7 @@
                     for ($row = 1; $row <= $highestRow; $row++) {
                         echo "<tr>";
                         for ($col = 1; $col <= $highestColumnIndex; $col++) {
-                            $cell = $worksheet->getCellByColumnAndRow($col, $row);
+                            $cell = $worksheet->getCell([$col, $row]);
                             $value = $cell->getValue();
                             // Check if the cell is part of a merged range
                             $isMerged = false;

@@ -1,5 +1,5 @@
 <?php
-@ini_set('display_errors','1'); error_reporting(EALL);
+@ini_set('display_errors','1'); error_reporting(E_ALL);
 require_once __DIR__ . '/../../../vendor/autoload.php';
 $mapping = __DIR__ . '/../mappings/Kaigo_Template_XLS.json';
 $ok = is_readable($mapping);

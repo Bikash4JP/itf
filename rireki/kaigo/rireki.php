@@ -265,7 +265,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'upload_photo') {
   // MIME validate
   $fi = finfo_open(FILEINFO_MIME_TYPE);
   $mime = finfo_file($fi, $f['tmp_name']);
-  finfo_close($fi);
+  unset($fi);
 
   $ext = '';
   if ($mime === 'image/jpeg') $ext = 'jpg';

@@ -208,59 +208,59 @@ ul {
 }
 
 /* Background Images */
-.topImagesInner--01.js-current {
-    background: url(../images/mv01_pc.png) no-repeat center center;
+.topImagesInner--01 {
+    background: url(../images/mv01_pc.webp) no-repeat center center;
     background-size: cover;
 }
 
-.topImagesInner--02.js-current {
-    background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url(../images/mv02_pc.png) no-repeat center center;
+.topImagesInner--02 {
+    background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url(../images/mv02_pc.webp) no-repeat center center;
     background-size: contain;
 }
 
-.topImagesInner--03.js-current {
-    background: url(../images/mv03_pc.png) no-repeat center center;
+.topImagesInner--03 {
+    background: url(../images/mv03_pc.webp) no-repeat center center;
     background-size: cover;
 }
 
-.topImagesInner--04.js-current {
-    background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url(../images/mv04_pc.jpg) no-repeat center center;
+.topImagesInner--04 {
+    background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url(../images/mv04_pc.webp) no-repeat center center;
     background-size: cover;
 }
 
-.topImagesInner--05.js-current {
-    background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url(../images/mv05_pc.png) no-repeat center center;
+.topImagesInner--05 {
+    background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url(../images/mv05_pc.webp) no-repeat center center;
     background-size: cover;
 }
 
-.topImagesInner--06.js-current {
-    background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url(../images/mv06_pc.jpg) no-repeat center center;
+.topImagesInner--06 {
+    background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url(../images/mv06_pc.webp) no-repeat center center;
     background-size: cover;
 }
 
 @media (max-width: 480px) {
-    .topImagesInner--01.js-current {
-        background: url(../images/mv01_sp.jpg) no-repeat center center;
+    .topImagesInner--01 {
+        background: url(../images/mv01_sp.webp) no-repeat center center;
         background-size: cover;
     }
-    .topImagesInner--02.js-current {
-        background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url(../images/mv02_sp.jpg) no-repeat center center;
+    .topImagesInner--02 {
+        background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url(../images/mv02_sp.webp) no-repeat center center;
         background-size: cover;
     }
-    .topImagesInner--03.js-current {
-        background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url(../images/mv03_sp.png) no-repeat center center;
+    .topImagesInner--03 {
+        background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url(../images/mv03_sp.webp) no-repeat center center;
         background-size: cover;
     }
-    .topImagesInner--04.js-current {
-        background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url(../images/mv04_sp.jpg) no-repeat center center;
+    .topImagesInner--04 {
+        background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url(../images/mv04_sp.webp) no-repeat center center;
         background-size: cover;
     }
-    .topImagesInner--05.js-current {
-        background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url(../images/mv05_sp.jpg) no-repeat center center;
+    .topImagesInner--05 {
+        background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url(../images/mv05_sp.webp) no-repeat center center;
         background-size: cover;
     }
-    .topImagesInner--06.js-current {
-        background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url(../images/mv06_sp.jpg) no-repeat center center;
+    .topImagesInner--06 {
+        background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), url(../images/mv06_sp.webp) no-repeat center center;
         background-size: cover;
     }
 }

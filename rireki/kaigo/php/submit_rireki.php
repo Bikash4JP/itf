@@ -288,7 +288,15 @@ if (function_exists('app_is_logged_in') && app_is_logged_in()) {
           $who = trim((string)($data['name_romaji'] ?? ''));
           if ($who === '') $who = 'applicant';
           $msg = '【応募】' . $company . ' に新しい応募が届きました。';
-          log_activity($pdo_app, $msg, 'applicant', $uid, $who);
+          log_activity($pdo_app, [
+              'action'           => 'apply',
+              'entity_type'      => 'job_application',
+              'message_ja'       => $msg,
+              'actor_type'       => 'applicant',
+              'actor_username'   => $who,
+              'company_name'     => $company,
+              'talent_name_kana' => $who
+          ]);
         }
       }
     }
