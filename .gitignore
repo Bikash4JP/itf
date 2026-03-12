@@ -8,6 +8,26 @@ sftp.json
 .sftpignore
 .vscode/
 
+# --- Environment & API Secrets ---
+.env
+.env.*
+*.env
+*.pem
+*.key
+*secret*
+*credential*
+*config.json
+*config.php
+!php/config.php # Keep if php/config.php is a template, else ignore it as well
+google-credentials.json
+firebase-config.json
+client_secret.json
+aws-credentials.csv
+
+# --- Database credentials ---
+php/db_connect.php
+*database.php
+*db_config.php
 # --- Dependencies ---
 vendor/
 node_modules/
