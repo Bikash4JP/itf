@@ -18,7 +18,7 @@ $(function() {
     let pause_on_hoevr = false; // マウスオーバー時に一時停止するか
     let pause = false; // 再生状態
 
-    // コントローラが指定されていない場合、追加
+    // コントローラが指定されていない 場合、追加
     if ( ! $controller.length ) {
         $controller = $('<div></div>');
         $slider.append( $controller );
