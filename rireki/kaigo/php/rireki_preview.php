@@ -1403,6 +1403,34 @@ $step6 = [
     <?php endif; ?>
   </style>
 
+  <style>
+    @media print {
+      header, aside, nav, footer, .modal-backdrop,
+      #deleteModal, #appModal, #saveModal,
+      .hdr-left a, .btn:not(#printable), .hdr { display: none !important; }
+      body { background: #fff !important; color: #000 !important; padding: 0 !important; font-size: 11pt; }
+      main.wrap { display: block !important; padding: 0 !important; max-width: 100% !important; }
+      section.main-section { display: block !important; }
+      .section {
+        background: #fff !important;
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+        margin-bottom: 12pt;
+        padding: 8pt;
+        border-radius: 0 !important;
+      }
+      .section-head { border-bottom: 1px solid #ccc !important; margin-bottom: 6pt; }
+      .section-head h2 { color: #000 !important; font-size: 12pt; }
+      .tbl th, .tbl td { border: 1px solid #aaa !important; color: #000 !important; font-size: 9pt; }
+      dl.pair dt, dl.pair dd { color: #000 !important; }
+      .dl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6pt; }
+      .pair { border-bottom: 1px solid #eee !important; }
+      a { color: #000 !important; text-decoration: none; }
+      img { max-width: 120pt !important; }
+    }
+  </style>
+
   <?php if (!empty($_GET['embedded'])): ?>
     <base target="_parent">
   <?php endif; ?>
@@ -1674,10 +1702,9 @@ $step6 = [
               <div class="okbox">完成しました！</div>
               <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
                 <a id="xlsDownloadLink" class="btn green" href="#" download style="justify-content:center">Excel（.xls）をダウンロード</a>
-                <a id="claimLink" class="btn" href="#" style="justify-content:center">アカウントに保存</a>
               </div>
-              <p id="exportTokenText" class="small" style="margin-top:8px"></p>
             </div>
+            <button id="btnBuildPdf" class="btn" type="button" style="width:100%;justify-content:center;margin-top:10px">📄 PDFとしてダウンロード</button>
           <?php endif; ?>
         </div>
       </div>
@@ -1769,10 +1796,10 @@ $step6 = [
     if (m2 && e.target === m2) { m2.style.display = 'none'; m2.setAttribute('aria-hidden', 'true'); }
   });
 
-  // Open resume: register + build XLS inside aside (no separate submit page)
+  // Open resume / Profile only: register + build XLS inside aside
   (function () {
     const flow = "<?= h($flow) ?>";
-    if (flow !== 'open_resume') return;
+    if (flow !== 'open_resume' && flow !== 'profile_only') return;
 
     const token = "<?= h($token) ?>";
     const isLoggedIn = <?= ($session_uid > 0 ? 'true' : 'false') ?>;
@@ -1823,7 +1850,7 @@ $step6 = [
 
         const fd = new FormData();
         fd.append('token', token);
-        fd.append('flow', 'open_resume');
+        fd.append('flow', flow === 'profile_only' ? 'profile_only' : 'open_resume');
         fd.append('ajax', '1');
 
         try {
@@ -1832,31 +1859,10 @@ $step6 = [
           if (!res.ok || !j || !j.ok || !j.xls_url) throw new Error('build_failed');
 
           const xls = j.xls_url;
-          const outToken = j.token || '';
           const result = document.getElementById('exportResult');
           const dl = document.getElementById('xlsDownloadLink');
-          const claim = document.getElementById('claimLink');
-          const tok = document.getElementById('exportTokenText');
 
           if (dl) dl.href = xls;
-
-          // Build claim/login links (same as submit_rireki.php)
-          const fmt = 'kaigo';
-          const claimNext = "/rireki/kaigo/php/claim_resume.php?token=" + encodeURIComponent(outToken) + "&fmt=" + encodeURIComponent(fmt);
-          const loginUrl = "/php/user_login.php?next=" + encodeURIComponent(claimNext);
-
-          if (claim) {
-            if (isLoggedIn) {
-              claim.href = claimNext;
-              claim.textContent = 'アカウントに保存（あとで再DL）';
-            } else {
-              claim.href = loginUrl;
-              claim.textContent = 'ログインして保存（あとで再DL）';
-            }
-          }
-
-          if (tok) tok.textContent = 'トークン: ' + outToken + ' / 出力: ' + xls;
-
           if (result) result.style.display = 'block';
           if (st) st.textContent = '完了しました。下のボタンからダウンロードできます。';
         } catch (err) {
@@ -1864,6 +1870,15 @@ $step6 = [
         } finally {
           buildBtn.disabled = false;
         }
+      });
+    }
+
+    // PDF download button — opens dedicated pixel-perfect PDF renderer
+    const pdfBtn = document.getElementById('btnBuildPdf');
+    if (pdfBtn) {
+      pdfBtn.addEventListener('click', () => {
+        const pdfUrl = '/rireki/kaigo/php/pdf_rireki.php?token=' + encodeURIComponent(token) + '&print=1';
+        window.open(pdfUrl, '_blank');
       });
     }
   })();
