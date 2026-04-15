@@ -782,10 +782,9 @@ if ($job_id > 0) {
 }
 
 // Edit base URL — links "Edit" button in each section card back to the form
-$editBase = '/rireki/kaigo/rireki.php';
+$editBase = '/rireki/kaigo/rireki.php?edit=1';
 if ($token !== '') {
-  // If a token is set (post_id), carry it so the form pre-fills
-  // (the form reads it from session, no extra param needed)
+  $editBase .= '&token=' . urlencode($token);
 }
 
 // Photo
@@ -1395,7 +1394,7 @@ $step6 = [
       }
     }
   <style>
-    /* If embedded, hide header and aside, and adjust layout */
+    /* If embedded, hide header and aside, break out of iframe for links, and adjust layout */
     <?php if (!empty($_GET['embedded'])): ?>
       header, aside { display: none !important; }
       main.wrap { display: block !important; padding-top: 10px; }
@@ -1404,6 +1403,9 @@ $step6 = [
     <?php endif; ?>
   </style>
 
+  <?php if (!empty($_GET['embedded'])): ?>
+    <base target="_parent">
+  <?php endif; ?>
 </head>
 <body>
 
@@ -1645,6 +1647,7 @@ $step6 = [
           <p style="font-size:14px;margin-bottom:14px;color:var(--muted)">最新の情報を保存しておくと、次回以降すぐに応募できます。</p>
           <form id="saveProfileForm" action="<?= h($_SERVER['REQUEST_URI']) ?>" method="post">
             <input type="hidden" name="__action" value="save_profile">
+            <input type="hidden" name="token" value="<?= h($token) ?>">
             <button class="btn primary" type="submit" style="width:100%;justify-content:center">プロフィールを保存する</button>
           </form>
         </div>
@@ -1679,13 +1682,15 @@ $step6 = [
         </div>
       </div>
 
-      <!-- Quick links card -->
+      <!-- Dashboard card -->
       <div class="aside-card">
-        <div class="aside-title">アクション</div>
+        <div class="aside-title">マイページ（ダッシュボード）</div>
         <div class="aside-btn-row">
-          <a class="btn" href="<?= h($editBase) ?>" style="justify-content:center">フォームを編集する</a>
-          <a class="btn" href="/saiyou.php" style="justify-content:center">求人を探す</a>
-          <a class="btn" href="/rireki/" style="justify-content:center">フォーマット選択へ</a>
+          <a class="btn" href="<?= h($editBase) ?>" style="justify-content:center">✏️ データを編集・更新する</a>
+          <a class="btn" href="/saiyou.php" style="justify-content:center">💼 おすすめ求人を見る</a>
+          <a class="btn" href="/rireki/index.php#formats" style="justify-content:center">➕ 新規フォーマット切替</a>
+          <button class="btn danger" onclick="showDeleteModal()" style="justify-content:center;color:#f85149;border-color:rgba(248,81,73,.3);background:rgba(248,81,73,.1);">🗑 データを完全削除してやり直す</button>
+          <a class="btn ghost" href="/php/user_logout.php" style="justify-content:center;color:var(--muted);border:none;background:transparent;margin-top:10px;">ログアウト</a>
         </div>
       </div>
 
@@ -1865,6 +1870,29 @@ $step6 = [
 
 </script>
 
+  <!-- Delete Modal -->
+<div id="deleteModal" style="display:none; position:fixed; inset:0; z-index:900; background:rgba(0,0,0,.7); backdrop-filter:blur(4px); align-items:center; justify-content:center;">
+  <div style="background:rgba(13,17,27,.95); border:1px solid var(--border); border-radius:18px; padding:24px; max-width:400px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,.6); text-align:center;">
+    <div style="font-size:36px; margin-bottom:12px;">⚠️</div>
+    <h3 style="font-size:18px; margin-bottom:10px;">本当に削除しますか？</h3>
+    <p style="color:var(--muted); font-size:14px; margin-bottom:20px;">履歴書データが完全に消去され、復元できなくなります。<br>最初から全く新しい履歴書を作り直す場合のみ実行してください。</p>
+    <div style="display:flex; gap:10px; justify-content:center;">
+      <button class="btn" type="button" onclick="document.getElementById('deleteModal').style.display='none'">キャンセル</button>
+      <form action="/rireki/php/delete_profile.php" method="POST">
+        <input type="hidden" name="action" value="delete_all">
+        <button class="btn" type="submit" style="color:#f85149; border-color:rgba(248,81,73,.3); background:rgba(248,81,73,.1);">はい、データを削除します</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showDeleteModal() {
+    document.getElementById('deleteModal').style.display = 'flex';
+  }
+</script>
+
+  <script src="/rireki/kaigo/js/kaigo.js?v=6"></script>
 </body>
 
 </html>

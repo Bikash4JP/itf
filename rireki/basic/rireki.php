@@ -13,7 +13,7 @@ $pdo = app_pdo();
 app_ensure_tables($pdo);
 
 if (!app_is_logged_in()) {
-  header('Location: /rireki/rireki_login.php?next=' . urlencode($_SERVER['REQUEST_URI']), true, 302);
+  header('Location: /php/user_login.php?next=' . urlencode($_SERVER['REQUEST_URI']), true, 302);
   exit;
 }
 ?><!doctype html>

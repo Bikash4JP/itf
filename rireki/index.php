@@ -422,8 +422,8 @@ function username(): string {
       </div>
       <a class="nav-btn" href="/php/user_logout.php" style="font-size:12px;padding:7px 14px">ログアウト</a>
     <?php else: ?>
-      <a class="nav-btn" href="/rireki/rireki_login.php?next=/rireki/">ログイン</a>
-      <a class="nav-btn primary" href="/rireki/rireki_login.php?next=/rireki/">無料登録</a>
+      <a class="nav-btn" href="/php/user_login.php?next=/rireki/">ログイン</a>
+      <a class="nav-btn primary" href="/php/user_login.php?next=/rireki/">無料登録</a>
     <?php endif; ?>
   </div>
 </nav>
@@ -449,7 +449,7 @@ function username(): string {
         <span class="chip">⚡ 最短5分</span>
       </div>
       <div class="hero-cta">
-        <a class="btn-primary" href="/rireki/rireki_login.php?next=/rireki/basic/rireki.php&fmt=basic">
+        <a class="btn-primary" href="/php/user_login.php?next=/rireki/basic/rireki.php&fmt=basic">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
           今すぐ無料作成
         </a>
@@ -481,7 +481,7 @@ function username(): string {
         <div class="return-pill">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           過去に作成しましたか？変更をご希望ですか？
-          <a href="/rireki/rireki_login.php?next=<?= urlencode('/rireki/kaigo/php/rireki_preview.php?flow=profile_only') ?>">ログインして続ける →</a>
+          <a href="/php/user_login.php?next=<?= urlencode('/rireki/kaigo/php/rireki_preview.php?flow=profile_only') ?>">ログインして続ける →</a>
         </div>
       </div>
       <?php endif; ?>
@@ -509,7 +509,7 @@ function username(): string {
       <div class="empty-card">
         <div class="icon">📄</div>
         <p>まだ履歴書が作成されていません。<br>下のフォーマットから始めてください。</p>
-        <a class="btn-primary" href="/rireki/rireki_login.php?next=/rireki/basic/rireki.php&fmt=basic" style="display:inline-flex">
+        <a class="btn-primary" href="/php/user_login.php?next=/rireki/basic/rireki.php&fmt=basic" style="display:inline-flex">
           今すぐ作成する
         </a>
       </div>
@@ -558,14 +558,14 @@ function username(): string {
       <div class="empty-card">
         <div class="icon">📋</div>
         <p>標準フォーマットがまだありません。</p>
-        <a class="btn-ghost" href="/rireki/rireki_login.php?next=/rireki/basic/rireki.php&fmt=basic" style="display:inline-flex;font-size:13px">作成する</a>
+        <a class="btn-ghost" href="/php/user_login.php?next=/rireki/basic/rireki.php&fmt=basic" style="display:inline-flex;font-size:13px">作成する</a>
       </div>
       <?php endif; ?>
       <?php if (!isset($profiles['kaigo'])): ?>
       <div class="empty-card">
         <div class="icon">🏥</div>
         <p>介護向けフォーマットがまだありません。</p>
-        <a class="btn-ghost" href="/rireki/rireki_login.php?next=/rireki/kaigo/rireki.php&fmt=kaigo" style="display:inline-flex;font-size:13px">作成する</a>
+        <a class="btn-ghost" href="/php/user_login.php?next=/rireki/kaigo/rireki.php&fmt=kaigo" style="display:inline-flex;font-size:13px">作成する</a>
       </div>
       <?php endif; ?>
     </div>
@@ -598,7 +598,7 @@ function username(): string {
         <p>一般応募向けの標準フォーマット。氏名・住所・学歴・職歴・資格・自己PRなど。最短5分で完了。</p>
       </div>
       <div class="format-cta">
-        <a class="btn-primary" href="/rireki/rireki_login.php?next=/rireki/basic/rireki.php&fmt=basic" style="width:100%;justify-content:center">
+        <a class="btn-primary" href="/php/user_login.php?next=/rireki/basic/rireki.php&fmt=basic" style="width:100%;justify-content:center">
           このフォーマットで作成
         </a>
       </div>
@@ -612,7 +612,7 @@ function username(): string {
         <p>介護資格・夜勤可否・経験年数・シフト希望など、介護業界に特化した入力ステップ。</p>
       </div>
       <div class="format-cta">
-        <a class="btn-primary" href="/rireki/rireki_login.php?next=/rireki/kaigo/rireki.php&fmt=kaigo" style="width:100%;justify-content:center;background:linear-gradient(135deg,#3fb950,#2ea043);box-shadow:0 6px 24px rgba(63,185,80,.4)">
+        <a class="btn-ghost" href="/php/user_login.php?next=/rireki/kaigo/rireki.php&fmt=kaigo" style="display:inline-flex;width:100%;justify-content:center;padding:12px;background:linear-gradient(135deg,var(--sky),var(--sky2));border:none;color:#fff">
           このフォーマットで作成
         </a>
       </div>
@@ -730,6 +730,48 @@ function username(): string {
 </a>
 
 <script>
+// Dynamic Auth State Fetcher (Bypasses CDN Cache)
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const res = await fetch('/rireki/php/api_user_status.php');
+    const data = await res.json();
+    if (data.logged_in) {
+      // 1. Update NavBar Links
+      const navLinks = document.querySelector('.nav-links');
+      if (navLinks) {
+        navLinks.innerHTML = `
+          <a class="nav-link" href="https://it-future.jp/">ホーム</a>
+          <a class="nav-link" href="https://it-future.jp/saiyou.php">求人を見る</a>
+          <div class="nav-user">
+            <div class="nav-user-avatar">${data.username.charAt(0)}</div>
+            <span style="font-size:13px;font-weight:600">${data.username}さん</span>
+          </div>
+          <a class="nav-btn primary" href="/rireki/user_data.php" style="font-size:12px;padding:7px 14px">マイページ</a>
+          <a class="nav-btn" href="/php/user_logout.php" style="font-size:12px;padding:7px 14px;background:rgba(255,0,0,0.1);color:#ff6a6a;border-color:rgba(255,0,0,0.3)">ログアウト</a>
+        `;
+      }
+
+      // 2. Update Hero Return Bar if present
+      const heroReturn = document.querySelector('.hero-return-bar');
+      if (heroReturn) {
+        heroReturn.innerHTML = `
+          <div class="logged-in-hero-row">
+            <a class="btn-preview" href="/rireki/user_data.php">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              ダッシュボードを開く
+            </a>
+            <a class="btn-edit-resume" href="/php/user_logout.php" style="color:#ff6a6a;background:rgba(255,0,0,0.1);border-color:rgba(255,0,0,0.3)">
+              ログアウト
+            </a>
+          </div>
+        `;
+      }
+    }
+  } catch (err) {
+    console.warn('Auth fetch failed', err);
+  }
+});
+
 // Stars
 (function(){
   const wrap = document.getElementById('stars');

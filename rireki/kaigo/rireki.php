@@ -15,7 +15,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/php/db_connect.php'; // expects $pdo 
 // --- Auth guard: must be logged in to access the form ---
 require_once $_SERVER['DOCUMENT_ROOT'] . '/php/user_auth.php';
 if (!app_is_logged_in()) {
-  header('Location: /rireki/rireki_login.php?next=' . urlencode($_SERVER['REQUEST_URI']), true, 302);
+  header('Location: /php/user_login.php?next=' . urlencode($_SERVER['REQUEST_URI']), true, 302);
   exit;
 }
 
