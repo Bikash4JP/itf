@@ -401,8 +401,9 @@ function build_job_ld($job){
         <aside class="filters" aria-label="求人フィルター">
           <?php
             $next = $_SERVER['REQUEST_URI'] ?? '/saiyou.php';
-            $loginUrl  = '/php/user_login.php?next=' . urlencode($next);
-            $logoutUrl = '/php/user_logout.php'; // ✅ correct logout
+            // Use the new styled rireki login page (redirects to preview for returning users)
+            $loginUrl  = '/rireki/rireki_login.php?next=' . urlencode('/rireki/kaigo/php/rireki_preview.php?flow=profile_only');
+            $logoutUrl = '/php/user_logout.php';
           ?>
 
           <!-- ✅ USER PANEL -->
@@ -419,10 +420,10 @@ function build_job_ld($job){
             <?php if (app_is_logged_in()): ?>
               <div class="user-actions">
                 <a class="user-link" href="/php/user_applied_jobs.php">応募履歴</a>
-                <a class="user-link" href="/rireki/kaigo/php/rireki_preview.php">マイ情報（履歴書）</a>
+                <a class="user-link primary" href="/rireki/kaigo/php/rireki_preview.php?flow=profile_only">マイ履歴書を見る ›</a>
                 <a class="user-link ghost" href="<?=htmlspecialchars($logoutUrl,ENT_QUOTES,'UTF-8')?>">ログアウト</a>
               </div>
-              <div class="user-note">※ 「マイ情報」から履歴書を作成・更新できます。</div>
+              <div class="user-note">※ 「マイ履歴書」から編集・ダウンロードできます。</div>
             <?php else: ?>
               <div class="user-note">ログインすると、履歴書を保存して後からダウンロードできます。</div>
               <div class="user-actions">

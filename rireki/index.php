@@ -1,393 +1,746 @@
 <?php
 // /home/it-future/www/itf/rireki/index.php
+
+ini_set('session.cookie_path', '/');
+ini_set('session.cookie_domain', '.it-future.jp');
+ini_set('session.cookie_lifetime', 86400);
+ini_set('session.cookie_secure', true);
+ini_set('session.cookie_httponly', true);
+
+require_once $_SERVER['DOCUMENT_ROOT'] . '/php/user_auth.php';
+
+$loggedIn = app_is_logged_in();
+$pdo      = null;
+$user     = null;
+$profiles = [];
+
+if ($loggedIn) {
+    try {
+        $pdo  = app_pdo();
+        app_ensure_tables($pdo);
+        $user = app_current_user($pdo);
+
+        // Load saved profiles (basic + kaigo)
+        foreach (['basic', 'kaigo'] as $fmt) {
+            $p = app_load_profile($pdo, app_user_id(), $fmt);
+            if ($p) $profiles[$fmt] = $p;
+        }
+    } catch (Throwable $e) { $loggedIn = false; }
+}
+
+function h($s): string { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
+function username(): string {
+    global $user;
+    return $user ? h($user['username']) : '';
+}
 ?><!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="format-detection" content="telephone=no" />
-  <meta name="theme-color" content="#1e90ff" />
-
-  <!-- Primary SEO (UPDATED) -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="format-detection" content="telephone=no">
   <title>【無料】履歴書作成ツール（スマホ対応）｜オンラインで5分・Excelダウンロード</title>
-  <meta name="description" content="【無料】履歴書をオンラインで作成。スマホ/PC対応で最短5分、Excel（.xls）でダウンロード可能。標準/介護テンプレ対応、インストール不要でかんたん作成。">
-
-  <!-- Canonical / robots -->
-  <link rel="canonical" href="https://it-future.jp/rireki/" />
-  <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1">
-
-  <!-- Hreflang -->
-  <link rel="alternate" hreflang="ja-JP" href="https://it-future.jp/rireki/" />
-  <link rel="alternate" hreflang="x-default" href="https://it-future.jp/rireki/" />
-
-  <!-- Open Graph (UPDATED) -->
+  <meta name="description" content="【無料】履歴書をオンラインで作成。スマホ/PC対応で最短5分、Excel（.xls）でダウンロード可能。標準/介護テンプレ対応。">
+  <link rel="canonical" href="https://it-future.jp/rireki/">
+  <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+  <link rel="alternate" hreflang="ja-JP" href="https://it-future.jp/rireki/">
+  <link rel="icon" href="https://it-future.jp/images/favicon-32x32.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="https://it-future.jp/images/apple-touch-icon.png">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="ja_JP">
-  <meta property="og:site_name" content="ITF オンライン履歴書メーカー">
-  <meta property="og:title" content="【無料】履歴書作成ツール（スマホ対応）｜オンラインで5分・Excelダウンロード">
-  <meta property="og:description" content="最短5分で履歴書をオンライン作成。無料・Excel出力・テンプレ対応・スマホOK。介護向けフォーマットも。">
+  <meta property="og:title" content="【無料】履歴書作成ツール（スマホ対応）">
+  <meta property="og:description" content="最短5分で履歴書をオンライン作成。無料・Excel出力・テンプレ対応・スマホOK。">
   <meta property="og:url" content="https://it-future.jp/rireki/">
   <meta property="og:image" content="https://it-future.jp/images/og/rireki_og.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-
-  <!-- Twitter (UPDATED) -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="【無料】履歴書作成ツール（スマホ対応）｜オンラインで5分・Excelダウンロード">
-  <meta name="twitter:description" content="最短5分で履歴書をオンライン作成。無料・Excel出力・テンプレ対応・スマホOK。介護向けフォーマットも。">
-  <meta name="twitter:image" content="https://it-future.jp/images/og/rireki_og.png">
-
-  <!-- Performance (UPDATED) -->
-  <link rel="preconnect" href="https://it-future.jp" crossorigin>
-  <link rel="dns-prefetch" href="https://it-future.jp">
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-
-  <!-- Preload LCP image (UPDATED) -->
-  <link rel="preload" as="image" href="https://it-future.jp/rireki/images/basicRireki_sample.png" fetchpriority="high" />
-
-  <!-- Styles -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://it-future.jp/css/footer.css">
+
   <style>
-    :root{
-      --sky:#39a7ff; --sky-2:#1e90ff; --sky2:#e9f5ff;
-      --ink:#0b0f19; --muted:#667085; --ring:#bfe2ff;
-      --card:#ffffff; --border:#e6edf6; --ok:#0b6b4a; --warn:#b45309; --warn-bg:#fff7ed; --warn-bd:#fed7aa;
+    /* ===== Reset ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --sky: #3b9eff; --sky2: #1e78e8; --violet: #7c3aed;
+      --ink: #e6edf3; --muted: #8b949e; --border: rgba(255,255,255,.1);
+      --card: rgba(255,255,255,.06); --card-hover: rgba(255,255,255,.1);
+      --ok: #3fb950; --warn: #e3b341; --danger: #f85149;
     }
-    *{ box-sizing:border-box; }
-    html,body{ height:100% }
-    body{
-      margin:0;
-      font-family: ui-sans-serif,system-ui,"Segoe UI",Roboto,"Noto Sans JP","Hiragino Kaku Gothic ProN",Meiryo,Arial,sans-serif;
-      color:var(--ink);
-      background:linear-gradient(180deg,#f8fbff,#eef6ff);
+    html, body { min-height: 100%; font-family: 'Inter','Noto Sans JP',system-ui,sans-serif; }
+    body {
+      background:
+        radial-gradient(ellipse 80% 55% at 50% -5%, rgba(59,158,255,.22) 0%, transparent 65%),
+        radial-gradient(ellipse 55% 40% at 85% 95%, rgba(124,58,237,.18) 0%, transparent 60%),
+        linear-gradient(155deg, #060d1a 0%, #0d1f3c 50%, #080f20 100%);
+      background-attachment: fixed;
+      color: var(--ink);
     }
-    header{
-      padding:24px 20px;
-      border-bottom:1px solid #eef2f7;
-      background:rgba(255,255,255,.86);
-      position:sticky; top:0; z-index:10;
-      backdrop-filter:saturate(180%) blur(6px);
-    }
-    .wrap{ max-width:1100px; margin:0 auto; }
-    .hero{ display:grid; grid-template-columns: 1.2fr .8fr; gap:18px; align-items:center; }
-    @media (max-width: 900px){ .hero{ grid-template-columns:1fr } }
-    .hero h1{ margin:0; font-size:28px; letter-spacing:.2px; font-weight:900; }
-    .lead{ margin:8px 0 0; color:var(--muted); line-height:1.7 }
-    .benefits{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px }
-    .chip{ font-size:12px; padding:6px 10px; border-radius:999px; background:#eef7ff; color:#1969b5; border:1px solid #d7ebff }
-    .cta-row{ margin-top:14px; display:flex; gap:10px; flex-wrap:wrap }
-    .btn{
-      appearance:none; cursor:pointer; border-radius:10px; padding:12px 14px;
-      border:1px solid #dbe7f5; background:#f3f9ff; color:#0c4a7a; text-decoration:none; font-weight:800;
-      transition:background .2s,transform .2s,box-shadow .2s,border-color .2s;
-    }
-    .btn:hover{ background:#e9f5ff; transform: translateY(-1px); box-shadow:0 6px 18px rgba(57,167,255,.18) }
-    .btn.primary{ background:linear-gradient(180deg,var(--sky),var(--sky-2)); border-color:var(--sky); color:#fff; }
-    .btn.primary:hover{ filter:brightness(.96); }
-    .thumb-hero{ border:1px solid var(--border); border-radius:14px; overflow:hidden; background:#fff; box-shadow:0 10px 24px rgba(0,0,0,.06); }
-    .thumb-hero img{ display:block; width:100%; height:auto }
+    a { color: inherit; text-decoration: none; }
 
-    main.wrap{ padding:28px 20px 40px }
-    .notice{
-      display:flex; gap:10px; align-items:flex-start;
-      background:var(--warn-bg); border:1px solid var(--warn-bd); color:var(--warn);
-      border-radius:12px; padding:12px 14px; margin:16px 0 8px;
-      font-size:14px; line-height:1.6;
-    }
-    .notice svg{ flex:0 0 auto; margin-top:2px }
-    .h2{ font-size:22px; margin:18px 0 10px; font-weight:800 }
-    .grid{
-      display:grid; grid-template-columns: repeat(3,minmax(0,1fr));
-      gap:18px; padding:12px 0 24px;
-    }
-    @media (max-width: 980px){ .grid{ grid-template-columns:1fr 1fr } }
-    @media (max-width: 700px){ .grid{ grid-template-columns:1fr } }
-    .card{
-      position:relative; border:1px solid var(--border); border-radius:16px;
-      overflow:hidden; background:var(--card);
-      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
-      box-shadow: 0 10px 24px rgba(0,0,0,.04);
-    }
-    .card:hover{ transform: translateY(-2px); border-color: var(--ring); box-shadow: 0 10px 28px rgba(57,167,255,.18); }
-    .thumb{ aspect-ratio: 16/10; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:20px; color:#1b66a7; background:linear-gradient(135deg, var(--sky2), #fff); }
-    .card.kaigo .thumb{ background:linear-gradient(135deg, #e6fff7, #fff); color:var(--ok); }
-    .card.shinsotsu .thumb{ background:linear-gradient(135deg, #f7ecff, #fff); color:#5e2ca5; }
-    .body{ padding:16px; }
-    .title{ font-size:18px; margin:0 0 6px; display:flex; align-items:center; gap:8px; font-weight:800; }
-    .tag{ font-size:12px; padding:2px 8px; border-radius:999px; background:#eef7ff; color:#1969b5; border:1px solid #d7ebff; }
-    .desc{ margin:0; color:#475467; line-height:1.6; }
-    .cta{ display:flex; gap:10px; padding:14px 16px 18px; flex-wrap:wrap; }
-    .soon{ position:absolute; top:10px; right:10px; background:#111827; color:#fff; font-size:11px; padding:4px 8px; border-radius:999px; opacity:.9; }
-    .faq, .howto{ background:#fff; border:1px solid var(--border); border-radius:14px; padding:16px; margin:18px 0; box-shadow:0 10px 24px rgba(0,0,0,.04) }
-    .faq h3, .howto h3{ margin:0 0 10px; font-size:18px }
-    details{ border-top:1px dashed #e5e7eb; padding:10px 0 }
-    details:first-of-type{ border-top:none }
-    summary{ cursor:pointer; font-weight:700 }
-    .crumb{ font-size:12px; color:#6b7280; margin:6px 0 0 }
-    footer{ padding:20px; border-top:1px solid #eef2f7; color:#667085; font-size:12px; background:#fff; }
+    /* ===== Stars ===== */
+    #stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .star { position: absolute; border-radius: 50%; background: rgba(255,255,255,.8);
+      animation: twinkle var(--d,4s) ease-in-out infinite alternate; }
+    @keyframes twinkle { from{opacity:.08;transform:scale(1)} to{opacity:.7;transform:scale(1.5)} }
 
-    /* Back to top */
-    #back-to-top{ text-decoration:none; color:#0c4a7a; box-shadow:0 2px 6px rgba(0,0,0,.12); transition:background .2s,transform .2s,box-shadow .2s }
-    #back-to-top:hover{ background:#f3f9ff; transform: translateY(-1px); box-shadow:0 6px 18px rgba(30,144,255,.16) }
-    #back-to-top:focus{ outline:none; box-shadow:0 0 0 4px rgba(59,130,246,.5),0 6px 18px rgba(30,144,255,.16) }
+    /* ===== Nav ===== */
+    .topnav {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(6,13,26,.82); backdrop-filter: blur(18px) saturate(200%);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px; height: 64px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; }
+    .nav-logo-mark {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--sky), var(--violet));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 14px; color: #fff; letter-spacing: -1px;
+      box-shadow: 0 4px 14px rgba(59,158,255,.4);
+      overflow: hidden;
+    }
+    .nav-logo-mark img { width: 100%; height: 100%; object-fit: cover; }
+    .nav-logo-text { font-weight: 800; font-size: 15px; color: var(--ink); }
+    .nav-logo-sub  { font-size: 11px; color: var(--muted); font-weight: 400; }
+    .nav-spacer { flex: 1; }
+    .nav-links { display: flex; align-items: center; gap: 12px; }
+    .nav-link {
+      font-size: 13px; font-weight: 600; color: var(--muted); padding: 6px 12px;
+      border-radius: 8px; transition: color .2s, background .2s;
+    }
+    .nav-link:hover { color: var(--ink); background: rgba(255,255,255,.07); }
+    .nav-btn {
+      font-size: 13px; font-weight: 700; padding: 8px 18px; border-radius: 10px;
+      border: 1px solid var(--border); background: rgba(255,255,255,.08);
+      color: var(--ink); cursor: pointer; transition: background .2s, border-color .2s;
+      font-family: inherit;
+    }
+    .nav-btn:hover { background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.2); }
+    .nav-btn.primary {
+      background: linear-gradient(135deg, var(--sky), var(--sky2));
+      border-color: var(--sky); color: #fff;
+      box-shadow: 0 4px 14px rgba(59,158,255,.35);
+    }
+    .nav-btn.primary:hover { filter: brightness(1.1); }
+    .nav-user {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--muted);
+    }
+    .nav-user-avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--sky), var(--violet));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 12px; color: #fff;
+    }
+    @media(max-width:600px){ .nav-link{ display:none } }
+
+    /* ===== Page wrap ===== */
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 2; }
+
+    /* ===== Hero ===== */
+    .hero {
+      padding: 72px 0 52px;
+      display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 40px; align-items: center;
+    }
+    @media(max-width:900px){ .hero{ grid-template-columns:1fr; padding:48px 0 36px; } }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(59,158,255,.12); border: 1px solid rgba(59,158,255,.25);
+      color: #7dc8ff; border-radius: 999px; padding: 4px 14px; font-size: 12px; font-weight: 700;
+      margin-bottom: 18px; letter-spacing: .3px;
+    }
+    .hero h1 {
+      font-size: clamp(26px, 4vw, 42px); font-weight: 900; line-height: 1.22;
+      letter-spacing: -.5px;
+      background: linear-gradient(135deg, #e6edf3 30%, #7dc8ff 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero-lead { margin: 14px 0 24px; color: var(--muted); line-height: 1.75; font-size: 15px; }
+    .hero-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+    .chip {
+      font-size: 12px; padding: 5px 12px; border-radius: 999px;
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+      color: rgba(230,237,243,.7);
+    }
+    .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 26px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--sky), var(--sky2));
+      border: none; color: #fff; font-weight: 800; font-size: 15px; font-family: inherit;
+      cursor: pointer; text-decoration: none;
+      box-shadow: 0 6px 24px rgba(59,158,255,.45);
+      transition: filter .2s, transform .15s, box-shadow .2s;
+    }
+    .btn-primary:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 10px 30px rgba(59,158,255,.55); }
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 13px 22px; border-radius: 12px;
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14);
+      color: var(--ink); font-weight: 700; font-size: 15px; font-family: inherit;
+      cursor: pointer; text-decoration: none;
+      transition: background .2s, border-color .2s;
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.22); }
+
+    /* Hero image mock */
+    .hero-visual {
+      border-radius: 20px; overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 60px rgba(0,0,0,.5), 0 0 0 1px rgba(59,158,255,.1);
+      background: rgba(255,255,255,.04);
+      position: relative;
+    }
+    .hero-visual img { display: block; width: 100%; height: auto; }
+    .hero-visual-glow {
+      position: absolute; inset: 0; pointer-events: none;
+      background: linear-gradient(135deg, rgba(59,158,255,.08) 0%, transparent 60%);
+    }
+    @media(max-width:900px){ .hero-visual{ display:none } }
+
+    /* ===== Returning user section ===== */
+    .section-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--sky); margin-bottom: 10px;
+    }
+    .section-title { font-size: 22px; font-weight: 900; margin-bottom: 6px; }
+    .section-sub { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
+
+    .user-section { padding: 40px 0 20px; }
+
+    .resume-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+
+    .resume-card {
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 18px; padding: 22px;
+      transition: border-color .25s, background .25s, transform .2s, box-shadow .2s;
+      position: relative; overflow: hidden;
+    }
+    .resume-card::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(59,158,255,.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .resume-card:hover {
+      border-color: rgba(59,158,255,.35); background: rgba(59,158,255,.07);
+      transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,.3);
+    }
+    .resume-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .resume-icon {
+      width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 20px;
+    }
+    .resume-icon.basic   { background: rgba(59,158,255,.15); }
+    .resume-icon.kaigo   { background: rgba(63,185,80,.15); }
+    .resume-card-meta h3 { font-size: 16px; font-weight: 800; }
+    .resume-card-meta p  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .resume-card-actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+    .action-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 7px 14px; border-radius: 9px; font-size: 13px; font-weight: 700;
+      border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.07);
+      color: var(--ink); cursor: pointer; text-decoration: none;
+      transition: background .2s, border-color .2s;
+    }
+    .action-btn:hover { background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.22); }
+    .action-btn.sky   { background: rgba(59,158,255,.15); border-color: rgba(59,158,255,.3); color: #7dc8ff; }
+    .action-btn.sky:hover { background: rgba(59,158,255,.25); }
+    .action-btn.green { background: rgba(63,185,80,.15); border-color: rgba(63,185,80,.3); color: #56d364; }
+    .action-btn.green:hover { background: rgba(63,185,80,.25); }
+
+    .empty-card {
+      border: 2px dashed rgba(255,255,255,.1); border-radius: 18px; padding: 36px 22px;
+      text-align: center; color: var(--muted);
+    }
+    .empty-card .icon { font-size: 36px; margin-bottom: 12px; }
+    .empty-card p { font-size: 14px; line-height: 1.6; margin-bottom: 18px; }
+
+    /* ===== Notice ===== */
+    .notice {
+      display: flex; gap: 10px; align-items: flex-start;
+      background: rgba(227,179,65,.08); border: 1px solid rgba(227,179,65,.2);
+      border-radius: 12px; padding: 14px 16px; margin: 24px 0;
+      font-size: 14px; line-height: 1.6; color: #e3b341;
+    }
+    .notice svg { flex-shrink: 0; margin-top: 2px; }
+
+    /* ===== Format grid ===== */
+    .formats-section { padding: 20px 0 48px; }
+    .format-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+    }
+    @media(max-width:980px){ .format-grid{ grid-template-columns:1fr 1fr } }
+    @media(max-width:660px){ .format-grid{ grid-template-columns:1fr } }
+
+    .format-card {
+      background: rgba(255,255,255,.05); border: 1px solid var(--border);
+      border-radius: 20px; overflow: hidden;
+      transition: border-color .25s, transform .2s, box-shadow .2s;
+      position: relative;
+    }
+    .format-card:hover {
+      border-color: rgba(59,158,255,.35); transform: translateY(-4px);
+      box-shadow: 0 16px 48px rgba(0,0,0,.35);
+    }
+    .format-thumb {
+      aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 22px; letter-spacing: 1px;
+    }
+    .format-thumb.basic  { background: linear-gradient(135deg, rgba(59,158,255,.2), rgba(59,158,255,.05)); color: #7dc8ff; }
+    .format-thumb.kaigo  { background: linear-gradient(135deg, rgba(63,185,80,.2), rgba(63,185,80,.05)); color: #56d364; }
+    .format-thumb.soon   { background: linear-gradient(135deg, rgba(124,58,237,.2), rgba(124,58,237,.05)); color: #a78bfa; opacity: .7; }
+    .format-body { padding: 18px; }
+    .format-body h2 { font-size: 17px; font-weight: 800; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+    .format-tag {
+      font-size: 11px; padding: 2px 8px; border-radius: 999px;
+      background: rgba(59,158,255,.15); border: 1px solid rgba(59,158,255,.25); color: #7dc8ff;
+    }
+    .format-tag.green { background: rgba(63,185,80,.15); border-color: rgba(63,185,80,.25); color: #56d364; }
+    .format-body p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+    .format-cta { padding: 0 18px 20px; }
+    .format-soon-badge {
+      position: absolute; top: 10px; right: 10px;
+      background: rgba(124,58,237,.3); border: 1px solid rgba(124,58,237,.4);
+      color: #c4b5fd; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px;
+    }
+
+    /* ===== Howto ===== */
+    .howto-section { padding: 20px 0 48px; }
+    .steps-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    @media(max-width:860px){ .steps-row{ grid-template-columns:1fr 1fr } }
+    @media(max-width:560px){ .steps-row{ grid-template-columns:1fr } }
+    .step-item {
+      background: rgba(255,255,255,.04); border: 1px solid var(--border);
+      border-radius: 16px; padding: 20px 16px; text-align: center;
+    }
+    .step-num {
+      width: 36px; height: 36px; border-radius: 50%; margin: 0 auto 12px;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, var(--sky), var(--violet));
+      font-weight: 900; font-size: 15px; color: #fff;
+    }
+    .step-item h3 { font-size: 14px; font-weight: 800; margin-bottom: 6px; }
+    .step-item p  { font-size: 12px; color: var(--muted); line-height: 1.55; }
+
+    /* ===== FAQ ===== */
+    .faq-section { padding: 0 0 56px; }
+    .faq-list { display: flex; flex-direction: column; gap: 8px; }
+    details.faq-item {
+      background: rgba(255,255,255,.04); border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden;
+    }
+    details.faq-item[open] { border-color: rgba(59,158,255,.25); background: rgba(59,158,255,.05); }
+    summary.faq-q {
+      cursor: pointer; padding: 16px 20px; font-weight: 700; font-size: 14px;
+      list-style: none; display: flex; justify-content: space-between; align-items: center;
+    }
+    summary.faq-q::after { content: '+'; font-size: 20px; font-weight: 400; color: var(--sky); flex-shrink: 0; }
+    details[open] summary.faq-q::after { content: '−'; }
+    .faq-a { padding: 0 20px 16px; font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+    /* ===== Divider ===== */
+    .section-divider {
+      height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent);
+      margin: 8px 0;
+    }
+
+    /* ===== Footer ===== */
+    footer.footer { background: rgba(0,0,0,.4); border-top: 1px solid var(--border); }
+
+    /* ===== Returning user hero bar ===== */
+    .hero-return-bar {
+      margin-top: 22px;
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .return-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 18px; border-radius: 12px;
+      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);
+      font-size: 13px; color: var(--muted);
+    }
+    .return-pill a {
+      color: #7dc8ff; font-weight: 700; text-decoration: none;
+      transition: color .2s;
+    }
+    .return-pill a:hover { color: #aad8ff; text-decoration: underline; }
+    .btn-preview {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 11px 22px; border-radius: 12px;
+      background: linear-gradient(135deg, rgba(124,58,237,.35), rgba(59,158,255,.35));
+      border: 1px solid rgba(124,58,237,.45);
+      color: #c4b5fd; font-weight: 800; font-size: 14px;
+      text-decoration: none; cursor: pointer;
+      box-shadow: 0 4px 20px rgba(124,58,237,.25), inset 0 1px 0 rgba(255,255,255,.1);
+      transition: filter .2s, transform .15s, box-shadow .2s;
+    }
+    .btn-preview:hover {
+      filter: brightness(1.15); transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(124,58,237,.4);
+    }
+    .btn-edit-resume {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 10px 18px; border-radius: 11px;
+      background: rgba(59,158,255,.12); border: 1px solid rgba(59,158,255,.25);
+      color: #7dc8ff; font-weight: 700; font-size: 13px;
+      text-decoration: none;
+      transition: background .2s, border-color .2s;
+    }
+    .btn-edit-resume:hover { background: rgba(59,158,255,.22); border-color: rgba(59,158,255,.4); }
+    .logged-in-hero-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   </style>
 
-  <!-- JSON-LD: WebPage (UPDATED) -->
   <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"WebPage",
-    "name":"オンライン履歴書メーカー（無料）",
-    "url":"https://it-future.jp/rireki/",
-    "description":"履歴書をオンラインで作成できる無料ツール。スマホ/PC対応、最短5分、Excel（.xls）ダウンロード、標準/介護テンプレ対応。",
-    "inLanguage":"ja-JP",
-    "isPartOf":{
-      "@type":"WebSite",
-      "name":"株式会社アイティーエフ",
-      "url":"https://it-future.jp/"
-    },
-    "primaryImageOfPage":{
-      "@type":"ImageObject",
-      "url":"https://it-future.jp/rireki/images/basicRireki_sample.png",
-      "width":720,
-      "height":480
-    }
-  }
-  </script>
-
-  <!-- JSON-LD: WebApplication (UPDATED) -->
-  <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"WebApplication",
-    "name":"ITF オンライン履歴書メーカー",
-    "url":"https://it-future.jp/rireki/",
-    "applicationCategory":"BusinessApplication",
-    "operatingSystem":"Web",
-    "inLanguage":"ja-JP",
-    "offers":{"@type":"Offer","price":"0","priceCurrency":"JPY"},
-    "featureList":[
-      "スマホで履歴書作成",
-      "オンラインで入力して作成",
-      "Excel（.xls）ダウンロード",
-      "標準/介護テンプレ対応",
-      "インストール不要"
-    ],
-    "publisher":{
-      "@type":"Organization",
-      "name":"株式会社アイティーエフ",
-      "url":"https://it-future.jp/"
-    }
-  }
-  </script>
-
-  <!-- JSON-LD: Breadcrumb -->
-  <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"BreadcrumbList",
-    "itemListElement":[
-      {"@type":"ListItem","position":1,"name":"ホーム","item":"https://it-future.jp/"},
-      {"@type":"ListItem","position":2,"name":"オンライン履歴書メーカー","item":"https://it-future.jp/rireki/"}
-    ]
-  }
-  </script>
-
-  <!-- JSON-LD: FAQ -->
-  <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"FAQPage",
-    "mainEntity":[
-      {"@type":"Question","name":"本サービスは無料ですか？","acceptedAnswer":{"@type":"Answer","text":"はい、無料でご利用いただけます。作成した履歴書はExcel（.xls）でダウンロードできます。"}},
-      {"@type":"Question","name":"履歴書の作成にどれくらい時間がかかりますか？","acceptedAnswer":{"@type":"Answer","text":"基本フォームなら最短5分程度で作成可能です。入力を保存し、後から編集もできます。"}},
-      {"@type":"Question","name":"介護業界向けの項目はありますか？","acceptedAnswer":{"@type":"Answer","text":"はい。介護資格・夜勤可否・経験年数など、介護向けフォーマットをご用意しています。"}},
-      {"@type":"Question","name":"スマホでも使えますか？","acceptedAnswer":{"@type":"Answer","text":"はい。スマホ・タブレット・PCに対応しています。インストールは不要です。"}}
-    ]
-  }
+  {"@context":"https://schema.org","@type":"WebApplication","name":"ITF オンライン履歴書メーカー","url":"https://it-future.jp/rireki/","applicationCategory":"BusinessApplication","operatingSystem":"Web","inLanguage":"ja-JP","offers":{"@type":"Offer","price":"0","priceCurrency":"JPY"}}
   </script>
 </head>
 <body>
-  <header>
-    <div class="wrap hero">
-      <div>
-        <p class="crumb">ホーム ＞ オンライン履歴書メーカー</p>
-        <h1>オンライン履歴書メーカー（無料）— 5分で作成、Excel出力にも対応</h1>
-        <p class="lead">
-          ダウンロード不要・インストール不要。<br>
-          入力するだけで、<strong>最短5分</strong>で履歴書が完成します。<br>
-          <strong>Excel（.xls）でダウンロード</strong>でき、介護向けの特化フォーマットもご用意。
-        </p>
-        <div class="benefits">
-          <span class="chip">無料</span>
-          <span class="chip">Excel出力</span>
-          <span class="chip">スマホOK</span>
-          <span class="chip">介護向けテンプレ</span>
-          <span class="chip">日本語＆外国籍対応</span>
-        </div>
-        <div class="cta-row">
-          <!-- Quick start -> Terms -> Basic form -->
-          <a class="btn primary" href="/rireki/rireki_terms.php?next=/rireki/basic/rireki.php&fmt=basic">5分で無料作成をはじめる</a>
-          <a class="btn" href="/saiyou.php">求人を見ながら作成</a>
+<div id="stars" aria-hidden="true"></div>
+
+<!-- ===== NAV ===== -->
+<nav class="topnav">
+  <div class="nav-logo">
+    <div class="nav-logo-mark">
+      <img src="https://it-future.jp/images/android-chrome-192x192.png" alt="ITF" onerror="this.style.display='none';this.parentElement.textContent='ITF'">
+    </div>
+    <div>
+      <div class="nav-logo-text">ITF 履歴書メーカー</div>
+      <div class="nav-logo-sub">オンライン・無料・最短5分</div>
+    </div>
+  </div>
+
+  <div class="nav-spacer"></div>
+  <div class="nav-links">
+    <a class="nav-link" href="https://it-future.jp/">ホーム</a>
+    <a class="nav-link" href="https://it-future.jp/saiyou.php">求人を見る</a>
+
+    <?php if ($loggedIn && $user): ?>
+      <div class="nav-user">
+        <div class="nav-user-avatar"><?= mb_strtoupper(mb_substr($user['username'], 0, 1, 'UTF-8'), 'UTF-8') ?></div>
+        <span style="font-size:13px;font-weight:600"><?= username() ?></span>
+      </div>
+      <a class="nav-btn" href="/php/user_logout.php" style="font-size:12px;padding:7px 14px">ログアウト</a>
+    <?php else: ?>
+      <a class="nav-btn" href="/rireki/rireki_login.php?next=/rireki/">ログイン</a>
+      <a class="nav-btn primary" href="/rireki/rireki_login.php?next=/rireki/">無料登録</a>
+    <?php endif; ?>
+  </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="wrap">
+  <div class="hero">
+    <div>
+      <div class="hero-eyebrow">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        完全無料 · Excel出力 · スマホ対応
+      </div>
+      <h1>オンラインで5分。<br>プロ品質の<br>履歴書を作成</h1>
+      <p class="hero-lead">
+        インストール不要。入力するだけで<strong style="color:#7dc8ff">Excelダウンロード</strong>まで完結。<br>
+        標準・介護業界向けテンプレ対応。
+      </p>
+      <div class="hero-chips">
+        <span class="chip">✅ 無料</span>
+        <span class="chip">📄 Excel出力</span>
+        <span class="chip">📱 スマホOK</span>
+        <span class="chip">🌏 介護向けテンプレ</span>
+        <span class="chip">⚡ 最短5分</span>
+      </div>
+      <div class="hero-cta">
+        <a class="btn-primary" href="/rireki/rireki_login.php?next=/rireki/basic/rireki.php&fmt=basic">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          今すぐ無料作成
+        </a>
+        <a class="btn-ghost" href="https://it-future.jp/saiyou.php">
+          求人を見ながら作成
+        </a>
+      </div>
+
+      <!-- Returning user bar -->
+      <?php if ($loggedIn && $user): ?>
+      <div class="hero-return-bar">
+        <div class="logged-in-hero-row">
+          <a class="btn-preview" href="/rireki/kaigo/php/rireki_preview.php?flow=profile_only">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            履歴書をプレビュー
+          </a>
+          <a class="btn-edit-resume" href="/rireki/kaigo/rireki.php">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            介護向けを編集
+          </a>
+          <a class="btn-edit-resume" href="/rireki/basic/rireki.php" style="color:#56d364;background:rgba(63,185,80,.1);border-color:rgba(63,185,80,.25)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            標準フォームを編集
+          </a>
         </div>
       </div>
-      <div class="thumb-hero">
-        <!-- LCP improvement: eager + fetchpriority (UPDATED) -->
-        <img src="https://it-future.jp/rireki/images/basicRireki_sample.png"
-             alt="オンライン履歴書メーカーのスクリーンショット"
-             loading="eager"
-             fetchpriority="high"
-             decoding="async"
-             width="720"
-             height="480">
+      <?php else: ?>
+      <div class="hero-return-bar">
+        <div class="return-pill">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          過去に作成しましたか？変更をご希望ですか？
+          <a href="/rireki/rireki_login.php?next=<?= urlencode('/rireki/kaigo/php/rireki_preview.php?flow=profile_only') ?>">ログインして続ける →</a>
+        </div>
+      </div>
+      <?php endif; ?>
+
+    </div>
+    <div class="hero-visual">
+      <img src="https://it-future.jp/rireki/images/basicRireki_sample.png"
+           alt="オンライン履歴書メーカーのプレビュー" loading="eager" fetchpriority="high" width="720" height="480">
+      <div class="hero-visual-glow"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== RETURNING USER SECTION ===== -->
+<?php if ($loggedIn && $user): ?>
+<section class="wrap user-section">
+  <div class="section-divider"></div>
+  <br>
+  <div class="section-label">📋 マイ履歴書</div>
+  <div class="section-title">おかえりなさい、<?= username() ?>さん</div>
+  <div class="section-sub">保存された履歴書を編集・ダウンロードできます。</div>
+
+  <?php if (empty($profiles)): ?>
+    <div class="resume-grid">
+      <div class="empty-card">
+        <div class="icon">📄</div>
+        <p>まだ履歴書が作成されていません。<br>下のフォーマットから始めてください。</p>
+        <a class="btn-primary" href="/rireki/rireki_login.php?next=/rireki/basic/rireki.php&fmt=basic" style="display:inline-flex">
+          今すぐ作成する
+        </a>
       </div>
     </div>
-  </header>
-
-  <main class="wrap">
-    <!-- CLEAR NOTICE about PDF vs Excel -->
-    <div class="notice" role="note" aria-live="polite">
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-      </svg>
-      <div>
-        <strong>ご注意：</strong>PDF 生成は環境差により<strong>レイアウトが100%一致しない</strong>場合があります。<br>
-        <strong>最も正確な出力・印刷は「Excel（.xls）のダウンロード」</strong>をご利用ください。
-      </div>
-    </div>
-
-    <h2 class="h2">フォーマットを選択</h2>
-    <div class="grid" id="formats">
-      <!-- BASIC -->
-      <article class="card basic">
-        <div class="thumb">Basic</div>
-        <div class="body">
-          <h2 class="title">標準 履歴書 <span class="tag">おすすめ</span></h2>
-          <p class="desc">一般応募向けの標準フォーマット。氏名・住所・学歴・職歴・資格・自己PRなど。最短5分で完了。</p>
-        </div>
-        <div class="cta">
-          <!-- Basic -> Terms -> Basic form -->
-          <a class="btn primary" href="/rireki/rireki_terms.php?next=/rireki/basic/rireki.php&fmt=basic">このフォーマットで作成</a>
-        </div>
-      </article>
-
-      <!-- KAIGO -->
-      <article class="card kaigo">
-        <div class="thumb">Kaigo</div>
-        <div class="body">
-          <h2 class="title">介護向け 履歴書 <span class="tag">業界特化</span></h2>
-          <p class="desc">介護資格・夜勤可否・経験年数・シフト希望など、介護業界に特化した入力ステップ。現場で求められる情報を漏れなく整理。</p>
-        </div>
-        <div class="cta">
-          <!-- Kaigo -> Terms -> Kaigo form -->
-          <a class="btn primary" href="/rireki/rireki_terms.php?next=/rireki/kaigo/rireki.php&fmt=kaigo">このフォーマットで作成</a>
-        </div>
-      </article>
-
-      <!-- SHINSOTSU -->
-      <article class="card shinsotsu">
-        <div class="soon">近日公開</div>
-        <div class="thumb">Shinsotsu</div>
-        <div class="body">
-          <h2 class="title">新卒向け 履歴書</h2>
-          <p class="desc">卒業見込・ゼミ/卒研・インターン・志望業界など新卒特化の項目。公開までもう少しお待ちください。</p>
-        </div>
-        <div class="cta">
-          <a class="btn" href="javascript:void(0)" aria-disabled="true">準備中</a>
-        </div>
-      </article>
-    </div>
-
-    <!-- How-to -->
-    <section class="howto" id="howto">
-      <h3>使い方（5分で完了）</h3>
-      <ol>
-        <li><strong>フォーマットを選択：</strong>「標準」または「介護向け」を選びます。</li>
-        <li><strong>必要項目を入力：</strong>氏名・連絡先・学歴・職歴・資格等を入力。</li>
-        <li><strong>プレビュー：</strong>入力ミスがないか確認します。</li>
-        <li><strong>Excel（.xls）で保存：</strong>そのままダウンロードできます（推奨）。<br>
-            <small style="color:#6b7280">※ PDF は環境により体裁が崩れる場合があります。Excel からの印刷が最も綺麗です。</small>
-        </li>
-        <li><strong>求人へ応募：</strong><a href="/saiyou.php">求人情報</a>から応募、または直接提出。</li>
-      </ol>
-      <p class="lead">求人詳細ページからの応募でも、履歴書の自動作成に対応しています。</p>
-    </section>
-
-    <!-- FAQ -->
-    <section class="faq" id="faq">
-      <h3>よくある質問</h3>
-      <details>
-        <summary>本サービスは無料ですか？</summary>
-        <div>はい、無料でご利用いただけます。作成した履歴書はExcel（.xls）でダウンロード可能です。</div>
-      </details>
-      <details>
-        <summary>介護業界向けの項目はありますか？</summary>
-        <div>はい。介護資格・夜勤可否・経験年数など、介護向けフォーマットをご用意しています。</div>
-      </details>
-      <details>
-        <summary>スマホでも使えますか？</summary>
-        <div>はい。スマホ・タブレット・PCに対応しています。インストールは不要です。</div>
-      </details>
-      <details>
-        <summary>Excel以外の形式は対応していますか？</summary>
-        <div>現在はExcel（.xls）に最適化しています。PDFはレイアウトが完全一致しない場合があるため、Excelでの保存・印刷を推奨します。</div>
-      </details>
-    </section>
-
-    <p class="lead" style="margin-top:20px">
-      キーワード例：<em>オンライン 履歴書 作成 無料 / 履歴書 Excel 5分 / 履歴書 テンプレ 介護</em>
-    </p>
-  </main>
-
-  <!-- Footer (site shared) -->
-  <footer class="footer">
-    <div class="footer-container">
-      <div class="footer-row">
-        <div class="footer-col">
-          <h3 class="footer-heading" data-i18n="footer.location_title">所在地</h3>
-          <div class="footer-link">
-            <a href="https://it-future.jp/" style="color: white;" data-i18n="footer.company_name">株式会社アイティーエフ</a>
+  <?php else: ?>
+    <div class="resume-grid">
+      <?php foreach ($profiles as $fmt => $data):
+        $name = $data['personal_name_kanji'] ?? $data['name_romaji'] ?? $data['name_kana'] ?? '（名称未入力）';
+        $isKaigo = $fmt === 'kaigo';
+        $editUrl   = $isKaigo ? '/rireki/kaigo/rireki.php' : '/rireki/basic/rireki.php';
+        $fmtLabel  = $isKaigo ? '介護向け 履歴書' : '標準 履歴書';
+        $icon      = $isKaigo ? '🏥' : '📋';
+        $iconClass = $isKaigo ? 'kaigo' : 'basic';
+      ?>
+      <div class="resume-card">
+        <div class="resume-card-header">
+          <div class="resume-icon <?= $iconClass ?>"><?= $icon ?></div>
+          <div class="resume-card-meta">
+            <h3><?= $fmtLabel ?></h3>
+            <p><?= h($name) ?></p>
           </div>
-          <p class="footer-text" data-i18n="footer.location_details">
-            〒556-0017 大阪府大阪市浪速区湊町1-4-38 近鉄新難波ビル10F<br>
-            06-6644-1800<br>
-            〒144-0052 東京都大田区蒲田5丁目21-13<br>
-            03-6424-7747<br>
-            info@it-future.jp
-          </p>
         </div>
-        <div class="footer-col">
-          <h3 class="footer-heading" data-i18n="footer.services_title">サービス案内</h3>
-          <a href="https://it-future.jp/index.html#solution_03" class="footer-link" data-i18n="footer.services_for_companies">人財をお探しの企業様</a>
-          <a href="https://it-future.jp/index.html#service-naiyo" class="footer-link" data-i18n="footer.service_introduction">サービス紹介</a>
-          <a href="https://it-future.jp/index.html#merit" class="footer-link" data-i18n="footer.benefits">メリット</a>
-          <a href="https://it-future.jp/index.html#work-step" class="footer-link" data-i18n="footer.introduction_flow">紹介の流れ</a>
-          <a href="https://it-future.jp/about.html#support-naiyou" class="footer-link" data-i18n="footer.support_content">サポート内容</a>
+        <div style="font-size:12px;color:var(--muted);line-height:1.5">
+          <?php if (!empty($data['email'])): ?>
+            📧 <?= h($data['email']) ?><br>
+          <?php endif; ?>
+          <?php if (!empty($data['contact_phone']) || !empty($data['phone'])): ?>
+            📞 <?= h($data['contact_phone'] ?? $data['phone'] ?? '') ?>
+          <?php endif; ?>
         </div>
-        <div class="footer-col">
-          <h3 class="footer-heading" data-i18n="footer.company_info_title">会社案内</h3>
-          <a href="https://it-future.jp/greeting.html" class="footer-link" data-i18n="footer.president_greeting">代表者挨拶</a>
-          <a href="https://it-future.jp/company_info.html" class="footer-link" data-i18n="footer.company_info">会社概要</a>
-        </div>
-        <div class="footer-col">
-          <a href="https://it-future.jp/privacy.html" class="footer-btn" data-i18n="footer.privacy_policy">プライバシーポリシー</a>
+        <div class="resume-card-actions">
+          <a class="action-btn sky" href="<?= h($editUrl) ?>">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            編集・更新
+          </a>
+          <a class="action-btn green" href="<?= h($editUrl) ?>">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            ダウンロード
+          </a>
         </div>
       </div>
-      <div class="footer-copyright">
-        © ITF co. Ltd. ALL Rights Reserved
+      <?php endforeach; ?>
+
+      <!-- Add new format card -->
+      <?php if (!isset($profiles['basic'])): ?>
+      <div class="empty-card">
+        <div class="icon">📋</div>
+        <p>標準フォーマットがまだありません。</p>
+        <a class="btn-ghost" href="/rireki/rireki_login.php?next=/rireki/basic/rireki.php&fmt=basic" style="display:inline-flex;font-size:13px">作成する</a>
+      </div>
+      <?php endif; ?>
+      <?php if (!isset($profiles['kaigo'])): ?>
+      <div class="empty-card">
+        <div class="icon">🏥</div>
+        <p>介護向けフォーマットがまだありません。</p>
+        <a class="btn-ghost" href="/rireki/rireki_login.php?next=/rireki/kaigo/rireki.php&fmt=kaigo" style="display:inline-flex;font-size:13px">作成する</a>
+      </div>
+      <?php endif; ?>
+    </div>
+  <?php endif; ?>
+</section>
+<?php endif; ?>
+
+<div class="wrap"><div class="section-divider"></div></div>
+
+<!-- ===== NOTICE ===== -->
+<div class="wrap">
+  <div class="notice">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <div><strong>ご注意：</strong>PDF出力は環境によりレイアウトが崩れる場合があります。<strong>Excel（.xls）でのダウンロード・印刷を推奨</strong>します。</div>
+  </div>
+</div>
+
+<!-- ===== FORMAT SELECTION ===== -->
+<section class="wrap formats-section" id="formats">
+  <div class="section-label">📁 フォーマット選択</div>
+  <div class="section-title">あなたに合ったテンプレートを選択</div>
+  <div class="section-sub">まず作成したいフォーマットを選んでください</div>
+
+  <div class="format-grid">
+    <!-- BASIC -->
+    <article class="format-card">
+      <div class="format-thumb basic">Basic</div>
+      <div class="format-body">
+        <h2>標準 履歴書 <span class="format-tag">おすすめ</span></h2>
+        <p>一般応募向けの標準フォーマット。氏名・住所・学歴・職歴・資格・自己PRなど。最短5分で完了。</p>
+      </div>
+      <div class="format-cta">
+        <a class="btn-primary" href="/rireki/rireki_login.php?next=/rireki/basic/rireki.php&fmt=basic" style="width:100%;justify-content:center">
+          このフォーマットで作成
+        </a>
+      </div>
+    </article>
+
+    <!-- KAIGO -->
+    <article class="format-card">
+      <div class="format-thumb kaigo">Kaigo</div>
+      <div class="format-body">
+        <h2>介護向け 履歴書 <span class="format-tag green">業界特化</span></h2>
+        <p>介護資格・夜勤可否・経験年数・シフト希望など、介護業界に特化した入力ステップ。</p>
+      </div>
+      <div class="format-cta">
+        <a class="btn-primary" href="/rireki/rireki_login.php?next=/rireki/kaigo/rireki.php&fmt=kaigo" style="width:100%;justify-content:center;background:linear-gradient(135deg,#3fb950,#2ea043);box-shadow:0 6px 24px rgba(63,185,80,.4)">
+          このフォーマットで作成
+        </a>
+      </div>
+    </article>
+
+    <!-- SOON -->
+    <article class="format-card">
+      <div class="format-soon-badge">近日公開</div>
+      <div class="format-thumb soon">Shinsotsu</div>
+      <div class="format-body">
+        <h2>新卒向け 履歴書</h2>
+        <p>卒業見込・ゼミ/卒研・インターン・志望業界など新卒特化の項目。公開までもう少しお待ちください。</p>
+      </div>
+      <div class="format-cta">
+        <button class="btn-ghost" style="width:100%;justify-content:center;opacity:.5;cursor:not-allowed" disabled>準備中</button>
+      </div>
+    </article>
+  </div>
+</section>
+
+<div class="wrap"><div class="section-divider"></div></div>
+
+<!-- ===== HOW TO ===== -->
+<section class="wrap howto-section" id="howto">
+  <div class="section-label">🚀 使い方</div>
+  <div class="section-title">4ステップで完成</div>
+  <div class="section-sub" style="margin-bottom:32px">アカウント登録から5分でダウンロードまで</div>
+  <div class="steps-row">
+    <div class="step-item">
+      <div class="step-num">1</div>
+      <h3>ログイン・登録</h3>
+      <p>無料アカウントを作成してフォームへ。既存ユーザーはそのまま続きから編集できます。</p>
+    </div>
+    <div class="step-item">
+      <div class="step-num">2</div>
+      <h3>フォーマット選択</h3>
+      <p>標準・介護用など、応募先に合ったテンプレートを選びます。</p>
+    </div>
+    <div class="step-item">
+      <div class="step-num">3</div>
+      <h3>情報を入力</h3>
+      <p>氏名・学歴・職歴・資格等を入力。AIで自己PRを整えることも可能。</p>
+    </div>
+    <div class="step-item">
+      <div class="step-num">4</div>
+      <h3>Excel出力</h3>
+      <p>完成したらExcel（.xls）でダウンロード。そのまま印刷または提出できます。</p>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><div class="section-divider"></div></div>
+
+<!-- ===== FAQ ===== -->
+<section class="wrap faq-section" id="faq">
+  <div class="section-label">❓ FAQ</div>
+  <div class="section-title" style="margin-bottom:24px">よくある質問</div>
+  <div class="faq-list">
+    <details class="faq-item">
+      <summary class="faq-q">本サービスは完全無料ですか？</summary>
+      <div class="faq-a">はい、完全無料です。作成した履歴書はExcel（.xls）でダウンロード可能です。</div>
+    </details>
+    <details class="faq-item">
+      <summary class="faq-q">アカウントは必要ですか？</summary>
+      <div class="faq-a">はい。フォーム入力前にメールアドレスとパスワードで無料登録が必要です。登録後は何度でも履歴書を編集・更新・再ダウンロードできます。</div>
+    </details>
+    <details class="faq-item">
+      <summary class="faq-q">介護業界向けの項目はありますか？</summary>
+      <div class="faq-a">はい。介護資格・夜勤可否・経験年数など、介護向けフォーマットをご用意しています。</div>
+    </details>
+    <details class="faq-item">
+      <summary class="faq-q">スマホでも使えますか？</summary>
+      <div class="faq-a">はい。スマホ・タブレット・PCすべてに対応しています。インストールは不要です。</div>
+    </details>
+    <details class="faq-item">
+      <summary class="faq-q">以前の入力データはどこで確認できますか？</summary>
+      <div class="faq-a">ログイン後、このページ上部に「マイ履歴書」セクションが表示されます。そこから編集またはダウンロードできます。</div>
+    </details>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="footer-container">
+    <div class="footer-row">
+      <div class="footer-col">
+        <h3 class="footer-heading">所在地</h3>
+        <div class="footer-link"><a href="https://it-future.jp/" style="color:white">株式会社アイティーエフ</a></div>
+        <p class="footer-text">〒556-0017 大阪府大阪市浪速区湊町1-4-38 近鉄新難波ビル10F<br>06-6644-1800<br>〒144-0052 東京都大田区蒲田5丁目21-13<br>03-6424-7747<br>info@it-future.jp</p>
+      </div>
+      <div class="footer-col">
+        <h3 class="footer-heading">サービス案内</h3>
+        <a href="https://it-future.jp/index.html#solution_03" class="footer-link">人財をお探しの企業様</a>
+        <a href="https://it-future.jp/index.html#service-naiyo" class="footer-link">サービス紹介</a>
+        <a href="https://it-future.jp/index.html#merit" class="footer-link">メリット</a>
+        <a href="https://it-future.jp/index.html#work-step" class="footer-link">紹介の流れ</a>
+        <a href="https://it-future.jp/about.html#support-naiyou" class="footer-link">サポート内容</a>
+      </div>
+      <div class="footer-col">
+        <h3 class="footer-heading">会社案内</h3>
+        <a href="https://it-future.jp/greeting.html" class="footer-link">代表者挨拶</a>
+        <a href="https://it-future.jp/company_info.html" class="footer-link">会社概要</a>
+      </div>
+      <div class="footer-col">
+        <a href="https://it-future.jp/privacy.html" class="footer-btn">プライバシーポリシー</a>
       </div>
     </div>
-  </footer>
+    <div class="footer-copyright">© ITF co. Ltd. ALL Rights Reserved</div>
+  </div>
+</footer>
 
-  <a href="#" id="back-to-top" class="back-to-top" title="Back to Top" aria-label="Back to Top" style="position:fixed;right:18px;bottom:18px;display:inline-flex;border:1px solid #e5e7eb;border-radius:999px;background:#fff;padding:8px">
-    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <polyline points="18 15 12 9 6 15"></polyline>
-    </svg>
-  </a>
+<a href="#" id="back-to-top" title="Back to Top" aria-label="Back to Top"
+   style="position:fixed;right:18px;bottom:18px;display:inline-flex;border:1px solid rgba(255,255,255,.15);border-radius:999px;background:rgba(6,13,26,.7);backdrop-filter:blur(10px);padding:9px;color:var(--ink);z-index:99">
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+</a>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
-  <script type="text/javascript" src="https://it-future.jp/js/wp-embed.min.js" defer></script>
+<script>
+// Stars
+(function(){
+  const wrap = document.getElementById('stars');
+  for(let i=0;i<55;i++){
+    const s = document.createElement('div');
+    s.className = 'star';
+    const sz = Math.random()*2+0.8;
+    s.style.cssText = `width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${(Math.random()*4+2).toFixed(1)}s;animation-delay:-${(Math.random()*6).toFixed(1)}s`;
+    wrap.appendChild(s);
+  }
+})();
+</script>
 </body>
 </html>

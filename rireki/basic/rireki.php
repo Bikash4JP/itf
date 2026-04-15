@@ -1,7 +1,22 @@
 <?php
 // /home/it-future/www/itf/rireki/basic/rireki.php
-?>
-<!doctype html>
+
+// --- Auth guard: must be logged in to access the form ---
+ini_set('session.cookie_path', '/');
+ini_set('session.cookie_domain', '.it-future.jp');
+ini_set('session.cookie_lifetime', 86400);
+ini_set('session.cookie_secure', true);
+ini_set('session.cookie_httponly', true);
+
+require_once $_SERVER['DOCUMENT_ROOT'] . '/php/user_auth.php';
+$pdo = app_pdo();
+app_ensure_tables($pdo);
+
+if (!app_is_logged_in()) {
+  header('Location: /rireki/rireki_login.php?next=' . urlencode($_SERVER['REQUEST_URI']), true, 302);
+  exit;
+}
+?><!doctype html>
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
