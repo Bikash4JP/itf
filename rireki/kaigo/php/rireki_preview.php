@@ -788,8 +788,8 @@ if ($token !== '') {
 }
 
 // Photo
-$photoPath  = (string)($post['photo_path'] ?? '');
-$hasPhoto   = ($photoPath !== '' && file_exists($_SERVER['DOCUMENT_ROOT'] . $photoPath));
+$photoPath = (string) ($post['photo_path'] ?? '');
+$hasPhoto = ($photoPath !== '' && file_exists($_SERVER['DOCUMENT_ROOT'] . $photoPath));
 
 
 // ---------- Build preview data from KAIGO form names ----------
@@ -1393,24 +1393,69 @@ $step6 = [
         grid-template-columns: 1fr;
       }
     }
-  <style>
+
+    <style>
+
     /* If embedded, hide header and aside, break out of iframe for links, and adjust layout */
     <?php if (!empty($_GET['embedded'])): ?>
-      header, aside { display: none !important; }
-      main.wrap { display: block !important; padding-top: 10px; }
-      body { padding-top: 0 !important; background: transparent !important; }
-      .section { border: 1px solid rgba(255,255,255,.05); box-shadow: none; background: rgba(0,0,0,.2); }
+      header,
+      aside {
+        display: none !important;
+      }
+
+      main.wrap {
+        display: block !important;
+        padding-top: 10px;
+      }
+
+      body {
+        padding-top: 0 !important;
+        background: transparent !important;
+      }
+
+      .section {
+        border: 1px solid rgba(255, 255, 255, .05);
+        box-shadow: none;
+        background: rgba(0, 0, 0, .2);
+      }
+
     <?php endif; ?>
   </style>
 
   <style>
     @media print {
-      header, aside, nav, footer, .modal-backdrop,
-      #deleteModal, #appModal, #saveModal,
-      .hdr-left a, .btn:not(#printable), .hdr { display: none !important; }
-      body { background: #fff !important; color: #000 !important; padding: 0 !important; font-size: 11pt; }
-      main.wrap { display: block !important; padding: 0 !important; max-width: 100% !important; }
-      section.main-section { display: block !important; }
+
+      header,
+      aside,
+      nav,
+      footer,
+      .modal-backdrop,
+      #deleteModal,
+      #appModal,
+      #saveModal,
+      .hdr-left a,
+      .btn:not(#printable),
+      .hdr {
+        display: none !important;
+      }
+
+      body {
+        background: #fff !important;
+        color: #000 !important;
+        padding: 0 !important;
+        font-size: 11pt;
+      }
+
+      main.wrap {
+        display: block !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+      }
+
+      section.main-section {
+        display: block !important;
+      }
+
       .section {
         background: #fff !important;
         border: 1px solid #ccc !important;
@@ -1420,14 +1465,47 @@ $step6 = [
         padding: 8pt;
         border-radius: 0 !important;
       }
-      .section-head { border-bottom: 1px solid #ccc !important; margin-bottom: 6pt; }
-      .section-head h2 { color: #000 !important; font-size: 12pt; }
-      .tbl th, .tbl td { border: 1px solid #aaa !important; color: #000 !important; font-size: 9pt; }
-      dl.pair dt, dl.pair dd { color: #000 !important; }
-      .dl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6pt; }
-      .pair { border-bottom: 1px solid #eee !important; }
-      a { color: #000 !important; text-decoration: none; }
-      img { max-width: 120pt !important; }
+
+      .section-head {
+        border-bottom: 1px solid #ccc !important;
+        margin-bottom: 6pt;
+      }
+
+      .section-head h2 {
+        color: #000 !important;
+        font-size: 12pt;
+      }
+
+      .tbl th,
+      .tbl td {
+        border: 1px solid #aaa !important;
+        color: #000 !important;
+        font-size: 9pt;
+      }
+
+      dl.pair dt,
+      dl.pair dd {
+        color: #000 !important;
+      }
+
+      .dl-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6pt;
+      }
+
+      .pair {
+        border-bottom: 1px solid #eee !important;
+      }
+
+      a {
+        color: #000 !important;
+        text-decoration: none;
+      }
+
+      img {
+        max-width: 120pt !important;
+      }
     }
   </style>
 
@@ -1435,26 +1513,28 @@ $step6 = [
     <base target="_parent">
   <?php endif; ?>
 </head>
+
 <body>
 
   <!-- ===== HEADER ===== -->
   <?php if (empty($_GET['embedded'])): ?>
-  <header>
-    <div class="wrap">
-      <div class="hdr">
-        <div class="hdr-left">
-          <div class="nav-logo-mark">
-            <img src="https://it-future.jp/images/android-chrome-192x192.png" alt="ITF" onerror="this.style.display='none'">
+    <header>
+      <div class="wrap">
+        <div class="hdr">
+          <div class="hdr-left">
+            <div class="nav-logo-mark">
+              <img src="https://it-future.jp/images/android-chrome-192x192.png" alt="ITF"
+                onerror="this.style.display='none'">
+            </div>
+            <div>
+              <h1 class="title">履歴書プレビュー</h1>
+              <p class="crumb">ホーム ＞ 履歴書メーカー ＞ 介護向け ＞ プレビュー</p>
+            </div>
           </div>
-          <div>
-            <h1 class="title">履歴書プレビュー</h1>
-            <p class="crumb">ホーム ＞ 履歴書メーカー ＞ 介護向け ＞ プレビュー</p>
-          </div>
+          <a class="btn" href="<?= h($headerBackHref) ?>"><?= h($headerBackLabel) ?></a>
         </div>
-        <a class="btn" href="<?= h($headerBackHref) ?>"><?= h($headerBackLabel) ?></a>
       </div>
-    </div>
-  </header>
+    </header>
   <?php endif; ?>
 
 
@@ -1492,16 +1572,16 @@ $step6 = [
         </div>
         <div class="section-body">
           <?php if ($hasPhoto): ?>
-          <div class="photo-wrap">
-            <img src="<?= h($photoPath) ?>" alt="証明写真">
-          </div>
+            <div class="photo-wrap">
+              <img src="<?= h($photoPath) ?>" alt="証明写真">
+            </div>
           <?php endif; ?>
           <div class="dl-grid">
             <?php foreach ($step1 as $k => $v): ?>
-            <dl class="pair">
-              <dt><?= h($k) ?></dt>
-              <dd><?= $v !== '' ? h($v) : '<span style="color:var(--muted)">—</span>' ?></dd>
-            </dl>
+              <dl class="pair">
+                <dt><?= h($k) ?></dt>
+                <dd><?= $v !== '' ? h($v) : '<span style="color:var(--muted)">—</span>' ?></dd>
+              </dl>
             <?php endforeach; ?>
           </div>
         </div>
@@ -1516,10 +1596,10 @@ $step6 = [
         <div class="section-body">
           <div class="dl-grid">
             <?php foreach ($step2 as $k => $v): ?>
-            <dl class="pair">
-              <dt><?= h($k) ?></dt>
-              <dd><?= $v !== '' ? h($v) : '<span style="color:var(--muted)">—</span>' ?></dd>
-            </dl>
+              <dl class="pair">
+                <dt><?= h($k) ?></dt>
+                <dd><?= $v !== '' ? h($v) : '<span style="color:var(--muted)">—</span>' ?></dd>
+              </dl>
             <?php endforeach; ?>
           </div>
         </div>
@@ -1533,42 +1613,58 @@ $step6 = [
         </div>
         <div class="section-body">
           <?php if (!empty($eduRows)): ?>
-          <p style="font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">学歴</p>
-          <table class="tbl" style="margin-bottom:16px">
-            <thead><tr>
-              <th>開始</th><th>終了</th><th>在学状況</th><th>学校名</th><th>学部・専攻</th>
-            </tr></thead>
-            <tbody>
-              <?php foreach ($eduRows as $r): ?>
-              <tr>
-                <td><?= h($r['開始']) ?></td>
-                <td><?= h($r['終了']) ?></td>
-                <td><?= h($r['在学状況']) ?></td>
-                <td><?= h($r['学校名']) ?></td>
-                <td><?= h($r['学部・専攻']) ?></td>
-              </tr>
-              <?php endforeach; ?>
-            </tbody>
-          </table>
+            <p
+              style="font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">
+              学歴</p>
+            <table class="tbl" style="margin-bottom:16px">
+              <thead>
+                <tr>
+                  <th>開始</th>
+                  <th>終了</th>
+                  <th>在学状況</th>
+                  <th>学校名</th>
+                  <th>学部・専攻</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php foreach ($eduRows as $r): ?>
+                  <tr>
+                    <td><?= h($r['開始']) ?></td>
+                    <td><?= h($r['終了']) ?></td>
+                    <td><?= h($r['在学状況']) ?></td>
+                    <td><?= h($r['学校名']) ?></td>
+                    <td><?= h($r['学部・専攻']) ?></td>
+                  </tr>
+                <?php endforeach; ?>
+              </tbody>
+            </table>
           <?php endif; ?>
 
           <?php if (!empty($licRows)): ?>
-          <p style="font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">資格・免許</p>
-          <table class="tbl">
-            <thead><tr><th>取得年</th><th>取得月</th><th>資格名</th></tr></thead>
-            <tbody>
-              <?php foreach ($licRows as $r): ?>
-              <tr>
-                <td><?= h($r['取得年']) ?></td>
-                <td><?= h($r['取得月']) ?></td>
-                <td><?= h($r['資格名']) ?></td>
-              </tr>
-              <?php endforeach; ?>
-            </tbody>
-          </table>
+            <p
+              style="font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">
+              資格・免許</p>
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>取得年</th>
+                  <th>取得月</th>
+                  <th>資格名</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php foreach ($licRows as $r): ?>
+                  <tr>
+                    <td><?= h($r['取得年']) ?></td>
+                    <td><?= h($r['取得月']) ?></td>
+                    <td><?= h($r['資格名']) ?></td>
+                  </tr>
+                <?php endforeach; ?>
+              </tbody>
+            </table>
           <?php endif; ?>
           <?php if (empty($eduRows) && empty($licRows)): ?>
-          <p style="color:var(--muted);font-size:13px">入力なし</p>
+            <p style="color:var(--muted);font-size:13px">入力なし</p>
           <?php endif; ?>
         </div>
       </div>
@@ -1581,36 +1677,45 @@ $step6 = [
         </div>
         <div class="section-body">
           <?php if (!empty($workRows)): ?>
-          <table class="tbl">
-            <thead><tr>
-              <th>開始</th><th>状況</th><th>終了</th><th>会社・施設名</th><th>職種/役職</th><th>仕事内容</th>
-            </tr></thead>
-            <tbody>
-              <?php foreach ($workRows as $r): ?>
-              <tr>
-                <td><?= h($r['開始']) ?></td>
-                <td><?= h($r['在職状況']) ?></td>
-                <td><?= h($r['終了']) ?></td>
-                <td><?= h($r['会社・施設名']) ?></td>
-                <td><?= h($r['職種/役職']) ?></td>
-                <td style="white-space:pre-line"><?= h($r['仕事内容']) ?></td>
-              </tr>
-              <?php endforeach; ?>
-            </tbody>
-          </table>
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>開始</th>
+                  <th>状況</th>
+                  <th>終了</th>
+                  <th>会社・施設名</th>
+                  <th>職種/役職</th>
+                  <th>仕事内容</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php foreach ($workRows as $r): ?>
+                  <tr>
+                    <td><?= h($r['開始']) ?></td>
+                    <td><?= h($r['在職状況']) ?></td>
+                    <td><?= h($r['終了']) ?></td>
+                    <td><?= h($r['会社・施設名']) ?></td>
+                    <td><?= h($r['職種/役職']) ?></td>
+                    <td style="white-space:pre-line"><?= h($r['仕事内容']) ?></td>
+                  </tr>
+                <?php endforeach; ?>
+              </tbody>
+            </table>
           <?php else: ?>
-          <p style="color:var(--muted);font-size:13px">入力なし</p>
+            <p style="color:var(--muted);font-size:13px">入力なし</p>
           <?php endif; ?>
 
           <?php if (!empty($reasonResign)): ?>
-          <dl class="pair" style="margin-top:12px">
-            <dt>退職理由</dt><dd><?= h($reasonResign) ?></dd>
-          </dl>
+            <dl class="pair" style="margin-top:12px">
+              <dt>退職理由</dt>
+              <dd><?= h($reasonResign) ?></dd>
+            </dl>
           <?php endif; ?>
           <?php if (!empty($plannedResign)): ?>
-          <dl class="pair">
-            <dt>退職（予定）年月</dt><dd><?= h($plannedResign) ?></dd>
-          </dl>
+            <dl class="pair">
+              <dt>退職（予定）年月</dt>
+              <dd><?= h($plannedResign) ?></dd>
+            </dl>
           <?php endif; ?>
         </div>
       </div>
@@ -1624,10 +1729,12 @@ $step6 = [
         <div class="section-body">
           <div class="dl-grid">
             <?php foreach ($step5 as $k => $v): ?>
-            <dl class="pair" style="<?= in_array($k, ['自己PR','志望の動機','本人希望（職種・給与・勤務地など）'], true) ? 'grid-column:1/-1' : '' ?>">
-              <dt><?= h($k) ?></dt>
-              <dd style="white-space:pre-line"><?= $v !== '' ? h($v) : '<span style="color:var(--muted)">—</span>' ?></dd>
-            </dl>
+              <dl class="pair"
+                style="<?= in_array($k, ['自己PR', '志望の動機', '本人希望（職種・給与・勤務地など）'], true) ? 'grid-column:1/-1' : '' ?>">
+                <dt><?= h($k) ?></dt>
+                <dd style="white-space:pre-line"><?= $v !== '' ? h($v) : '<span style="color:var(--muted)">—</span>' ?>
+                </dd>
+              </dl>
             <?php endforeach; ?>
           </div>
         </div>
@@ -1642,10 +1749,10 @@ $step6 = [
         <div class="section-body">
           <div class="dl-grid">
             <?php foreach ($step6 as $k => $v): ?>
-            <dl class="pair">
-              <dt><?= h($k) ?></dt>
-              <dd><?= $v !== '' ? h($v) : '<span style="color:var(--muted)">—</span>' ?></dd>
-            </dl>
+              <dl class="pair">
+                <dt><?= h($k) ?></dt>
+                <dd><?= $v !== '' ? h($v) : '<span style="color:var(--muted)">—</span>' ?></dd>
+              </dl>
             <?php endforeach; ?>
           </div>
         </div>
@@ -1653,259 +1760,348 @@ $step6 = [
 
       <!-- Apply form (if job application flow) -->
       <?php if ($flow === 'apply' && $job_id > 0 && $session_uid > 0): ?>
-      <div class="section" style="animation-delay:.35s">
-        <div class="section-head"><h2>📨 求人への応募</h2></div>
-        <div class="section-body">
-          <p style="font-size:14px;margin-bottom:14px;color:var(--muted)">上記内容で応募します。よろしければ送信してください。</p>
-          <form id="applyForm" action="/rireki/kaigo/php/submit_rireki.php" method="post">
-            <input type="hidden" name="token" value="<?= h($token) ?>">
-            <input type="hidden" name="job_id" value="<?= h($job_id) ?>">
-            <input type="hidden" name="flow" value="apply">
-            <button class="btn primary" type="submit" style="width:100%;justify-content:center">この内容で応募する</button>
-          </form>
+        <div class="section" style="animation-delay:.35s">
+          <div class="section-head">
+            <h2>📨 求人への応募</h2>
+          </div>
+          <div class="section-body">
+            <p style="font-size:14px;margin-bottom:14px;color:var(--muted)">上記内容で応募します。よろしければ送信してください。</p>
+            <form id="applyForm" action="/rireki/kaigo/php/submit_rireki.php" method="post">
+              <input type="hidden" name="token" value="<?= h($token) ?>">
+              <input type="hidden" name="job_id" value="<?= h($job_id) ?>">
+              <input type="hidden" name="flow" value="apply">
+              <button class="btn primary" type="submit" style="width:100%;justify-content:center">この内容で応募する</button>
+            </form>
+          </div>
         </div>
-      </div>
       <?php endif; ?>
 
       <!-- Save profile form (profile_only flow) -->
       <?php if ($flow === 'profile_only' && $session_uid > 0): ?>
-      <div class="section" style="animation-delay:.35s">
-        <div class="section-head"><h2>💾 プロフィールを更新</h2></div>
-        <div class="section-body">
-          <p style="font-size:14px;margin-bottom:14px;color:var(--muted)">最新の情報を保存しておくと、次回以降すぐに応募できます。</p>
-          <form id="saveProfileForm" action="<?= h($_SERVER['REQUEST_URI']) ?>" method="post">
-            <input type="hidden" name="__action" value="save_profile">
-            <input type="hidden" name="token" value="<?= h($token) ?>">
-            <button class="btn primary" type="submit" style="width:100%;justify-content:center">プロフィールを保存する</button>
-          </form>
+        <div class="section" style="animation-delay:.35s">
+          <div class="section-head">
+            <h2>💾 プロフィールを更新</h2>
+          </div>
+          <div class="section-body">
+            <p style="font-size:14px;margin-bottom:14px;color:var(--muted)">最新の情報を保存しておくと、次回以降すぐに応募できます。</p>
+            <form id="saveProfileForm" action="<?= h($_SERVER['REQUEST_URI']) ?>" method="post">
+              <input type="hidden" name="__action" value="save_profile">
+              <input type="hidden" name="token" value="<?= h($token) ?>">
+              <button class="btn primary" type="submit" style="width:100%;justify-content:center">プロフィールを保存する</button>
+            </form>
+          </div>
         </div>
-      </div>
       <?php endif; ?>
 
     </section>
 
     <!-- ===== ASIDE ===== -->
     <?php if (empty($_GET['embedded'])): ?>
-    <aside>
+      <aside>
 
-      <!-- Excel export card -->
-      <div class="aside-card">
-        <div class="aside-title">履歴書出力（Excel）</div>
-        <div class="aside-btn-row">
-          <?php if ($session_uid <= 0): ?>
-            <div class="note">ダウンロードは「無料登録」後に有効になります。</div>
-            <button class="btn primary" type="button" disabled style="width:100%;justify-content:center">登録するとダウンロードできます</button>
-          <?php else: ?>
-            <p id="exportStatus" class="small" style="margin:0 0 8px">Excel（.xls）を生成してダウンロードできます。</p>
-            <button id="btnBuildXls" class="btn primary" type="button" style="width:100%;justify-content:center">Excelを作成・ダウンロード</button>
-            <div id="exportResult" style="display:none;margin-top:12px">
-              <div class="okbox">完成しました！</div>
-              <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
-                <a id="xlsDownloadLink" class="btn green" href="#" download style="justify-content:center">Excel（.xls）をダウンロード</a>
+        <!-- Excel export card -->
+        <div class="aside-card">
+          <div class="aside-title">履歴書出力（Excel）</div>
+          <div class="aside-btn-row">
+            <?php if ($session_uid <= 0): ?>
+              <div class="note">ダウンロードは「無料登録」後に有効になります。</div>
+              <button class="btn primary" type="button" disabled
+                style="width:100%;justify-content:center">登録するとダウンロードできます</button>
+            <?php else: ?>
+              <p id="exportStatus" class="small" style="margin:0 0 8px">Excel（.xls）を生成してダウンロードできます。</p>
+              <button id="btnBuildXls" class="btn primary" type="button"
+                style="width:100%;justify-content:center">Excelを作成・ダウンロード</button>
+              <div id="exportResult" style="display:none;margin-top:12px">
+                <div class="okbox">完成しました！</div>
+                <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
+                  <a id="xlsDownloadLink" class="btn green" href="#" download
+                    style="justify-content:center">Excel（.xls）をダウンロード</a>
+                </div>
               </div>
-            </div>
-            <button id="btnBuildPdf" class="btn" type="button" style="width:100%;justify-content:center;margin-top:10px">📄 PDFとしてダウンロード</button>
-          <?php endif; ?>
+              <button id="btnBuildPdf" class="btn" type="button"
+                style="width:100%;justify-content:center;margin-top:10px">📄 PDFとしてダウンロード</button>
+            <?php endif; ?>
+          </div>
         </div>
-      </div>
 
-      <!-- Dashboard card -->
-      <div class="aside-card">
-        <div class="aside-title">マイページ（ダッシュボード）</div>
-        <div class="aside-btn-row">
-          <a class="btn" href="<?= h($editBase) ?>" style="justify-content:center">✏️ データを編集・更新する</a>
-          <a class="btn" href="/saiyou.php" style="justify-content:center">💼 おすすめ求人を見る</a>
-          <a class="btn" href="/rireki/index.php#formats" style="justify-content:center">➕ 新規フォーマット切替</a>
-          <button class="btn danger" onclick="showDeleteModal()" style="justify-content:center;color:#f85149;border-color:rgba(248,81,73,.3);background:rgba(248,81,73,.1);">🗑 データを完全削除してやり直す</button>
-          <a class="btn ghost" href="/php/user_logout.php" style="justify-content:center;color:var(--muted);border:none;background:transparent;margin-top:10px;">ログアウト</a>
+        <!-- Dashboard card -->
+        <div class="aside-card">
+          <div class="aside-title">マイページ（ダッシュボード）</div>
+          <div class="aside-btn-row">
+            <?php if ($flow === 'apply_profile' && $job_id > 0): ?>
+              <!-- ★ Apply button — only shown when coming from job listing -->
+              <div
+                style="margin-bottom:6px;padding:10px;background:rgba(59,158,255,.08);border:1px solid rgba(59,158,255,.3);border-radius:10px;text-align:center;">
+                <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">この求人に今すぐ応募</div>
+                <form id="applyProfileForm" method="POST" style="margin:0;">
+                  <input type="hidden" name="job_id" value="<?= h($job_id) ?>">
+                  <input type="hidden" name="token" value="<?= h($token) ?>">
+                  <button id="btnApplyProfile" type="submit" class="btn primary"
+                    style="width:100%;justify-content:center;background:#0ea5e9;border-color:#0284c7;">
+                    💼 プロフィールで応募する
+                  </button>
+                </form>
+                <div style="font-size:11px;color:var(--muted);margin-top:4px;">登録済みのデータで即応募</div>
+              </div>
+              <hr style="border:none;border-top:1px solid var(--border);margin:4px 0">
+            <?php endif; ?>
+            <a class="btn" href="<?= h($editBase) ?>" style="justify-content:center">✏️ データを編集・更新する</a>
+            <a class="btn" href="/saiyou.php" style="justify-content:center">💼 おすすめ求人を見る</a>
+            <a class="btn" href="/rireki/index.php#formats" style="justify-content:center">➕ 新規フォーマット切替</a>
+            <button class="btn danger" onclick="showDeleteModal()"
+              style="justify-content:center;color:#f85149;border-color:rgba(248,81,73,.3);background:rgba(248,81,73,.1);">🗑
+              データを完全削除してやり直す</button>
+            <a class="btn ghost" href="/php/user_logout.php"
+              style="justify-content:center;color:var(--muted);border:none;background:transparent;margin-top:10px;">ログアウト</a>
+          </div>
         </div>
-      </div>
 
-      <!-- Checklist card -->
-      <div class="aside-card">
-        <div class="aside-title">最終チェックリスト</div>
-        <ul style="font-size:13px;color:var(--muted);padding-left:1.2em;line-height:1.8">
-          <li>氏名・住所・連絡先は正確？</li>
-          <li>在留期限・旅券番号の扱いはOK？</li>
-          <li>学歴/職歴の年月は時系列？</li>
-          <li>写真は明るく背景シンプル？</li>
-        </ul>
-      </div>
+        <!-- Checklist card -->
+        <div class="aside-card">
+          <div class="aside-title">最終チェックリスト</div>
+          <ul style="font-size:13px;color:var(--muted);padding-left:1.2em;line-height:1.8">
+            <li>氏名・住所・連絡先は正確？</li>
+            <li>在留期限・旅券番号の扱いはOK？</li>
+            <li>学歴/職歴の年月は時系列？</li>
+            <li>写真は明るく背景シンプル？</li>
+          </ul>
+        </div>
 
-    </aside>
+      </aside>
     <?php endif; ?>
   </main>
 
-
-
-<script>
-  // Apply-with-profile: AJAX submit -> show THANK YOU modal -> user clicks 戻る => applied list
-  (function () {
-    const form = document.getElementById('applyForm');
-    if (!form) return;
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const fd = new FormData(form);
-
-      try {
-        const res = await fetch(form.action, { method: 'POST', body: fd, credentials: 'same-origin' });
-        if (!res.ok) throw new Error('submit failed');
-
-        // fire-and-forget: recent activity log (staff dashboard)
-        try {
-          const fd2 = new FormData();
-          fd2.append('action', 'log_apply_activity');
-          fd2.append('token', "<?= h($token) ?>");
-          fd2.append('job_id', "<?= h($job_id) ?>");
-          await fetch(window.location.pathname + window.location.search, { method: 'POST', body: fd2, credentials: 'same-origin' });
-        } catch (_) { }
-        const modal = document.getElementById('appModal');
-        if (modal) { modal.style.display = 'flex'; modal.setAttribute('aria-hidden', 'false'); }
-      } catch (err) {
-        alert('送信に失敗しました。もう一度お試しください。');
-      }
-    });
-  })();
-
-  // Profile-only: POST to preview itself -> it will auto-save already; show modal (client side)
-  (function () {
-    const form = document.getElementById('saveProfileForm');
-    if (!form) return;
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const fd = new FormData(form);
-
-      try {
-        const res = await fetch(form.action, { method: 'POST', body: fd, credentials: 'same-origin' });
-        if (!res.ok) throw new Error('save failed');
-        const modal = document.getElementById('saveModal');
-        if (modal) { modal.style.display = 'flex'; modal.setAttribute('aria-hidden', 'false'); }
-      } catch (err) {
-        alert('保存に失敗しました。もう一度お試しください。');
-      }
-    });
-  })();
-
-  // Close modal when clicking outside
-  document.addEventListener('click', (e) => {
-    const m1 = document.getElementById('appModal');
-    const m2 = document.getElementById('saveModal');
-    if (m1 && e.target === m1) { m1.style.display = 'none'; m1.setAttribute('aria-hidden', 'true'); }
-    if (m2 && e.target === m2) { m2.style.display = 'none'; m2.setAttribute('aria-hidden', 'true'); }
-  });
-
-  // Open resume / Profile only: register + build XLS inside aside
-  (function () {
-    const flow = "<?= h($flow) ?>";
-    if (flow !== 'open_resume' && flow !== 'profile_only') return;
-
-    const token = "<?= h($token) ?>";
-    const isLoggedIn = <?= ($session_uid > 0 ? 'true' : 'false') ?>;
-
-    // Register form (public -> create account + bind token)
-    const regForm = document.getElementById('openRegisterForm');
-    if (regForm) {
-      regForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const btn = document.getElementById('btnRegisterOpen');
-        const msg = document.getElementById('regMsg');
-        if (msg) msg.textContent = '';
-        if (btn) { btn.disabled = true; btn.textContent = '登録中...'; }
-
-        try {
-          const fd = new FormData(regForm);
-          const res = await fetch("/rireki/kaigo/php/rireki_preview.php?token=" + encodeURIComponent(token) + "&flow=open_resume", {
-            method: 'POST',
-            body: fd,
-            credentials: 'same-origin'
-          });
-          const j = await res.json().catch(() => null);
-          if (!res.ok || !j || !j.ok) {
-            const err = (j && j.error) ? j.error : 'register_failed';
-            let t = '登録に失敗しました。';
-            if (err === 'email_exists') t = 'このメールアドレスは既に登録されています。ログインしてください。';
-            if (err === 'password_short') t = 'パスワードは8文字以上にしてください。';
-            if (msg) msg.textContent = t;
-            if (btn) { btn.disabled = false; btn.textContent = '登録してダウンロードを有効化'; }
-            return;
-          }
-          // Logged in now (session set). Reload to show export enabled.
-          window.location.href = "/rireki/kaigo/php/rireki_preview.php?token=" + encodeURIComponent(token) + "&flow=open_resume";
-        } catch (e2) {
-          if (msg) msg.textContent = '通信に失敗しました。もう一度お試しください。';
-          if (btn) { btn.disabled = false; btn.textContent = '登録してダウンロードを有効化'; }
-        }
-      });
-    }
-
-    // Build XLS (AJAX -> show download link)
-    const buildBtn = document.getElementById('btnBuildXls');
-    if (buildBtn) {
-      buildBtn.addEventListener('click', async () => {
-        buildBtn.disabled = true;
-        const st = document.getElementById('exportStatus');
-        if (st) st.textContent = 'Excelを作成中...';
-
-        const fd = new FormData();
-        fd.append('token', token);
-        fd.append('flow', flow === 'profile_only' ? 'profile_only' : 'open_resume');
-        fd.append('ajax', '1');
-
-        try {
-          const res = await fetch("/rireki/kaigo/php/submit_rireki.php", { method: 'POST', body: fd, credentials: 'same-origin' });
-          const j = await res.json().catch(() => null);
-          if (!res.ok || !j || !j.ok || !j.xls_url) throw new Error('build_failed');
-
-          const xls = j.xls_url;
-          const result = document.getElementById('exportResult');
-          const dl = document.getElementById('xlsDownloadLink');
-
-          if (dl) dl.href = xls;
-          if (result) result.style.display = 'block';
-          if (st) st.textContent = '完了しました。下のボタンからダウンロードできます。';
-        } catch (err) {
-          if (st) st.textContent = '作成に失敗しました。もう一度お試しください。';
-        } finally {
-          buildBtn.disabled = false;
-        }
-      });
-    }
-
-    // PDF download button — opens dedicated pixel-perfect PDF renderer
-    const pdfBtn = document.getElementById('btnBuildPdf');
-    if (pdfBtn) {
-      pdfBtn.addEventListener('click', () => {
-        const pdfUrl = '/rireki/kaigo/php/pdf_rireki.php?token=' + encodeURIComponent(token) + '&print=1';
-        window.open(pdfUrl, '_blank');
-      });
-    }
-  })();
-
-</script>
-
-  <!-- Delete Modal -->
-<div id="deleteModal" style="display:none; position:fixed; inset:0; z-index:900; background:rgba(0,0,0,.7); backdrop-filter:blur(4px); align-items:center; justify-content:center;">
-  <div style="background:rgba(13,17,27,.95); border:1px solid var(--border); border-radius:18px; padding:24px; max-width:400px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,.6); text-align:center;">
-    <div style="font-size:36px; margin-bottom:12px;">⚠️</div>
-    <h3 style="font-size:18px; margin-bottom:10px;">本当に削除しますか？</h3>
-    <p style="color:var(--muted); font-size:14px; margin-bottom:20px;">履歴書データが完全に消去され、復元できなくなります。<br>最初から全く新しい履歴書を作り直す場合のみ実行してください。</p>
-    <div style="display:flex; gap:10px; justify-content:center;">
-      <button class="btn" type="button" onclick="document.getElementById('deleteModal').style.display='none'">キャンセル</button>
-      <form action="/rireki/php/delete_profile.php" method="POST">
-        <input type="hidden" name="action" value="delete_all">
-        <button class="btn" type="submit" style="color:#f85149; border-color:rgba(248,81,73,.3); background:rgba(248,81,73,.1);">はい、データを削除します</button>
-      </form>
+  <!-- ★ Thank-you modal (apply_profile flow) -->
+  <div id="applyThankModal" role="dialog" aria-modal="true" aria-label="応募完了"
+    style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);align-items:center;justify-content:center;">
+    <div
+      style="background:#fff;border-radius:20px;padding:32px 28px;max-width:400px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.25);">
+      <div style="font-size:42px;margin-bottom:10px;">🎉</div>
+      <h2 style="font-size:20px;font-weight:900;color:#0b2243;margin:0 0 12px">応募を受け付けました！</h2>
+      <p style="font-size:14px;color:#4b5563;line-height:1.7;margin:0 0 20px">
+        ご応募アりがとうございます。<br>
+        当社担当者が中2〜3営業日以内にご連絡いたします。<br>
+        <span style="font-size:12px;color:#9ca3af">（Thank you for your interest! Our team will reach you within
+          2&ndash;3 business days.）</span>
+      </p>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <a href="/php/user_applied_jobs.php" class="btn primary" style="justify-content:center;">📋 応募履歴を見る</a>
+        <a href="/saiyou.php" class="btn" style="justify-content:center;">← 求人一覧に戻る</a>
+      </div>
     </div>
   </div>
-</div>
 
-<script>
-  function showDeleteModal() {
-    document.getElementById('deleteModal').style.display = 'flex';
-  }
-</script>
+
+
+  <script>
+    // Apply-with-profile form: AJAX submit -> show thank-you modal
+    (function () {
+      const form = document.getElementById('applyProfileForm');
+      if (!form) return;
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('btnApplyProfile');
+        if (btn) { btn.disabled = true; btn.textContent = '送信中...'; }
+
+        try {
+          const fd = new FormData(form);
+          const res = await fetch('/php/apply_now.php', { method: 'POST', body: fd, credentials: 'same-origin' });
+          const j = await res.json().catch(() => null);
+          if (!res.ok || !j || !j.ok) {
+            const msg = (j && j.error) || 'unknown_error';
+            if (msg === 'not_logged_in') {
+              alert('セッションが切れました。再度ログインしてください。');
+              window.location.href = '/php/user_login.php?next=' + encodeURIComponent(window.location.href);
+            } else {
+              alert('送信に失敗しました（' + msg + '）。もう一度お試しください。');
+            }
+            if (btn) { btn.disabled = false; btn.textContent = '💼 プロフィールで応募する'; }
+            return;
+          }
+          // Success: show thank-you modal
+          const modal = document.getElementById('applyThankModal');
+          if (modal) { modal.style.display = 'flex'; }
+        } catch (err) {
+          alert('通信エラーが発生しました。もう一度お試しください。');
+          if (btn) { btn.disabled = false; btn.textContent = '💼 プロフィールで応募する'; }
+        }
+      });
+    })();
+
+    // Legacy applyForm stub (kept for backward compat but no-op if form absent)
+    (function () {
+      const form = document.getElementById('applyForm');
+      if (!form) return;
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(form);
+
+        try {
+          const res = await fetch(form.action, { method: 'POST', body: fd, credentials: 'same-origin' });
+          if (!res.ok) throw new Error('submit failed');
+
+          // fire-and-forget: recent activity log (staff dashboard)
+          try {
+            const fd2 = new FormData();
+            fd2.append('action', 'log_apply_activity');
+            fd2.append('token', "<?= h($token) ?>");
+            fd2.append('job_id', "<?= h($job_id) ?>");
+            await fetch(window.location.pathname + window.location.search, { method: 'POST', body: fd2, credentials: 'same-origin' });
+          } catch (_) { }
+          const modal = document.getElementById('appModal');
+          if (modal) { modal.style.display = 'flex'; modal.setAttribute('aria-hidden', 'false'); }
+        } catch (err) {
+          alert('送信に失敗しました。もう一度お試しください。');
+        }
+      });
+    })();
+
+    // Profile-only: POST to preview itself -> it will auto-save already; show modal (client side)
+    //server twst 
+    (function () {
+      const form = document.getElementById('saveProfileForm');
+      if (!form) return;
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(form);
+
+        try {
+          const res = await fetch(form.action, { method: 'POST', body: fd, credentials: 'same-origin' });
+          if (!res.ok) throw new Error('save failed');
+          const modal = document.getElementById('saveModal');
+          if (modal) { modal.style.display = 'flex'; modal.setAttribute('aria-hidden', 'false'); }
+        } catch (err) {
+          alert('保存に失敗しました。もう一度お試しください。');
+        }
+      });
+    })();
+
+    // Close modal when clicking outside
+    document.addEventListener('click', (e) => {
+      const m1 = document.getElementById('appModal');
+      const m2 = document.getElementById('saveModal');
+      if (m1 && e.target === m1) { m1.style.display = 'none'; m1.setAttribute('aria-hidden', 'true'); }
+      if (m2 && e.target === m2) { m2.style.display = 'none'; m2.setAttribute('aria-hidden', 'true'); }
+    });
+
+    // Open resume / Profile only: register + build XLS inside aside
+    (function () {
+      const flow = "<?= h($flow) ?>";
+      if (flow !== 'open_resume' && flow !== 'profile_only') return;
+
+      const token = "<?= h($token) ?>";
+      const isLoggedIn = <?= ($session_uid > 0 ? 'true' : 'false') ?>;
+
+      // Register form (public -> create account + bind token)
+      const regForm = document.getElementById('openRegisterForm');
+      if (regForm) {
+        regForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const btn = document.getElementById('btnRegisterOpen');
+          const msg = document.getElementById('regMsg');
+          if (msg) msg.textContent = '';
+          if (btn) { btn.disabled = true; btn.textContent = '登録中...'; }
+
+          try {
+            const fd = new FormData(regForm);
+            const res = await fetch("/rireki/kaigo/php/rireki_preview.php?token=" + encodeURIComponent(token) + "&flow=open_resume", {
+              method: 'POST',
+              body: fd,
+              credentials: 'same-origin'
+            });
+            const j = await res.json().catch(() => null);
+            if (!res.ok || !j || !j.ok) {
+              const err = (j && j.error) ? j.error : 'register_failed';
+              let t = '登録に失敗しました。';
+              if (err === 'email_exists') t = 'このメールアドレスは既に登録されています。ログインしてください。';
+              if (err === 'password_short') t = 'パスワードは8文字以上にしてください。';
+              if (msg) msg.textContent = t;
+              if (btn) { btn.disabled = false; btn.textContent = '登録してダウンロードを有効化'; }
+              return;
+            }
+            // Logged in now (session set). Reload to show export enabled.
+            window.location.href = "/rireki/kaigo/php/rireki_preview.php?token=" + encodeURIComponent(token) + "&flow=open_resume";
+          } catch (e2) {
+            if (msg) msg.textContent = '通信に失敗しました。もう一度お試しください。';
+            if (btn) { btn.disabled = false; btn.textContent = '登録してダウンロードを有効化'; }
+          }
+        });
+      }
+
+      // Build XLS (AJAX -> show download link)
+      const buildBtn = document.getElementById('btnBuildXls');
+      if (buildBtn) {
+        buildBtn.addEventListener('click', async () => {
+          buildBtn.disabled = true;
+          const st = document.getElementById('exportStatus');
+          if (st) st.textContent = 'Excelを作成中...';
+
+          const fd = new FormData();
+          fd.append('token', token);
+          fd.append('flow', flow === 'profile_only' ? 'profile_only' : 'open_resume');
+          fd.append('ajax', '1');
+
+          try {
+            const res = await fetch("/rireki/kaigo/php/submit_rireki.php", { method: 'POST', body: fd, credentials: 'same-origin' });
+            const j = await res.json().catch(() => null);
+            if (!res.ok || !j || !j.ok || !j.xls_url) throw new Error('build_failed');
+
+            const xls = j.xls_url;
+            const result = document.getElementById('exportResult');
+            const dl = document.getElementById('xlsDownloadLink');
+
+            if (dl) dl.href = xls;
+            if (result) result.style.display = 'block';
+            if (st) st.textContent = '完了しました。下のボタンからダウンロードできます。';
+          } catch (err) {
+            if (st) st.textContent = '作成に失敗しました。もう一度お試しください。';
+          } finally {
+            buildBtn.disabled = false;
+          }
+        });
+      }
+
+      // PDF download button — opens dedicated pixel-perfect PDF renderer
+      const pdfBtn = document.getElementById('btnBuildPdf');
+      if (pdfBtn) {
+        pdfBtn.addEventListener('click', () => {
+          const pdfUrl = '/rireki/kaigo/php/pdf_rireki.php?token=' + encodeURIComponent(token) + '&print=1';
+          window.open(pdfUrl, '_blank');
+        });
+      }
+    })();
+
+  </script>
+
+  <!-- Delete Modal -->
+  <div id="deleteModal"
+    style="display:none; position:fixed; inset:0; z-index:900; background:rgba(0,0,0,.7); backdrop-filter:blur(4px); align-items:center; justify-content:center;">
+    <div
+      style="background:rgba(13,17,27,.95); border:1px solid var(--border); border-radius:18px; padding:24px; max-width:400px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,.6); text-align:center;">
+      <div style="font-size:36px; margin-bottom:12px;">⚠️</div>
+      <h3 style="font-size:18px; margin-bottom:10px;">本当に削除しますか？</h3>
+      <p style="color:var(--muted); font-size:14px; margin-bottom:20px;">
+        履歴書データが完全に消去され、復元できなくなります。<br>最初から全く新しい履歴書を作り直す場合のみ実行してください。</p>
+      <div style="display:flex; gap:10px; justify-content:center;">
+        <button class="btn" type="button"
+          onclick="document.getElementById('deleteModal').style.display='none'">キャンセル</button>
+        <form action="/rireki/php/delete_profile.php" method="POST">
+          <input type="hidden" name="action" value="delete_all">
+          <button class="btn" type="submit"
+            style="color:#f85149; border-color:rgba(248,81,73,.3); background:rgba(248,81,73,.1);">はい、データを削除します</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showDeleteModal() {
+      document.getElementById('deleteModal').style.display = 'flex';
+    }
+  </script>
 
   <script src="/rireki/kaigo/js/kaigo.js?v=6"></script>
 </body>

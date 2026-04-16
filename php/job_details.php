@@ -154,8 +154,9 @@ if ($takehome_num !== null) {
 }
 
 $published_date = (string)($job['date'] ?? '');
-$apply_url = "resume.php?job_id=" . (int)$job['id'];
-$back_url  = "https://it-future.jp/saiyou.php";
+$apply_url     = "/php/apply_with_profile.php?job_id=" . (int)$job['id'] . "&fmt=kaigo";
+$apply_new_url = "/rireki/kaigo/rireki.php?job_id=" . (int)$job['id'];
+$back_url      = "https://it-future.jp/saiyou.php";
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -425,12 +426,10 @@ $back_url  = "https://it-future.jp/saiyou.php";
 
     <aside class="side" aria-label="応募パネル">
       <div class="cta">
-        <a class="btn apply" href="<?= h($apply_url) ?>">この求人に応募する</a>
-        <div class="mini">
-          <div><b>勤務地：</b><?= h($job_location ?: '—') ?></div>
-          <div><b>月給：</b><?= h($salary ?: '—') ?></div>
-          <div><b>日本語：</b><?= h($japanese_level ?: '—') ?></div>
-        </div>
+        <a class="btn apply" href="<?= h($apply_url) ?>">💼 この求人にプロフィールで応募</a>
+        <div class="mini" style="margin-top:6px; font-size:12px; color:var(--muted); text-align:center">ログイン後、登録済みプロフィールで即応募できます</div>
+        <div class="hr"></div>
+        <a class="btn back" href="<?= h($apply_new_url) ?>" style="font-size:13px">🗒️ 新規で履歴書を作成して応募</a>
         <div class="hr"></div>
         <a class="btn back" href="<?= h($back_url) ?>">求人一覧に戻る</a>
       </div>
