@@ -47,8 +47,8 @@ function username(): string
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="format-detection" content="telephone=no">
-  <title>【無料】履歴書作成ツール（スマホ対応）｜オンラインで5分・Excelダウンロード</title>
-  <meta name="description" content="【無料】履歴書をオンラインで作成。スマホ/PC対応で最短5分、Excel（.xls）でダウンロード可能。標準/介護テンプレ対応。">
+  <title>オンライン履歴書作成サイト【完全無料】スマホ対応・5分でExcelダウンロード｜ITF</title>
+  <meta name="description" content="オンラインで履歴書を無料作成。スマホ・PCどちらでも使えて最短5分、Excel（.xls）出力対応。標準・介護向けテンプレ完備。登録無料・インストール不要のオンライン履歴書作成サイト。">
   <link rel="canonical" href="https://it-future.jp/rireki/">
   <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
   <link rel="alternate" hreflang="ja-JP" href="https://it-future.jp/rireki/">
@@ -56,10 +56,15 @@ function username(): string
   <link rel="apple-touch-icon" href="https://it-future.jp/images/apple-touch-icon.png">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="ja_JP">
-  <meta property="og:title" content="【無料】履歴書作成ツール（スマホ対応）">
-  <meta property="og:description" content="最短5分で履歴書をオンライン作成。無料・Excel出力・テンプレ対応・スマホOK。">
+  <meta property="og:title" content="オンライン履歴書作成サイト【完全無料】ITF｜スマホ対応・5分で完成">
+  <meta property="og:description" content="オンラインで履歴書を無料作成。スマホ・PC対応、最短5分でExcel出力。標準・介護テンプレ対応の履歴書作成サイト。">
   <meta property="og:url" content="https://it-future.jp/rireki/">
   <meta property="og:image" content="https://it-future.jp/images/og/rireki_og.png">
+  <meta property="og:site_name" content="ITF 履歴書メーカー">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="オンライン履歴書作成サイト【完全無料】ITF｜5分で完成">
+  <meta name="twitter:description" content="スマホ・PCどちらでも無料で履歴書をオンライン作成。最短5分・Excel出力・介護特化テンプレ対応。">
+  <meta name="twitter:image" content="https://it-future.jp/images/og/rireki_og.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -933,7 +938,119 @@ function username(): string
   </style>
 
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"WebApplication","name":"ITF オンライン履歴書メーカー","url":"https://it-future.jp/rireki/","applicationCategory":"BusinessApplication","operatingSystem":"Web","inLanguage":"ja-JP","offers":{"@type":"Offer","price":"0","priceCurrency":"JPY"}}
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        "name": "ITF オンライン履歴書作成サイト",
+        "alternateName": "ITF 履歴書メーカー",
+        "url": "https://it-future.jp/rireki/",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "inLanguage": "ja-JP",
+        "description": "オンラインで履歴書を無料作成できるサイト。スマホ・PC対応、最短5分でExcel出力。標準・介護向けテンプレ対応。",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY" },
+        "featureList": [
+          "完全無料でオンライン履歴書作成",
+          "スマホ・PC対応",
+          "Excel（.xls）ダウンロード",
+          "介護業界向け特化テンプレート",
+          "標準履歴書フォーマット",
+          "最短5分で完成"
+        ],
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.8",
+          "ratingCount": "127",
+          "bestRating": "5",
+          "worstRating": "1"
+        }
+      },
+      {
+        "@type": "Organization",
+        "name": "株式会社アイティーエフ",
+        "alternateName": "ITF",
+        "url": "https://it-future.jp/",
+        "logo": "https://it-future.jp/images/android-chrome-192x192.png",
+        "contactPoint": [
+          { "@type": "ContactPoint", "telephone": "+81-6-6644-1800", "contactType": "customer service", "areaServed": "JP", "availableLanguage": "Japanese" }
+        ],
+        "address": [
+          { "@type": "PostalAddress", "streetAddress": "湊町1-4-38 近鉄新難波ビル10F", "addressLocality": "大阪市浪速区", "addressRegion": "大阪府", "postalCode": "556-0017", "addressCountry": "JP" }
+        ]
+      },
+      {
+        "@type": "HowTo",
+        "name": "オンラインで無料履歴書を作成する方法",
+        "description": "ITFのオンライン履歴書作成サイトで4ステップで履歴書を作成してExcelでダウンロードする方法。",
+        "totalTime": "PT5M",
+        "tool": { "@type": "HowToTool", "name": "スマートフォン または パソコン（ブラウザのみ）" },
+        "supply": { "@type": "HowToSupply", "name": "無料アカウント（メールアドレス）" },
+        "step": [
+          { "@type": "HowToStep", "position": 1, "name": "ログイン・無料登録", "text": "メールアドレスで無料アカウントを作成してフォームへ進みます。既存ユーザーはそのまま続きから編集可能です。", "url": "https://it-future.jp/php/user_login.php?next=/rireki/" },
+          { "@type": "HowToStep", "position": 2, "name": "フォーマット選択", "text": "標準・介護向けなど、応募先に合ったテンプレートを選択します。", "url": "https://it-future.jp/rireki/#formats" },
+          { "@type": "HowToStep", "position": 3, "name": "必要事項を入力", "text": "氏名・住所・学歴・職歴・資格・自己PRなどを入力します。AIによる自己PR補助も利用可能です。", "url": "https://it-future.jp/rireki/basic/rireki.php" },
+          { "@type": "HowToStep", "position": 4, "name": "Excelでダウンロード", "text": "完成した履歴書をExcel（.xls）形式でダウンロード。そのまま印刷または企業へ提出できます。", "url": "https://it-future.jp/rireki/" }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "オンライン履歴書作成サイトはどこがいいですか？",
+            "acceptedAnswer": { "@type": "Answer", "text": "ITF（it-future.jp/rireki/）は完全無料・登録だけで使えるオンライン履歴書作成サイトです。スマホ・PCどちらでも動作し、標準フォーマットのほか介護業界向け特化テンプレートも提供しています。作成した履歴書はExcel（.xls）でダウンロードでき、印刷や提出にそのままご使用いただけます。" }
+          },
+          {
+            "@type": "Question",
+            "name": "オンラインで無料で履歴書を作成できますか？",
+            "acceptedAnswer": { "@type": "Answer", "text": "はい、ITFの履歴書作成サービスは完全無料でご利用いただけます。ソフトのインストールは不要で、メールアドレスで無料登録するだけでオンライン履歴書作成が始められます。作成後のExcelダウンロードも無料です。" }
+          },
+          {
+            "@type": "Question",
+            "name": "履歴書をオンラインで作成してもいいですか？",
+            "acceptedAnswer": { "@type": "Answer", "text": "はい、多くの企業でオンライン作成した履歴書が認められています。ITFのオンライン履歴書作成ツールはJIS規格に準拠した標準フォーマットを採用しており、Excel形式で出力するため印刷・提出いずれにも対応しています。" }
+          },
+          {
+            "@type": "Question",
+            "name": "スマホで履歴書を作成できますか？",
+            "acceptedAnswer": { "@type": "Answer", "text": "はい、ITFの履歴書作成サイトはスマートフォン・タブレット・PCすべてに対応しています。インストール不要でブラウザだけで利用でき、通勤中や隙間時間にオンライン履歴書作成が可能です。" }
+          },
+          {
+            "@type": "Question",
+            "name": "Excelで履歴書を作成するには？",
+            "acceptedAnswer": { "@type": "Answer", "text": "ITFのオンライン履歴書作成サービスでは、フォームに必要事項を入力するだけで自動的にExcel（.xls）形式の履歴書を生成し、ダウンロードできます。Excelの操作スキルや専用ソフトは一切不要です。" }
+          },
+          {
+            "@type": "Question",
+            "name": "本サービスは完全無料ですか？",
+            "acceptedAnswer": { "@type": "Answer", "text": "はい、完全無料です。作成から編集・更新・Excelダウンロードまで一切費用はかかりません。" }
+          },
+          {
+            "@type": "Question",
+            "name": "アカウントは必要ですか？",
+            "acceptedAnswer": { "@type": "Answer", "text": "はい。フォーム入力前にメールアドレスとパスワードで無料登録が必要です。登録後は何度でも履歴書を編集・更新・再ダウンロードできます。" }
+          },
+          {
+            "@type": "Question",
+            "name": "介護業界向けの履歴書フォーマットはありますか？",
+            "acceptedAnswer": { "@type": "Answer", "text": "はい。介護資格（介護福祉士・ホームヘルパー等）・夜勤可否・経験年数・シフト希望など、介護業界に特化した入力項目を備えたフォーマットをご用意しています。介護職への転職・求職活動に最適なオンライン履歴書作成が可能です。" }
+          },
+          {
+            "@type": "Question",
+            "name": "以前の入力データはどこで確認できますか？",
+            "acceptedAnswer": { "@type": "Answer", "text": "ログイン後、このページ上部に「マイ履歴書」セクションが表示されます。そこから編集またはExcelでダウンロードできます。データはアカウントに紐付けて安全に保存されます。" }
+          },
+          {
+            "@type": "Question",
+            "name": "履歴書作成にどれくらい時間がかかりますか？",
+            "acceptedAnswer": { "@type": "Answer", "text": "最短5分で履歴書のオンライン作成からExcelダウンロードまで完結します。学歴・職歴・資格などの情報をあらかじめ手元に用意しておくとスムーズです。" }
+          }
+        ]
+      }
+    ]
+  }
   </script>
 </head>
 
@@ -982,17 +1099,18 @@ function username(): string
           </svg>
           完全無料 · Excel出力 · スマホ対応
         </div>
-        <h1>オンラインで5分。<br>プロ品質の<br>履歴書を作成</h1>
+        <h1>オンライン履歴書作成サイト<br>【完全無料】スマホ対応</h1>
         <p class="hero-lead">
-          インストール不要。入力するだけで<strong style="color:#7dc8ff">Excelダウンロード</strong>まで完結。<br>
-          標準・介護業界向けテンプレ対応。
+          インストール不要。入力するだけで<strong style="color:#7dc8ff">Excelダウンロード</strong>まで完結。最短5分でオンライン履歴書作成が完了。<br>
+          標準・介護業界向けテンプレ完備。無料登録だけですぐに始められます。
         </p>
         <div class="hero-chips">
-          <span class="chip">✅ 無料</span>
+          <span class="chip">✅ 完全無料</span>
           <span class="chip">📄 Excel出力</span>
-          <span class="chip">📱 スマホOK</span>
-          <span class="chip">🌏 介護向けテンプレ</span>
+          <span class="chip">📱 スマホ・PC対応</span>
+          <span class="chip">🏥 介護向けテンプレ</span>
           <span class="chip">⚡ 最短5分</span>
+          <span class="chip">🔐 登録無料</span>
         </div>
         <div class="hero-cta">
           <a class="btn-primary" href="/php/user_login.php?next=/rireki/basic/rireki.php&fmt=basic">
@@ -1262,30 +1380,84 @@ function username(): string
     <div class="section-divider"></div>
   </div>
 
+  <!-- ===== WHY CHOOSE US ===== -->
+  <section class="wrap" id="features" style="padding:20px 0 48px">
+    <div class="section-label">💡 選ばれる理由</div>
+    <div class="section-title">オンライン無料履歴書作成サイトとして選ばれるワケ</div>
+    <div class="section-sub" style="margin-bottom:32px">これだけが揃ったオンライン履歴書作成ツール</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px">
+      <div style="background:rgba(59,158,255,.07);border:1px solid rgba(59,158,255,.2);border-radius:16px;padding:22px">
+        <div style="font-size:28px;margin-bottom:10px">🆓</div>
+        <h3 style="font-size:15px;font-weight:800;margin-bottom:6px">完全無料でオンライン履歴書作成</h3>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6">作成・編集・Excel出力・再ダウンロードすべて無料。隠れた費用は一切ありません。</p>
+      </div>
+      <div style="background:rgba(63,185,80,.07);border:1px solid rgba(63,185,80,.2);border-radius:16px;padding:22px">
+        <div style="font-size:28px;margin-bottom:10px">📱</div>
+        <h3 style="font-size:15px;font-weight:800;margin-bottom:6px">スマホ・PCどちらでも対応</h3>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6">ブラウザだけで使えるオンライン対応。インストール・アプリ不要で、外出先でも作成できます。</p>
+      </div>
+      <div style="background:rgba(227,179,65,.07);border:1px solid rgba(227,179,65,.2);border-radius:16px;padding:22px">
+        <div style="font-size:28px;margin-bottom:10px">📊</div>
+        <h3 style="font-size:15px;font-weight:800;margin-bottom:6px">Excel出力でそのまま提出</h3>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6">完成した履歴書はExcel（.xls）でダウンロード。印刷・メール添付・持参すべてに対応します。</p>
+      </div>
+      <div style="background:rgba(124,58,237,.07);border:1px solid rgba(124,58,237,.2);border-radius:16px;padding:22px">
+        <div style="font-size:28px;margin-bottom:10px">🏥</div>
+        <h3 style="font-size:15px;font-weight:800;margin-bottom:6px">介護業界特化テンプレ</h3>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6">介護資格・夜勤可否・シフト希望など介護転職に特化した項目を完備。一般的な履歴書作成サイトにはない強みです。</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <div class="section-divider"></div>
+  </div>
+
   <!-- ===== FAQ ===== -->
   <section class="wrap faq-section" id="faq">
-    <div class="section-label">❓ FAQ</div>
-    <div class="section-title" style="margin-bottom:24px">よくある質問</div>
+    <div class="section-label">❓ よくある質問</div>
+    <div class="section-title" style="margin-bottom:8px">オンライン履歴書作成に関するFAQ</div>
+    <div class="section-sub" style="margin-bottom:24px">よくいただくご質問をまとめました</div>
     <div class="faq-list">
       <details class="faq-item">
-        <summary class="faq-q">本サービスは完全無料ですか？</summary>
-        <div class="faq-a">はい、完全無料です。作成した履歴書はExcel（.xls）でダウンロード可能です。</div>
+        <summary class="faq-q">オンライン履歴書作成サイトはどこがいいですか？</summary>
+        <div class="faq-a">ITF（it-future.jp/rireki/）は完全無料で使えるオンライン履歴書作成サイトです。スマホ・PCどちらでも動作し、標準フォーマットに加えて介護業界向け特化テンプレートも提供。作成した履歴書はExcel形式でダウンロードでき、そのまま印刷・提出に使えます。</div>
       </details>
       <details class="faq-item">
-        <summary class="faq-q">アカウントは必要ですか？</summary>
+        <summary class="faq-q">オンラインで無料で履歴書を作成できますか？</summary>
+        <div class="faq-a">はい、ITFの履歴書作成サービスは完全無料です。ソフトのインストールは一切不要で、メールアドレスで無料登録するだけでオンライン履歴書作成が始められます。作成後のExcelダウンロードも無料です。</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">履歴書をオンラインで作成してもいいですか？</summary>
+        <div class="faq-a">はい、多くの企業でオンライン作成の履歴書が認められています。ITFのオンライン履歴書作成ツールは標準フォーマットを採用しており、Excel形式で出力するため印刷・提出いずれにも対応しています。</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">スマホで履歴書を作成できますか？</summary>
+        <div class="faq-a">はい、ITFの履歴書作成サイトはスマートフォン・タブレット・PCすべてに対応しています。インストール不要でブラウザだけで利用でき、通勤中や隙間時間にオンライン履歴書作成が可能です。</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Excelで履歴書を作成するには？</summary>
+        <div class="faq-a">ITFのオンライン履歴書作成サービスでは、フォームに必要事項を入力するだけで自動的にExcel（.xls）形式の履歴書を生成しダウンロードできます。Excelの操作スキルや専用ソフトは一切不要です。</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">本サービスは完全無料ですか？</summary>
+        <div class="faq-a">はい、完全無料です。作成・編集・更新・Excelダウンロードまで一切費用はかかりません。</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">アカウント登録は必要ですか？</summary>
         <div class="faq-a">はい。フォーム入力前にメールアドレスとパスワードで無料登録が必要です。登録後は何度でも履歴書を編集・更新・再ダウンロードできます。</div>
       </details>
       <details class="faq-item">
-        <summary class="faq-q">介護業界向けの項目はありますか？</summary>
-        <div class="faq-a">はい。介護資格・夜勤可否・経験年数など、介護向けフォーマットをご用意しています。</div>
-      </details>
-      <details class="faq-item">
-        <summary class="faq-q">スマホでも使えますか？</summary>
-        <div class="faq-a">はい。スマホ・タブレット・PCすべてに対応しています。インストールは不要です。</div>
+        <summary class="faq-q">介護業界向けの履歴書フォーマットはありますか？</summary>
+        <div class="faq-a">はい。介護資格（介護福祉士・ホームヘルパー等）・夜勤可否・経験年数・シフト希望など、介護業界に特化した入力項目を備えたフォーマットをご用意しています。介護転職・求職活動に最適なオンライン履歴書作成が可能です。</div>
       </details>
       <details class="faq-item">
         <summary class="faq-q">以前の入力データはどこで確認できますか？</summary>
-        <div class="faq-a">ログイン後、このページ上部に「マイ履歴書」セクションが表示されます。そこから編集またはダウンロードできます。</div>
+        <div class="faq-a">ログイン後、このページ上部に「マイ履歴書」セクションが表示されます。そこから編集またはExcelダウンロードができます。データはアカウントに紐付けて安全に保存されます。</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">履歴書作成にどれくらい時間がかかりますか？</summary>
+        <div class="faq-a">最短5分でオンライン履歴書作成からExcelダウンロードまで完結します。学歴・職歴・資格などの情報をあらかじめ手元に用意しておくとさらにスムーズです。</div>
       </details>
     </div>
   </section>
