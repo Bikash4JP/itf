@@ -1173,31 +1173,9 @@ function username(): string
     <div class="format-grid">
       <!-- BASIC -->
       <article class="format-card">
-        <div class="format-thumb basic" style="padding:0;overflow:hidden;background:transparent;border:none;">
-          <svg width="100%" viewBox="0 0 190 120" xmlns="http://www.w3.org/2000/svg">
-            <!-- header -->
-            <rect x="0" y="0" width="190" height="120" rx="8" fill="#EEF4FB" />
-            <rect x="0" y="0" width="190" height="36" rx="8" fill="#378ADD" />
-            <rect x="0" y="22" width="190" height="14" fill="#378ADD" />
-            <text x="95" y="24" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="600"
-              fill="#fff">標準 履歴書</text>
-            <!-- photo placeholder -->
-            <rect x="130" y="42" width="46" height="52" rx="3" fill="#B5D4F4" stroke="#378ADD" stroke-width="0.5" />
-            <text x="153" y="67" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#185FA5">写真</text>
-            <text x="153" y="78" text-anchor="middle" font-family="sans-serif" font-size="7" fill="#378ADD">3×4cm</text>
-            <!-- fields -->
-            <rect x="12" y="42" width="110" height="11" rx="2" fill="#fff" stroke="#B5D4F4" stroke-width="0.5" />
-            <text x="17" y="51" font-family="sans-serif" font-size="7" fill="#185FA5">氏名</text>
-            <rect x="12" y="57" width="110" height="9" rx="2" fill="#E6F1FB" />
-            <text x="17" y="65" font-family="sans-serif" font-size="6.5" fill="#378ADD">生年月日</text>
-            <rect x="12" y="70" width="110" height="9" rx="2" fill="#E6F1FB" />
-            <text x="17" y="78" font-family="sans-serif" font-size="6.5" fill="#378ADD">住所</text>
-            <!-- divider & history -->
-            <rect x="12" y="84" width="166" height="0.5" fill="#B5D4F4" />
-            <text x="12" y="94" font-family="sans-serif" font-size="6.5" font-weight="600" fill="#185FA5">学歴・職歴</text>
-            <rect x="12" y="97" width="130" height="6" rx="2" fill="#E6F1FB" />
-            <rect x="12" y="107" width="110" height="6" rx="2" fill="#E6F1FB" />
-          </svg>
+        <div class="format-thumb basic">
+          <img src="/rireki/images/thumb_basic.png" alt="標準履歴書フォーマットプレビュー"
+            style="width:100%;display:block;border-radius:8px;">
         </div>
         <div class="format-body">
           <h2>標準 履歴書 <span class="format-tag">おすすめ</span></h2>
@@ -1213,30 +1191,9 @@ function username(): string
 
       <!-- KAIGO -->
       <article class="format-card">
-        <div class="format-thumb kaigo" style="padding:0;overflow:hidden;background:transparent;border:none;">
-          <svg width="100%" viewBox="0 0 190 120" xmlns="http://www.w3.org/2000/svg">
-            <rect x="0" y="0" width="190" height="120" rx="8" fill="#E1F5EE" />
-            <rect x="0" y="0" width="190" height="36" rx="8" fill="#1D9E75" />
-            <rect x="0" y="22" width="190" height="14" fill="#1D9E75" />
-            <text x="95" y="24" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="600"
-              fill="#fff">介護向け 履歴書</text>
-            <!-- photo placeholder -->
-            <rect x="130" y="42" width="46" height="52" rx="3" fill="#9FE1CB" stroke="#1D9E75" stroke-width="0.5" />
-            <text x="153" y="67" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#0F6E56">写真</text>
-            <text x="153" y="78" text-anchor="middle" font-family="sans-serif" font-size="7" fill="#1D9E75">3×4cm</text>
-            <!-- fields -->
-            <rect x="12" y="42" width="110" height="11" rx="2" fill="#fff" stroke="#9FE1CB" stroke-width="0.5" />
-            <text x="17" y="51" font-family="sans-serif" font-size="7" fill="#0F6E56">氏名</text>
-            <rect x="12" y="57" width="110" height="9" rx="2" fill="#E1F5EE" />
-            <text x="17" y="65" font-family="sans-serif" font-size="6.5" fill="#1D9E75">保有資格（介護福祉士など）</text>
-            <rect x="12" y="70" width="110" height="9" rx="2" fill="#E1F5EE" />
-            <text x="17" y="78" font-family="sans-serif" font-size="6.5" fill="#1D9E75">夜勤可否・シフト希望</text>
-            <!-- divider & history -->
-            <rect x="12" y="84" width="166" height="0.5" fill="#9FE1CB" />
-            <text x="12" y="94" font-family="sans-serif" font-size="6.5" font-weight="600" fill="#0F6E56">介護経験・年数</text>
-            <rect x="12" y="97" width="130" height="6" rx="2" fill="#E1F5EE" />
-            <rect x="12" y="107" width="110" height="6" rx="2" fill="#E1F5EE" />
-          </svg>
+        <div class="format-thumb kaigo">
+          <img src="/rireki/images/thumb_kaigo.png" alt="介護向け履歴書フォーマットプレビュー"
+            style="width:100%;display:block;border-radius:8px;">
         </div>
         <div class="format-body">
           <h2>介護向け 履歴書 <span class="format-tag green">業界特化</span></h2>
@@ -1253,32 +1210,9 @@ function username(): string
       <!-- SOON -->
       <article class="format-card">
         <div class="format-soon-badge">近日公開</div>
-        <div class="format-thumb soon"
-          style="padding:0;overflow:hidden;background:transparent;border:none;opacity:0.55;">
-          <svg width="100%" viewBox="0 0 190 120" xmlns="http://www.w3.org/2000/svg">
-            <rect x="0" y="0" width="190" height="120" rx="8" fill="#F1EFE8" />
-            <rect x="0" y="0" width="190" height="36" rx="8" fill="#888780" />
-            <rect x="0" y="22" width="190" height="14" fill="#888780" />
-            <text x="95" y="24" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="600"
-              fill="#fff">新卒向け 履歴書</text>
-            <!-- photo placeholder -->
-            <rect x="130" y="42" width="46" height="52" rx="3" fill="#D3D1C7" stroke="#888780" stroke-width="0.5" />
-            <text x="153" y="67" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#5F5E5A">写真</text>
-            <text x="153" y="78" text-anchor="middle" font-family="sans-serif" font-size="7" fill="#888780">3×4cm</text>
-            <!-- fields -->
-            <rect x="12" y="42" width="110" height="11" rx="2" fill="#fff" stroke="#D3D1C7" stroke-width="0.5" />
-            <text x="17" y="51" font-family="sans-serif" font-size="7" fill="#5F5E5A">氏名</text>
-            <rect x="12" y="57" width="110" height="9" rx="2" fill="#F1EFE8" />
-            <text x="17" y="65" font-family="sans-serif" font-size="6.5" fill="#888780">卒業見込み・ゼミ</text>
-            <rect x="12" y="70" width="110" height="9" rx="2" fill="#F1EFE8" />
-            <text x="17" y="78" font-family="sans-serif" font-size="6.5" fill="#888780">インターン・志望業界</text>
-            <!-- divider & history -->
-            <rect x="12" y="84" width="166" height="0.5" fill="#D3D1C7" />
-            <text x="12" y="94" font-family="sans-serif" font-size="6.5" font-weight="600"
-              fill="#5F5E5A">活動実績・自己PR</text>
-            <rect x="12" y="97" width="130" height="6" rx="2" fill="#F1EFE8" />
-            <rect x="12" y="107" width="110" height="6" rx="2" fill="#F1EFE8" />
-          </svg>
+        <div class="format-thumb soon">
+          <img src="/rireki/images/thumb_shinsotsu.png" alt="新卒向け履歴書フォーマットプレビュー"
+            style="width:100%;display:block;border-radius:8px;opacity:0.55;">
         </div>
         <div class="format-body">
           <h2>新卒向け 履歴書</h2>
