@@ -171,6 +171,11 @@ function build_data_from_row(array $row): array {
   $data['planned_resign_year']  = trim((string)($data['planned_resign_year'] ?? ''));
   $data['planned_resign_month'] = trim((string)($data['planned_resign_month'] ?? ''));
 
+  // ✅ Combine address_auto (prefecture/city) + address (street/building) -> write combined to B8
+  $addrAuto = trim((string)($data['address_auto'] ?? ''));
+  $addrManual = trim((string)($data['address'] ?? ''));
+  $data['address'] = trim($addrAuto . ($addrAuto !== '' && $addrManual !== '' ? ' ' : '') . $addrManual);
+
   return $data;
 }
 
