@@ -14,6 +14,7 @@ function buildCanonicalData(array $post, ?array $files): array {
     'dob_day'          => trim($post['dob_day'] ?? ''),
     'birthplace'       => trim($post['birthplace'] ?? ''),
     'postal'           => trim($post['postal'] ?? ''),
+    'address_auto'     => trim($post['address_auto'] ?? ''),
     'address'          => trim($post['address'] ?? ''),
     'nationality'      => trim($post['nationality'] ?? ''),
     'gender'           => trim($post['gender'] ?? ''),
@@ -145,6 +146,10 @@ function buildCanonicalData(array $post, ?array $files): array {
     move_uploaded_file($files['photo']['tmp_name'], $dest);
     $photoPath = $dest;
   }
+
+  // Merge address_auto + address into 'address' for PDF/Excel output (cell B8)
+  $fullAddress = trim(($singles['address_auto'] ?? '') . ' ' . ($singles['address'] ?? ''));
+  $singles['address'] = $fullAddress;
 
   return array_merge($singles, [
     'education'   => $education,

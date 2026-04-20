@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // /home/it-future/www/itf/rireki/kaigo/rireki.php
 
 ini_set('session.cookie_path', '/');
@@ -77,7 +77,7 @@ function allowed_columns(): array {
   // ✅ keep strict whitelist (security)
   return [
     'step_current',
-    'name_romaji','name_kana','dob_year','dob_month','dob_day','age_autofill','birthplace','postal','address','contact_phone','email',
+    'name_romaji','name_kana','dob_year','dob_month','dob_day','age_autofill','birthplace','postal','address_auto','address','contact_phone','email',
     'nationality','gender','religion','marital_status','height_cm','weight_kg',
     'passport_has','passport_exp_year','passport_exp_month','passport_exp_day','passport_no','past_travel_count','past_travel_details',
     'recent_entry_year','recent_entry_month','recent_entry_day','recent_exit_year','recent_exit_month','recent_exit_day',
@@ -142,7 +142,7 @@ function map_post_to_columns(array $post): array {
   // direct fields: name matches columns (most are direct)
   $direct = [
     'step_current',
-    'name_romaji','name_kana','dob_year','dob_month','dob_day','age_autofill','birthplace','postal','address','contact_phone','email',
+    'name_romaji','name_kana','dob_year','dob_month','dob_day','age_autofill','birthplace','postal','address_auto','address','contact_phone','email',
     'nationality','gender','religion','marital_status','height_cm','weight_kg',
     'passport_has','passport_exp_year','passport_exp_month','passport_exp_day','passport_no','past_travel_count','past_travel_details',
     'recent_entry_year','recent_entry_month','recent_entry_day','recent_exit_year','recent_exit_month','recent_exit_day',
@@ -645,25 +645,33 @@ $photoPath = (string)($row['photo_path'] ?? '');
             </label>
             <div></div>
 
-            <label>
-              <span class="lbl">郵便番号<span class="req">*</span></span>
-              <div style="display:flex;gap:8px;align-items:center">
-                <input type="text" name="postal" id="postal" placeholder="1234567 (ハイフンなし)" inputmode="numeric" required pattern="\d{3}-?\d{4}" maxlength="8" style="flex:1" value="<?php echo h($row['postal'] ?? ''); ?>">
-                <button type="button" id="btnPostal" style="padding:6px 12px;border-radius:8px;border:1px solid #ccc;background:#f0f8ff;cursor:pointer;white-space:nowrap;">住所検索</button>
+            <!-- ── 現住所 グループ ── -->
+            <div style="grid-column:1/-1;border:1px solid rgba(59,158,255,.2);border-radius:12px;padding:14px 16px 8px;background:rgba(59,158,255,.06);margin:4px 0 0">
+              <div style="font-weight:800;color:#7dc8ff;font-size:14px;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+                🏠 現住所
               </div>
-              <small id="postalHint" style="color:#0284c7;font-size:12px;margin-top:2px;display:block"></small>
-            </label>
+              <div class="grid-2" style="gap:10px">
+                <label>
+                  <span class="lbl">郵便番号<span class="req">*</span></span>
+                  <div style="display:flex;gap:8px;align-items:center">
+                    <input type="text" name="postal" id="postal" placeholder="1234567 (ハイフンなし)" inputmode="numeric" required pattern="\d{3}-?\d{4}" maxlength="8" style="flex:1" value="<?php echo h($row['postal'] ?? ''); ?>">
+                    <button type="button" id="btnPostal" style="padding:6px 12px;border-radius:8px;border:1px solid rgba(59,158,255,.3);background:rgba(59,158,255,.15);color:#7dc8ff;cursor:pointer;white-space:nowrap;font-weight:700;font-size:13px">住所検索</button>
+                  </div>
+                  <small id="postalHint" style="color:#0284c7;font-size:12px;margin-top:2px;display:block"></small>
+                </label>
 
-            <label>
-              <span class="lbl">都道府県・市区町村（自動）</span>
-              <input type="text" name="address_auto" id="address_auto" placeholder="郵便番号を入力すると自動入力されます" readonly style="background:#f5f9ff;color:#555" value="<?php echo h($row['address_auto'] ?? ''); ?>">
-            </label>
+                <label>
+                  <span class="lbl">都道府県・市区町村（自動）</span>
+                  <input type="text" name="address_auto" id="address_auto" placeholder="郵便番号を入力すると自動入力されます" style="background:rgba(255,255,255,.03);color:var(--muted);border-color:rgba(255,255,255,.08)" value="<?php echo h($row['address_auto'] ?? ''); ?>">
+                </label>
 
-            <label>
-              <span class="lbl">現住所（丁目・番地・建物名・部屋番号）<span class="req">*</span></span>
-              <input type="text" name="address" placeholder="例：1-2-3 ○○マンション 101号" required autocomplete="street-address" value="<?php echo h($row['address'] ?? ''); ?>">
-              <small class="hint">※ 都道府県・市区町村は上の欄、番地・建物名はここに記入</small>
-            </label>
+                <label style="grid-column:1/-1">
+                  <span class="lbl">丁目・番地・建物名・部屋番号<span class="req">*</span></span>
+                  <input type="text" name="address" placeholder="例：1-2-3 ○○マンション 101号" required autocomplete="street-address" value="<?php echo h($row['address'] ?? ''); ?>">
+                  <small class="hint">※ 都道府県・市区町村は上の欄で自動入力、番地・建物名はここに記入</small>
+                </label>
+              </div>
+            </div>
 
             <label>
               <span class="lbl">個人携帯番号<span class="req">*</span></span>

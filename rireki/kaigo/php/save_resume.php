@@ -15,7 +15,7 @@ if (!preg_match('/^[a-f0-9]{32}$/', $token)) out(false, ['error'=>'Invalid token
 $allowedCols = [
   'step_current',
   'name_romaji','name_kana','dob_year','dob_month','dob_day','age_autofill',
-  'birthplace','postal','address','contact_phone','email','nationality','gender','religion','marital_status',
+  'birthplace','postal','address_auto','address','contact_phone','email','nationality','gender','religion','marital_status',
   'height_cm','weight_kg',
   'passport_has','passport_exp_year','passport_exp_month','passport_exp_day','passport_no',
   'past_travel_count','past_travel_details',

@@ -388,7 +388,7 @@ $today = date('Y年m月d日');
       </tr>
       <tr>
         <td class="label">住所</td>
-        <td class="val" colspan="3"><?= h(val($row, 'address')) ?></td>
+        <td class="val" colspan="3"><?= h(trim(val($row, 'address_auto') . ' ' . val($row, 'address'))) ?></td>
         <td class="label">身長 / 体重</td>
         <td class="val"><?= h(val($row, 'height_cm')) ?> cm / <?= h(val($row, 'weight_kg')) ?> kg</td>
       </tr>
