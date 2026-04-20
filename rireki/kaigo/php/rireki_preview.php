@@ -180,6 +180,13 @@ function fetch_kaigo_by_token(PDO $pdo, string $token): ?array
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && (string) ($_POST['action'] ?? '') === 'log_apply_activity') {
   header('Content-Type: application/json; charset=utf-8');
 
+  // ✅ Security: require login to log activity (prevent unauthenticated spam)
+  if (!$HAS_USER_AUTH || !app_is_logged_in()) {
+    http_response_code(401);
+    echo json_encode(['ok' => false, 'error' => 'not_logged_in'], JSON_UNESCAPED_UNICODE);
+    exit;
+  }
+
   if (!$HAS_ACTIVITY_LOGGER) {
     echo json_encode(['ok' => false, 'error' => 'activity_logger_missing'], JSON_UNESCAPED_UNICODE);
     exit;
@@ -1528,7 +1535,6 @@ $step6 = [
             </div>
             <div>
               <h1 class="title">履歴書プレビュー</h1>
-              <p class="crumb">ホーム ＞ 履歴書メーカー ＞ 介護向け ＞ プレビュー</p>
             </div>
           </div>
           <a class="btn" href="<?= h($headerBackHref) ?>"><?= h($headerBackLabel) ?></a>

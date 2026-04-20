@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 // /home/it-future/www/itf/rireki/kaigo/rireki.php
 
 ini_set('session.cookie_path', '/');
@@ -647,12 +647,22 @@ $photoPath = (string)($row['photo_path'] ?? '');
 
             <label>
               <span class="lbl">郵便番号<span class="req">*</span></span>
-              <input type="text" name="postal" id="postal" placeholder="現在の郵便番号を入力" inputmode="numeric" required pattern="\d{3}-?\d{4}" value="<?php echo h($row['postal'] ?? ''); ?>">
+              <div style="display:flex;gap:8px;align-items:center">
+                <input type="text" name="postal" id="postal" placeholder="1234567 (ハイフンなし)" inputmode="numeric" required pattern="\d{3}-?\d{4}" maxlength="8" style="flex:1" value="<?php echo h($row['postal'] ?? ''); ?>">
+                <button type="button" id="btnPostal" style="padding:6px 12px;border-radius:8px;border:1px solid #ccc;background:#f0f8ff;cursor:pointer;white-space:nowrap;">住所検索</button>
+              </div>
+              <small id="postalHint" style="color:#0284c7;font-size:12px;margin-top:2px;display:block"></small>
             </label>
 
             <label>
-              <span class="lbl">現住所<span class="req">*</span></span>
-              <input type="text" name="address" placeholder="神奈川県横浜市…" required autocomplete="street-address" value="<?php echo h($row['address'] ?? ''); ?>">
+              <span class="lbl">都道府県・市区町村（自動）</span>
+              <input type="text" name="address_auto" id="address_auto" placeholder="郵便番号を入力すると自動入力されます" readonly style="background:#f5f9ff;color:#555" value="<?php echo h($row['address_auto'] ?? ''); ?>">
+            </label>
+
+            <label>
+              <span class="lbl">現住所（丁目・番地・建物名・部屋番号）<span class="req">*</span></span>
+              <input type="text" name="address" placeholder="例：1-2-3 ○○マンション 101号" required autocomplete="street-address" value="<?php echo h($row['address'] ?? ''); ?>">
+              <small class="hint">※ 都道府県・市区町村は上の欄、番地・建物名はここに記入</small>
             </label>
 
             <label>
@@ -668,15 +678,47 @@ $photoPath = (string)($row['photo_path'] ?? '');
 
             <label>
               <span class="lbl">国籍<span class="req">*</span></span>
-              <select name="nationality" required>
+              <select name="nationality" id="nationality" required>
                 <option value=""></option>
                 <?php
-                  $opts = ['バングラデシュ','インドネシア国籍','ベトナム国籍','ネパール国籍','ミャンマー国籍','ペルー国籍','中国国籍','韓国国籍'];
+                  $mainOpts = ['バングラデシュ','インドネシア','ベトナム','ネパール','ミャンマー','ペルー','中国','韓国'];
                   $cur = (string)($row['nationality'] ?? '');
-                  foreach ($opts as $o) {
+                  foreach ($mainOpts as $o) {
                     $sel = ($cur === $o) ? 'selected' : '';
                     echo '<option '.$sel.'>'.h($o).'</option>';
                   }
+
+                  // Full world list A-Z
+                  $allCountries = [
+                    'アイスランド','アイルランド','アゼルバイジャン','アフガニスタン','アルジェリア','アルゼンチン','アルバニア','アルメニア',
+                    'アンゴラ','アンティグア・バーブーダ','アンドラ','イエメン','イギリス','イスラエル','イタリア','イラク','イラン',
+                    'インド','ウガンダ','ウクライナ','ウズベキスタン','ウルグアイ','エクアドル','エジプト','エストニア','エチオピア',
+                    'エリトリア','エルサルバドル','オーストラリア','オーストリア','オマーン','オランダ','ガーナ','カーボベルデ','カザフスタン',
+                    'カタール','カナダ','ガボン','カメルーン','カンボジア','ギニア','ギニアビサウ','キプロス','キューバ','ギリシャ',
+                    'キリバス','キルギス','グアテマラ','クウェート','クロアチア','ケニア','コートジボワール','コスタリカ','コモロ',
+                    'コロンビア','コンゴ共和国','コンゴ民主共和国','サウジアラビア','サモア','サントメ・プリンシペ','ザンビア',
+                    'サンマリノ','シエラレオネ','ジブチ','ジャマイカ','ジョージア','シリア','シンガポール','ジンバブエ','スイス',
+                    'スウェーデン','スーダン','スペイン','スリナム','スリランカ','スロバキア','スロベニア','スワジランド（エスワティニ）',
+                    'セーシェル','赤道ギニア','セネガル','セルビア','セントクリストファー・ネービス','セントビンセント・グレナディーン',
+                    'セントルシア','ソマリア','ソロモン諸島','タイ','タジキスタン','タンザニア','チェコ','チャド','中央アフリカ',
+                    'チュニジア','チリ','ツバル','デンマーク','ドイツ','ドミニカ共和国','ドミニカ国','トリニダード・トバゴ',
+                    'トルクメニスタン','トルコ','トンガ','ナイジェリア','ナウル','ナミビア','ニカラグア','ニジェール','ニュージーランド',
+                    'ノルウェー','パキスタン','パナマ','バヌアツ','バハマ','パプアニューギニア','パラオ','パラグアイ','バルバドス',
+                    'ハンガリー','バングラデシュ（国際）','東ティモール','フィジー','フィリピン','フィンランド','ブータン','ブラジル',
+                    'フランス','ブルガリア','ブルキナファソ','ブルネイ','ブルンジ','ベトナム（国際）','ベナン','ベネズエラ','ベラルーシ',
+                    'ベリーズ','ポーランド','ボスニア・ヘルツェゴビナ','ボツワナ','ボリビア','ポルトガル','ホンジュラス','マーシャル諸島',
+                    'マダガスカル','マラウイ','マリ','マルタ','マレーシア','ミクロネシア','南アフリカ','南スーダン','モーリシャス',
+                    'モーリタニア','モザンビーク','モナコ','モルディブ','モルドバ','モロッコ','モンゴル','モンテネグロ','ヨルダン',
+                    'ラオス','ラトビア','リトアニア','リビア','リヒテンシュタイン','リベリア','ルーマニア','ルワンダ','レソト',
+                    'レバノン','ロシア'
+                  ];
+                  // Remove duplicates with main opts (different spelling variants kept)
+                  echo '<optgroup label="─ 全ての国（A-Z）─">';
+                  foreach ($allCountries as $o) {
+                    $sel = ($cur === $o) ? 'selected' : '';
+                    echo '<option '.$sel.'>'.h($o).'</option>';
+                  }
+                  echo '</optgroup>';
                 ?>
               </select>
             </label>
@@ -1436,6 +1478,8 @@ $photoPath = (string)($row['photo_path'] ?? '');
 
   <script src="/rireki/kaigo/js/kaigo.js?v=5"></script>
   <script src="/rireki/kaigo/js/rireki_form_extra.js?v=20260129"></script>
+  <script src="/rireki/kaigo/js/postal_autofill.js?v=1"></script>
 </body>
 
 </html>
+

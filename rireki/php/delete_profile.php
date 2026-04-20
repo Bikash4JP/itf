@@ -1,35 +1,55 @@
 <?php
 // /home/it-future/www/itf/rireki/php/delete_profile.php
-
+// Deletes all data for the logged-in user and redirects to logout.
 declare(strict_types=1);
 
 ini_set('session.cookie_path', '/');
 ini_set('session.cookie_domain', '.it-future.jp');
 ini_set('session.cookie_lifetime', 86400);
+ini_set('session.cookie_secure', true);
+ini_set('session.cookie_httponly', true);
+session_start();
 
+require_once $_SERVER['DOCUMENT_ROOT'] . '/php/db_connect.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/php/user_auth.php';
 
-if (!app_is_logged_in() || $_SERVER['REQUEST_METHOD'] !== 'POST' || ($_POST['action'] ?? '') !== 'delete_all') {
-    header('Location: /rireki/user_data.php', true, 302);
-    exit;
+if (!app_is_logged_in()) {
+  header('Location: /php/user_login.php', true, 302);
+  exit;
 }
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || ($_POST['action'] ?? '') !== 'delete_all') {
+  header('Location: /rireki/kaigo/php/rireki_preview.php', true, 302);
+  exit;
+}
+
+$uid = (int) app_user_id();
+app_ensure_tables($pdo);
 
 try {
-    $pdo = app_pdo();
-    $uid = (int)app_user_id();
+  // Delete kaigo resume drafts
+  $pdo->prepare("DELETE FROM app_resume_kaigo WHERE user_id = ?")->execute([$uid]);
 
-    // Delete records from both resume tables
-    $st1 = $pdo->prepare("DELETE FROM app_resume_basic WHERE user_id = ?");
-    $st1->execute([$uid]);
+  // Delete saved profile snapshots
+  $pdo->prepare("DELETE FROM app_profiles WHERE user_id = ?")->execute([$uid]);
 
-    $st2 = $pdo->prepare("DELETE FROM app_resume_kaigo WHERE user_id = ?");
-    $st2->execute([$uid]);
+  // Delete application history
+  $pdo->prepare("DELETE FROM app_applications WHERE user_id = ?")->execute([$uid]);
 
-    // Optional: we don't delete from APP_TBL_USERS, only resume data.
+  // Delete resume tokens
+  $pdo->prepare("DELETE FROM app_resumes WHERE user_id = ?")->execute([$uid]);
+
+  // Delete user account itself
+  $pdo->prepare("DELETE FROM app_users WHERE id = ?")->execute([$uid]);
+
 } catch (Throwable $e) {
-    // ignore
+  error_log('[delete_profile] ' . $e->getMessage());
 }
 
-// Redirect back to user_data (will show empty state now)
-header('Location: /rireki/user_data.php', true, 302);
+// Clear session and redirect to login
+session_unset();
+session_destroy();
+setcookie(session_name(), '', ['expires' => 1, 'path' => '/', 'domain' => '.it-future.jp', 'secure' => true, 'httponly' => true]);
+
+header('Location: /php/user_login.php?deleted=1', true, 302);
 exit;
