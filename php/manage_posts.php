@@ -14,7 +14,8 @@ require_once __DIR__ . '/db_connect.php';
 $stmt = $pdo->query("
   SELECT *
   FROM posts
-  ORDER BY (post_type='job') DESC, date DESC, id DESC
+  WHERE post_type = 'news'
+  ORDER BY date DESC, id DESC
 ");
 $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -23,7 +24,7 @@ $q = trim($_GET['q'] ?? '');
 if ($q !== '') {
   $needle = mb_strtolower($q);
   $posts = array_values(array_filter($posts, function($p) use ($needle){
-    $hay = mb_strtolower(($p['title'] ?? '') . ' ' . ($p['summary'] ?? '') . ' ' . ($p['company_name'] ?? ''));
+    $hay = mb_strtolower(($p['title'] ?? '') . ' ' . ($p['summary'] ?? ''));
     return strpos($hay, $needle) !== false;
   }));
 }
@@ -101,7 +102,7 @@ if ($q !== '') {
   <div class="wrap">
     <form class="toolbar" method="get" action="manage_posts.php">
       <div class="search">
-        <input type="text" name="q" value="<?=htmlspecialchars($q,ENT_QUOTES,'UTF-8')?>" placeholder="タイトル / 概要 / 会社名 を検索">
+        <input type="text" name="q" value="<?=htmlspecialchars($q,ENT_QUOTES,'UTF-8')?>" placeholder="タイトル / 概要 を検索">
       </div>
     </form>
 
@@ -111,28 +112,19 @@ if ($q !== '') {
       <div class="cards">
         <?php foreach ($posts as $p): ?>
           <div class="card">
-            <span class="type"><?= $p['post_type']==='job' ? '求人' : 'ニュース' ?></span>
+            <span class="type">ニュース</span>
             <h3><?= htmlspecialchars($p['title'] ?? '') ?></h3>
             <div class="meta">
               <span>投稿日: <?= htmlspecialchars($p['date'] ?? '') ?></span>
               <span>投稿者: <?= htmlspecialchars($p['posted_by'] ?? '') ?></span>
-              <?php if ($p['post_type']==='job'): ?>
-                <span>勤務地: <?= htmlspecialchars($p['job_location'] ?? '-') ?></span>
-                <span>カテゴリ: <?= htmlspecialchars($p['job_category'] ?? '-') ?></span>
-              <?php endif; ?>
             </div>
             <?php if (!empty($p['summary'])): ?>
               <div class="sum"><?= nl2br(htmlspecialchars($p['summary'])) ?></div>
             <?php endif; ?>
 
             <div class="actions">
-              <?php if ($p['post_type']==='job'): ?>
-                <a class="btn primary" href="edit_job.php?id=<?= (int)$p['id'] ?>">求人を編集</a>
-                <a class="btn" href="job_details.php?job_id=<?= (int)$p['id'] ?>" target="_blank">公開ページを見る</a>
-              <?php else: ?>
-                <a class="btn primary" href="edit_post.php?id=<?= (int)$p['id'] ?>">編集</a>
-                <a class="btn" href="../news.html" target="_blank">公開ページを見る</a>
-              <?php endif; ?>
+              <a class="btn primary" href="edit_post.php?id=<?= (int)$p['id'] ?>">編集</a>
+              <a class="btn" href="../news.html" target="_blank">公開ページを見る</a>
               <a class="btn bad" href="delete_post.php?id=<?= (int)$p['id'] ?>" onclick="return confirm('この投稿を削除しますか？')">削除</a>
             </div>
           </div>

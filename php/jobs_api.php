@@ -327,11 +327,13 @@ try {
   } catch(Throwable $e) {}
 
   if ($action === 'list') {
+    $exists = posts_existing_cols($pdo);
+    $orderCol = isset($exists['updated_at']) ? 'updated_at' : 'date';
     $stmt = $pdo->query("
       SELECT ".select_cols_sql($pdo)."
       FROM posts
       WHERE post_type='job'
-      ORDER BY updated_at DESC, id DESC
+      ORDER BY $orderCol DESC, id DESC
     ");
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -515,7 +517,9 @@ try {
 
     if (count($updates) > 0) {
       $values[] = $id;
-      $sql = "UPDATE posts SET ".implode(', ', $updates).", updated_at = NOW() WHERE id = ? AND post_type='job'";
+      $exists = posts_existing_cols($pdo);
+      $updSql = isset($exists['updated_at']) ? ", updated_at = NOW()" : "";
+      $sql = "UPDATE posts SET ".implode(', ', $updates)."$updSql WHERE id = ? AND post_type='job'";
       $st = $pdo->prepare($sql);
       $st->execute($values);
     }
@@ -613,7 +617,10 @@ try {
       }
     }
 
-    $pdo->prepare("UPDATE posts SET updated_at=NOW() WHERE id=? AND post_type='job'")->execute([$jobId]);
+    $exists = posts_existing_cols($pdo);
+    if (isset($exists['updated_at'])) {
+        $pdo->prepare("UPDATE posts SET updated_at=NOW() WHERE id=? AND post_type='job'")->execute([$jobId]);
+    }
 
     $u = (string)($_SESSION['username'] ?? '');
     _log_job_activity($pdo, 'delete_file', $jobId, "{$u} が「{$company}」（求人ID: {$jobId}）の求人票ファイルを削除しました。{$fileName}", $company);
@@ -659,7 +666,10 @@ try {
     $st = $pdo->prepare("INSERT INTO job_files (job_post_id, file_path, file_name, mime) VALUES (?,?,?,?)");
     $st->execute([$id, $publicPath, $orig, $mime]);
 
-    $pdo->prepare("UPDATE posts SET updated_at=NOW() WHERE id=? AND post_type='job'")->execute([$id]);
+    $exists = posts_existing_cols($pdo);
+    if (isset($exists['updated_at'])) {
+        $pdo->prepare("UPDATE posts SET updated_at=NOW() WHERE id=? AND post_type='job'")->execute([$id]);
+    }
 
     $stC = $pdo->prepare("SELECT company_name FROM posts WHERE id=? AND post_type='job'");
     $stC->execute([$id]);
@@ -674,6 +684,6 @@ try {
 
   json_out(['ok'=>false,'error'=>'Unknown action'], 400);
 
-} catch(Exception $e){
-  json_out(['ok'=>false,'error'=>$e->getMessage()], 500);
+} catch (Throwable $e) {
+  json_out(['ok'=>false, 'error'=>$e->getMessage(), 'file'=>$e->getFile(), 'line'=>$e->getLine()], 500);
 }

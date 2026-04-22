@@ -42,6 +42,14 @@ try {
   <title>求人管理（Airtable風）</title>
 
   <link rel="stylesheet" href="https://it-future.jp/css/staffdb.css">
+  <script>
+    window.onerror = function(msg, url, line, col, error) {
+       alert("JS ERROR: " + msg + "\nLine: " + line + "\nCol: " + col);
+    };
+    window.onunhandledrejection = function(e) {
+       alert("PROMISE ERROR: " + (e.reason ? e.reason.message || e.reason : "Unknown reason"));
+    };
+  </script>
   <link href="https://unpkg.com/tabulator-tables@6.3.0/dist/css/tabulator.min.css" rel="stylesheet">
   <script src="https://unpkg.com/tabulator-tables@6.3.0/dist/js/tabulator.min.js"></script>
 
@@ -150,7 +158,7 @@ try {
 
 <script>
 const CSRF = <?= json_encode($_SESSION['csrf_token']) ?>;
-const STAFF_LIST = <?= json_encode($staffList, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) ?>;
+const STAFF_LIST = <?= json_encode($staffList, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_INVALID_UTF8_SUBSTITUTE) ?: '[]' ?>;
 
 const STAFF_NAME_BY_ID = {};
 const STAFF_VALUE_LIST = (function(){
@@ -279,8 +287,19 @@ function filesPreviewFormatter(cell){
 async function api(action, data=null){
   const url = "jobs_api.php?action=" + encodeURIComponent(action);
   if(!data){
-    const r = await fetch(url, {credentials:"same-origin"});
-    return r.json();
+    try {
+      const r = await fetch(url, {credentials:"same-origin"});
+      const text = await r.text();
+      try {
+        return JSON.parse(text);
+      } catch(e) {
+        alert("API Response is not valid JSON. Response start: " + text.substring(0, 100));
+        return {ok: false, error: "Invalid JSON response"};
+      }
+    } catch(e) {
+      alert("Network or Fetch Error: " + e.message);
+      return {ok: false, error: e.message};
+    }
   }
   const form = new FormData();
   for(const k in data){
@@ -290,8 +309,19 @@ async function api(action, data=null){
     else form.append(k, v);
   }
   form.append("csrf_token", CSRF);
-  const r = await fetch(url, {method:"POST", body:form, credentials:"same-origin"});
-  return r.json();
+  try {
+    const r = await fetch(url, {method:"POST", body:form, credentials:"same-origin"});
+    const text = await r.text();
+    try {
+      return JSON.parse(text);
+    } catch(e) {
+      alert("API POST Response is not valid JSON. Response start: " + text.substring(0, 100));
+      return {ok: false, error: "Invalid JSON response"};
+    }
+  } catch(e) {
+    alert("Network or Fetch Error on POST: " + e.message);
+    return {ok: false, error: e.message};
+  }
 }
 
 function normalizeRow(row){
