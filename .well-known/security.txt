@@ -1,0 +1,6 @@
+Contact: mailto:info@it-future.jp
+Contact: https://it-future.jp/inquiry.html
+Expires: 2027-04-22T00:00:00.000Z
+Preferred-Languages: ja, en
+Canonical: https://it-future.jp/.well-known/security.txt
+Policy: https://it-future.jp/privacy.html

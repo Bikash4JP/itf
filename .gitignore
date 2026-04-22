@@ -60,6 +60,16 @@ composer_audit.php
 sitemap_generator.php
 test_db_connection.php
 
+# --- Dev & Temp Scripts (NEVER commit these) ---
+*.ps1
+*.psm1
+*.psd1
+*.py
+*.csv
+*.sql
+*.ods
+lh-report.json
+
 # --- Personal links and Notes ,  Files ---
 links/
 notes/
