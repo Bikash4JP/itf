@@ -34,7 +34,7 @@ $(function() {
     });
 
     for( let i=0,len=$items.length; i<len; i++ ) {
-        $controller.append('<a href="#' + (i+1) + '">' + (i+1) + '</a>');
+        $controller.append('<a href="#' + (i+1) + '" aria-label="Go to slide ' + (i+1) + '">' + (i+1) + '</a>');
     }
 
     /**

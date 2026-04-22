@@ -109,9 +109,9 @@
 <link rel="stylesheet" id="wp-pagenavi-css" href="css/pagenavi-css.css" type="text/css" media="all">
 <link rel="stylesheet" href="css/footer.css">
 <link rel="stylesheet" href="css/greeting.css">
-<link rel="stylesheet" href="css/top.css">
-<link rel="stylesheet" href="css/main_intro.css">
-<script src="js/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="css/top.css?v=2">
+<link rel="stylesheet" href="css/main_intro.css?v=2">
+<script defer src="js/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
 <script defer src="js/top.js"></script>
 <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
@@ -120,6 +120,8 @@
 <meta name="msapplication-TileImage" content="images/url_logo.PNG">
 <link rel="preload" as="image" href="images/mv01_pc.webp" media="(min-width: 481px)" fetchpriority="high">
 <link rel="preload" as="image" href="images/mv01_sp.webp" media="(max-width: 480px)" fetchpriority="high">
+<link rel="preload" as="image" href="images/mv01_pc_content.webp" media="(min-width: 481px)" fetchpriority="high">
+<link rel="preload" as="image" href="images/mv01_sp_content.webp" media="(max-width: 480px)" fetchpriority="high">
 </head>
 
 <body class="home blog">
@@ -137,7 +139,7 @@
                         <h1 class="sp-2 logo"><a href="https://it-future.jp/" class="logo-link flex vcenter"><img
                                     src="https://it-future.jp/images/logo.png" alt="株式会社アイティーエフ - 外国人財紹介サービス"></a></h1>
                         <div id="sp-menu-open" class="sp l-animebtn sp-3">
-                            <a onclick="document.getElementById('sp-menu-acc').classList.toggle('active')">
+                            <a onclick="document.getElementById('sp-menu-acc').classList.toggle('active')" aria-label="Toggle Navigation">
                                 <div class="bar"><span></span><span></span><span></span></div>
                             </a>
                         </div>
@@ -159,7 +161,7 @@
                                     </a>
                                 </li>
                                 <li class="cta-item document flex vcenter">
-                                    <select id="language-selector">
+                                    <select id="language-selector" aria-label="Language">
                                         <option value="ja">日本語</option>
                                         <option value="en">English</option>
                                         <option value="id">Indonesian</option>
@@ -189,50 +191,52 @@
                     <ul id="topImages">
                         <li class="topImagesInner topImagesInner--01 js-current">
                             <a href="#">
-                                <img src="images/mv01_pc_content.webp" alt="株式会社アイティーエフ - 会社概要" class="topImagesBody u-only_pc_tab">
-                                <img src="images/mv01_sp_content.webp" alt="株式会社アイティーエフ - 会社概要" class="topImagesBody u-only_sp">
+                                <img src="images/mv01_pc_content.webp" alt="株式会社アイティーエフ - 会社概要" class="topImagesBody u-only_pc_tab" width="1920" height="742" decoding="async">
+                                <img src="images/mv01_sp_content.webp" alt="株式会社アイティーエフ - 会社概要" class="topImagesBody u-only_sp" width="750" height="1334" decoding="async">
                             </a>
                         </li>
                         <li class="topImagesInner topImagesInner--02">
                             <a href="about.html#itf-reu">
-                                <img src="images/mv02_pc_content.webp" alt="株式会社アイティーエフ - 事業紹介" class="topImagesBody u-only_pc_tab">
-                                <img src="images/mv02_sp_content.webp" alt="株式会社アイティーエフ - 事業紹介" class="topImagesBody u-only_sp">
+                                <img src="images/mv02_pc_content.webp" alt="株式会社アイティーエフ - 事業紹介" class="topImagesBody u-only_pc_tab" loading="lazy" decoding="async" width="2142" height="889">
+                                <img src="images/mv02_sp_content.webp" alt="株式会社アイティーエフ - 事業紹介" class="topImagesBody u-only_sp" loading="lazy" decoding="async">
                             </a>
                         </li>
                         <li class="topImagesInner topImagesInner--03">
                             <a href="index.html#service-naiyo">
-                                <img src="images/mv03_pc_content.webp" alt="株式会社アイティーエフ - サービス紹介" class="topImagesBody u-only_pc_tab">
-                                <img src="images/mv03_sp_content.webp" alt="株式会社アイティーエフ - サービス紹介" class="topImagesBody u-only_sp">
+                                <img src="images/mv03_pc_content.webp" alt="株式会社アイティーエフ - サービス紹介" class="topImagesBody u-only_pc_tab" loading="lazy" decoding="async">
+                                <img src="images/mv03_sp_content.webp" alt="株式会社アイティーエフ - サービス紹介" class="topImagesBody u-only_sp" loading="lazy" decoding="async">
                             </a>
                         </li>
                         <li class="topImagesInner topImagesInner--04">
                             <a href="index.html#ITF-point">
-                                <img src="images/mv04_pc_content.webp" alt="株式会社アイティーエフ - ITFのポイント" class="topImagesBody u-only_pc_tab">
-                                <img src="images/mv04_sp_content.webp" alt="株式会社アイティーエフ - ITFのポイント" class="topImagesBody u-only_sp">
+                                <img src="images/mv04_pc_content.webp" alt="株式会社アイティーエフ - ITFのポイント" class="topImagesBody u-only_pc_tab" loading="lazy" decoding="async">
+                                <img src="images/mv04_sp_content.webp" alt="株式会社アイティーエフ - ITFのポイント" class="topImagesBody u-only_sp" loading="lazy" decoding="async">
                             </a>
                         </li>
                         <li class="topImagesInner topImagesInner--05">
                             <a href="index.html#work-step">
-                                <img src="images/mv05_pc_content.webp" alt="株式会社アイティーエフ - 紹介の流れ" class="topImagesBody u-only_pc_tab">
-                                <img src="images/mv05_sp_content.webp" alt="株式会社アイティーエフ - 紹介の流れ" class="topImagesBody u-only_sp">
+                                <img src="images/mv05_pc_content.webp" alt="株式会社アイティーエフ - 紹介の流れ" class="topImagesBody u-only_pc_tab" loading="lazy" decoding="async">
+                                <img src="images/mv05_sp_content.webp" alt="株式会社アイティーエフ - 紹介の流れ" class="topImagesBody u-only_sp" loading="lazy" decoding="async">
                             </a>
                         </li>
                         <li class="topImagesInner topImagesInner--06">
                             <a href="index.html#osirase">
-                                <img src="images/mv06_pc_content.webp" alt="株式会社アイティーエフ - お知らせ" class="topImagesBody u-only_pc_tab">
-                                <img src="images/mv06_sp_content.webp" alt="株式会社アイティーエフ - お知らせ" class="topImagesBody u-only_sp">
+                                <img src="images/mv06_pc_content.webp" alt="株式会社株式会社アイティーエフ - お知らせ" class="topImagesBody u-only_pc_tab" loading="lazy" decoding="async">
+                                <img src="images/mv06_sp_content.webp" alt="株式会社株式会社アイティーエフ - お知らせ" class="topImagesBody u-only_sp" loading="lazy" decoding="async">
                             </a>
                         </li>
                     </ul>
                     <div class="topController" id="topController"></div>
                 </div>
             </section>
-            <div class="shortcut-links">
-                <a href="index.html#osirase" class="shortcut-btn" data-i18n="footer.news">お知らせ</a>
-                <a href="index.html#service-naiyou" class="shortcut-btn" data-i18n="footer.service_introduction">サービス紹介</a>
-                <a href="index.html#merit" class="shortcut-btn" data-i18n="footer.benefits">メリット</a>
-                <a href="index.html#ITF-point" class="shortcut-btn" data-i18n="footer.point">ITFのポイント</a>
-                <a href="index.html#work-step" class="shortcut-btn" data-i18n="footer.introduction_flow">紹介の流れ</a>
+            <div class="shortcut-links-placeholder">
+                <div class="shortcut-links">
+                    <a href="index.html#osirase" class="shortcut-btn" data-i18n="footer.news">お知らせ</a>
+                    <a href="index.html#service-naiyou" class="shortcut-btn" data-i18n="footer.service_introduction">サービス紹介</a>
+                    <a href="index.html#merit" class="shortcut-btn" data-i18n="footer.benefits">メリット</a>
+                    <a href="index.html#ITF-point" class="shortcut-btn" data-i18n="footer.point">ITFのポイント</a>
+                    <a href="index.html#work-step" class="shortcut-btn" data-i18n="footer.introduction_flow">紹介の流れ</a>
+                </div>
             </div>
             <section class="l-section troubles">
                 <div class="wrap w1200 sp-wrap">
@@ -264,7 +268,7 @@
                         <li class="produce-item">
                             <dl>
                                 <dt class="produce-title sp-flex vcenter">
-                                    <div class="produce-image flex vcenter hcenter"><img src="images/meeting.png" alt="優秀な外国人財採用 日本全国"></div>
+                                    <div class="produce-image flex vcenter hcenter"><img src="images/meeting.png" alt="優秀な外国人財採用 日本全国" loading="lazy" decoding="async"></div>
                                     <div class="text" data-i18n="merit.item1_title">優秀な人財が豊富</div>
                                 </dt>
                                 <dd class="produce-data" data-i18n="merit.item1_description">
@@ -275,7 +279,7 @@
                         <li class="produce-item">
                             <dl>
                                 <dt class="produce-title sp-flex vcenter">
-                                    <div class="produce-image flex vcenter hcenter"><img src="images/Multilingual.png" alt="外国人財紹介サービス グローバル対応"></div>
+                                    <div class="produce-image flex vcenter hcenter"><img src="images/Multilingual.png" alt="外国人財紹介サービス グローバル対応" loading="lazy" decoding="async"></div>
                                     <div class="text" data-i18n="merit.item2_title">グローバル化への多言語対応</div>
                                 </dt>
                                 <dd class="produce-data" data-i18n="merit.item2_description">
@@ -286,7 +290,7 @@
                         <li class="produce-item">
                             <dl>
                                 <dt class="produce-title sp-flex vcenter">
-                                    <div class="produce-image flex vcenter hcenter"><img src="images/adaptation.png" alt="外国人介護人財 適応能力"></div>
+                                    <div class="produce-image flex vcenter hcenter"><img src="images/adaptation.png" alt="外国人介護人財 適応能力" loading="lazy" decoding="async"></div>
                                     <div class="text" data-i18n="merit.item3_title">適応能力の高さ</div>
                                 </dt>
                                 <dd class="produce-data" data-i18n="merit.item3_description">
@@ -297,7 +301,7 @@
                         <li class="produce-item">
                             <dl>
                                 <dt class="produce-title sp-flex vcenter">
-                                    <div class="produce-image flex vcenter hcenter"><img src="images/mind.png" alt="多様な視点 外国人採用サポート"></div>
+                                    <div class="produce-image flex vcenter hcenter"><img src="images/mind.png" alt="多様な視点 外国人採用サポート" loading="lazy" decoding="async"></div>
                                     <div class="text" data-i18n="merit.item4_title">多様な視点とアイデアの提供</div>
                                 </dt>
                                 <dd class="produce-data" data-i18n="merit.item4_description">
@@ -308,7 +312,7 @@
                         <li class="produce-item">
                             <dl>
                                 <dt class="produce-title sp-flex vcenter">
-                                    <div class="produce-image flex vcenter hcenter"><img src="images/skill.png" alt="外国人看護師採用 専門知識"></div>
+                                    <div class="produce-image flex vcenter hcenter"><img src="images/skill.png" alt="外国人看護師採用 専門知識" loading="lazy" decoding="async"></div>
                                     <div class="text" data-i18n="merit.item5_title">高い専門知識と技術</div>
                                 </dt>
                                 <dd class="produce-data" data-i18n="merit.item5_description">
@@ -319,7 +323,7 @@
                         <li class="produce-item">
                             <dl>
                                 <dt class="produce-title sp-flex vcenter">
-                                    <div class="produce-image flex vcenter hcenter"><img src="images/world.png" alt="グローバルネットワーク 日本介護外国人"></div>
+                                    <div class="produce-image flex vcenter hcenter"><img src="images/world.png" alt="グローバルネットワーク 日本介護外国人" loading="lazy" decoding="async"></div>
                                     <div class="text" data-i18n="merit.item6_title">グローバルネットワークの活用</div>
                                 </dt>
                                 <dd class="produce-data" data-i18n="merit.item6_description">
@@ -337,7 +341,7 @@
                     </div>
                     <div class="about-container">
                         <div class="about-logo-container">
-                            <img src="images/logo.png" alt="株式会社アイティーエフ ロゴ">
+                            <img src="images/logo.png" alt="株式会社アイティーエフ ロゴ" loading="lazy" decoding="async">
                         </div>
                         <div class="about-content">
                             <h2 class="about-heading" data-i18n="about.heading">ITF<span>(アイティーエフ)</span><strong>とは</strong></h2>
@@ -371,7 +375,7 @@
                         <li class="service__item flex break sp-vert vcenter pc-bet">
                             <div class="service__item--img">
                                 <div class="service__item--title flex vcenter sp"><span class="service__item--stt flex vcenter hcenter">01</span><span data-i18n="service.item1_title">優秀な人財が豊富</span></div>
-                                <img src="images/top_service_01.jpg" alt="外国人採用サポート 日本全国">
+                                <img src="images/top_service_01.jpg" alt="外国人採用サポート 日本全国" loading="lazy" decoding="async">
                             </div>
                             <div class="service__item--right">
                                 <div class="service__item--title flex vcenter pc"><span class="service__item--stt flex vcenter hcenter">01</span><span data-i18n="service.item1_title">優秀な人財が豊富</span></div>
@@ -384,7 +388,7 @@
                         <li class="service__item flex break sp-vert vcenter pc-bet">
                             <div class="service__item--img pc-2">
                                 <div class="service__item--title flex vcenter sp"><span class="service__item--stt flex vcenter hcenter">02</span></div>
-                                <img src="images/top_serice_02.png" alt="特定技能人財 外国人財紹介サービス">
+                                <img src="images/top_serice_02.png" alt="特定技能人財 外国人財紹介サービス" loading="lazy" decoding="async">
                             </div>
                             <div class="service__item--right">
                                 <div class="service__item--title flex vcenter pc"><span class="service__item--stt flex vcenter hcenter">02</span><span data-i18n="service.item2_title">特定技能人財のご案内</span></div>
@@ -397,7 +401,7 @@
                         <li class="service__item flex break sp-vert vcenter pc-bet">
                             <div class="service__item--img">
                                 <div class="service__item--title flex vcenter sp"><span class="service__item--stt flex vcenter hcenter">03</span><span data-i18n="service.item3_title">手厚いサポート</span></div>
-                                <img src="images/top_service_03.jpg" alt="外国人採用サポート 日本全国">
+                                <img src="images/top_service_03.jpg" alt="外国人採用サポート 日本全国" loading="lazy" decoding="async">
                             </div>
                             <div class="service__item--right">
                                 <div class="service__item--title flex vcenter pc"><span class="service__item--stt flex vcenter hcenter">03</span><span data-i18n="service.item3_title">手厚いサポート</span></div>
@@ -410,7 +414,7 @@
                         <li class="service__item flex break sp-vert vcenter pc-bet">
                             <div class="service__item--img pc-2">
                                 <div class="service__item--title flex vcenter sp"><span class="service__item--stt flex vcenter hcenter">04</span><span data-i18n="service.item4_title">外国籍スタッフが多数在籍</span></div>
-                                <img src="images/top_service_04.png" alt="外国籍スタッフが多数在籍">
+                                <img src="images/top_service_04.png" alt="外国籍スタッフが多数在籍" loading="lazy" decoding="async">
                             </div>
                             <div class="service__item--right">
                                 <div class="service__item--title flex vcenter pc"><span class="service__item--stt flex vcenter hcenter">04</span><span data-i18n="service.item4_title">外国籍スタッフが多数在籍</span></div>
@@ -443,7 +447,7 @@
                         <li class="develop__item flex break sp-vert vcenter pc-bet">
                             <div class="develop__item--left pc-2">
                                 <div class="develop__item--img">
-                                    <img src="images/solution_01.jpg" alt="アジア6か国 外国人介護人財" class="shadow">
+                                    <img src="images/solution_01.jpg" alt="アジア6か国 外国人介護人財" class="shadow" loading="lazy" decoding="async">
                                 </div>
                             </div>
                             <div class="develop__item--right">
@@ -457,7 +461,7 @@
                         <li class="develop__item flex break sp-vert vcenter pc-bet">
                             <div class="develop__item--left">
                                 <div class="develop__item--img">
-                                    <img src="images/solution_02.jpg" alt="母国語対応 外国人採用サポート" class="shadow">
+                                    <img src="images/solution_02.jpg" alt="母国語対応 外国人採用サポート" class="shadow" loading="lazy" decoding="async">
                                 </div>
                             </div>
                             <div class="develop__item--right">
@@ -471,7 +475,7 @@
                         <li class="develop__item flex break sp-vert vcenter pc-bet">
                             <div class="develop__item--left pc-2">
                                 <div class="develop__item--img">
-                                    <img src="images/solution_03.jpg" alt="幅広い業種 日本介護外国人" class="shadow">
+                                    <img src="images/solution_03.jpg" alt="幅広い業種 日本介護外国人" class="shadow" loading="lazy" decoding="async">
                                 </div>
                             </div>
                             <div class="develop__item--right">
@@ -549,7 +553,7 @@
                 <div class="wrap w1200 sp-wrap">
                     <div class="l-section-header-center textW">
                         <h2 class="header flex hcenter" data-i18n="company.title">会社概要</h2>
-                        <div class="acc_img"><a href="company_info.html"><img src="images/office.jpg" alt="株式会社アイティーエフ 会社概要"></a></div>
+                        <div class="acc_img"><a href="company_info.html"><img src="images/office.jpg" alt="株式会社アイティーエフ 会社概要" loading="lazy" decoding="async"></a></div>
                         <br>
                     </div>
                 </div>
