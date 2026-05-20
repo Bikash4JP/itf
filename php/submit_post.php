@@ -217,7 +217,7 @@ try {
       <h1>投稿が完了しました</h1>
       <p>求人情報は <strong>「saiyou.php」</strong> にてご確認ください。</p>
       <div class="actions">
-        <a class="btn primary" href="/saiyou.php">求人報一覧を開く</a>
+        <a class="btn primary" href="/saiyou.php">求人情報一覧を開く</a>
         <a class="btn" href="/php/staffdb.php">スタッフDBへ戻る</a>
       </div>
     </div>
