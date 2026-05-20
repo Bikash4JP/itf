@@ -1,10 +1,10 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('inquiryForm');
     const submitBtn = document.getElementById('submitBtn');
     const successMessage = document.getElementById('successMessage');
     const requiredTextFields = Array.from(form.querySelectorAll('input[required]:not([type="checkbox"]):not([name="inquiry"])'));
     const agreeCheckbox = document.getElementById('agree-checkbox');
-    
+
     // Error message elements
     const errorMessages = {
         name: document.getElementById('name-error'),
@@ -29,22 +29,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize form validation
     checkFormCompleteness();
-    
+
     // Real-time validation
     form.addEventListener('input', checkFormCompleteness);
     form.addEventListener('change', checkFormCompleteness);
-    
+
     // Form submission
-    form.addEventListener('submit', async function(e) {
+    form.addEventListener('submit', async function (e) {
         e.preventDefault();
-        
+
         hasAttemptedSubmit = true;
-        
+
         if (!validateForm()) {
             alert('必須項目をすべて正しく入力してください');
             return;
         }
-        
+
         // Set loading state
         submitBtn.disabled = true;
         const originalText = submitBtn.textContent;
@@ -53,11 +53,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Hide any previous error
         const prevError = document.getElementById('formErrorMessage');
         if (prevError) prevError.remove();
-        
+
         try {
             // Prepare form data
             const formData = new FormData(form);
-            
+
             // inquiry チェックボックス群をまとめる
             const selectedInquiries = Array.from(form.querySelectorAll('input[name="inquiry"]:checked'))
                 .map(cb => cb.value)
@@ -65,18 +65,18 @@ document.addEventListener('DOMContentLoaded', function() {
             formData.set('inquiry', selectedInquiries);
 
             // PHPハンドラーへ送信（自社サーバー・第三者不要）
-            const response = await fetch('/php/send_inquiry.php', {
+            const response = await fetch('php/send_inquiry.php', {
                 method: 'POST',
                 body: formData
             });
 
             const result = await response.json();
-            
+
             if (result.ok) {
                 // 成功：フォームを非表示にして完了メッセージを表示
                 form.style.display = 'none';
                 successMessage.style.display = 'block';
-                
+
                 // 5秒後にトップへリダイレクト
                 let seconds = 5;
                 const redirectMsg = document.getElementById('redirectMessage');
@@ -111,45 +111,45 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    
+
     // Check if form is complete (for button state)
     function checkFormCompleteness() {
         let isComplete = true;
-        
+
         // Check required text fields
         isComplete = requiredTextFields.every(field => field.value.trim() !== '');
-        
+
         // Check at least one inquiry is selected
         isComplete = isComplete && document.querySelector('input[name="inquiry"]:checked') !== null;
-        
+
         // Check agreement checkbox
         isComplete = isComplete && agreeCheckbox.checked;
-        
+
         // Check email format if email field has content
         const email = form.querySelector('input[type="email"]').value;
         if (email) {
             isComplete = isComplete && validateEmail(email);
         }
-        
+
         // Check phone format if phone field has content
         const phone = form.querySelector('input[type="tel"]').value;
         if (phone) {
             isComplete = isComplete && validatePhone(phone);
         }
-        
+
         submitBtn.disabled = !isComplete;
     }
-    
+
     // Full validation (for submission)
     function validateForm() {
         let isValid = true;
-        
+
         // Reset error messages
         Object.values(errorMessages).forEach(el => {
             el.style.display = 'none';
             el.textContent = '';
         });
-        
+
         // Validate required fields
         requiredTextFields.forEach(field => {
             if (!field.value.trim()) {
@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
-        
+
         // Validate at least one inquiry is selected
         const inquiryChecked = document.querySelector('input[name="inquiry"]:checked');
         if (!inquiryChecked) {
@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', function() {
             errorMessages.inquiry.textContent = '少なくとも1つのお問い合わせ内容を選択してください';
             errorMessages.inquiry.style.display = 'block';
         }
-        
+
         // Validate email format
         const email = form.querySelector('input[type="email"]').value;
         if (email && !validateEmail(email)) {
@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function() {
             errorMessages.email.textContent = '有効なメールアドレスを入力してください';
             errorMessages.email.style.display = 'block';
         }
-        
+
         // Validate phone format
         const phone = form.querySelector('input[type="tel"]').value;
         if (phone && !validatePhone(phone)) {
@@ -185,23 +185,23 @@ document.addEventListener('DOMContentLoaded', function() {
             errorMessages.phone.textContent = '有効な電話番号を入力してください (10-11桁の数字)';
             errorMessages.phone.style.display = 'block';
         }
-        
+
         // Validate agreement checkbox
         if (!agreeCheckbox.checked) {
             isValid = false;
             errorMessages.agree.textContent = 'プライバシーポリシーに同意が必要です';
             errorMessages.agree.style.display = 'block';
         }
-        
+
         return isValid;
     }
-    
+
     // Helper functions
     function validateEmail(email) {
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return re.test(email);
     }
-    
+
     function validatePhone(phone) {
         const re = /^[0-9]{10,11}$/;
         return re.test(phone);

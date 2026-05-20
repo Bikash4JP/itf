@@ -15,20 +15,17 @@
     <link rel="stylesheet" type="text/css" media="all" href="css/common.css">
     <!-- All in One SEO 4.2.4 - aioseo.com -->
     <title>お問い合わせ | 株式会社アイティーエフ - 外国人財紹介サービス</title>
-    <meta name="description"
-        content="株式会社アイティーエフへのお問い合わせページ。介護・ホテル・外食向け外国人採用サービスに関するご相談は、フォームまたはお電話でお気軽にお問い合わせください。">
+    <meta name="description" content="株式会社アイティーエフへのお問い合わせページ。介護・ホテル・外食向け外国人採用サービスに関するご相談は、フォームまたはお電話でお気軽にお問い合わせください。">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://it-future.jp/inquiry.html">
     <meta property="og:locale" content="ja_JP">
     <meta property="og:site_name" content="株式会社アイティーエフ | 外国人財紹介サービス">
     <meta property="og:type" content="website">
     <meta property="og:title" content="お問い合わせ | 株式会社アイティーエフ - 外国人財紹介サービス">
-    <meta property="og:description"
-        content="株式会社アイティーエフへのお問い合わせ。介護・ホテル・外食向け外国人採用サービスに関するご相談はこちらから。">
+    <meta property="og:description" content="株式会社アイティーエフへのお問い合わせ。介護・ホテル・外食向け外国人採用サービスに関するご相談はこちらから。">
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="お問い合わせ | 株式会社アイティーエフ">
-    <meta name="twitter:description"
-        content="株式会社アイティーエフへのお問い合わせ。介護・ホテル・外食向け外国人採用サービスに関するご相談はこちらから。">
+    <meta name="twitter:description" content="株式会社アイティーエフへのお問い合わせ。介護・ホテル・外食向け外国人採用サービスに関するご相談はこちらから。">
     <script type="application/ld+json" class="aioseo-schema">		</script>
     <!-- All in One SEO -->
     <!-- teststtt -->
@@ -302,17 +299,17 @@
     <script src="js/form.min.js"></script>
     <script src="js/main.min.js"></script>
     <script src="js/scripts.js"></script>
-    <script src="js/form-validation.js"></script>
+    <script src="js/form-validation.js?v=20260520b"></script>
     <script>
-    // CSRFトークンをサーバーから取得してフォームにセット
-    fetch('/php/get_csrf_token.php?form=inquiry')
-        .then(r => r.json())
-        .then(data => {
-            if (data.token) {
-                document.getElementById('csrfToken').value = data.token;
-            }
-        })
-        .catch(() => { /* サーバーが返せない場合は静かに失敗 */ });
+        // CSRFトークンをサーバーから取得してフォームにセット（相対パス使用）
+        fetch('php/get_csrf_token.php?form=inquiry')
+            .then(r => r.json())
+            .then(data => {
+                if (data.token) {
+                    document.getElementById('csrfToken').value = data.token;
+                }
+            })
+            .catch(() => { /* サーバーが返せない場合は静かに失敗 */ });
     </script>
     <script type="text/javascript" src="js/front.min.js"></script>
     <script type="text/javascript" src="js/wp-embed.min.js"></script>
@@ -320,4 +317,3 @@
 </body>
 
 </html>
-
