@@ -154,6 +154,12 @@
             <p class="tel">📞 06-6644-1800</p>
         </div>
         <form class="form" id="inquiryForm">
+            <!-- CSRF トークン（セキュリティ） -->
+            <input type="hidden" name="csrf_token" id="csrfToken" value="">
+            <!-- ハニーポット：ボット検知用（非表示） -->
+            <div style="display:none;" aria-hidden="true">
+                <input type="text" name="website" tabindex="-1" autocomplete="off">
+            </div>
             <div class="note">＊全項目ご記入ください。</div>
 
             <div class="form-group">
@@ -297,6 +303,17 @@
     <script src="js/main.min.js"></script>
     <script src="js/scripts.js"></script>
     <script src="js/form-validation.js"></script>
+    <script>
+    // CSRFトークンをサーバーから取得してフォームにセット
+    fetch('/php/get_csrf_token.php?form=inquiry')
+        .then(r => r.json())
+        .then(data => {
+            if (data.token) {
+                document.getElementById('csrfToken').value = data.token;
+            }
+        })
+        .catch(() => { /* サーバーが返せない場合は静かに失敗 */ });
+    </script>
     <script type="text/javascript" src="js/front.min.js"></script>
     <script type="text/javascript" src="js/wp-embed.min.js"></script>
     <script src="js/nav.js"></script>

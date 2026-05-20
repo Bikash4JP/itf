@@ -49,79 +49,68 @@ document.addEventListener('DOMContentLoaded', function() {
         submitBtn.disabled = true;
         const originalText = submitBtn.textContent;
         submitBtn.textContent = '送信中...';
+
+        // Hide any previous error
+        const prevError = document.getElementById('formErrorMessage');
+        if (prevError) prevError.remove();
         
         try {
             // Prepare form data
             const formData = new FormData(form);
             
-            // Get all selected inquiry types
+            // inquiry チェックボックス群をまとめる
             const selectedInquiries = Array.from(form.querySelectorAll('input[name="inquiry"]:checked'))
-                .map(checkbox => checkbox.value)
-                .join(', ');
-            
-            // Add to form data
-            formData.append('inquiry_types', selectedInquiries);
-            formData.append('_cc', 'info@it-future.jp'); // CC to bikash@it-future.jp
-            formData.append('_subject', `【ITF問い合わせ】${formData.get('company')} - ${formData.get('name')}`);
-            
-            // Send to Formspree (primary email: bikash4jp@gmail.com)
-            const response = await fetch('https://formspree.io/f/xrbprkko', {
+                .map(cb => cb.value)
+                .join('、');
+            formData.set('inquiry', selectedInquiries);
+
+            // PHPハンドラーへ送信（自社サーバー・第三者不要）
+            const response = await fetch('/php/send_inquiry.php', {
                 method: 'POST',
-                body: formData,
-                headers: {
-                    'Accept': 'application/json'
-                }   
+                body: formData
             });
+
+            const result = await response.json();
             
-            if (response.ok) {
-                // Show success message
+            if (result.ok) {
+                // 成功：フォームを非表示にして完了メッセージを表示
                 form.style.display = 'none';
                 successMessage.style.display = 'block';
                 
-                // Redirect after 5 seconds
+                // 5秒後にトップへリダイレクト
                 let seconds = 5;
                 const redirectMsg = document.getElementById('redirectMessage');
                 const timer = setInterval(() => {
                     seconds--;
                     redirectMsg.textContent = `${seconds}秒後にトップページに自動的に戻ります。`;
-                    
                     if (seconds <= 0) {
                         clearInterval(timer);
                         window.location.href = 'index.html';
                     }
                 }, 1000);
             } else {
-                throw new Error(`サーバーエラー: ${response.status}`);
+                throw new Error(result.error || 'サーバーエラーが発生しました');
             }
         } catch (error) {
             console.error('Submission error:', error);
-            
-            // Fallback to mailto if Formspree fails
-            if (confirm('フォーム送信に失敗しました。メールで直接送信しますか？')) {
-                const formData = new FormData(form);
-                const selectedInquiries = Array.from(form.querySelectorAll('input[name="inquiry"]:checked'))
-                    .map(checkbox => checkbox.value)
-                    .join(', ');
-                
-                const mailtoBody = [
-                    `氏名: ${formData.get('name')}`,
-                    `メール: ${formData.get('email')}`,
-                    `電話: ${formData.get('phone')}`,
-                    `会社名: ${formData.get('company')}`,
-                    `問い合わせ種類: ${selectedInquiries}`,
-                    `メッセージ: ${formData.get('message') || '未記入'}`,
-                    '',
-                    '※このメールはフォーム送信失敗時に代替手段として送信されました'
-                ].join('%0A');
-                
-                // Primary email to bikash4jp@gmail.com, CC to info@it-future.jp
-                window.location.href = `mailto:bikash4jp@gmail.com?cc=info@it-future.jp&subject=【ITF問い合わせ】${encodeURIComponent(formData.get('company'))}&body=${mailtoBody}`;
-            }
+
+            // インラインエラーメッセージ（メールアプリは不要）
+            const errDiv = document.createElement('div');
+            errDiv.id = 'formErrorMessage';
+            errDiv.style.cssText = 'background:#fff0f0;border:1px solid #e53e3e;border-radius:6px;padding:12px 16px;margin-top:12px;color:#c53030;font-size:14px;line-height:1.6;';
+            errDiv.innerHTML = `
+                <strong>⚠ 送信に失敗しました</strong><br>
+                ${error.message || 'しばらく経ってから再度お試しください。'}<br>
+                <small>お急ぎの場合は <a href="tel:0666441800" style="color:#c53030;">06-6644-1800</a>
+                または <a href="mailto:info@it-future.jp" style="color:#c53030;">info@it-future.jp</a> へ直接ご連絡ください。</small>
+            `;
+            form.querySelector('.submit-btn').after(errDiv);
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
         }
     });
+
     
     // Check if form is complete (for button state)
     function checkFormCompleteness() {
