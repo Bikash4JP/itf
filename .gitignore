@@ -123,6 +123,8 @@ run_composer.php
 composer_audit.php
 sitemap_generator.php
 test_db_connection.php
+php/check_password.php
+*check_password.php
 
 # -------------------------------------------------------
 # データファイル（機密情報含む可能性あり）
