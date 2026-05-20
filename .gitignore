@@ -1,78 +1,212 @@
-# --- Sensitive & Config Files ---
+# =============================================================
+# 株式会社アイティーエフ — .gitignore
+# 目的: セキュリティ・認証情報を絶対にGitHubにPushしない
+# 更新: 2026-05-20
+# =============================================================
+
+# -------------------------------------------------------
+# 【最重要】DB接続・認証情報（全ディレクトリ共通）
+# -------------------------------------------------------
 php/db_connect.php
 php/config.php
-.env
-itf.sql
-.htaccess
+rireki/basic/php/db_connect.php
+rireki/kaigo/php/db_connect.php
+**/db_connect.php
 sftp.json
 .sftpignore
-.vscode/
-
-# --- Environment & API Secrets ---
 .env
 .env.*
 *.env
 *.pem
 *.key
-*secret*
-*credential*
-*config.json
-*config.php
-!php/config.php # Keep if php/config.php is a template, else ignore it as well
+*.p12
+*.pfx
 google-credentials.json
 firebase-config.json
 client_secret.json
 aws-credentials.csv
+*secret*
+*credential*
+*_secret.json
+*_secret.php
 
-# --- Database credentials ---
-php/db_connect.php
+# -------------------------------------------------------
+# 【重要】セキュリティ設定（本番サーバー専用）
+# -------------------------------------------------------
+.htaccess
+
+# -------------------------------------------------------
+# PHPコンフィグ系（DB/APIキーを含む可能性あり）
+# -------------------------------------------------------
+*config.php
+*config.json
 *database.php
 *db_config.php
-# --- Dependencies ---
+php/invoice_items_api.php
+
+# -------------------------------------------------------
+# Composerパッケージ・依存関係（サイズ大・不要）
+# -------------------------------------------------------
 vendor/
-node_modules/
 composer.json
 composer.lock
 composer.phar
+
+# -------------------------------------------------------
+# NPMパッケージ（不要）
+# -------------------------------------------------------
+node_modules/
+package.json
 package-lock.json
 yarn.lock
-package.json
 
-# --- Directories / Uploads ---
+# -------------------------------------------------------
+# アップロード・生成ファイル（ユーザーデータ）
+# -------------------------------------------------------
 uploads/
 php/uploads/
 resumes/
-recruit/
-locales/
-templates/
-php/App/
-APP/
+php/talents.ods
+
+# -------------------------------------------------------
+# ドキュメント・社外秘資料（GitHub非公開）
+# -------------------------------------------------------
+ITF_Documentation/
+ITF_*.zip
+*.zip
+documentation.md
+README_JP.md
+
+# -------------------------------------------------------
+# ログファイル
+# -------------------------------------------------------
 logs/
+*.log
+composer_error.txt
+
+# -------------------------------------------------------
+# 画像・メディア（容量削減）
+# -------------------------------------------------------
 images/
+fonts/
+
+# -------------------------------------------------------
+# 個人情報・非公開コンテンツ
+# -------------------------------------------------------
 p_info/
-favicon.ico
-# --- Utility & Script Files ---
-sitemap.xml
-robots.txt
+links/
+notes/
+30thann/
+recruit/
+mail_sign.html
+privacy.html
+
+# -------------------------------------------------------
+# テンプレート・サーバー専用ファイル
+# -------------------------------------------------------
+templates/
+locales/
+
+# -------------------------------------------------------
+# スクリプト・デバッグツール（実行危険）
+# -------------------------------------------------------
+*.ps1
+*.psm1
+*.psd1
+*.py
+*.sh
+*.bash
+*.rb
+*.pl
 install_composer.php
 run_composer.php
 composer_audit.php
 sitemap_generator.php
 test_db_connection.php
 
-# --- Dev & Temp Scripts (NEVER commit these) ---
-*.ps1
-*.psm1
-*.psd1
-*.py
+# -------------------------------------------------------
+# データファイル（機密情報含む可能性あり）
+# -------------------------------------------------------
 *.csv
 *.sql
 *.ods
+*.xlsx
+*.xls
 lh-report.json
 
-# --- Personal links and Notes ,  Files ---
-links/
-notes/
-mail_sign.html
-privacy.html
-30thann/
+# -------------------------------------------------------
+# SEO・インフラファイル（本番専用）
+# -------------------------------------------------------
+sitemap.xml
+robots.txt
+
+# -------------------------------------------------------
+# IDEと開発ツール
+# -------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# -------------------------------------------------------
+# OS生成ファイル
+# -------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# -------------------------------------------------------
+# バックアップ・一時ファイル
+# -------------------------------------------------------
+*.bak
+*.bak2
+*.bak3
+*.tmp
+*.temp
+
+# -------------------------------------------------------
+# キャッシュ・一時ディレクトリ
+# -------------------------------------------------------
+tmp/
+rireki/basic/tmp/
+rireki/kaigo/tmp/
+**/tmp/
+cache/
+
+# -------------------------------------------------------
+# メモ・内部ノート（社外秘）
+# -------------------------------------------------------
+memo.txt
+**/memo.txt
+rireki/memo.txt
+rireki/kaigo/memo.txt
+
+# -------------------------------------------------------
+# フォントバイナリ（大容量・ライセンス注意）
+# -------------------------------------------------------
+*.ttf
+*.otf
+*.eot
+rireki/basic/fonts/
+rireki/kaigo/fonts/
+
+# -------------------------------------------------------
+# 診断・デバッグ・内部確認用PHPスクリプト
+# -------------------------------------------------------
+rireki/kaigo/php/diag.php
+rireki/kaigo/php/health.php
+rireki/kaigo/php/info.php
+rireki/kaigo/php/ping.php
+rireki/basic/php/_debug_boot.php
+rireki/basic/php/mini_demo.php
+
+# -------------------------------------------------------
+# その他
+# -------------------------------------------------------
+favicon.ico
+sftp.json
+dashboard.html
+rireki/user.ini
+rireki/kaigo/php/cononical.php
