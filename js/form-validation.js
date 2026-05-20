@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('inquiryForm');
     const submitBtn = document.getElementById('submitBtn');
     const successMessage = document.getElementById('successMessage');
-    const requiredTextFields = Array.from(form.querySelectorAll('input[required]:not([type="checkbox"]):not([name="inquiry"])'));
     const agreeCheckbox = document.getElementById('agree-checkbox');
 
     // Error message elements
@@ -15,22 +14,18 @@ document.addEventListener('DOMContentLoaded', function () {
         agree: document.getElementById('agree-error')
     };
 
+    const requiredTextFields = [
+        form.querySelector('input[name="name"]'),
+        form.querySelector('input[type="email"]'),
+        form.querySelector('input[type="tel"]'),
+        form.querySelector('input[name="company"]')
+    ];
+
     let hasAttemptedSubmit = false;
 
-    // Convert radio group to checkboxes for multiple selection
-    const radioGroup = document.getElementById('inquiry-group');
-    if (radioGroup) {
-        // Convert all radio inputs to checkboxes
-        const radioInputs = radioGroup.querySelectorAll('input[type="radio"]');
-        radioInputs.forEach(input => {
-            input.type = 'checkbox';
-        });
-    }
-
-    // Initialize form validation
+    // Initialize
     checkFormCompleteness();
 
-    // Real-time validation
     form.addEventListener('input', checkFormCompleteness);
     form.addEventListener('change', checkFormCompleteness);
 
@@ -41,31 +36,29 @@ document.addEventListener('DOMContentLoaded', function () {
         hasAttemptedSubmit = true;
 
         if (!validateForm()) {
-            alert('必須項目をすべて正しく入力してください');
             return;
         }
 
-        // Set loading state
+        // Loading state
         submitBtn.disabled = true;
         const originalText = submitBtn.textContent;
         submitBtn.textContent = '送信中...';
 
-        // Hide any previous error
+        // Remove previous error
         const prevError = document.getElementById('formErrorMessage');
         if (prevError) prevError.remove();
 
         try {
-            // Prepare form data
             const formData = new FormData(form);
 
-            // inquiry チェックボックス群をまとめる
-            const selectedInquiries = Array.from(form.querySelectorAll('input[name="inquiry"]:checked'))
-                .map(cb => cb.value)
-                .join('、');
+            // Collect checked inquiry values
+            const selectedInquiries = Array.from(
+                form.querySelectorAll('input[name="inquiry"]:checked')
+            ).map(cb => cb.value).join('、');
             formData.set('inquiry', selectedInquiries);
 
-            // PHPハンドラーへ送信（自社サーバー・第三者不要）
-            const response = await fetch('php/send_inquiry.php', {
+            // POST to existing whitelisted PHP file
+            const response = await fetch('php/fetch_news.php', {
                 method: 'POST',
                 body: formData
             });
@@ -73,16 +66,18 @@ document.addEventListener('DOMContentLoaded', function () {
             const result = await response.json();
 
             if (result.ok) {
-                // 成功：フォームを非表示にして完了メッセージを表示
+                // Success: hide form, show message
                 form.style.display = 'none';
                 successMessage.style.display = 'block';
 
-                // 5秒後にトップへリダイレクト
+                // Countdown redirect
                 let seconds = 5;
                 const redirectMsg = document.getElementById('redirectMessage');
-                const timer = setInterval(() => {
+                const timer = setInterval(function () {
                     seconds--;
-                    redirectMsg.textContent = `${seconds}秒後にトップページに自動的に戻ります。`;
+                    if (redirectMsg) {
+                        redirectMsg.textContent = seconds + '秒後にトップページに自動的に戻ります。';
+                    }
                     if (seconds <= 0) {
                         clearInterval(timer);
                         window.location.href = 'index.html';
@@ -91,119 +86,132 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 throw new Error(result.error || 'サーバーエラーが発生しました');
             }
+
         } catch (error) {
             console.error('Submission error:', error);
 
-            // インラインエラーメッセージ（メールアプリは不要）
+            // Inline error message
             const errDiv = document.createElement('div');
             errDiv.id = 'formErrorMessage';
-            errDiv.style.cssText = 'background:#fff0f0;border:1px solid #e53e3e;border-radius:6px;padding:12px 16px;margin-top:12px;color:#c53030;font-size:14px;line-height:1.6;';
-            errDiv.innerHTML = `
-                <strong>⚠ 送信に失敗しました</strong><br>
-                ${error.message || 'しばらく経ってから再度お試しください。'}<br>
-                <small>お急ぎの場合は <a href="tel:0666441800" style="color:#c53030;">06-6644-1800</a>
-                または <a href="mailto:info@it-future.jp" style="color:#c53030;">info@it-future.jp</a> へ直接ご連絡ください。</small>
-            `;
-            form.querySelector('.submit-btn').after(errDiv);
+            errDiv.style.cssText = [
+                'background:#fff0f0',
+                'border:1px solid #e53e3e',
+                'border-radius:6px',
+                'padding:12px 16px',
+                'margin-top:12px',
+                'color:#c53030',
+                'font-size:14px',
+                'line-height:1.6'
+            ].join(';');
+            errDiv.innerHTML =
+                '<strong>\u26a0 \u9001\u4fe1\u306b\u5931\u6557\u3057\u307e\u3057\u305f</strong><br>' +
+                (error.message || '\u3057\u3070\u3089\u304f\u7d4c\u3063\u3066\u304b\u3089\u518d\u5ea6\u304a\u8a66\u3057\u304f\u3060\u3055\u3044\u3002') + '<br>' +
+                '<small>\u304a\u6025\u304e\u306e\u5834\u5408\u306f ' +
+                '<a href="tel:0666441800" style="color:#c53030;">06-6644-1800</a> \u307e\u305f\u306f ' +
+                '<a href="mailto:info@it-future.jp" style="color:#c53030;">info@it-future.jp</a> ' +
+                '\u3078\u76f4\u63a5\u3054\u9023\u7d61\u304f\u3060\u3055\u3044\u3002</small>';
+
+            const submitArea = form.querySelector('.submit-btn');
+            if (submitArea) {
+                submitArea.after(errDiv);
+            } else {
+                form.appendChild(errDiv);
+            }
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
+            checkFormCompleteness();
         }
     });
 
-
-    // Check if form is complete (for button state)
+    // Button state check
     function checkFormCompleteness() {
-        let isComplete = true;
+        let isComplete = requiredTextFields.every(function (f) {
+            return f && f.value.trim() !== '';
+        });
 
-        // Check required text fields
-        isComplete = requiredTextFields.every(field => field.value.trim() !== '');
+        isComplete = isComplete &&
+            document.querySelector('input[name="inquiry"]:checked') !== null;
 
-        // Check at least one inquiry is selected
-        isComplete = isComplete && document.querySelector('input[name="inquiry"]:checked') !== null;
-
-        // Check agreement checkbox
         isComplete = isComplete && agreeCheckbox.checked;
 
-        // Check email format if email field has content
-        const email = form.querySelector('input[type="email"]').value;
-        if (email) {
-            isComplete = isComplete && validateEmail(email);
+        var emailVal = form.querySelector('input[type="email"]').value;
+        if (emailVal) {
+            isComplete = isComplete && validateEmail(emailVal);
         }
 
-        // Check phone format if phone field has content
-        const phone = form.querySelector('input[type="tel"]').value;
-        if (phone) {
-            isComplete = isComplete && validatePhone(phone);
+        var phoneVal = form.querySelector('input[type="tel"]').value;
+        if (phoneVal) {
+            isComplete = isComplete && validatePhone(phoneVal);
         }
 
         submitBtn.disabled = !isComplete;
     }
 
-    // Full validation (for submission)
+    // Full validation on submit
     function validateForm() {
-        let isValid = true;
+        var isValid = true;
 
-        // Reset error messages
-        Object.values(errorMessages).forEach(el => {
-            el.style.display = 'none';
-            el.textContent = '';
+        Object.values(errorMessages).forEach(function (el) {
+            if (el) {
+                el.style.display = 'none';
+                el.textContent = '';
+            }
         });
 
-        // Validate required fields
-        requiredTextFields.forEach(field => {
-            if (!field.value.trim()) {
+        requiredTextFields.forEach(function (field) {
+            if (field && !field.value.trim()) {
                 isValid = false;
-                const fieldName = field.name;
-                if (errorMessages[fieldName]) {
-                    errorMessages[fieldName].textContent = 'この項目は必須です';
-                    errorMessages[fieldName].style.display = 'block';
+                var key = field.name;
+                if (errorMessages[key]) {
+                    errorMessages[key].textContent = '\u3053\u306e\u9805\u76ee\u306f\u5fc5\u9808\u3067\u3059';
+                    errorMessages[key].style.display = 'block';
                 }
             }
         });
 
-        // Validate at least one inquiry is selected
-        const inquiryChecked = document.querySelector('input[name="inquiry"]:checked');
-        if (!inquiryChecked) {
+        if (!document.querySelector('input[name="inquiry"]:checked')) {
             isValid = false;
-            errorMessages.inquiry.textContent = '少なくとも1つのお問い合わせ内容を選択してください';
-            errorMessages.inquiry.style.display = 'block';
+            if (errorMessages.inquiry) {
+                errorMessages.inquiry.textContent = '\u5c11\u306a\u304f\u3068\u30821\u3064\u306e\u304a\u554f\u3044\u5408\u308f\u305b\u5185\u5bb9\u3092\u9078\u629e\u3057\u3066\u304f\u3060\u3055\u3044';
+                errorMessages.inquiry.style.display = 'block';
+            }
         }
 
-        // Validate email format
-        const email = form.querySelector('input[type="email"]').value;
+        var email = form.querySelector('input[type="email"]').value;
         if (email && !validateEmail(email)) {
             isValid = false;
-            errorMessages.email.textContent = '有効なメールアドレスを入力してください';
-            errorMessages.email.style.display = 'block';
+            if (errorMessages.email) {
+                errorMessages.email.textContent = '\u6709\u52b9\u306a\u30e1\u30fc\u30eb\u30a2\u30c9\u30ec\u30b9\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044';
+                errorMessages.email.style.display = 'block';
+            }
         }
 
-        // Validate phone format
-        const phone = form.querySelector('input[type="tel"]').value;
+        var phone = form.querySelector('input[type="tel"]').value;
         if (phone && !validatePhone(phone)) {
             isValid = false;
-            errorMessages.phone.textContent = '有効な電話番号を入力してください (10-11桁の数字)';
-            errorMessages.phone.style.display = 'block';
+            if (errorMessages.phone) {
+                errorMessages.phone.textContent = '\u6709\u52b9\u306a\u96fb\u8a71\u756a\u53f7\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044 (10-11\u6841\u306e\u6570\u5b57)';
+                errorMessages.phone.style.display = 'block';
+            }
         }
 
-        // Validate agreement checkbox
         if (!agreeCheckbox.checked) {
             isValid = false;
-            errorMessages.agree.textContent = 'プライバシーポリシーに同意が必要です';
-            errorMessages.agree.style.display = 'block';
+            if (errorMessages.agree) {
+                errorMessages.agree.textContent = '\u30d7\u30e9\u30a4\u30d0\u30b7\u30fc\u30dd\u30ea\u30b7\u30fc\u306b\u540c\u610f\u304c\u5fc5\u8981\u3067\u3059';
+                errorMessages.agree.style.display = 'block';
+            }
         }
 
         return isValid;
     }
 
-    // Helper functions
     function validateEmail(email) {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(email);
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
 
     function validatePhone(phone) {
-        const re = /^[0-9]{10,11}$/;
-        return re.test(phone);
+        return /^[0-9]{10,11}$/.test(phone.replace(/[-\s]/g, ''));
     }
 });
