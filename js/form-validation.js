@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const successMessage = document.getElementById('successMessage');
     const agreeCheckbox = document.getElementById('agree-checkbox');
 
-    // Error message elements
     const errorMessages = {
         name: document.getElementById('name-error'),
         email: document.getElementById('email-error'),
@@ -21,56 +20,76 @@ document.addEventListener('DOMContentLoaded', function () {
         form.querySelector('input[name="company"]')
     ];
 
-    let hasAttemptedSubmit = false;
-
-    // Initialize
+    // Initialize button state
     checkFormCompleteness();
-
     form.addEventListener('input', checkFormCompleteness);
     form.addEventListener('change', checkFormCompleteness);
 
-    // Form submission
+    // ── Form submission ────────────────────────────────────────────
     form.addEventListener('submit', async function (e) {
         e.preventDefault();
 
-        hasAttemptedSubmit = true;
+        if (!validateForm()) return;
 
-        if (!validateForm()) {
-            return;
-        }
-
-        // Loading state
         submitBtn.disabled = true;
         const originalText = submitBtn.textContent;
         submitBtn.textContent = '送信中...';
 
-        // Remove previous error
         const prevError = document.getElementById('formErrorMessage');
         if (prevError) prevError.remove();
 
         try {
+            // ── Step 1: Fetch CSRF token ─────────────────────────
+            // credentials:'same-origin' is REQUIRED so the browser
+            // sends the PHP session cookie on both requests.
+            const tokenRes = await fetch('php/get_csrf_token.php?form=inquiry', {
+                credentials: 'same-origin'
+            });
+
+            if (!tokenRes.ok) {
+                throw new Error('セキュリティトークンの取得に失敗しました。ページを再読み込みしてください。');
+            }
+
+            const contentTypeToken = tokenRes.headers.get('content-type') || '';
+            if (!contentTypeToken.includes('application/json')) {
+                throw new Error('サーバーから予期しない応答がありました。ページを再読み込みしてください。');
+            }
+
+            const tokenData = await tokenRes.json();
+
+            // ── Step 2: Build form data ──────────────────────────
             const formData = new FormData(form);
 
-            // Collect checked inquiry values
-            const selectedInquiries = Array.from(
-                form.querySelectorAll('input[name="inquiry"]:checked')
-            ).map(cb => cb.value).join('、');
-            formData.set('inquiry', selectedInquiries);
+            // Radio button — get single selected value
+            const selectedInquiry = form.querySelector('input[name="inquiry"]:checked');
+            formData.set('inquiry', selectedInquiry ? selectedInquiry.value : '');
 
-            // POST to existing whitelisted PHP file
-            const response = await fetch('php/fetch_news.php', {
+            // Attach CSRF token
+            formData.set('csrf_token', tokenData.token);
+
+            // ── Step 3: POST to send_inquiry.php ─────────────────
+            const response = await fetch('php/send_inquiry.php', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                credentials: 'same-origin'  // must match token fetch above
             });
+
+            // Guard against HTML error pages
+            const contentType = response.headers.get('content-type') || '';
+            if (!contentType.includes('application/json')) {
+                throw new Error(
+                    'サーバーから予期しない応答がありました (HTTP ' + response.status + ')。' +
+                    'しばらくしてから再度お試しください。'
+                );
+            }
 
             const result = await response.json();
 
             if (result.ok) {
-                // Success: hide form, show message
                 form.style.display = 'none';
                 successMessage.style.display = 'block';
 
-                // Countdown redirect
+                // Countdown redirect to top page
                 let seconds = 5;
                 const redirectMsg = document.getElementById('redirectMessage');
                 const timer = setInterval(function () {
@@ -90,7 +109,6 @@ document.addEventListener('DOMContentLoaded', function () {
         } catch (error) {
             console.error('Submission error:', error);
 
-            // Inline error message
             const errDiv = document.createElement('div');
             errDiv.id = 'formErrorMessage';
             errDiv.style.cssText = [
@@ -112,11 +130,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 '\u3078\u76f4\u63a5\u3054\u9023\u7d61\u304f\u3060\u3055\u3044\u3002</small>';
 
             const submitArea = form.querySelector('.submit-btn');
-            if (submitArea) {
-                submitArea.after(errDiv);
-            } else {
-                form.appendChild(errDiv);
-            }
+            if (submitArea) submitArea.after(errDiv);
+            else form.appendChild(errDiv);
+
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
@@ -124,45 +140,33 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Button state check
+    // ── Button enable/disable ──────────────────────────────────────
     function checkFormCompleteness() {
-        let isComplete = requiredTextFields.every(function (f) {
-            return f && f.value.trim() !== '';
-        });
-
-        isComplete = isComplete &&
-            document.querySelector('input[name="inquiry"]:checked') !== null;
-
+        let isComplete = requiredTextFields.every(f => f && f.value.trim() !== '');
+        isComplete = isComplete && document.querySelector('input[name="inquiry"]:checked') !== null;
         isComplete = isComplete && agreeCheckbox.checked;
 
-        var emailVal = form.querySelector('input[type="email"]').value;
-        if (emailVal) {
-            isComplete = isComplete && validateEmail(emailVal);
-        }
+        const emailVal = form.querySelector('input[type="email"]').value;
+        if (emailVal) isComplete = isComplete && validateEmail(emailVal);
 
-        var phoneVal = form.querySelector('input[type="tel"]').value;
-        if (phoneVal) {
-            isComplete = isComplete && validatePhone(phoneVal);
-        }
+        const phoneVal = form.querySelector('input[type="tel"]').value;
+        if (phoneVal) isComplete = isComplete && validatePhone(phoneVal);
 
         submitBtn.disabled = !isComplete;
     }
 
-    // Full validation on submit
+    // ── Full validation on submit ──────────────────────────────────
     function validateForm() {
-        var isValid = true;
+        let isValid = true;
 
-        Object.values(errorMessages).forEach(function (el) {
-            if (el) {
-                el.style.display = 'none';
-                el.textContent = '';
-            }
+        Object.values(errorMessages).forEach(el => {
+            if (el) { el.style.display = 'none'; el.textContent = ''; }
         });
 
-        requiredTextFields.forEach(function (field) {
+        requiredTextFields.forEach(field => {
             if (field && !field.value.trim()) {
                 isValid = false;
-                var key = field.name;
+                const key = field.name;
                 if (errorMessages[key]) {
                     errorMessages[key].textContent = '\u3053\u306e\u9805\u76ee\u306f\u5fc5\u9808\u3067\u3059';
                     errorMessages[key].style.display = 'block';
@@ -173,12 +177,12 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!document.querySelector('input[name="inquiry"]:checked')) {
             isValid = false;
             if (errorMessages.inquiry) {
-                errorMessages.inquiry.textContent = '\u5c11\u306a\u304f\u3068\u30821\u3064\u306e\u304a\u554f\u3044\u5408\u308f\u305b\u5185\u5bb9\u3092\u9078\u629e\u3057\u3066\u304f\u3060\u3055\u3044';
+                errorMessages.inquiry.textContent = '\u304a\u554f\u3044\u5408\u308f\u305b\u5185\u5bb9\u3092\u9078\u629e\u3057\u3066\u304f\u3060\u3055\u3044';
                 errorMessages.inquiry.style.display = 'block';
             }
         }
 
-        var email = form.querySelector('input[type="email"]').value;
+        const email = form.querySelector('input[type="email"]').value;
         if (email && !validateEmail(email)) {
             isValid = false;
             if (errorMessages.email) {
@@ -187,7 +191,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        var phone = form.querySelector('input[type="tel"]').value;
+        const phone = form.querySelector('input[type="tel"]').value;
         if (phone && !validatePhone(phone)) {
             isValid = false;
             if (errorMessages.phone) {
