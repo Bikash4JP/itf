@@ -13,7 +13,7 @@ header('Content-Type: application/json; charset=utf-8');
 
 // ── 設定 ─────────────────────────────────────────────────────────────
 const MAIL_TO = 'info@it-future.jp';
-const MAIL_NOTIFY = 'bikash4jp@gmail.com';
+const MAIL_NOTIFY = 'bikash@it-future.jp';
 const MAIL_FROM = 'noreply@it-future.jp'; // display From (envelope stays info@ via -f)
 const ENVELOPE = '-f info@it-future.jp'; // sets Return-Path for SPF
 const SITE_NAME = '株式会社アイティーエフ';
@@ -145,7 +145,7 @@ if (!$sent1) {
     reply(false, 'メール送信に失敗しました。お電話（' . SITE_TEL . '）または ' . MAIL_TO . ' でお問い合わせください。');
 }
 
-// ── ② bikash4jp@gmail.com へ個別送信 ─────────────────────────────────
+// ── ② bikash@it-future.jp へ個別送信 ─────────────────────────────────
 $sent2 = mb_send_mail(MAIL_NOTIFY, $mailSubject, $mailBody, $baseHeaders, ENVELOPE);
 error_log('[ITF] To=' . MAIL_NOTIFY . ' ' . ($sent2 ? 'OK' : 'FAIL') . ' @ ' . date('Y-m-d H:i:s'));
 

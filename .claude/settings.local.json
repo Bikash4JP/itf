@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import os; os.utime\\('aboutv4.html', None\\)\")",
+      "Bash(Sort-Object Name)",
+      "Bash(curl -L \"https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=1600&q=80\" -o images/about1-hero-bg.jpg)",
+      "Bash(curl -L \"https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80\" -o images/about1-caregiving.jpg)",
+      "Bash(curl -L \"https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80\" -o images/about1-hotel.jpg)",
+      "Bash(curl -L \"https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=80\" -o images/about1-restaurant.jpg)",
+      "Bash(curl -L \"https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=200&h=200&fit=crop&crop=face\" -o /c/Users/pc/OneDrive/Desktop/itf/images/about1-worker1.jpg --silent)",
+      "Bash(curl -L \"https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200&h=200&fit=crop&crop=face\" -o /c/Users/pc/OneDrive/Desktop/itf/images/about1-worker2.jpg --silent)",
+      "Bash(curl -L \"https://images.unsplash.com/photo-1542909168-82c3e7fdca5c?w=200&h=200&fit=crop&crop=face\" -o /c/Users/pc/OneDrive/Desktop/itf/images/about1-worker3.jpg --silent)",
+      "Bash(curl -L \"http://hakujukai-group.jp/wp-content/themes/hakujukai/images/logo.png\" -o /c/Users/pc/OneDrive/Desktop/itf/images/client-hakujukai.png --silent --max-time 8)",
+      "Bash(curl -L \"https://ichouen.org/shisetsu/1_toku_you_icho/images/logo.png\" -o /c/Users/pc/OneDrive/Desktop/itf/images/client-ichouen.png --silent --max-time 8)",
+      "Bash(curl -L \"https://mashibamed.com/fujiminoveterankan/wp-content/uploads/2020/01/logo.png\" -o /c/Users/pc/OneDrive/Desktop/itf/images/client-veteran.png --silent --max-time 8)",
+      "WebFetch(domain:it-future.jp)",
+      "Bash(python -c ' *)",
+      "Bash(curl -L \"https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1600&q=85&auto=format&fit=crop\" -o \"c:\\\\Users\\\\pc\\\\OneDrive\\\\Desktop\\\\itf\\\\images\\\\hero-about.jpg\")"
+    ]
+  }
+}

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja" itemscope="" itemtype="https://schema.org/WebPage">
 
 <head>
@@ -115,424 +115,16 @@
 <link rel="stylesheet" href="css/top.css?v=2">
 <link rel="stylesheet" href="css/main_intro.css?v=2">
 <script defer src="js/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
+<script defer src="js/top.js"></script>
 <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
 <link rel="manifest" href="images/site.webmanifest">
 <meta name="msapplication-TileImage" content="images/url_logo.PNG">
-<link rel="preload" as="image" href="images/slide1_bg.png" media="(min-width: 481px)" fetchpriority="high">
-<link rel="preload" as="image" href="images/slide1_bg.png" media="(max-width: 480px)" fetchpriority="high">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap"
-    rel="stylesheet">
-<style>
-    :root {
-        --mv-accent: #1a73e8;
-        --mv-text: #fff;
-        --mv-transition: 0.8s cubic-bezier(.77, 0, .175, 1);
-        --mv-font: 'Noto Sans JP', sans-serif
-    }
-
-    .mv-hero {
-        position: relative;
-        width: 100%;
-        height: 100vh;
-        overflow: hidden;
-        font-family: var(--mv-font);
-    }
-
-    .mv-slides {
-        position: relative;
-        width: 100%;
-        height: 100%;
-        list-style: none;
-        margin: 0;
-        padding: 0;
-    }
-
-    .mv-slide {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 1s ease, visibility 1s;
-        z-index: 0;
-    }
-
-    .mv-slide.active {
-        opacity: 1;
-        visibility: visible;
-        z-index: 2;
-    }
-
-    .mv-bg {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-size: cover;
-        background-position: center;
-        transform: scale(1.08);
-        transition: transform 7s ease-out;
-    }
-
-    .mv-slide.active .mv-bg {
-        transform: scale(1);
-    }
-
-    .mv-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 1;
-    }
-
-    .mv-slide:nth-child(1) .mv-overlay {
-        background: linear-gradient(135deg, rgba(10, 25, 60, .72), rgba(26, 115, 232, .5));
-    }
-
-    .mv-slide:nth-child(2) .mv-overlay {
-        background: linear-gradient(135deg, rgba(10, 25, 60, .72), rgba(26, 115, 232, .5));
-    }
-
-    .mv-slide:nth-child(3) .mv-overlay {
-        background: linear-gradient(135deg, rgba(10, 25, 60, .72), rgba(26, 115, 232, .5));
-    }
-
-    .mv-slide:nth-child(4) .mv-overlay {
-        background: linear-gradient(135deg, rgba(10, 25, 60, .72), rgba(26, 115, 232, .5));
-    }
-
-    .mv-slide:nth-child(5) .mv-overlay {
-        background: linear-gradient(135deg, rgba(10, 25, 60, .72), rgba(26, 115, 232, .5));
-    }
-
-    .mv-slide:nth-child(6) .mv-overlay {
-        background: linear-gradient(135deg, rgba(10, 25, 60, .72), rgba(10, 185, 238, 0.5));
-    }
-
-    .mv-content {
-        position: absolute;
-        top: 50%;
-        left: 0;
-        width: 100%;
-        transform: translateY(-50%);
-        z-index: 3;
-        padding: 0 8%;
-        box-sizing: border-box;
-        max-width: 900px;
-    }
-
-    .mv-label {
-        font-size: 15px;
-        line-height: 1.4;
-        font-weight: 500;
-        letter-spacing: .2em;
-        text-transform: uppercase;
-        color: var(--mv-accent);
-        background: rgba(255, 255, 255, .15);
-        backdrop-filter: blur(6px);
-        display: inline-block;
-        padding: 6px 18px;
-        border-radius: 30px;
-        border: 1px solid rgba(255, 255, 255, .25);
-        margin-bottom: 18px;
-        opacity: 0;
-        transform: translateY(25px);
-        transition: opacity .6s ease .1s, transform .6s ease .1s;
-    }
-
-    .mv-headline {
-        font-size: 52px;
-        line-height: 1.2;
-        font-weight: 900;
-        color: var(--mv-text);
-        margin: 0 0 16px;
-        opacity: 0;
-        transform: translateY(30px);
-        transition: opacity .6s ease .25s, transform .6s ease .25s;
-        text-shadow: 0 2px 20px rgba(0, 0, 0, .3);
-    }
-
-    .mv-headline .accent {
-        color: #64b5f6;
-    }
-
-    .mv-sub {
-        font-size: 20px;
-        line-height: 1.7;
-        font-weight: 300;
-        color: rgba(255, 255, 255, .88);
-        margin: 0 0 28px;
-        max-width: 600px;
-        opacity: 0;
-        transform: translateY(25px);
-        transition: opacity .6s ease .4s, transform .6s ease .4s;
-    }
-
-    .mv-cta {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 14px 34px;
-        background: var(--mv-accent);
-        color: #fff;
-        text-decoration: none;
-        font-size: 18px;
-        font-weight: 600;
-        border-radius: 50px;
-        cursor: pointer;
-        box-shadow: 0 4px 20px rgba(26, 115, 232, .4);
-        opacity: 0;
-        transform: translateY(25px);
-        transition: opacity .6s ease .55s, transform .6s ease .55s, background .3s, box-shadow .3s;
-    }
-
-    .mv-cta:hover {
-        background: #1565c0;
-        box-shadow: 0 6px 28px rgba(26, 115, 232, .55);
-        transform: translateY(-2px) !important;
-    }
-
-    .mv-cta svg {
-        width: 16px;
-        height: 16px;
-        transition: transform .3s;
-    }
-
-    .mv-cta:hover svg {
-        transform: translateX(4px);
-    }
-
-    .mv-slide.active .mv-label,
-    .mv-slide.active .mv-headline,
-    .mv-slide.active .mv-sub,
-    .mv-slide.active .mv-cta {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    .mv-nav {
-        position: absolute;
-        top: 50%;
-        z-index: 10;
-        transform: translateY(-50%);
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        border: 2px solid rgba(255, 255, 255, .35);
-        background: rgba(0, 0, 0, .2);
-        backdrop-filter: blur(6px);
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all .3s;
-        color: #fff;
-        padding: 0;
-    }
-
-    .mv-nav:hover {
-        background: var(--mv-accent);
-        border-color: var(--mv-accent);
-    }
-
-    .mv-nav svg {
-        width: 22px;
-        height: 22px;
-        fill: none;
-        stroke: #fff;
-        stroke-width: 2.5;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-    }
-
-    .mv-prev {
-        left: 24px;
-    }
-
-    .mv-next {
-        right: 24px;
-    }
-
-    .mv-dots {
-        position: absolute;
-        bottom: 36px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 10;
-        display: flex;
-        gap: 12px;
-        align-items: center;
-    }
-
-    .mv-dot {
-        width: 48px;
-        height: 4px;
-        border-radius: 3px;
-        background: rgba(255, 255, 255, .3);
-        cursor: pointer;
-        position: relative;
-        overflow: hidden;
-        border: none;
-        padding: 0;
-    }
-
-    .mv-dot::after {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        height: 100%;
-        width: 0;
-        background: var(--mv-accent);
-        border-radius: 3px;
-        transition: width 0s;
-    }
-
-    .mv-dot.active::after {
-        width: 100%;
-        transition: width 5s linear;
-    }
-
-    .mv-dot:hover {
-        background: rgba(255, 255, 255, .5);
-    }
-
-    .mv-counter {
-        position: absolute;
-        bottom: 34px;
-        right: 36px;
-        z-index: 10;
-        font-family: var(--mv-font);
-        font-size: 13px;
-        color: rgba(255, 255, 255, .7);
-        letter-spacing: .1em;
-    }
-
-    .mv-counter .cur {
-        font-size: 22px;
-        font-weight: 700;
-        color: #fff;
-    }
-
-    /* Sticky Shortcut Links */
-    .shortcut-links-placeholder {
-        position: relative;
-        z-index: 100;
-    }
-
-    .shortcut-links.is-sticky {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        z-index: 1000;
-        background: #fff;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        margin-top: 0 !important;
-    }
-
-    @media(max-width:768px) {
-        .mv-hero {
-            height: 90vh;
-        }
-
-        .mv-content {
-            padding: 0 6%;
-            text-align: center;
-            max-width: 100%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        .mv-label {
-            font-size: 13px;
-        }
-
-        .mv-headline {
-            font-size: 28px;
-        }
-
-        .mv-sub {
-            font-size: 16px;
-            margin: 0 auto 28px;
-        }
-
-        .mv-cta {
-            font-size: 15px;
-        }
-
-        .mv-counter {
-            font-size: 12px;
-        }
-
-        .mv-nav {
-            width: 40px;
-            height: 40px;
-        }
-
-        .mv-nav svg {
-            width: 18px;
-            height: 18px;
-        }
-
-        .mv-prev {
-            left: 12px;
-        }
-
-        .mv-next {
-            right: 12px;
-        }
-
-        .mv-dots {
-            bottom: 24px;
-            gap: 8px;
-        }
-
-        .mv-dot {
-            width: 32px;
-        }
-
-        .mv-counter {
-            display: none;
-        }
-    }
-
-    @media(max-width:480px) {
-        .mv-hero {
-            height: 90vh;
-        }
-
-        .mv-nav {
-            width: 36px;
-            height: 36px;
-        }
-
-        .mv-prev {
-            left: 8px;
-        }
-
-        .mv-next {
-            right: 8px;
-        }
-
-        .mv-dots {
-            bottom: 18px;
-            gap: 6px;
-        }
-
-        .mv-dot {
-            width: 24px;
-            height: 3px;
-        }
-    }
-</style>
+<link rel="preload" as="image" href="images/mv01_pc.webp" media="(min-width: 481px)" fetchpriority="high">
+<link rel="preload" as="image" href="images/mv01_sp.webp" media="(max-width: 480px)" fetchpriority="high">
+<link rel="preload" as="image" href="images/mv01_pc_content.webp" media="(min-width: 481px)" fetchpriority="high">
+<link rel="preload" as="image" href="images/mv01_sp_content.webp" media="(max-width: 480px)" fetchpriority="high">
 </head>
 
 <body class="home blog">
@@ -603,96 +195,61 @@
     </header>
     <div class="l-top">
         <article class="l-main">
-            <section class="mv-hero" id="mvHero">
-                <ul class="mv-slides">
-                    <li class="mv-slide active" data-index="0">
-                        <div class="mv-bg" style="background-image:url('images/slide1_bg.png')"></div>
-                        <div class="mv-overlay"></div>
-                        <div class="mv-content">
-                            <p class="mv-label">Illuminate The Future</p>
-                            <h2 class="mv-headline"><span class="accent">多言語</span>スタッフが<br>生活相談まで丁寧に対応</h2>
-                            <p class="mv-sub">母国語対応のスタッフが、就労から日常生活まで外国人財を幅広くサポート。安心して日本で働ける環境を提供します。</p>
-                            <a href="https://it-future.jp/company_info.html" class="mv-cta">会社概要を見る<svg
-                                    viewBox="0 0 24 24">
-                                    <path d="M5 12h14M12 5l7 7-7 7" stroke="#fff" fill="none" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round" />
-                                </svg></a>
-                        </div>
-                    </li>
-                    <li class="mv-slide" data-index="1">
-                        <div class="mv-bg" style="background-image:url('images/slide2_bg.png')"></div>
-                        <div class="mv-overlay"></div>
-                        <div class="mv-content">
-                            <p class="mv-label">Full Support</p>
-                            <h2 class="mv-headline">企業様に代わり<span class="accent">ITF</span>が<br>外国人材を全面支援</h2>
-                            <p class="mv-sub">特定技能の受け入れから在留資格の手続きまで、企業様の負担を最小限に。ITFがワンストップで対応します。</p>
-                            <a href="about.html#itf-reu" class="mv-cta">事業紹介を見る<svg viewBox="0 0 24 24">
-                                    <path d="M5 12h14M12 5l7 7-7 7" stroke="#fff" fill="none" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round" />
-                                </svg></a>
-                        </div>
-                    </li>
-                    <li class="mv-slide" data-index="2">
-                        <div class="mv-bg" style="background-image:url('images/slide3_bg.png')"></div>
-                        <div class="mv-overlay"></div>
-                        <div class="mv-content">
-                            <p class="mv-label">Matching</p>
-                            <h2 class="mv-headline">多種多様な業界向けに<br>最適な人材<span class="accent">マッチング</span>を提供</h2>
-                            <p class="mv-sub">介護・外食・宿泊など14業種に対応。企業のニーズに合った即戦力人財を迅速にご紹介いたします。</p>
-                            <a href="index.html#service-naiyou" class="mv-cta">サービス紹介<svg viewBox="0 0 24 24">
-                                    <path d="M5 12h14M12 5l7 7-7 7" stroke="#fff" fill="none" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round" />
-                                </svg></a>
-                        </div>
-                    </li>
-                    <li class="mv-slide" data-index="3">
-                        <div class="mv-bg" style="background-image:url('images/slide4_bg.png')"></div>
-                        <div class="mv-overlay"></div>
-                        <div class="mv-content">
-                            <p class="mv-label">Total Support</p>
-                            <h2 class="mv-headline">外国人の安心な<br>就労環境をトータル<span class="accent">サポート</span></h2>
-                            <p class="mv-sub">行政手続き・住居手配・生活支援まで、定着率向上のための包括的なフォロー体制を構築しています。</p>
-                            <a href="index.html#ITF-point" class="mv-cta">ITFのポイント<svg viewBox="0 0 24 24">
-                                    <path d="M5 12h14M12 5l7 7-7 7" stroke="#fff" fill="none" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round" />
-                                </svg></a>
-                        </div>
-                    </li>
-                    <li class="mv-slide" data-index="4">
-                        <div class="mv-bg" style="background-image:url('images/slide5_bg.png')"></div>
-                        <div class="mv-overlay"></div>
-                        <div class="mv-content">
-                            <p class="mv-label">Global Talent</p>
-                            <h2 class="mv-headline">日本で活躍する<span class="accent">外国籍人財</span>を<br>ITFが全力サポート</h2>
-                            <p class="mv-sub">アジア6か国の提携機関と連携し、意欲ある若手人財の採用・育成・定着を一貫して支援します。</p>
-                            <a href="index.html#work-step" class="mv-cta">紹介の流れ<svg viewBox="0 0 24 24">
-                                    <path d="M5 12h14M12 5l7 7-7 7" stroke="#fff" fill="none" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round" />
-                                </svg></a>
-                        </div>
-                    </li>
-                    <li class="mv-slide" data-index="5">
-                        <div class="mv-bg" style="background-image:url('images/slide6_bg.png')"></div>
-                        <div class="mv-overlay"></div>
-                        <div class="mv-content">
-                            <p class="mv-label">Recruitment</p>
-                            <h2 class="mv-headline">国内外から優れた<br><span class="accent">外国人材</span>の採用支援</h2>
-                            <p class="mv-sub">全国でスムーズな採用をサポート。特定技能・技人国人財の紹介から登録支援まで、ワンストップでご提供。</p>
-                            <a href="inquiry.html" class="mv-cta">お問い合わせ<svg viewBox="0 0 24 24">
-                                    <path d="M5 12h14M12 5l7 7-7 7" stroke="#fff" fill="none" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round" />
-                                </svg></a>
-                        </div>
-                    </li>
-                </ul>
-                <button class="mv-nav mv-prev" aria-label="前のスライド"><svg viewBox="0 0 24 24">
-                        <polyline points="15 18 9 12 15 6" />
-                    </svg></button>
-                <button class="mv-nav mv-next" aria-label="次のスライド"><svg viewBox="0 0 24 24">
-                        <polyline points="9 6 15 12 9 18" />
-                    </svg></button>
-                <div class="mv-dots" id="mvDots"></div>
-                <div class="mv-counter"><span class="cur">01</span> / 06</div>
+            <section>
+                <div class="topSlider" id="topSlider">
+                    <ul id="topImages">
+                        <li class="topImagesInner topImagesInner--01 js-current">
+                            <a href="#">
+                                <img src="images/mv01_pc_content.webp" alt="株式会社アイティーエフ - 会社概要"
+                                    class="topImagesBody u-only_pc_tab" width="1920" height="742" decoding="async">
+                                <img src="images/mv01_sp_content.webp" alt="株式会社アイティーエフ - 会社概要"
+                                    class="topImagesBody u-only_sp" width="750" height="1334" decoding="async">
+                            </a>
+                        </li>
+                        <li class="topImagesInner topImagesInner--02">
+                            <a href="about.html#itf-reu">
+                                <img src="images/mv02_pc_content.webp" alt="株式会社アイティーエフ - 事業紹介"
+                                    class="topImagesBody u-only_pc_tab" loading="lazy" decoding="async" width="2142"
+                                    height="889">
+                                <img src="images/mv02_sp_content.webp" alt="株式会社アイティーエフ - 事業紹介"
+                                    class="topImagesBody u-only_sp" loading="lazy" decoding="async">
+                            </a>
+                        </li>
+                        <li class="topImagesInner topImagesInner--03">
+                            <a href="index.html#service-naiyo">
+                                <img src="images/mv03_pc_content.webp" alt="株式会社アイティーエフ - サービス紹介"
+                                    class="topImagesBody u-only_pc_tab" loading="lazy" decoding="async">
+                                <img src="images/mv03_sp_content.webp" alt="株式会社アイティーエフ - サービス紹介"
+                                    class="topImagesBody u-only_sp" loading="lazy" decoding="async">
+                            </a>
+                        </li>
+                        <li class="topImagesInner topImagesInner--04">
+                            <a href="index.html#ITF-point">
+                                <img src="images/mv04_pc_content.webp" alt="株式会社アイティーエフ - ITFのポイント"
+                                    class="topImagesBody u-only_pc_tab" loading="lazy" decoding="async">
+                                <img src="images/mv04_sp_content.webp" alt="株式会社アイティーエフ - ITFのポイント"
+                                    class="topImagesBody u-only_sp" loading="lazy" decoding="async">
+                            </a>
+                        </li>
+                        <li class="topImagesInner topImagesInner--05">
+                            <a href="index.html#work-step">
+                                <img src="images/mv05_pc_content.webp" alt="株式会社アイティーエフ - 紹介の流れ"
+                                    class="topImagesBody u-only_pc_tab" loading="lazy" decoding="async">
+                                <img src="images/mv05_sp_content.webp" alt="株式会社アイティーエフ - 紹介の流れ"
+                                    class="topImagesBody u-only_sp" loading="lazy" decoding="async">
+                            </a>
+                        </li>
+                        <li class="topImagesInner topImagesInner--06">
+                            <a href="index.html#osirase">
+                                <img src="images/mv06_pc_content.webp" alt="株式会社株式会社アイティーエフ - お知らせ"
+                                    class="topImagesBody u-only_pc_tab" loading="lazy" decoding="async">
+                                <img src="images/mv06_sp_content.webp" alt="株式会社株式会社アイティーエフ - お知らせ"
+                                    class="topImagesBody u-only_sp" loading="lazy" decoding="async">
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="topController" id="topController"></div>
+                </div>
             </section>
             <div class="shortcut-links-placeholder">
                 <div class="shortcut-links">
@@ -1166,142 +723,10 @@
     <!-- <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
     <script defer src="js/form.min.js"></script>
     <script defer src="js/main.min.js"></script>
-    <!-- removed shortcut.js -->
+    <script defer src="js/shortcut.js"></script>
     <script defer src="js/scripts.js"></script>
     <script defer src="js/news.js"></script>
     <script defer src="js/nav.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Slider logic
-            const slides = document.querySelectorAll('.mv-slide');
-            const dotsC = document.getElementById('mvDots');
-            const counter = document.querySelector('.mv-counter .cur');
-            let currentSlide = 0;
-            let isAnimating = false;
-            let autoplayTimer;
-            let totalSlides = slides.length;
-
-            for (let i = 0; i < totalSlides; i++) {
-                const d = document.createElement('button');
-                d.className = 'mv-dot' + (i === 0 ? ' active' : '');
-                d.setAttribute('aria-label', 'スライド' + (i + 1));
-                d.dataset.idx = i;
-                dotsC.appendChild(d);
-            }
-            const dots = dotsC.querySelectorAll('.mv-dot');
-
-            function goToSlide(index) {
-                if (isAnimating || index === currentSlide) return;
-                isAnimating = true;
-
-                slides[currentSlide].classList.remove('active');
-                dots[currentSlide].classList.remove('active');
-
-                currentSlide = index;
-                if (currentSlide >= totalSlides) currentSlide = 0;
-                if (currentSlide < 0) currentSlide = totalSlides - 1;
-
-                slides[currentSlide].classList.add('active');
-                dots[currentSlide].classList.add('active');
-
-                if (counter) counter.textContent = String(currentSlide + 1).padStart(2, '0');
-
-                setTimeout(() => { isAnimating = false; }, 1100);
-            }
-
-            function startAutoplay() {
-                stopAutoplay();
-                autoplayTimer = setInterval(() => {
-                    goToSlide((currentSlide + 1) % totalSlides);
-                }, 5000);
-            }
-
-            function stopAutoplay() {
-                clearInterval(autoplayTimer);
-            }
-
-            document.querySelector('.mv-next').addEventListener('click', function () {
-                goToSlide((currentSlide + 1) % totalSlides);
-                startAutoplay();
-            });
-            document.querySelector('.mv-prev').addEventListener('click', function () {
-                goToSlide((currentSlide - 1 + totalSlides) % totalSlides);
-                startAutoplay();
-            });
-            dots.forEach(function (d) {
-                d.addEventListener('click', function () {
-                    goToSlide(+this.dataset.idx);
-                    startAutoplay();
-                });
-            });
-
-            var hero = document.getElementById('mvHero');
-            var isHovered = false;
-
-            hero.addEventListener('mouseenter', function () {
-                isHovered = true;
-                stopAutoplay();
-            });
-            hero.addEventListener('mouseleave', function () {
-                isHovered = false;
-                startAutoplay();
-            });
-
-            // When hero scrolls out of view, mouseleave may never fire — force restart
-            var heroVisObs = new IntersectionObserver(function (entries) {
-                if (!entries[0].isIntersecting) {
-                    isHovered = false;
-                    startAutoplay();
-                }
-            }, { threshold: 0.1 });
-            heroVisObs.observe(hero);
-
-            // Pause when tab is hidden, resume when visible again
-            document.addEventListener('visibilitychange', function () {
-                if (document.hidden) {
-                    stopAutoplay();
-                } else if (!isHovered) {
-                    startAutoplay();
-                }
-            });
-
-            let tx = 0;
-            hero.addEventListener('touchstart', function (e) { tx = e.touches[0].clientX; }, { passive: true });
-            hero.addEventListener('touchend', function (e) {
-                var dx = e.changedTouches[0].clientX - tx;
-                if (Math.abs(dx) > 50) {
-                    dx < 0 ? goToSlide((currentSlide + 1) % totalSlides) : goToSlide((currentSlide - 1 + totalSlides) % totalSlides);
-                    startAutoplay();
-                }
-            }, { passive: true });
-
-            document.addEventListener('keydown', function (e) {
-                if (e.key === 'ArrowRight') { goToSlide((currentSlide + 1) % totalSlides); startAutoplay(); }
-                if (e.key === 'ArrowLeft') { goToSlide((currentSlide - 1 + totalSlides) % totalSlides); startAutoplay(); }
-            });
-
-            startAutoplay();
-
-            // Shortcut sticky observer
-            const mvSection = document.getElementById('mvHero');
-            const shortcutBar = document.querySelector('.shortcut-links');
-            const shortcutPlaceholder = document.querySelector('.shortcut-links-placeholder');
-
-            const observer = new IntersectionObserver(([entry]) => {
-                if (entry.isIntersecting) {
-                    shortcutBar.classList.remove('is-sticky');
-                    shortcutPlaceholder.style.paddingTop = '0px';
-                } else {
-                    shortcutBar.classList.add('is-sticky');
-                    shortcutPlaceholder.style.paddingTop = shortcutBar.offsetHeight + 'px';
-                }
-            }, { threshold: 0, rootMargin: '0px' });
-
-            if (mvSection && shortcutBar) {
-                observer.observe(mvSection);
-            }
-        });
-    </script>
 </body>
 
 </html>
