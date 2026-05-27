@@ -33,33 +33,34 @@
 
 ```mermaid
 graph TD
-    Client[Web Browser] -->|HTTPS| Apache[Apache / Sakura Internet]
-    Apache --> HTML[HTML/CSS/Vanilla JS Frontend]
-    Apache --> PHP[PHP 8.x Backend]
-    PHP --> MySQL[(MySQL Database)]
-    PHP -->|mb_send_mail / mail()| Mail[Sakura Mail Server]
-    Mail -->|info@it-future.jp| Company[社内メール受信]
-    Mail -->|自動返信| Applicant[申込者メール受信]
+    Client["Web Browser"] -->|HTTPS| Apache["Apache - Sakura Internet"]
+    Apache --> HTML["HTML/CSS/Vanilla JS Frontend"]
+    Apache --> PHP["PHP 8.x Backend"]
+    PHP --> MySQL[("MySQL Database")]
+    PHP -->|mb_send_mail| Mail["Sakura Mail Server"]
+    Mail -->|"info@it-future.jp"| Company["社内メール受信"]
+    Mail -->|自動返信| Applicant["申込者メール受信"]
     HTML -->|fetch API| PHP
-    HTML -->|i18next JSON| Locales[/locales/ 10言語]
-    PHP -->|PhpSpreadsheet| Excel[Excel XLSX生成]
-    PHP -->|Dompdf| PDF[PDF履歴書生成]
+    HTML -->|i18next JSON| Locales["/locales/ 10言語"]
+    PHP -->|PhpSpreadsheet| Excel["Excel XLSX生成"]
+    PHP -->|Dompdf| PDF["PDF履歴書生成"]
 
-    subgraph Frontend Pages
-        Index[index.html - メインページ]
-        About[about.html - 事業紹介]
-        Inquiry[inquiry.html - お問い合わせ]
-        Saiyou[saiyou.php - 求人情報]
-        News[news.html - 新着情報]
+    subgraph "Frontend Pages"
+        Index["index.html - メインページ"]
+        About["about.html - 事業紹介"]
+        Inquiry["inquiry.html - お問い合わせ"]
+        Saiyou["saiyou.php - 求人情報"]
+        News["news.html - 新着情報"]
     end
 
-    subgraph Backend APIs
-        SendInquiry[send_inquiry.php]
-        FetchNews[fetch_news.php - デュアル用途]
-        JobsAPI[jobs_api.php]
-        CSRF[get_csrf_token.php]
+    subgraph "Backend APIs"
+        SendInquiry["send_inquiry.php"]
+        FetchNews["fetch_news.php - デュアル用途"]
+        JobsAPI["jobs_api.php"]
+        CSRF["get_csrf_token.php"]
     end
 ```
+
 
 ---
 
