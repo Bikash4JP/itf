@@ -15,7 +15,9 @@
       "Bash(curl -L \"https://mashibamed.com/fujiminoveterankan/wp-content/uploads/2020/01/logo.png\" -o /c/Users/pc/OneDrive/Desktop/itf/images/client-veteran.png --silent --max-time 8)",
       "WebFetch(domain:it-future.jp)",
       "Bash(python -c ' *)",
-      "Bash(curl -L \"https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1600&q=85&auto=format&fit=crop\" -o \"c:\\\\Users\\\\pc\\\\OneDrive\\\\Desktop\\\\itf\\\\images\\\\hero-about.jpg\")"
+      "Bash(curl -L \"https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1600&q=85&auto=format&fit=crop\" -o \"c:\\\\Users\\\\pc\\\\OneDrive\\\\Desktop\\\\itf\\\\images\\\\hero-about.jpg\")",
+      "Bash(ls -la *.md)",
+      "Bash(ls -la ITF_Documentation/)"
     ]
   }
 }
