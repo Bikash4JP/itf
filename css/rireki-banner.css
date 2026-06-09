@@ -1,0 +1,166 @@
+/* ============================================================
+   #rireki-section — ITF brand: sky-blue bg, white card, orange CTA
+   Brand palette: #009ef2 (sky blue) · #e79435 (orange) · #fff (card)
+   ============================================================ */
+
+#rireki-section {
+    background: linear-gradient(119deg, rgb(8, 175, 236), rgb(240, 182, 76));
+    padding: 56px 0;
+}
+
+.rireki-banner__inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 32px;
+}
+
+.rireki-banner__card {
+    background: #8ad9ec;
+    border-radius: 16px;
+    padding: 40px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+    flex-wrap: wrap;
+    box-shadow: 0 8px 36px rgba(0, 0, 0, 0.14);
+}
+
+.rireki-banner__text h3 {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 22px;
+    font-weight: 900;
+    color: #111;
+    margin: 0 0 8px;
+    line-height: 1.4;
+}
+
+.rireki-banner__text p {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.75;
+    margin: 0;
+}
+
+.rireki-banner__actions {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+}
+
+/* Primary CTA — orange, matches .about-button on page */
+.rireki-banner__btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 34px;
+    border-radius: 50px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Noto Sans JP', sans-serif;
+    text-decoration: none;
+    background: #e79435;
+    color: #fff;
+    box-shadow: 0 4px 18px rgba(231, 148, 53, 0.4);
+    transition: background 0.25s, box-shadow 0.25s, transform 0.2s;
+}
+
+.rireki-banner__btn-primary:hover {
+    background: #c97a18;
+    box-shadow: 0 6px 24px rgba(201, 122, 24, 0.5);
+    transform: translateY(-2px);
+}
+
+/* Secondary CTA — sky-blue outline, matches site link style */
+.rireki-banner__btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 34px;
+    border-radius: 50px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Noto Sans JP', sans-serif;
+    text-decoration: none;
+    background: transparent;
+    border: 2px solid #009ef2;
+    color: #009ef2;
+    transition: background 0.25s, color 0.25s, transform 0.2s;
+}
+
+.rireki-banner__btn-secondary:hover {
+    background: #009ef2;
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+/* ============================================================
+   Shortcut bar overrides — move inline styles out of HTML
+   ============================================================ */
+
+/* Base shortcut buttons: dark text on light bg (overrides main_intro.css default) */
+.shortcut-btn {
+    color: #003344;
+    font-weight: 700;
+}
+
+.shortcut-btn:hover {
+    color: #fff;
+}
+
+/* Featured shortcut link (rireki) — orange-amber highlight */
+.shortcut-btn--featured {
+    background: linear-gradient(90deg, #e79435, #f5b347);
+    color: #fff !important;
+    box-shadow: 0 2px 8px rgba(231, 148, 53, 0.35);
+}
+
+.shortcut-btn--featured:hover {
+    background: linear-gradient(90deg, #c97a18, #e79435);
+    color: #fff !important;
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+
+@media (max-width: 768px) {
+    #rireki-section {
+        padding: 40px 0;
+    }
+
+    .rireki-banner__card {
+        flex-direction: column;
+        text-align: center;
+        padding: 32px 24px;
+        gap: 24px;
+    }
+
+    .rireki-banner__actions {
+        justify-content: center;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    #rireki-section {
+        padding: 28px 0;
+    }
+
+    .rireki-banner__inner {
+        padding: 0 16px;
+    }
+
+    .rireki-banner__text h3 {
+        font-size: 18px;
+    }
+
+    .rireki-banner__btn-primary,
+    .rireki-banner__btn-secondary {
+        font-size: 14px;
+        padding: 12px 22px;
+        width: 100%;
+        justify-content: center;
+    }
+}
