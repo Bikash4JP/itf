@@ -164,3 +164,998 @@
         justify-content: center;
     }
 }
+
+/* ============================================================
+   PROMO BANNERS — 3 catchy variants for multiple page placements
+   A: Full-width photo  |  B: Split image+text  |  C: Gradient strip
+   ============================================================ */
+
+/* ── Shared base ── */
+.promo-banner {
+    position: relative;
+    overflow: hidden;
+}
+
+.promo-banner__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px;
+}
+
+/* ══════════════════════════════════════════
+   BANNER A — Dark navy, image-left feature-chips (resume creation)
+   Placement: after troubles section
+   Layout: illustration LEFT · badge+title+chips+CTA RIGHT
+   ══════════════════════════════════════════ */
+.promo-banner--company {
+    background: linear-gradient(130deg, #0d1e35 0%, #0a3655 100%);
+    padding: 0;
+}
+
+.promo-banner--company .promo-banner__inner {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    padding: 0;
+}
+
+/* Left: illustration panel */
+.promo-banner--company .promo-banner__image {
+    flex: 0 0 360px;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(160deg, #0a2d4a 0%, #0d3f62 100%);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.promo-banner--company .promo-banner__image img {
+    display: block;
+    max-height: 320px;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    object-position: bottom center;
+    filter: drop-shadow(0 4px 24px rgba(0, 158, 242, .25));
+}
+
+.promo-banner--company .promo-banner__image-label {
+    position: absolute;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 158, 242, .18);
+    border: 1px solid rgba(0, 158, 242, .4);
+    border-radius: 50px;
+    padding: 6px 18px;
+    color: #3be1ff;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    white-space: nowrap;
+}
+
+/* Right: content panel */
+.promo-banner--company .promo-banner__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 48px 48px 48px 44px;
+}
+
+.promo-banner--company .promo-banner__badge {
+    display: inline-block;
+    background: #e79435;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    padding: 5px 16px;
+    border-radius: 30px;
+    margin-bottom: 18px;
+    text-transform: uppercase;
+    width: fit-content;
+}
+
+.promo-banner--company .promo-banner__title {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 30px;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.3;
+    margin: 0 0 10px;
+}
+
+.promo-banner--company .promo-banner__title strong {
+    color: #e79435;
+}
+
+.promo-banner--company .promo-banner__desc {
+    font-size: 14px;
+    color: rgba(255, 255, 255, .72);
+    line-height: 1.75;
+    margin: 0 0 24px;
+}
+
+/* Feature chips grid */
+.promo-banner--company .promo-banner__features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 32px;
+}
+
+.promo-banner--company .promo-banner__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, .08);
+    border: 1px solid rgba(255, 255, 255, .16);
+    border-radius: 8px;
+    padding: 8px 14px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Noto Sans JP', sans-serif;
+    transition: background .2s, border-color .2s;
+}
+
+.promo-banner--company .promo-banner__chip:hover {
+    background: rgba(0, 158, 242, .2);
+    border-color: rgba(0, 158, 242, .5);
+}
+
+.promo-banner--company .promo-banner__chip-icon {
+    font-size: 15px;
+}
+
+/* CTA — shimmer sweep on loop */
+.promo-banner--company .promo-banner__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 38px;
+    background: linear-gradient(100deg,
+            #e79435 0%,
+            #e79435 35%,
+            #f7d080 50%,
+            #e79435 65%,
+            #e79435 100%);
+    background-size: 250% 100%;
+    color: #fff;
+    border-radius: 50px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Noto Sans JP', sans-serif;
+    text-decoration: none;
+    box-shadow: 0 4px 20px rgba(231, 148, 53, .4);
+    animation: ctaShimmer 2.8s linear infinite;
+    width: fit-content;
+    transition: transform .2s, box-shadow .2s;
+}
+
+.promo-banner--company .promo-banner__cta:hover {
+    background: #c97a18;
+    animation: none;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 28px rgba(231, 148, 53, .55);
+}
+
+/* ── Banner A keyframes ── */
+@keyframes ctaShimmer {
+    0% {
+        background-position: 200% center;
+    }
+
+    100% {
+        background-position: -200% center;
+    }
+}
+
+@keyframes bannerImgFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-12px);
+    }
+}
+
+@keyframes chipFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes labelPulse {
+
+    0%,
+    100% {
+        opacity: .75;
+        box-shadow: 0 0 0 rgba(0, 158, 242, 0);
+    }
+
+    50% {
+        opacity: 1;
+        box-shadow: 0 0 10px rgba(0, 158, 242, .35);
+    }
+}
+
+/* Floating illustration */
+.promo-banner--company .promo-banner__image img {
+    animation: bannerImgFloat 4s ease-in-out infinite;
+}
+
+/* Image-panel top label — gentle glow pulse */
+.promo-banner--company .promo-banner__image-label {
+    animation: labelPulse 2.6s ease-in-out infinite;
+}
+
+/* Feature chips — staggered slide-up fade-in */
+.promo-banner--company .promo-banner__chip {
+    opacity: 0;
+    animation: chipFadeIn .45s ease forwards;
+}
+
+.promo-banner--company .promo-banner__chip:nth-child(1) {
+    animation-delay: .10s;
+}
+
+.promo-banner--company .promo-banner__chip:nth-child(2) {
+    animation-delay: .20s;
+}
+
+.promo-banner--company .promo-banner__chip:nth-child(3) {
+    animation-delay: .30s;
+}
+
+.promo-banner--company .promo-banner__chip:nth-child(4) {
+    animation-delay: .40s;
+}
+
+.promo-banner--company .promo-banner__chip:nth-child(5) {
+    animation-delay: .50s;
+}
+
+.promo-banner--company .promo-banner__chip:nth-child(6) {
+    animation-delay: .60s;
+}
+
+/* ══════════════════════════════════════════
+   BANNER B — Split image+text (resume CTA)
+   Placement: after service section
+   ══════════════════════════════════════════ */
+.promo-banner--resume {
+    background: #009ef2;
+}
+
+.promo-banner--resume .promo-banner__inner {
+    display: flex;
+    align-items: stretch;
+    min-height: 300px;
+    gap: 0;
+    padding-left: 32px;
+    padding-right: 0;
+}
+
+.promo-banner--resume .promo-banner__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 52px 48px 52px 0;
+}
+
+.promo-banner--resume .promo-banner__badge {
+    display: inline-block;
+    background: rgba(255, 255, 255, .18);
+    border: 1px solid rgba(255, 255, 255, .4);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    padding: 5px 16px;
+    border-radius: 30px;
+    margin-bottom: 16px;
+    width: fit-content;
+    text-transform: uppercase;
+}
+
+.promo-banner--resume .promo-banner__title {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 30px;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.3;
+    margin: 0 0 14px;
+}
+
+.promo-banner--resume .promo-banner__title strong {
+    color: #ffe87a;
+}
+
+.promo-banner--resume .promo-banner__desc {
+    font-size: 14px;
+    color: rgba(255, 255, 255, .9);
+    line-height: 1.8;
+    margin: 0 0 28px;
+}
+
+.promo-banner--resume .promo-banner__actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.promo-banner--resume .promo-banner__cta-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 32px;
+    background: #fff;
+    color: #009ef2;
+    border-radius: 50px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Noto Sans JP', sans-serif;
+    text-decoration: none;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .15);
+    transition: background .25s, color .25s, transform .2s;
+}
+
+.promo-banner--resume .promo-banner__cta-primary:hover {
+    background: #e79435;
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+.promo-banner--resume .promo-banner__cta-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 32px;
+    background: transparent;
+    color: #fff;
+    border: 2px solid rgba(255, 255, 255, .6);
+    border-radius: 50px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Noto Sans JP', sans-serif;
+    text-decoration: none;
+    transition: background .25s, border-color .25s, transform .2s;
+}
+
+.promo-banner--resume .promo-banner__cta-secondary:hover {
+    background: rgba(255, 255, 255, .15);
+    border-color: #fff;
+    transform: translateY(-2px);
+}
+
+.promo-banner--resume .promo-banner__image {
+    flex: 0 0 400px;
+    position: relative;
+    overflow: hidden;
+}
+
+.promo-banner--resume .promo-banner__image img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+}
+
+.promo-banner--resume .promo-banner__image::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 80px;
+    height: 100%;
+    background: linear-gradient(to right, #009ef2, transparent);
+    z-index: 1;
+}
+
+/* ══════════════════════════════════════════
+   BANNER C — Animated gradient strip (general)
+   Placement: after flow section (replaces old rireki-section)
+   ══════════════════════════════════════════ */
+.promo-banner--general {
+    background: linear-gradient(119deg, #e79435 0%, #3be1ff 55%, #3a9dff 100%);
+    background-size: 220% 220%;
+    animation: promoBannerGradient 10s ease infinite;
+    padding: 52px 0;
+}
+
+@keyframes promoBannerGradient {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.promo-banner--general .promo-banner__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+    flex-wrap: wrap;
+}
+
+.promo-banner--general .promo-banner__icon {
+    font-size: 60px;
+    line-height: 1;
+    flex-shrink: 0;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .2));
+}
+
+.promo-banner--general .promo-banner__content {
+    flex: 1;
+}
+
+.promo-banner--general .promo-banner__title {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 24px;
+    font-weight: 900;
+    color: #fff;
+    margin: 0 0 8px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, .2);
+}
+
+.promo-banner--general .promo-banner__desc {
+    font-size: 14px;
+    color: rgba(255, 255, 255, .92);
+    line-height: 1.75;
+    margin: 0;
+}
+
+.promo-banner--general .promo-banner__actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+}
+
+.promo-banner--general .promo-banner__cta-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 34px;
+    background: #fff;
+    color: #e79435;
+    border-radius: 50px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Noto Sans JP', sans-serif;
+    text-decoration: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, .18);
+    transition: background .25s, color .25s, transform .2s;
+}
+
+.promo-banner--general .promo-banner__cta-primary:hover {
+    background: #e79435;
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+.promo-banner--general .promo-banner__cta-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 34px;
+    background: transparent;
+    color: #fff;
+    border: 2px solid rgba(255, 255, 255, .75);
+    border-radius: 50px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Noto Sans JP', sans-serif;
+    text-decoration: none;
+    transition: background .25s, border-color .25s, transform .2s;
+}
+
+.promo-banner--general .promo-banner__cta-secondary:hover {
+    background: rgba(255, 255, 255, .18);
+    border-color: #fff;
+    transform: translateY(-2px);
+}
+
+/* ============================================================
+   SOLUTION SECTION — #solution_03
+   Fresh namespace (.itf-sol__*) avoids all common.css conflicts.
+   Pale-blue section bg + white cards — styled to match the rest of the page.
+   ============================================================ */
+
+#solution_03 {
+    background: #f0f8ff !important;
+    padding: 60px 0 !important;
+    position: relative !important;
+    overflow: visible !important;
+}
+
+/* Top accent bar — continues from Banner B's sky blue */
+#solution_03::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, #009ef2 0%, #3be1ff 50%, #e79435 100%);
+    z-index: 1;
+}
+
+/* remove the old decorative circle */
+#solution_03::after {
+    display: none;
+}
+
+/* ── Outer wrapper ── */
+.itf-sol {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px;
+}
+
+/* ═══════════════════════════════════════════════════
+   MAIN LAYOUT GRID
+   col 1 = left side card (230px)
+   col 2 = center-left (1fr)
+   col 3 = center-right (1fr)
+   col 4 = right side card (230px)
+   row 1 = title (cols 2-3) + side cards start
+   row 2 = center cards (cols 2-3) + side cards end
+   row 3 = CTA (cols 2-3)
+═══════════════════════════════════════════════════ */
+.itf-sol__layout {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr 1fr 1fr !important;
+    grid-template-rows: auto auto auto !important;
+    gap: 20px !important;
+    align-items: start !important;
+}
+
+/* ── Title block: center cols, row 1 ── */
+.itf-sol__head {
+    grid-column: 2 / 4 !important;
+    grid-row: 1 !important;
+    text-align: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 20px 24px !important;
+    margin-bottom: 0 !important;
+}
+
+.itf-sol__tag {
+    display: inline-block !important;
+    background: #009ef2 !important;
+    color: #fff !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.2em !important;
+    text-transform: uppercase !important;
+    padding: 7px 26px !important;
+    border-radius: 50px !important;
+    margin-bottom: 20px !important;
+    text-decoration: none !important;
+    font-family: 'Noto Sans JP', sans-serif !important;
+}
+
+.itf-sol__title {
+    font-family: 'Noto Sans JP', sans-serif !important;
+    font-size: 28px !important;
+    font-weight: 900 !important;
+    color: #0d1e35 !important;
+    line-height: 1.5 !important;
+    margin: 0 0 14px !important;
+    text-decoration: none !important;
+    border: none !important;
+    background: none !important;
+}
+
+.itf-sol__sub {
+    font-size: 13px !important;
+    color: #667788 !important;
+    margin: 0 !important;
+    line-height: 1.7 !important;
+    font-family: 'Noto Sans JP', sans-serif !important;
+}
+
+/* ── Card 1: LEFT col, rows 1+2, offset down for subtle stagger ── */
+.itf-sol__card[data-card="1"] {
+    grid-column: 1 !important;
+    grid-row: 1 / 3 !important;
+    align-self: start !important;
+    margin-top: 60px !important;
+}
+
+/* ── Card 2: center-left, row 2 (dropped below heading) ── */
+.itf-sol__card[data-card="2"] {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    align-self: start !important;
+}
+
+/* ── Card 3: center-right, row 2 (dropped below heading) ── */
+.itf-sol__card[data-card="3"] {
+    grid-column: 3 !important;
+    grid-row: 2 !important;
+    align-self: start !important;
+}
+
+/* ── Card 4: RIGHT col, rows 1+2, offset down for subtle stagger ── */
+.itf-sol__card[data-card="4"] {
+    grid-column: 4 !important;
+    grid-row: 1 / 3 !important;
+    align-self: start !important;
+    margin-top: 60px !important;
+}
+
+/* ── CTA: center cols, row 3 ── */
+.itf-sol__foot {
+    grid-column: 2 / 4 !important;
+    grid-row: 3 !important;
+    text-align: center !important;
+    padding: 8px 0 !important;
+    margin: 0 !important;
+}
+
+/* ══════════════════════════════════════════
+   CARD BASE STYLES (light white, matches page)
+══════════════════════════════════════════ */
+.itf-sol__card {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 16px !important;
+    background: #ffffff !important;
+    border-radius: 20px !important;
+    padding: 36px 24px 32px !important;
+    border: none !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    text-align: center !important;
+    min-height: 260px !important;
+    /* initial hidden state for scroll-reveal; transition applied inline by JS */
+    opacity: 0;
+    transform: translateY(24px);
+    text-decoration: none !important;
+    cursor: default;
+}
+
+/* Revealed state: after IntersectionObserver fires.
+   transition here governs hover speed once reveal is done
+   (the reveal itself uses a faster inline transition set by JS). */
+.itf-sol__card.itf-revealed {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    transition: transform 0.28s ease, box-shadow 0.28s ease !important;
+}
+
+/* CTA foot reveal */
+.itf-sol__foot {
+    opacity: 0;
+    transition: opacity 0.5s ease-out;
+}
+
+.itf-sol__foot.itf-revealed {
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .itf-sol__card {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+    }
+
+    .itf-sol__foot {
+        opacity: 1 !important;
+        transition: none !important;
+    }
+}
+
+/* Sky blue top shimmer stripe */
+.itf-sol__card::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 3px !important;
+    background: linear-gradient(90deg, #009ef2, #3be1ff, #e79435) !important;
+    border-radius: 0 !important;
+}
+
+/* Soft inner radial glow (very subtle on white card) */
+.itf-sol__card::after {
+    content: '' !important;
+    position: absolute !important;
+    bottom: -50px !important;
+    right: -50px !important;
+    width: 160px !important;
+    height: 160px !important;
+    border-radius: 50% !important;
+    background: radial-gradient(circle, rgba(0, 158, 242, 0.06) 0%, transparent 70%) !important;
+    pointer-events: none !important;
+}
+
+.itf-sol__card:hover {
+    transform: translateY(-7px) scale(1.01) !important;
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.14) !important;
+}
+
+/* ── Emoji icon (side cards only, shown via HTML) ── */
+.itf-sol__icon {
+    font-size: 44px !important;
+    line-height: 1 !important;
+    margin-bottom: 4px !important;
+    filter: none !important;
+    display: block !important;
+}
+
+/* ── Blue number badge — matches .service__item--stt from common.css ── */
+.itf-sol__num {
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 52px !important;
+    height: 52px !important;
+    min-width: 52px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(180deg, #3be1ff 0%, #3a9dff 100%) !important;
+    color: #fff !important;
+    font-size: 15px !important;
+    font-weight: 900 !important;
+    box-shadow: 0 4px 14px rgba(58, 157, 255, 0.35) !important;
+    font-family: 'Noto Sans JP', sans-serif !important;
+    text-decoration: none !important;
+}
+
+/* ── Card body ── */
+.itf-sol__body {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    width: 100% !important;
+}
+
+.itf-sol__problem {
+    display: block !important;
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    color: #0d1e35 !important;
+    line-height: 1.5 !important;
+    margin: 0 !important;
+    font-family: 'Noto Sans JP', sans-serif !important;
+    text-decoration: none !important;
+}
+
+.itf-sol__answer {
+    font-size: 12.5px !important;
+    color: #667788 !important;
+    line-height: 1.8 !important;
+    margin: 0 !important;
+    font-family: 'Noto Sans JP', sans-serif !important;
+}
+
+/* scroll-reveal handled by IntersectionObserver in JS — no CSS animations here */
+
+/* ── CTA button ── */
+.itf-sol__cta {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    background: #009ef2 !important;
+    color: #fff !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    font-family: 'Noto Sans JP', sans-serif !important;
+    text-decoration: none !important;
+    padding: 15px 48px !important;
+    border-radius: 50px !important;
+    box-shadow: 0 6px 24px rgba(0, 158, 242, 0.4) !important;
+    transition: background 0.25s, transform 0.2s, box-shadow 0.25s !important;
+}
+
+.itf-sol__cta:hover {
+    background: #0077cc !important;
+    transform: translateY(-3px) !important;
+    box-shadow: 0 12px 38px rgba(0, 158, 242, 0.55) !important;
+}
+
+/* ── Responsive ── */
+@media (max-width: 960px) {
+    .itf-sol__layout {
+        gap: 16px !important;
+    }
+
+    .itf-sol__title {
+        font-size: 23px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    #solution_03 {
+        padding: 52px 0 48px !important;
+    }
+
+    .itf-sol {
+        padding: 0 16px !important;
+    }
+
+    /* Stack to single column on mobile */
+    .itf-sol__layout {
+        grid-template-columns: 1fr !important;
+        grid-template-rows: auto !important;
+        gap: 16px !important;
+    }
+
+    .itf-sol__head,
+    .itf-sol__card[data-card="1"],
+    .itf-sol__card[data-card="2"],
+    .itf-sol__card[data-card="3"],
+    .itf-sol__card[data-card="4"],
+    .itf-sol__foot {
+        grid-column: 1 !important;
+        grid-row: auto !important;
+        align-self: auto !important;
+    }
+
+    /* Remove desktop stagger offset on mobile */
+    .itf-sol__card[data-card="1"],
+    .itf-sol__card[data-card="4"] {
+        margin-top: 0 !important;
+    }
+
+    .itf-sol__card {
+        min-height: 0 !important;
+    }
+
+    .itf-sol__head {
+        padding: 20px 0 8px !important;
+    }
+
+    .itf-sol__title {
+        font-size: 21px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .itf-sol__title {
+        font-size: 18px !important;
+    }
+
+    .itf-sol__card {
+        padding: 28px 18px !important;
+    }
+
+    .itf-sol__cta {
+        padding: 14px 28px !important;
+        width: 100% !important;
+        justify-content: center !important;
+    }
+}
+
+/* ── Responsive for all 3 ── */
+@media (max-width: 900px) {
+    .promo-banner--resume .promo-banner__image {
+        flex: 0 0 300px;
+    }
+}
+
+@media (max-width: 768px) {
+    .promo-banner--company .promo-banner__inner {
+        flex-direction: column;
+    }
+
+    .promo-banner--company .promo-banner__image {
+        flex: none;
+        width: 100%;
+        height: 200px;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .promo-banner--company .promo-banner__image img {
+        max-height: 180px;
+    }
+
+    .promo-banner--company .promo-banner__content {
+        padding: 36px 24px;
+    }
+
+    .promo-banner--company .promo-banner__title {
+        font-size: 24px;
+    }
+
+    .promo-banner--resume .promo-banner__inner {
+        flex-direction: column;
+        padding: 0 20px;
+    }
+
+    .promo-banner--resume .promo-banner__content {
+        padding: 40px 0 28px;
+    }
+
+    .promo-banner--resume .promo-banner__image {
+        flex: none;
+        width: 100%;
+        height: 220px;
+        position: relative;
+    }
+
+    .promo-banner--resume .promo-banner__image img {
+        position: static;
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+    }
+
+    .promo-banner--resume .promo-banner__image::before {
+        display: none;
+    }
+
+    .promo-banner--general .promo-banner__inner {
+        flex-direction: column;
+        text-align: center;
+        gap: 20px;
+    }
+
+    .promo-banner--general .promo-banner__actions {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .promo-banner--company .promo-banner__title {
+        font-size: 20px;
+    }
+
+    .promo-banner--company .promo-banner__content {
+        padding: 28px 16px;
+    }
+
+    .promo-banner--resume .promo-banner__title {
+        font-size: 22px;
+    }
+
+    .promo-banner--general .promo-banner__title {
+        font-size: 20px;
+    }
+
+    .promo-banner--company .promo-banner__cta,
+    .promo-banner--resume .promo-banner__cta-primary,
+    .promo-banner--resume .promo-banner__cta-secondary,
+    .promo-banner--general .promo-banner__cta-primary,
+    .promo-banner--general .promo-banner__cta-secondary {
+        font-size: 14px;
+        padding: 12px 22px;
+        width: 100%;
+        justify-content: center;
+    }
+}

@@ -104,437 +104,436 @@
         ]
     }
     </script>
-    <meta name="referrer" content="strict-origin-when-cross-origin">
-    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+</head>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-    <link rel="stylesheet" type="text/css" media="all" href="css/common.css">
-    <link rel="stylesheet" id="wp-pagenavi-css" href="css/pagenavi-css.css" type="text/css" media="all">
-    <link rel="stylesheet" href="css/footer.css">
-    <link rel="stylesheet" href="css/greeting.css">
-    <link rel="stylesheet" href="css/top.css?v=2">
-    <link rel="stylesheet" href="css/main_intro.css?v=2">
-    <link rel="stylesheet" href="css/rireki-banner.css">
-    <script defer src="js/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
-    <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
-    <link rel="manifest" href="images/site.webmanifest">
-    <meta name="msapplication-TileImage" content="images/url_logo.PNG">
-    <link rel="preload" as="image" href="images/slide1_bg.png" media="(min-width: 481px)" fetchpriority="high">
-    <link rel="preload" as="image" href="images/slide1_bg.png" media="(max-width: 480px)" fetchpriority="high">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap"
-        rel="stylesheet">
-    <style>
-        :root {
-            --mv-accent: #1a73e8;
-            --mv-text: #fff;
-            --mv-transition: 0.8s cubic-bezier(.77, 0, .175, 1);
-            --mv-font: 'Noto Sans JP', sans-serif
-        }
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link rel="stylesheet" type="text/css" media="all" href="css/common.css">
+<link rel="stylesheet" id="wp-pagenavi-css" href="css/pagenavi-css.css" type="text/css" media="all">
+<link rel="stylesheet" href="css/footer.css">
+<link rel="stylesheet" href="css/greeting.css">
+<link rel="stylesheet" href="css/top.css?v=2">
+<link rel="stylesheet" href="css/main_intro.css?v=2">
+<link rel="stylesheet" href="css/rireki-banner.css">
+<script defer src="js/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
+<link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+<link rel="manifest" href="images/site.webmanifest">
+<meta name="msapplication-TileImage" content="images/url_logo.PNG">
+<link rel="preload" as="image" href="images/slide1_bg.png" media="(min-width: 481px)" fetchpriority="high">
+<link rel="preload" as="image" href="images/slide1_bg.png" media="(max-width: 480px)" fetchpriority="high">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap"
+    rel="stylesheet">
+<style>
+    :root {
+        --mv-accent: #1a73e8;
+        --mv-text: #fff;
+        --mv-transition: 0.8s cubic-bezier(.77, 0, .175, 1);
+        --mv-font: 'Noto Sans JP', sans-serif
+    }
 
+    .mv-hero {
+        position: relative;
+        width: 100%;
+        height: 100vh;
+        overflow: hidden;
+        font-family: var(--mv-font);
+    }
+
+    .mv-slides {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .mv-slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 1s ease, visibility 1s;
+        z-index: 0;
+    }
+
+    .mv-slide.active {
+        opacity: 1;
+        visibility: visible;
+        z-index: 2;
+    }
+
+    .mv-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        transform: scale(1.08);
+        transition: transform 7s ease-out;
+    }
+
+    .mv-slide.active .mv-bg {
+        transform: scale(1);
+    }
+
+    .mv-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+    }
+
+    .mv-slide:nth-child(1) .mv-overlay {
+        background: linear-gradient(135deg, rgba(10, 25, 60, .72), rgba(26, 115, 232, .5));
+    }
+
+    .mv-slide:nth-child(2) .mv-overlay {
+        background: linear-gradient(135deg, rgba(10, 25, 60, .72), rgba(26, 115, 232, .5));
+    }
+
+    .mv-slide:nth-child(3) .mv-overlay {
+        background: linear-gradient(135deg, rgba(10, 25, 60, .72), rgba(26, 115, 232, .5));
+    }
+
+    .mv-slide:nth-child(4) .mv-overlay {
+        background: linear-gradient(135deg, rgba(10, 25, 60, .72), rgba(26, 115, 232, .5));
+    }
+
+    .mv-slide:nth-child(5) .mv-overlay {
+        background: linear-gradient(135deg, rgba(10, 25, 60, .72), rgba(26, 115, 232, .5));
+    }
+
+    .mv-slide:nth-child(6) .mv-overlay {
+        background: linear-gradient(135deg, rgba(10, 25, 60, .72), rgba(10, 185, 238, 0.5));
+    }
+
+    .mv-content {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        width: 100%;
+        transform: translateY(-50%);
+        z-index: 3;
+        padding: 0 8%;
+        box-sizing: border-box;
+        max-width: 900px;
+    }
+
+    .mv-label {
+        font-size: 15px;
+        line-height: 1.4;
+        font-weight: 500;
+        letter-spacing: .2em;
+        text-transform: uppercase;
+        color: var(--mv-accent);
+        background: rgba(255, 255, 255, .15);
+        backdrop-filter: blur(6px);
+        display: inline-block;
+        padding: 6px 18px;
+        border-radius: 30px;
+        border: 1px solid rgba(255, 255, 255, .25);
+        margin-bottom: 18px;
+        opacity: 0;
+        transform: translateY(25px);
+        transition: opacity .6s ease .1s, transform .6s ease .1s;
+    }
+
+    .mv-headline {
+        font-size: 52px;
+        line-height: 1.2;
+        font-weight: 900;
+        color: var(--mv-text);
+        margin: 0 0 16px;
+        opacity: 0;
+        transform: translateY(30px);
+        transition: opacity .6s ease .25s, transform .6s ease .25s;
+        text-shadow: 0 2px 20px rgba(0, 0, 0, .3);
+    }
+
+    .mv-headline .accent {
+        color: #64b5f6;
+    }
+
+    .mv-sub {
+        font-size: 20px;
+        line-height: 1.7;
+        font-weight: 300;
+        color: rgba(255, 255, 255, .88);
+        margin: 0 0 28px;
+        max-width: 600px;
+        opacity: 0;
+        transform: translateY(25px);
+        transition: opacity .6s ease .4s, transform .6s ease .4s;
+    }
+
+    .mv-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 34px;
+        background: var(--mv-accent);
+        color: #fff;
+        text-decoration: none;
+        font-size: 18px;
+        font-weight: 600;
+        border-radius: 50px;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(26, 115, 232, .4);
+        opacity: 0;
+        transform: translateY(25px);
+        transition: opacity .6s ease .55s, transform .6s ease .55s, background .3s, box-shadow .3s;
+    }
+
+    .mv-cta:hover {
+        background: #1565c0;
+        box-shadow: 0 6px 28px rgba(26, 115, 232, .55);
+        transform: translateY(-2px) !important;
+    }
+
+    .mv-cta svg {
+        width: 16px;
+        height: 16px;
+        transition: transform .3s;
+    }
+
+    .mv-cta:hover svg {
+        transform: translateX(4px);
+    }
+
+    .mv-slide.active .mv-label,
+    .mv-slide.active .mv-headline,
+    .mv-slide.active .mv-sub,
+    .mv-slide.active .mv-cta {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .mv-nav {
+        position: absolute;
+        top: 50%;
+        z-index: 10;
+        transform: translateY(-50%);
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, .35);
+        background: rgba(0, 0, 0, .2);
+        backdrop-filter: blur(6px);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all .3s;
+        color: #fff;
+        padding: 0;
+    }
+
+    .mv-nav:hover {
+        background: var(--mv-accent);
+        border-color: var(--mv-accent);
+    }
+
+    .mv-nav svg {
+        width: 22px;
+        height: 22px;
+        fill: none;
+        stroke: #fff;
+        stroke-width: 2.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    .mv-prev {
+        left: 24px;
+    }
+
+    .mv-next {
+        right: 24px;
+    }
+
+    .mv-dots {
+        position: absolute;
+        bottom: 36px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .mv-dot {
+        width: 48px;
+        height: 4px;
+        border-radius: 3px;
+        background: rgba(255, 255, 255, .3);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        border: none;
+        padding: 0;
+    }
+
+    .mv-dot::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 0;
+        background: var(--mv-accent);
+        border-radius: 3px;
+        transition: width 0s;
+    }
+
+    .mv-dot.active::after {
+        width: 100%;
+        transition: width 5s linear;
+    }
+
+    .mv-dot:hover {
+        background: rgba(255, 255, 255, .5);
+    }
+
+    .mv-counter {
+        position: absolute;
+        bottom: 34px;
+        right: 36px;
+        z-index: 10;
+        font-family: var(--mv-font);
+        font-size: 13px;
+        color: rgba(255, 255, 255, .7);
+        letter-spacing: .1em;
+    }
+
+    .mv-counter .cur {
+        font-size: 22px;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    /* Sticky Shortcut Links */
+    .shortcut-links-placeholder {
+        position: relative;
+        z-index: 100;
+    }
+
+    .shortcut-links.is-sticky {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 1000;
+        background: #fff;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-top: 0 !important;
+    }
+
+    @media(max-width:768px) {
         .mv-hero {
-            position: relative;
-            width: 100%;
-            height: 100vh;
-            overflow: hidden;
-            font-family: var(--mv-font);
-        }
-
-        .mv-slides {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        .mv-slide {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 1s ease, visibility 1s;
-            z-index: 0;
-        }
-
-        .mv-slide.active {
-            opacity: 1;
-            visibility: visible;
-            z-index: 2;
-        }
-
-        .mv-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-size: cover;
-            background-position: center;
-            transform: scale(1.08);
-            transition: transform 7s ease-out;
-        }
-
-        .mv-slide.active .mv-bg {
-            transform: scale(1);
-        }
-
-        .mv-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-
-        .mv-slide:nth-child(1) .mv-overlay {
-            background: linear-gradient(135deg, rgba(10, 25, 60, .72), rgba(26, 115, 232, .5));
-        }
-
-        .mv-slide:nth-child(2) .mv-overlay {
-            background: linear-gradient(135deg, rgba(10, 25, 60, .72), rgba(26, 115, 232, .5));
-        }
-
-        .mv-slide:nth-child(3) .mv-overlay {
-            background: linear-gradient(135deg, rgba(10, 25, 60, .72), rgba(26, 115, 232, .5));
-        }
-
-        .mv-slide:nth-child(4) .mv-overlay {
-            background: linear-gradient(135deg, rgba(10, 25, 60, .72), rgba(26, 115, 232, .5));
-        }
-
-        .mv-slide:nth-child(5) .mv-overlay {
-            background: linear-gradient(135deg, rgba(10, 25, 60, .72), rgba(26, 115, 232, .5));
-        }
-
-        .mv-slide:nth-child(6) .mv-overlay {
-            background: linear-gradient(135deg, rgba(10, 25, 60, .72), rgba(10, 185, 238, 0.5));
+            height: 90vh;
         }
 
         .mv-content {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            width: 100%;
-            transform: translateY(-50%);
-            z-index: 3;
-            padding: 0 8%;
-            box-sizing: border-box;
-            max-width: 900px;
+            padding: 0 6%;
+            text-align: center;
+            max-width: 100%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
 
         .mv-label {
-            font-size: 15px;
-            line-height: 1.4;
-            font-weight: 500;
-            letter-spacing: .2em;
-            text-transform: uppercase;
-            color: var(--mv-accent);
-            background: rgba(255, 255, 255, .15);
-            backdrop-filter: blur(6px);
-            display: inline-block;
-            padding: 6px 18px;
-            border-radius: 30px;
-            border: 1px solid rgba(255, 255, 255, .25);
-            margin-bottom: 18px;
-            opacity: 0;
-            transform: translateY(25px);
-            transition: opacity .6s ease .1s, transform .6s ease .1s;
+            font-size: 13px;
         }
 
         .mv-headline {
-            font-size: 52px;
-            line-height: 1.2;
-            font-weight: 900;
-            color: var(--mv-text);
-            margin: 0 0 16px;
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity .6s ease .25s, transform .6s ease .25s;
-            text-shadow: 0 2px 20px rgba(0, 0, 0, .3);
-        }
-
-        .mv-headline .accent {
-            color: #64b5f6;
+            font-size: 28px;
         }
 
         .mv-sub {
-            font-size: 20px;
-            line-height: 1.7;
-            font-weight: 300;
-            color: rgba(255, 255, 255, .88);
-            margin: 0 0 28px;
-            max-width: 600px;
-            opacity: 0;
-            transform: translateY(25px);
-            transition: opacity .6s ease .4s, transform .6s ease .4s;
+            font-size: 16px;
+            margin: 0 auto 28px;
         }
 
         .mv-cta {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 14px 34px;
-            background: var(--mv-accent);
-            color: #fff;
-            text-decoration: none;
-            font-size: 18px;
-            font-weight: 600;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 4px 20px rgba(26, 115, 232, .4);
-            opacity: 0;
-            transform: translateY(25px);
-            transition: opacity .6s ease .55s, transform .6s ease .55s, background .3s, box-shadow .3s;
-        }
-
-        .mv-cta:hover {
-            background: #1565c0;
-            box-shadow: 0 6px 28px rgba(26, 115, 232, .55);
-            transform: translateY(-2px) !important;
-        }
-
-        .mv-cta svg {
-            width: 16px;
-            height: 16px;
-            transition: transform .3s;
-        }
-
-        .mv-cta:hover svg {
-            transform: translateX(4px);
-        }
-
-        .mv-slide.active .mv-label,
-        .mv-slide.active .mv-headline,
-        .mv-slide.active .mv-sub,
-        .mv-slide.active .mv-cta {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .mv-nav {
-            position: absolute;
-            top: 50%;
-            z-index: 10;
-            transform: translateY(-50%);
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            border: 2px solid rgba(255, 255, 255, .35);
-            background: rgba(0, 0, 0, .2);
-            backdrop-filter: blur(6px);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all .3s;
-            color: #fff;
-            padding: 0;
-        }
-
-        .mv-nav:hover {
-            background: var(--mv-accent);
-            border-color: var(--mv-accent);
-        }
-
-        .mv-nav svg {
-            width: 22px;
-            height: 22px;
-            fill: none;
-            stroke: #fff;
-            stroke-width: 2.5;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
-        .mv-prev {
-            left: 24px;
-        }
-
-        .mv-next {
-            right: 24px;
-        }
-
-        .mv-dots {
-            position: absolute;
-            bottom: 36px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        .mv-dot {
-            width: 48px;
-            height: 4px;
-            border-radius: 3px;
-            background: rgba(255, 255, 255, .3);
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            border: none;
-            padding: 0;
-        }
-
-        .mv-dot::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            width: 0;
-            background: var(--mv-accent);
-            border-radius: 3px;
-            transition: width 0s;
-        }
-
-        .mv-dot.active::after {
-            width: 100%;
-            transition: width 5s linear;
-        }
-
-        .mv-dot:hover {
-            background: rgba(255, 255, 255, .5);
+            font-size: 15px;
         }
 
         .mv-counter {
-            position: absolute;
-            bottom: 34px;
-            right: 36px;
-            z-index: 10;
-            font-family: var(--mv-font);
-            font-size: 13px;
-            color: rgba(255, 255, 255, .7);
-            letter-spacing: .1em;
+            font-size: 12px;
         }
 
-        .mv-counter .cur {
-            font-size: 22px;
-            font-weight: 700;
-            color: #fff;
+        .mv-nav {
+            width: 40px;
+            height: 40px;
         }
 
-        /* Sticky Shortcut Links */
-        .shortcut-links-placeholder {
-            position: relative;
-            z-index: 100;
+        .mv-nav svg {
+            width: 18px;
+            height: 18px;
         }
 
-        .shortcut-links.is-sticky {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 1000;
-            background: #fff;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            margin-top: 0 !important;
+        .mv-prev {
+            left: 12px;
         }
 
-        @media(max-width:768px) {
-            .mv-hero {
-                height: 90vh;
-            }
-
-            .mv-content {
-                padding: 0 6%;
-                text-align: center;
-                max-width: 100%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-            }
-
-            .mv-label {
-                font-size: 13px;
-            }
-
-            .mv-headline {
-                font-size: 28px;
-            }
-
-            .mv-sub {
-                font-size: 16px;
-                margin: 0 auto 28px;
-            }
-
-            .mv-cta {
-                font-size: 15px;
-            }
-
-            .mv-counter {
-                font-size: 12px;
-            }
-
-            .mv-nav {
-                width: 40px;
-                height: 40px;
-            }
-
-            .mv-nav svg {
-                width: 18px;
-                height: 18px;
-            }
-
-            .mv-prev {
-                left: 12px;
-            }
-
-            .mv-next {
-                right: 12px;
-            }
-
-            .mv-dots {
-                bottom: 24px;
-                gap: 8px;
-            }
-
-            .mv-dot {
-                width: 32px;
-            }
-
-            .mv-counter {
-                display: none;
-            }
+        .mv-next {
+            right: 12px;
         }
 
-        @media(max-width:480px) {
-            .mv-hero {
-                height: 90vh;
-            }
-
-            .mv-nav {
-                width: 36px;
-                height: 36px;
-            }
-
-            .mv-prev {
-                left: 8px;
-            }
-
-            .mv-next {
-                right: 8px;
-            }
-
-            .mv-dots {
-                bottom: 18px;
-                gap: 6px;
-            }
-
-            .mv-dot {
-                width: 24px;
-                height: 3px;
-            }
+        .mv-dots {
+            bottom: 24px;
+            gap: 8px;
         }
-    </style>
+
+        .mv-dot {
+            width: 32px;
+        }
+
+        .mv-counter {
+            display: none;
+        }
+    }
+
+    @media(max-width:480px) {
+        .mv-hero {
+            height: 90vh;
+        }
+
+        .mv-nav {
+            width: 36px;
+            height: 36px;
+        }
+
+        .mv-prev {
+            left: 8px;
+        }
+
+        .mv-next {
+            right: 8px;
+        }
+
+        .mv-dots {
+            bottom: 18px;
+            gap: 6px;
+        }
+
+        .mv-dot {
+            width: 24px;
+            height: 3px;
+        }
+    }
+</style>
 </head>
 
 <body class="home blog">
@@ -698,15 +697,33 @@
             </section>
             <div class="shortcut-links-placeholder">
                 <div class="shortcut-links">
-                    <a href="index.html#osirase" class="shortcut-btn" data-i18n="footer.news">お知らせ</a>
-                    <a href="index.html#service-naiyou" class="shortcut-btn"
+                    <a href="1.html#osirase" class="shortcut-btn" data-i18n="footer.news">お知らせ</a>
+                    <a href="1.html#service-naiyou" class="shortcut-btn"
                         data-i18n="footer.service_introduction">サービス紹介</a>
-                    <a href="index.html#merit" class="shortcut-btn" data-i18n="footer.benefits">メリット</a>
-                    <a href="index.html#ITF-point" class="shortcut-btn" data-i18n="footer.point">ITFのポイント</a>
-                    <a href="index.html#work-step" class="shortcut-btn" data-i18n="footer.introduction_flow">紹介の流れ</a>
+                    <a href="1.html#merit" class="shortcut-btn" data-i18n="footer.benefits">メリット</a>
+                    <a href="1.html#ITF-point" class="shortcut-btn" data-i18n="footer.point">ITFのポイント</a>
+                    <a href="1.html#work-step" class="shortcut-btn" data-i18n="footer.introduction_flow">紹介の流れ</a>
                     <a href="https://it-future.jp/rireki/" class="shortcut-btn shortcut-btn--featured">📄 無料で履歴書を作る</a>
                 </div>
             </div>
+
+            <!-- PROMO BANNER A: Online resume platform — dark navy, animated SVG left + feature chips right -->
+            <section class="promo-banner promo-banner--company">
+                <div class="promo-banner__inner">
+                    <div class="promo-banner__image">
+                        <span class="promo-banner__image-label">ITF 公式オンラインツール</span>
+                        <img src="images/rireki_banner_img.svg" alt="ITF オンライン履歴書作成プラットフォーム" loading="lazy">
+                    </div>
+                    <div class="promo-banner__content">
+                        <span class="promo-banner__badge">🌐 Online Platform · 完全無料</span>
+                        <h2 class="promo-banner__title">日本での仕事希望しているあなた！<br><strong>無料・簡単・今すぐ</strong><br>履歴書を作ろう！</h2>
+                        <p class="promo-banner__desc">
+                            ITFのオンライン履歴書作成プラットフォームで、求職者はどこからでも無料で、簡単に、そして今すぐ日本語履歴書を完成できます。インストール不要・登録だけで即日スタート。</p>
+                        <a href="https://it-future.jp/rireki/" class="promo-banner__cta">新しい履歴書を作る →</a>
+                    </div>
+                </div>
+            </section>
+            <!-- END PROMO BANNER A -->
             <section class="l-section troubles">
                 <div class="wrap w1200 sp-wrap">
                     <div class="troubles__wrap flex break vcenter sp-vert">
@@ -731,6 +748,7 @@
                     <div class="troubles__bottom--line2"></div>
                 </div>
             </section>
+
             <section id="merit" class="l-section produce">
                 <div class="wrap w1200 sp-wrap">
                     <div class="l-section-header-center">
@@ -937,19 +955,81 @@
                     </ul>
                 </div>
             </section>
-            <section class="l-section senryaku" id="solution_03">
-                <div class="wrap w1200 sp-wrap">
-                    <div class="l-section-header-center textW">
-                        <h2 class="header flex hcenter" data-i18n="solution.title">解決策</h2>
-                        <h1 class="solution" data-i18n="solution.main_title">企業の採用活動における、こんな課題を解決します</h1>
-                        <p>
-                            <li class="service__item--title-sub" data-i18n="solution.item1">求める人財が見つからない？外国人採用で未来を切り開く
-                            </li>
-                            <li class="service__item--title-sub" data-i18n="solution.item2">応募者が集まらない？外国人財の力で解決します</li>
-                            <li class="service__item--title-sub" data-i18n="solution.item3">求人募集をしても優秀な人財が集まらない
-                                初期選考をスムーズに</li>
-                            <li class="service__item--title-sub" data-i18n="solution.item4">外国人財の採用を検討しているがノウハウがない?</li>
-                        </p>
+
+            <!-- PROMO BANNER B: Job-seeker / resume — split image+text on sky-blue -->
+            <section class="promo-banner promo-banner--resume">
+                <div class="promo-banner__inner">
+                    <div class="promo-banner__content">
+                        <span class="promo-banner__badge">Free Tool · 完全無料</span>
+                        <h2 class="promo-banner__title">最短<strong>5分</strong>で<br>日本語履歴書を完成させよう</h2>
+                        <p class="promo-banner__desc">
+                            スマホでもPCでもインストール不要。登録するだけで今日から使えます。<br>介護向け専用テンプレートも完備。Excel形式でそのままダウンロード可能。</p>
+                        <div class="promo-banner__actions">
+                            <a href="https://it-future.jp/rireki/" class="promo-banner__cta-primary">📄 無料で履歴書を作る</a>
+                            <a href="https://it-future.jp/saiyou.php" class="promo-banner__cta-secondary">求人情報を見る</a>
+                        </div>
+                    </div>
+                    <div class="promo-banner__image">
+                        <img src="images/rireki_intro_image.png" alt="ITF 履歴書作成ツール" loading="lazy">
+                    </div>
+                </div>
+            </section>
+            <!-- END PROMO BANNER B -->
+
+            <section id="solution_03">
+                <div class="itf-sol">
+                    <div class="itf-sol__layout">
+
+                        <!-- ① Title — center cols 2-3, row 1 -->
+                        <div class="itf-sol__head">
+                            <span class="itf-sol__tag" data-i18n="solution.title">解決策 · SOLUTIONS</span>
+                            <h2 class="itf-sol__title" data-i18n="solution.main_title">企業の採用活動における、<br>こんな課題を解決します</h2>
+                            <p class="itf-sol__sub">外国人財の採用でお困りではありませんか？ITFがすべて解決します。</p>
+                        </div>
+
+                        <!-- ② Card 1 — LEFT col, spans rows 1+2 — enters from LEFT -->
+                        <div class="itf-sol__card" data-card="1">
+                            <div class="itf-sol__icon">🌏</div>
+                            <span class="itf-sol__num">01</span>
+                            <div class="itf-sol__body">
+                                <strong class="itf-sol__problem" data-i18n="solution.item1">求める人財が見つからない？</strong>
+                                <p class="itf-sol__answer">東南アジア6か国の提携機関から、スキルと意欲ある外国人財を迅速にご紹介します</p>
+                            </div>
+                        </div>
+
+                        <!-- ③ Card 2 — center-left, row 2 — enters from bottom (left delay) -->
+                        <div class="itf-sol__card" data-card="2">
+                            <span class="itf-sol__num">02</span>
+                            <div class="itf-sol__body">
+                                <strong class="itf-sol__problem" data-i18n="solution.item2">応募者が集まらない？</strong>
+                                <p class="itf-sol__answer">外国人財の力で採用難を打破。多彩な人財プールへ即アクセス可能です</p>
+                            </div>
+                        </div>
+
+                        <!-- ④ Card 3 — center-right, row 2 — enters from bottom (right delay) -->
+                        <div class="itf-sol__card" data-card="3">
+                            <span class="itf-sol__num">03</span>
+                            <div class="itf-sol__body">
+                                <strong class="itf-sol__problem" data-i18n="solution.item3">優秀な人財が集まらない？</strong>
+                                <p class="itf-sol__answer">母国語スタッフが事前選抜・推薦し、初期選考をスムーズに進めます</p>
+                            </div>
+                        </div>
+
+                        <!-- ⑤ Card 4 — RIGHT col, spans rows 1+2 — enters from RIGHT -->
+                        <div class="itf-sol__card" data-card="4">
+                            <div class="itf-sol__icon">🤝</div>
+                            <span class="itf-sol__num">04</span>
+                            <div class="itf-sol__body">
+                                <strong class="itf-sol__problem" data-i18n="solution.item4">採用ノウハウがない？</strong>
+                                <p class="itf-sol__answer">ビザ手続きから入社後の定着支援まで、ITFがトータルサポートします</p>
+                            </div>
+                        </div>
+
+                        <!-- ⑥ CTA — center cols 2-3, row 3 -->
+                        <div class="itf-sol__foot">
+                            <a href="#ITF-point" class="itf-sol__cta">ITFのソリューションを見る ↓</a>
+                        </div>
+
                     </div>
                 </div>
             </section>
@@ -1056,22 +1136,21 @@
                     </ul>
                 </div>
             </section>
-            <!-- RIREKISHO BANNER -->
-            <section class="l-section" id="rireki-section">
-                <div class="rireki-banner__inner">
-                    <div class="rireki-banner__card">
-                        <div class="rireki-banner__text">
-                            <h3>📄 履歴書作成サービスを今すぐ試してみませんか？</h3>
-                            <p>完全無料・登録だけで今日から使えます。日本での就職活動を、ITFが全力でサポートします。</p>
-                        </div>
-                        <div class="rireki-banner__actions">
-                            <a href="https://it-future.jp/rireki/" class="rireki-banner__btn-primary">無料で履歴書を作る →</a>
-                            <a href="https://it-future.jp/saiyou.php" class="rireki-banner__btn-secondary">求人情報を見る</a>
-                        </div>
+            <!-- PROMO BANNER C: General CTA — animated brand-gradient strip -->
+            <section class="promo-banner promo-banner--general" id="rireki-section">
+                <div class="promo-banner__inner">
+                    <div class="promo-banner__icon">📋</div>
+                    <div class="promo-banner__content">
+                        <h2 class="promo-banner__title">日本での就職活動、ITFがトータルサポート</h2>
+                        <p class="promo-banner__desc">求人情報の検索から履歴書作成・ビザ手続きまで。外国人財の就労を完全無料で支援します。</p>
+                    </div>
+                    <div class="promo-banner__actions">
+                        <a href="https://it-future.jp/rireki/" class="promo-banner__cta-primary">📄 無料で履歴書を作る</a>
+                        <a href="https://it-future.jp/saiyou.php" class="promo-banner__cta-secondary">求人情報を見る</a>
                     </div>
                 </div>
             </section>
-            <!-- END RIREKISHO BANNER -->
+            <!-- END PROMO BANNER C -->
 
             <section class="l-section column" id="osirase">
                 <div class="wrapper pc-flex bet">
@@ -1164,7 +1243,7 @@
                     </div>
                 </div>
                 <div class="footer-copyright">
-                    &copy; 2020–2026 株式会社アイティーエフ (ITF Co., Ltd.) All Rights Reserved.
+                    © ITF co. Ltd. ALL Rights Reserve
                 </div>
             </div>
         </footer>
@@ -1316,6 +1395,50 @@
             if (mvSection && shortcutBar) {
                 observer.observe(mvSection);
             }
+
+            // ── Solution section scroll-reveal (left → right, IntersectionObserver) ──
+            (function () {
+                var sol = document.getElementById('solution_03');
+                if (!sol) return;
+
+                var cards = [1, 2, 3, 4].map(function (n) {
+                    return sol.querySelector('[data-card="' + n + '"]');
+                }).filter(Boolean);
+                var foot = sol.querySelector('.itf-sol__foot');
+                var delays = [0, 300, 600, 900]; // stagger: card 1→4 within 1.5s total
+
+                // Reduced-motion: show everything immediately, no animation
+                if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                    cards.forEach(function (c) { c.classList.add('itf-revealed'); });
+                    if (foot) foot.classList.add('itf-revealed');
+                    return;
+                }
+
+                function revealCard(card) {
+                    // Set slow reveal transition inline so it wins over the post-reveal CSS class
+                    card.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+                    requestAnimationFrame(function () {
+                        requestAnimationFrame(function () {
+                            card.classList.add('itf-revealed');
+                            // After reveal completes, clear inline — CSS class transition takes over for hover
+                            setTimeout(function () { card.style.transition = ''; }, 660);
+                        });
+                    });
+                }
+
+                var solObs = new IntersectionObserver(function (entries) {
+                    if (!entries[0].isIntersecting) return;
+                    solObs.disconnect();
+                    cards.forEach(function (card, i) {
+                        setTimeout(function () { revealCard(card); }, delays[i]);
+                    });
+                    if (foot) {
+                        setTimeout(function () { foot.classList.add('itf-revealed'); }, 1200);
+                    }
+                }, { threshold: 0.2 });
+
+                solObs.observe(sol);
+            })();
         });
     </script>
 </body>
