@@ -13,6 +13,7 @@ rireki/basic/php/db_connect.php
 rireki/kaigo/php/db_connect.php
 **/db_connect.php
 sftp.json
+.sftp.json
 .sftpignore
 .env
 .env.*
