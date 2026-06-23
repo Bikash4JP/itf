@@ -53,7 +53,7 @@ function normalize_token($t): string
   return preg_match('/^[a-f0-9]{32}$/', $t) ? $t : '';
 }
 
-function ensure_row(PDO $pdo, string $token, int $job_id): array
+function ensure_row(PDO $pdo, string $token, int $job_id, int $user_id = 0): array
 {
   // find
   $st = $pdo->prepare("SELECT * FROM app_resume_kaigo WHERE token = :t LIMIT 1");
@@ -61,18 +61,29 @@ function ensure_row(PDO $pdo, string $token, int $job_id): array
   $row = $st->fetch(PDO::FETCH_ASSOC);
 
   if ($row) {
-    // optional: keep job_id if passed
+    // optional: keep job_id or user_id if passed
+    $updates = [];
+    $params = [':t' => $token];
     if ($job_id > 0 && (int) ($row['job_id'] ?? 0) !== $job_id) {
-      $up = $pdo->prepare("UPDATE app_resume_kaigo SET job_id = :j WHERE token = :t");
-      $up->execute([':j' => $job_id, ':t' => $token]);
+      $updates[] = "job_id = :j";
+      $params[':j'] = $job_id;
       $row['job_id'] = $job_id;
+    }
+    if ($user_id > 0 && (int) ($row['user_id'] ?? 0) !== $user_id) {
+      $updates[] = "user_id = :u";
+      $params[':u'] = $user_id;
+      $row['user_id'] = $user_id;
+    }
+    if ($updates) {
+      $up = $pdo->prepare("UPDATE app_resume_kaigo SET " . implode(", ", $updates) . " WHERE token = :t");
+      $up->execute($params);
     }
     return $row;
   }
 
   // create
-  $ins = $pdo->prepare("INSERT INTO app_resume_kaigo (token, job_id, step_current) VALUES (:t, :j, 1)");
-  $ins->execute([':t' => $token, ':j' => ($job_id > 0 ? $job_id : null)]);
+  $ins = $pdo->prepare("INSERT INTO app_resume_kaigo (token, job_id, user_id, step_current) VALUES (:t, :j, :u, 1)");
+  $ins->execute([':t' => $token, ':j' => ($job_id > 0 ? $job_id : null), ':u' => ($user_id > 0 ? $user_id : null)]);
   $st->execute([':t' => $token]);
   $row = $st->fetch(PDO::FETCH_ASSOC);
   return $row ?: [];
@@ -472,6 +483,16 @@ function json_out(array $arr, int $code = 200): void
    Token bootstrap
    ========================= */
 $token = normalize_token($_GET['token'] ?? ($_POST['token'] ?? ''));
+
+if (!$token && app_is_logged_in()) {
+  $stT = $pdo->prepare("SELECT token FROM app_resume_kaigo WHERE user_id = ? ORDER BY id DESC LIMIT 1");
+  $stT->execute([app_user_id()]);
+  $existingT = $stT->fetchColumn();
+  if ($existingT) {
+    $token = $existingT;
+  }
+}
+
 if (!$token) {
   $token = bin2hex(random_bytes(16));
   $_SESSION['kaigo_token'] = $token;
@@ -485,7 +506,8 @@ if (!$token) {
 }
 $_SESSION['kaigo_token'] = $token;
 
-$row = ensure_row($pdo, $token, $job_id);
+$uid_current = (int) app_user_id();
+$row = ensure_row($pdo, $token, $job_id, $uid_current);
 
 /* =========================
    AJAX API (same file)
@@ -1397,15 +1419,15 @@ $photoPath = (string) ($row['photo_path'] ?? '');
             </div>
 
             <label>
-              <span class="lbl">携帯番号<span class="req">*</span></span>
-              <input type="tel" name="contact_phone" id="contact_phone" placeholder="090-0000-0000" required
-                inputmode="tel" autocomplete="tel" value="<?php echo h($row['contact_phone'] ?? ''); ?>">
+              <span class="lbl">携帯番号</span>
+              <input type="tel" name="contact_phone" id="contact_phone" placeholder="090-0000-0000" inputmode="tel"
+                autocomplete="tel" value="<?php echo h($row['contact_phone'] ?? ''); ?>">
               <small class="hint">※ ハイフンあり/なしOK（例：09000000000）</small>
             </label>
 
             <label>
-              <span class="lbl">Eメール<span class="req">*</span></span>
-              <input type="email" name="email" placeholder="taro@example.com" required autocomplete="email"
+              <span class="lbl">Eメール</span>
+              <input type="email" name="email" placeholder="taro@example.com" autocomplete="email"
                 value="<?php echo h($row['email'] ?? ''); ?>">
             </label>
 
@@ -2046,28 +2068,19 @@ $photoPath = (string) ($row['photo_path'] ?? '');
             <label class="col-2">
               <span class="lbl">自己PR</span>
               <textarea name="self_pr" rows="4" id="prText"
-                placeholder="自分の言葉でOK（母国語でもOK）です。できるだけ書いてみてください。書き終わったら「AIで整える」を押すと、読みやすい日本語に整えます。"><?php echo h($row['self_pr'] ?? ''); ?></textarea>
-              <div class="ai-row">
-                <button type="button" class="btn" data-ai-target="#prText">AIで整える</button>
-              </div>
+                placeholder="自分の言葉でOKです。できるだけ具体的に書いてみてください。"><?php echo h($row['self_pr'] ?? ''); ?></textarea>
             </label>
 
             <label class="col-2">
               <span class="lbl">志望の動機</span>
               <textarea name="motivation" rows="4" id="motivationText"
-                placeholder="自分の言葉でOK（母国語でもOK）です。できるだけ書いてみてください。書き終わったら「AIで整える」を押すと、読みやすい日本語に整えます。"><?php echo h($row['motivation'] ?? ''); ?></textarea>
-              <div class="ai-row">
-                <button type="button" class="btn" data-ai-target="#motivationText">AIで整える</button>
-              </div>
+                placeholder="自分の言葉でOKです。できるだけ具体的に書いてみてください。"><?php echo h($row['motivation'] ?? ''); ?></textarea>
             </label>
 
             <label class="col-2">
               <span class="lbl">本人希望欄（職種、給与、勤務地など）</span>
               <textarea name="preferences" rows="4" id="prefText"
-                placeholder="自分の言葉でOK（母国語でもOK）です。できるだけ書いてみてください。書き終わったら「AIで整える」を押すと、読みやすい日本語に整えます。"><?php echo h($row['preferences'] ?? ''); ?></textarea>
-              <div class="ai-row">
-                <button type="button" class="btn" data-ai-target="#prefText">AIで整える</button>
-              </div>
+                placeholder="自分の言葉でOKです。できるだけ具体的に書いてみてください。"><?php echo h($row['preferences'] ?? ''); ?></textarea>
             </label>
           </div>
 
