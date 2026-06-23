@@ -177,6 +177,7 @@ try {
 
                 <?php if ($canManageJobs): ?>
                     <li><a href="manage_jobs.php" class="menu-btn">求人管理</a></li>
+                    <li><a href="manage_staff.php" class="menu-btn">スタッフ管理</a></li>
                 <?php endif; ?>
 
                 <li><a href="addnews.php" class="menu-btn">✙お知らせ</a></li>
