@@ -134,12 +134,20 @@ graph TD
 - PDF出力（Dompdf）・Excel出力（PhpSpreadsheet）
 - Claude API（Cloudflare Worker）で志望動機・自己PRを日本語生成
 - `app_profiles`テーブルへのJSONデータ保存
+- **介護専用フォーム（`rireki/kaigo/rireki.php`）**: トークンベースの状態管理・サーバーサイドバリデーション実装。`rireki_form_extra.js` でステップ間データを保持
+- **履歴書一覧管理（`php/rireki_list.php`）**: `?src=kaigo|basic` でソース切替、JSON→XLSバックフィル生成、在留資格・居住地タグ付け、エントリー正規化
 
 ### 4.6 スタッフ管理システム（php/dashboard.php）
 - 管理者: `osaka_ueda`, `bikash`, `kimura`
 - 求人CRUD・ニュース投稿・スタッフDB管理
 - アクティビティログ（`activity_logger.php`）
 - アカウントロックアウト（3回失敗で`is_blocked=1`）
+
+### 4.7 スタッフアカウント管理（php/manage_staff.php）★新機能
+- **管理者専用**: ハードコード管理者リスト + `is_admin` DBフラグの二重チェック
+- スタッフアカウントの追加・編集・削除・ブロック/解除・パスワードリセット（フルCRUD）
+- CSRFトークン保護・動的スキーマ対応INSERT（`ALTER TABLE`自動マイグレーション）
+- `staffdb.php` サイドバーから「スタッフ管理」リンクで遷移
 
 ---
 
@@ -158,6 +166,10 @@ graph TD
 | `POST` | `/php/submit_application.php` | 求人応募 | User Login |
 | `POST` | `/php/user_auth.php` | ユーザー登録・ログイン | - |
 | `GET` | `/php/check_session.php` | セッション確認 | Session |
+| `GET` | `/php/manage_staff.php` | スタッフ一覧表示 | Admin Auth + CSRF |
+| `POST` | `/php/manage_staff.php` | スタッフ追加・編集・削除・ブロック | Admin Auth + CSRF |
+| `GET` | `/php/rireki_list.php?src=kaigo` | 介護履歴書一覧取得 | Staff Auth |
+| `GET` | `/php/rireki_list.php?src=basic` | 一般履歴書一覧取得 | Staff Auth |
 
 ---
 
@@ -315,7 +327,9 @@ itf/
 │   ├── manage_posts.php    # ニュース管理
 │   ├── addnews.php         # ニュース投稿
 │   ├── addjobs.php         # 求人投稿
-│   ├── staffdb.php         # スタッフDB管理
+│   ├── staffdb.php         # スタッフDB管理（サイドバーナビゲーション）
+│   ├── manage_staff.php    # ★スタッフアカウントCRUD（管理者専用）
+│   ├── rireki_list.php     # 履歴書一覧・フィルタ・正規化（kaigo/basic切替）
 │   ├── activity_logger.php # 操作ログ記録
 │   └── ...（50+エンドポイント）
 │
@@ -337,6 +351,9 @@ itf/
 ├── locales/                # i18next翻訳ファイル（ja/en/id/vi/zh/ne/tl/ko/hi/bn）
 ├── images/                 # WebP最適化画像・スライダー背景
 ├── rireki/                 # 履歴書メーカーモジュール
+│   ├── kaigo/              # 介護専用フォーム（rireki.php + トークン状態管理）
+│   │   └── js/rireki_form_extra.js  # ステップ間データ保持・バリデーション
+│   └── user_data.php       # ユーザーデータ管理（セッション連携）
 ├── recruit/                # 採用情報静的ページ
 ├── uploads/                # ユーザーアップロードファイル
 ├── logs/                   # エラーログ・アクティビティログ
