@@ -264,7 +264,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div class="wrap">
     <header>
       <h1>✙ お知らせを追加</h1>
-      <a class="btn" href="/staffdb.php" style="margin-left:auto">← ダッシュボードへ戻る</a>
+      <a class="btn" href="staffdb.php" style="margin-left:auto">← ダッシュボードへ戻る</a>
     </header>
 
     <?php if ($err): ?>
